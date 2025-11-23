@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Astro App – Natal Chart Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/static/css/home.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <h1>Astro App</h1>
+      <p class="subtitle">Generate a natal SVG chart using the /api/svg/natal endpoint.</p>
+    </header>
+
+    <main class="page-main">
+      <section class="panel panel-form">
+        <h2>Natal chart input</h2>
+        <form id="natalForm">
+          <div class="field-row">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" value="Subject" />
+          </div>
+
+          <div class="field-row">
+            <label>Date</label>
+            <div class="field-inline">
+              <input id="year" name="year" type="number" value="1990" min="1900" max="2100" />
+              <span class="field-inline-label">Year</span>
+            </div>
+            <div class="field-inline">
+              <input id="month" name="month" type="number" value="1" min="1" max="12" />
+              <span class="field-inline-label">Month</span>
+            </div>
+            <div class="field-inline">
+              <input id="day" name="day" type="number" value="1" min="1" max="31" />
+              <span class="field-inline-label">Day</span>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <label>Time</label>
+            <div class="field-inline">
+              <input id="hour" name="hour" type="number" value="12" min="0" max="23" />
+              <span class="field-inline-label">Hour</span>
+            </div>
+            <div class="field-inline">
+              <input id="minute" name="minute" type="number" value="0" min="0" max="59" />
+              <span class="field-inline-label">Minute</span>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <label>Location</label>
+            <div class="field-inline">
+              <input id="lat" name="lat" type="number" step="0.0001" value="52.3702" />
+              <span class="field-inline-label">Lat</span>
+            </div>
+            <div class="field-inline">
+              <input id="lng" name="lng" type="number" step="0.0001" value="4.8952" />
+              <span class="field-inline-label">Lng</span>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <label for="tz_str">Timezone</label>
+            <input
+              id="tz_str"
+              name="tz_str"
+              type="text"
+              value="Europe/Amsterdam"
+              placeholder="IANA timezone (e.g. Europe/Amsterdam)"
+            />
+          </div>
+
+          <div class="field-row">
+            <label for="city">City</label>
+            <input id="city" name="city" type="text" value="Amsterdam" />
+          </div>
+
+          <div class="field-row">
+            <label for="nation">Country code</label>
+            <input id="nation" name="nation" type="text" value="NL" maxlength="2" />
+          </div>
+
+          <div class="field-row">
+            <label for="theme">Theme</label>
+            <select id="theme" name="theme">
+              <option value="classic" selected>classic</option>
+              <option value="dark">dark</option>
+              <option value="dark-high-contrast">dark-high-contrast</option>
+              <option value="light">light</option>
+              <option value="strawberry">strawberry</option>
+              <option value="black-and-white">black-and-white</option>
+            </select>
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="generateBtn">Generate chart</button>
+            <span id="status" class="status"></span>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel panel-chart">
+        <h2>SVG chart</h2>
+        <div id="chartContainer" class="chart-container">
+          <p class="hint">
+            Fill in the form and click <strong>Generate chart</strong> to render a natal SVG here.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <p>
+        Astro App &amp; API – powered by
+        <a href="https://www.kerykeion.net/" target="_blank" rel="noreferrer">Kerykeion</a>
+        and FastAPI.
+      </p>
+    </footer>
+
+    <script src="/static/js/home.js"></script>
+  </body>
+</html>
