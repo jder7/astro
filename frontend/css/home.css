@@ -109,6 +109,83 @@ body {
   margin: 0.2rem 0;
 }
 
+.summary-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.summary-card {
+  border: 1px solid #1f2937;
+  border-radius: 0.9rem;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(12, 18, 34, 0.85));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.summary-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #c7d2fe;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.lunation {
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 0.8rem;
+  padding: 0.65rem 0.75rem;
+  margin: 0.5rem 0 0.75rem;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(99, 102, 241, 0.08));
+}
+
+.lunation-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.lunation-icon {
+  font-size: 1.15rem;
+}
+
+.lunation-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.lunation-phase {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.lunation-chip {
+  margin-left: auto;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #f8fafc;
+}
+
+.lunation-bar {
+  margin-top: 0.5rem;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.lunation-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #6366f1);
+}
+
 .chart-container {
   min-height: 260px;
   border-radius: 1rem;

@@ -69,7 +69,7 @@
               <form id="natalForm" class="space-y-6">
                 <div>
                   <label class="block mb-3 text-sm font-medium text-slate-200">Mode</label>
-                  <div class="grid grid-cols-2 gap-3">
+                  <div class="grid grid-cols-3 gap-3">
                     <label class="flowbite-radio">
                       <input type="radio" name="mode" value="natal" checked class="peer" />
                       <div class="flowbite-radio-label">
@@ -84,118 +84,228 @@
                         <span class="text-xs text-slate-400">Moment only</span>
                       </div>
                     </label>
-                  </div>
-                </div>
-
-                <div id="nameRow">
-                  <label for="name" class="flowbite-label">Name</label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value="Subject"
-                    class="flowbite-input"
-                    placeholder="Person or chart label"
-                  />
-                </div>
-
-                <div class="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label for="dateInput" class="flowbite-label">Date</label>
-                    <div class="relative">
-                      <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
-                        </svg>
+                    <label class="flowbite-radio">
+                      <input type="radio" name="mode" value="natal_transit" class="peer" />
+                      <div class="flowbite-radio-label">
+                        <span class="text-sm font-semibold text-white">Natal + Transit</span>
+                        <span class="text-xs text-slate-400">Dual wheel</span>
                       </div>
-                      <input
-                        id="dateInput"
-                        name="dateInput"
-                        type="text"
-                        value="1990-01-01"
-                        class="flowbite-input pl-10"
-                        placeholder="YYYY-MM-DD"
-                        datepicker
-                        datepicker-buttons
-                        datepicker-autohide
-                        datepicker-format="yyyy-mm-dd"
-                        autocomplete="off"
-                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div id="birthSection" class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-[0.2em]">Birth</h3>
+                    <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-cyan-200 border border-slate-700">Natal</span>
+                  </div>
+                  <div id="nameRow">
+                    <label for="name" class="flowbite-label">Name</label>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      value="Subject"
+                      class="flowbite-input"
+                      placeholder="Person or chart label"
+                    />
+                  </div>
+
+                  <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="dateInput" class="flowbite-label">Date</label>
+                      <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
+                          </svg>
+                        </div>
+                        <input
+                          id="dateInput"
+                          name="dateInput"
+                          type="text"
+                          value="1990-01-01"
+                          class="flowbite-input pl-10"
+                          placeholder="YYYY-MM-DD"
+                          datepicker
+                          datepicker-buttons
+                          datepicker-autohide
+                          datepicker-format="yyyy-mm-dd"
+                          autocomplete="off"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label for="timeInput" class="flowbite-label">Time</label>
+                      <div class="relative">
+                        <input
+                          id="timeInput"
+                          name="timeInput"
+                          type="text"
+                          value="12:00"
+                          class="flowbite-input pr-12"
+                          placeholder="HH:MM"
+                          autocomplete="off"
+                        />
+                        <button
+                          type="button"
+                          class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200 transition"
+                          data-timepicker-toggle
+                          data-target="#timeInput"
+                          aria-label="Open time picker"
+                        >
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3.5 2" />
+                            <circle cx="12" cy="12" r="9" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <label for="timeInput" class="flowbite-label">Time</label>
-                    <div class="relative">
-                      <input
-                        id="timeInput"
-                        name="timeInput"
-                        type="text"
-                        value="12:00"
-                        class="flowbite-input pr-12"
-                        placeholder="HH:MM"
-                        autocomplete="off"
-                      />
-                      <button
-                        type="button"
-                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200 transition"
-                        data-timepicker-toggle
-                        data-target="#timeInput"
-                        aria-label="Open time picker"
-                      >
-                        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3.5 2" />
-                          <circle cx="12" cy="12" r="9" />
-                        </svg>
-                      </button>
+
+                  <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="lat" class="flowbite-label">Latitude</label>
+                      <input id="lat" name="lat" type="number" step="0.0001" value="52.3702" class="flowbite-input" />
                     </div>
-                    <p class="mt-2 text-xs text-slate-400">Flowbite date + time pickers; defaults to UTC if no timezone offset is applied.</p>
+                    <div>
+                      <label for="lng" class="flowbite-label">Longitude</label>
+                      <input id="lng" name="lng" type="number" step="0.0001" value="4.8952" class="flowbite-input" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label for="tz_str" class="flowbite-label">Timezone</label>
+                    <input
+                      id="tz_str"
+                      name="tz_str"
+                      type="text"
+                      value="Europe/Amsterdam"
+                      class="flowbite-input"
+                      placeholder="IANA timezone (e.g. Europe/Amsterdam)"
+                    />
+                  </div>
+
+                  <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="city" class="flowbite-label">City</label>
+                      <input id="city" name="city" type="text" value="Amsterdam" class="flowbite-input" />
+                    </div>
+                    <div>
+                      <label for="nation" class="flowbite-label">Country code</label>
+                      <input id="nation" name="nation" type="text" value="NL" maxlength="2" class="flowbite-input" />
+                    </div>
+                  </div>
+                </div>
+
+                <div id="transitSection" class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-[0.2em]">Transit moment</h3>
+                    <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-amber-200 border border-slate-700">Outer wheel</span>
+                  </div>
+                  <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="transitDateInput" class="flowbite-label">Date</label>
+                      <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
+                          </svg>
+                        </div>
+                        <input
+                          id="transitDateInput"
+                          name="transitDateInput"
+                          type="text"
+                          value="2025-01-01"
+                          class="flowbite-input pl-10"
+                          placeholder="YYYY-MM-DD"
+                          datepicker
+                          datepicker-buttons
+                          datepicker-autohide
+                          datepicker-format="yyyy-mm-dd"
+                          autocomplete="off"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label for="transitTimeInput" class="flowbite-label">Time</label>
+                      <div class="relative">
+                        <input
+                          id="transitTimeInput"
+                          name="transitTimeInput"
+                          type="text"
+                          value="12:00"
+                          class="flowbite-input pr-12"
+                          placeholder="HH:MM"
+                          autocomplete="off"
+                        />
+                        <button
+                          type="button"
+                          class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200 transition"
+                          data-timepicker-toggle
+                          data-target="#transitTimeInput"
+                          aria-label="Open time picker"
+                        >
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3.5 2" />
+                            <circle cx="12" cy="12" r="9" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="transitLat" class="flowbite-label">Latitude</label>
+                      <input id="transitLat" name="transitLat" type="number" step="0.0001" value="52.3702" class="flowbite-input" />
+                    </div>
+                    <div>
+                      <label for="transitLng" class="flowbite-label">Longitude</label>
+                      <input id="transitLng" name="transitLng" type="number" step="0.0001" value="4.8952" class="flowbite-input" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label for="transitTz" class="flowbite-label">Timezone</label>
+                    <input
+                      id="transitTz"
+                      name="transitTz"
+                      type="text"
+                      value="Europe/Amsterdam"
+                      class="flowbite-input"
+                      placeholder="IANA timezone (e.g. Europe/Amsterdam)"
+                    />
+                  </div>
+
+                  <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label for="transitCity" class="flowbite-label">City</label>
+                      <input id="transitCity" name="transitCity" type="text" value="Amsterdam" class="flowbite-input" />
+                    </div>
+                    <div>
+                      <label for="transitNation" class="flowbite-label">Country code</label>
+                      <input id="transitNation" name="transitNation" type="text" value="NL" maxlength="2" class="flowbite-input" />
+                    </div>
                   </div>
                 </div>
 
                 <div class="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label for="lat" class="flowbite-label">Latitude</label>
-                    <input id="lat" name="lat" type="number" step="0.0001" value="52.3702" class="flowbite-input" />
+                    <label for="theme" class="flowbite-label">Theme</label>
+                    <select id="theme" name="theme" class="flowbite-input">
+                      <option value="classic" selected>classic</option>
+                      <option value="dark">dark</option>
+                      <option value="dark-high-contrast">dark-high-contrast</option>
+                      <option value="light">light</option>
+                      <option value="strawberry">strawberry</option>
+                      <option value="black-and-white">black-and-white</option>
+                    </select>
                   </div>
                   <div>
-                    <label for="lng" class="flowbite-label">Longitude</label>
-                    <input id="lng" name="lng" type="number" step="0.0001" value="4.8952" class="flowbite-input" />
+                    <label for="status" class="flowbite-label">Status</label>
+                    <span id="status" class="status block"></span>
                   </div>
-                </div>
-
-                <div>
-                  <label for="tz_str" class="flowbite-label">Timezone</label>
-                  <input
-                    id="tz_str"
-                    name="tz_str"
-                    type="text"
-                    value="Europe/Amsterdam"
-                    class="flowbite-input"
-                    placeholder="IANA timezone (e.g. Europe/Amsterdam)"
-                  />
-                </div>
-
-                <div class="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label for="city" class="flowbite-label">City</label>
-                    <input id="city" name="city" type="text" value="Amsterdam" class="flowbite-input" />
-                  </div>
-                  <div>
-                    <label for="nation" class="flowbite-label">Country code</label>
-                    <input id="nation" name="nation" type="text" value="NL" maxlength="2" class="flowbite-input" />
-                  </div>
-                </div>
-
-                <div>
-                  <label for="theme" class="flowbite-label">Theme</label>
-                  <select id="theme" name="theme" class="flowbite-input">
-                    <option value="classic" selected>classic</option>
-                    <option value="dark">dark</option>
-                    <option value="dark-high-contrast">dark-high-contrast</option>
-                    <option value="light">light</option>
-                    <option value="strawberry">strawberry</option>
-                    <option value="black-and-white">black-and-white</option>
-                  </select>
                 </div>
 
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
@@ -206,7 +316,6 @@
                   >
                     Generate chart
                   </button>
-                  <span id="status" class="status"></span>
                 </div>
               </form>
             </div>
@@ -217,16 +326,16 @@
               <div class="flex items-center justify-between gap-3 mb-4">
                 <div>
                   <p class="text-sm text-cyan-200/80 font-semibold">Summary</p>
-                  <h2 class="text-xl font-semibold text-white">Natal highlights</h2>
+                  <h2 class="text-xl font-semibold text-white">Highlights</h2>
                 </div>
                 <span class="text-xs px-2 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700">
-                  Sun · Moon · Asc
+                  Sun · Moon · Asc · Moon cycle
                 </span>
               </div>
               <div id="summaryContent" class="summary-content">
                 <p class="hint">
-                  After generating a natal chart, the Sun, Moon, Ascendant and the three tightest aspects involving them
-                  will appear here.
+                  Generate any mode to see Sun, Moon, Ascendant, moon cycle phase, and the tightest aspects for natal,
+                  transit, or both.
                 </p>
               </div>
             </div>
@@ -243,7 +352,7 @@
               </div>
               <div id="chartContainer" class="chart-container">
                 <p class="hint">
-                  Fill in the form and click <strong>Generate chart</strong> to render a natal or transit SVG here.
+                  Fill in the form and click <strong>Generate chart</strong> to render a natal, transit, or dual-wheel SVG here.
                 </p>
               </div>
             </div>
@@ -303,6 +412,40 @@
             }
           } catch (err) {
             console.warn("Timepicker init failed", err);
+          }
+        }
+
+        const transitDateInput = document.getElementById("transitDateInput");
+        if (transitDateInput && typeof Datepicker !== "undefined") {
+          try {
+            const existing = Datepicker.getInstance(transitDateInput);
+            if (!existing) {
+              new Datepicker(transitDateInput, {
+                autohide: true,
+                format: "yyyy-mm-dd",
+                orientation: "bottom",
+                todayHighlight: true,
+                weekStart: 1,
+              });
+            }
+          } catch (err) {
+            console.warn("Transit datepicker init failed", err);
+          }
+        }
+
+        const transitTimeInput = document.getElementById("transitTimeInput");
+        if (transitTimeInput && typeof Timepicker !== "undefined") {
+          try {
+            const existingTime = Timepicker.getInstance(transitTimeInput);
+            if (!existingTime) {
+              new Timepicker(transitTimeInput, {
+                defaultTime: "12:00",
+                minuteStep: 1,
+                format: "HH:mm",
+              });
+            }
+          } catch (err) {
+            console.warn("Transit timepicker init failed", err);
           }
         }
       })();

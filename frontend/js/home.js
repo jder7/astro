@@ -6,6 +6,10 @@
   const summaryEl = document.getElementById("summaryContent");
   const modeInputs = Array.from(document.querySelectorAll('input[name="mode"]'));
   const nameRow = document.getElementById("nameRow");
+  const birthSection = document.getElementById("birthSection");
+  const transitSection = document.getElementById("transitSection");
+  const transitDateInput = document.getElementById("transitDateInput");
+  const transitTimeInput = document.getElementById("transitTimeInput");
 
   if (!form || !chartContainer) {
     console.error("Home form or chart container missing from DOM.");
@@ -17,10 +21,27 @@
     return checked ? checked.value : "natal";
   }
 
+  function setTransitNow() {
+    if (!transitDateInput || !transitTimeInput) return;
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, "0");
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    transitDateInput.value = dateStr;
+    transitTimeInput.value = timeStr;
+  }
+
   function updateModeVisibility() {
     const mode = getSelectedMode();
-    if (nameRow) {
-      nameRow.style.display = mode === "natal" ? "" : "none";
+    const showBirth = mode !== "transit";
+    const showTransit = mode !== "natal";
+
+    if (birthSection) birthSection.style.display = showBirth ? "" : "none";
+    if (transitSection) transitSection.style.display = showTransit ? "" : "none";
+    if (nameRow) nameRow.style.display = mode === "transit" ? "none" : "";
+
+    if (showTransit && mode !== "natal") {
+      setTransitNow();
     }
   }
 
@@ -59,9 +80,9 @@
     const mode = getSelectedMode();
 
     try {
-      const { payload, isNatal } = buildPayloadFromForm(form, mode);
+      const { payload, birthDateParts, transitDateParts } = buildPayloadFromForm(mode);
 
-      if (isNatal) {
+      if (mode === "natal") {
         const jsonResp = await fetch("/api/natal", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -75,7 +96,7 @@
 
         const natalJson = await jsonResp.json();
         if (natalJson && natalJson.subject) {
-          renderNatalSummary(natalJson.subject);
+          renderNatalSummary(natalJson.subject, birthDateParts);
         } else if (summaryEl) {
           summaryEl.innerHTML =
             "<p>Unexpected response from natal endpoint – subject field not found.</p>";
@@ -95,7 +116,25 @@
         const svgText = await svgResp.text();
         chartContainer.innerHTML = svgText;
         setStatus("Natal chart generated.");
-      } else {
+      } else if (mode === "transit") {
+        const jsonResp = await fetch("/api/transit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!jsonResp.ok) {
+          const text = await jsonResp.text();
+          throw new Error(`Transit request failed: ${jsonResp.status} ${jsonResp.statusText} - ${text}`);
+        }
+
+        const transitJson = await jsonResp.json();
+        if (transitJson && transitJson.snapshot) {
+          renderTransitSummary(transitJson.snapshot, transitDateParts);
+        } else if (summaryEl) {
+          summaryEl.innerHTML = "<p>Unexpected response from transit endpoint – snapshot not found.</p>";
+        }
+
         const svgResp = await fetch("/api/svg/transit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -109,13 +148,40 @@
 
         const svgText = await svgResp.text();
         chartContainer.innerHTML = svgText;
+        setStatus("Transit chart generated.");
+      } else {
+        const jsonResp = await fetch("/api/transit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-        if (summaryEl) {
-          summaryEl.innerHTML =
-            "<p>Transit chart generated. (Transit summary is not yet implemented.)</p>";
+        if (!jsonResp.ok) {
+          const text = await jsonResp.text();
+          throw new Error(`Natal + transit request failed: ${jsonResp.status} ${jsonResp.statusText} - ${text}`);
         }
 
-        setStatus("Transit chart generated.");
+        const transitJson = await jsonResp.json();
+        if (transitJson && transitJson.snapshot) {
+          renderCombinedSummary(transitJson.snapshot, birthDateParts, transitDateParts);
+        } else if (summaryEl) {
+          summaryEl.innerHTML = "<p>Unexpected response from transit endpoint – snapshot not found.</p>";
+        }
+
+        const svgResp = await fetch("/api/svg/transit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!svgResp.ok) {
+          const text = await svgResp.text();
+          throw new Error(`SVG dual-wheel request failed: ${svgResp.status} ${svgResp.statusText} - ${text}`);
+        }
+
+        const svgText = await svgResp.text();
+        chartContainer.innerHTML = svgText;
+        setStatus("Natal + Transit chart generated.");
       }
     } catch (err) {
       console.error(err);
@@ -224,7 +290,7 @@
     return label;
   }
 
-  function formatPointLabel(key, point) {
+  function formatPointLabel(key, point, options = {}) {
     const baseNameMap = {
       sun: "Sun",
       moon: "Moon",
@@ -234,27 +300,84 @@
     const deg = typeof point.position === "number" ? point.position.toFixed(2) : "?";
     const sign = point.sign || "";
     const houseLabel = formatHouse(point.house);
-    const parts = [`${label} ${sign} ${deg}°`];
+    const prefix = options.prefix ? `${options.prefix} ` : "";
+    const parts = [`${prefix}${label} ${sign} ${deg}°`];
     if (houseLabel) {
       parts.push(`(${houseLabel})`);
     }
     return parts.join(" ");
   }
 
-  function formatAspectLabel(subject, aspect) {
+  function formatAspectLabel(subject, aspect, options = {}) {
     const points = extractPoints(subject);
     const basePoint = points[aspect.base];
     const otherPoint = points[aspect.other];
     if (!basePoint || !otherPoint) return null;
 
-    const baseLabel = formatPointLabel(aspect.base, basePoint);
-    const otherLabel = formatPointLabel(aspect.other, otherPoint);
+    const baseLabel = formatPointLabel(aspect.base, basePoint, { prefix: options.basePrefix });
+    const otherLabel = formatPointLabel(aspect.other, otherPoint, { prefix: options.otherPrefix });
     const orbText = aspect.orb.toFixed(2);
 
     return `${baseLabel} ${aspect.type} ${otherLabel} (orb ${orbText}°)`;
   }
 
-  function renderNatalSummary(subject) {
+  function getLunationInfo(parts) {
+    if (!parts) return null;
+    const { year, month, day, hour = 0, minute = 0 } = parts;
+    if ([year, month, day].some((n) => !Number.isFinite(n))) return null;
+
+    const synodic = 29.530588853; // average days in lunar cycle
+    const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14); // reference new moon
+    const target = Date.UTC(year, (month || 1) - 1, day || 1, hour || 0, minute || 0);
+    const daysSince = (target - knownNewMoon) / 86400000;
+    const normalized = ((daysSince % synodic) + synodic) % synodic;
+    const fraction = normalized / synodic;
+
+    const phases = [
+      { name: "New Moon", icon: "🌑" },
+      { name: "Waxing Crescent", icon: "🌒" },
+      { name: "First Quarter", icon: "🌓" },
+      { name: "Waxing Gibbous", icon: "🌔" },
+      { name: "Full Moon", icon: "🌕" },
+      { name: "Waning Gibbous", icon: "🌖" },
+      { name: "Last Quarter", icon: "🌗" },
+      { name: "Waning Crescent", icon: "🌘" },
+    ];
+
+    const idx = Math.floor((fraction * 8 + 0.5)) % 8;
+    const phase = phases[idx];
+    const age = normalized;
+
+    return {
+      name: phase.name,
+      icon: phase.icon,
+      fraction,
+      age,
+      cycle: `${age.toFixed(1)} / 29.5 days`,
+    };
+  }
+
+  function renderLunationBlock(info, title) {
+    if (!info) return "";
+    const percent = Math.round(info.fraction * 100);
+    return `
+      <div class="lunation">
+        <div class="lunation-header">
+          <span class="lunation-icon" aria-hidden="true">${info.icon}</span>
+          <div>
+            <div class="lunation-title">${title}</div>
+            <div class="lunation-phase">${info.name} · ${info.cycle}</div>
+          </div>
+          <span class="lunation-chip">${percent}%</span>
+        </div>
+        <div class="lunation-bar">
+          <span style="width:${percent}%;"></span>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderNatalSummary(subject, birthDateParts) {
     if (!summaryEl) {
       return;
     }
@@ -284,63 +407,250 @@
       .join("");
 
     summaryEl.innerHTML = `
-      <div class="summary-points">
-        <p><strong>Sun:</strong> ${sunText}</p>
-        <p><strong>Moon:</strong> ${moonText}</p>
-        <p><strong>Ascendant:</strong> ${ascText}</p>
-      </div>
-      <div class="summary-aspects">
-        <h4>Top aspects involving Sun, Moon, Ascendant</h4>
-        ${
-          aspectItems
-            ? `<ul>${aspectItems}</ul>`
-            : "<p>No major aspects found within the configured orbs.</p>"
-        }
+      <div class="summary-card">
+        <div class="summary-heading">Natal highlights</div>
+        <div class="summary-points">
+          <p><strong>Sun:</strong> ${sunText}</p>
+          <p><strong>Moon:</strong> ${moonText}</p>
+          <p><strong>Ascendant:</strong> ${ascText}</p>
+        </div>
+        <div class="summary-aspects">
+          <h4>Top aspects (Sun, Moon, Asc)</h4>
+          ${
+            aspectItems
+              ? `<ul>${aspectItems}</ul>`
+              : "<p>No major aspects found within the configured orbs.</p>"
+          }
+        </div>
+        ${renderLunationBlock(getLunationInfo(birthDateParts), "Moon cycle at birth")}
       </div>
     `;
   }
 
-  function buildPayloadFromForm(form, mode) {
-    const getValue = (id) => {
-      const el = document.getElementById(id);
-      return el ? el.value : "";
-    };
+  function renderTransitSummary(snapshot, transitDateParts) {
+    if (!summaryEl) return;
+    const subject = snapshot?.subject;
+    if (!subject) {
+      summaryEl.innerHTML = "<p>Transit data missing from response.</p>";
+      return;
+    }
 
-    const toFloat = (id, fallback) => {
-      const v = parseFloat(getValue(id));
-      return Number.isFinite(v) ? v : fallback;
-    };
+    const sun = subject.sun;
+    const moon = subject.moon;
+    const asc = subject.ascendant;
+    const baseNames = ["sun", "moon", "ascendant"];
+    const aspects = computeKeyAspects(subject, baseNames).slice(0, 3);
 
-    const parseDateTimeValue = () => {
-      const datePart = (getValue("dateInput") || "").trim();
-      const timePart = (getValue("timeInput") || "").trim();
+    const aspectItems = aspects
+      .map((asp) => formatAspectLabel(subject, asp, { basePrefix: "T", otherPrefix: "T" }))
+      .filter(Boolean)
+      .map((text) => `<li>${text}</li>`)
+      .join("");
 
-      if (!datePart) return null;
-      const [year, month, day] = datePart.split("-").map((n) => parseInt(n, 10));
-      const [hourRaw = "12", minuteRaw = "0"] = timePart.split(":");
-      const hour = parseInt(hourRaw, 10);
-      const minute = parseInt(minuteRaw, 10);
+    summaryEl.innerHTML = `
+      <div class="summary-card">
+        <div class="summary-heading">Transit snapshot</div>
+        <div class="summary-points">
+          <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", sun, { prefix: "T" })}</p>
+          <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", moon, { prefix: "T" })}</p>
+          <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", asc, { prefix: "T" })}</p>
+        </div>
+        <div class="summary-aspects">
+          <h4>Transit aspects (Sun, Moon, Asc)</h4>
+          ${
+            aspectItems
+              ? `<ul>${aspectItems}</ul>`
+              : "<p>No major aspects found within the configured orbs.</p>"
+          }
+        </div>
+        ${renderLunationBlock(getLunationInfo(transitDateParts), "Moon cycle at moment")}
+      </div>
+    `;
+  }
 
-      if ([year, month, day].some((n) => !Number.isFinite(n))) {
-        return null;
+  function computeTransitNatalAspects(natalSubject, transitSubject, baseNames) {
+    const natalPoints = extractPoints(natalSubject || {});
+    const transitPoints = extractPoints(transitSubject || {});
+    const natalKeys = Object.keys(natalPoints);
+    const aspects = [];
+
+    for (const base of baseNames) {
+      const transitPoint = transitPoints[base];
+      if (!transitPoint) continue;
+      const baseDeg = transitPoint.abs_pos;
+
+      for (const target of natalKeys) {
+        const natalPoint = natalPoints[target];
+        if (!natalPoint) continue;
+        const targetDeg = natalPoint.abs_pos;
+        const diff = normalizeAngleDiff(baseDeg, targetDeg);
+        const asp = classifyAspect(diff);
+        if (!asp) continue;
+
+        aspects.push({
+          base,
+          other: target,
+          type: asp.name,
+          orb: asp.orb,
+          baseSource: "transit",
+          otherSource: "natal",
+        });
       }
-      return {
-        year,
-        month,
-        day,
-        hour: Number.isFinite(hour) ? hour : 12,
-        minute: Number.isFinite(minute) ? minute : 0,
-      };
+    }
+
+    aspects.sort((a, b) => a.orb - b.orb);
+    return aspects;
+  }
+
+  function formatCrossAspectLabel(natalSubject, transitSubject, aspect) {
+    const transitPoints = extractPoints(transitSubject || {});
+    const natalPoints = extractPoints(natalSubject || {});
+    const basePoint = transitPoints[aspect.base];
+    const otherPoint = natalPoints[aspect.other];
+    if (!basePoint || !otherPoint) return null;
+
+    const baseLabel = formatPointLabel(aspect.base, basePoint, { prefix: "T" });
+    const otherLabel = formatPointLabel(aspect.other, otherPoint, { prefix: "N" });
+    const orbText = aspect.orb.toFixed(2);
+    return `${baseLabel} ${aspect.type} ${otherLabel} (orb ${orbText}°)`;
+  }
+
+  function renderCombinedSummary(snapshot, birthDateParts, transitDateParts) {
+    if (!summaryEl) return;
+    const transitSubject = snapshot?.subject;
+    const natalSubject = snapshot?.natal_subject;
+    if (!transitSubject || !natalSubject) {
+      summaryEl.innerHTML =
+        "<p>Missing natal or transit subjects in the combined response.</p>";
+      return;
+    }
+
+    const baseNames = ["sun", "moon", "ascendant"];
+    const natalBlock = (() => {
+      const aspects = computeKeyAspects(natalSubject, baseNames).slice(0, 3);
+      const aspectItems = aspects
+        .map((asp) => formatAspectLabel(natalSubject, asp))
+        .filter(Boolean)
+        .map((text) => `<li>${text}</li>`)
+        .join("");
+      return `
+        <div class="summary-card">
+          <div class="summary-heading">Natal</div>
+          <div class="summary-points">
+            <p><strong>Sun:</strong> ${formatPointLabel("sun", natalSubject.sun)}</p>
+            <p><strong>Moon:</strong> ${formatPointLabel("moon", natalSubject.moon)}</p>
+            <p><strong>Ascendant:</strong> ${formatPointLabel("ascendant", natalSubject.ascendant)}</p>
+          </div>
+          <div class="summary-aspects">
+            <h4>Top aspects (Sun, Moon, Asc)</h4>
+            ${aspectItems ? `<ul>${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
+          </div>
+          ${renderLunationBlock(getLunationInfo(birthDateParts), "Moon cycle at birth")}
+        </div>
+      `;
+    })();
+
+    const transitBlock = (() => {
+      const aspects = computeKeyAspects(transitSubject, baseNames).slice(0, 3);
+      const aspectItems = aspects
+        .map((asp) => formatAspectLabel(transitSubject, asp, { basePrefix: "T", otherPrefix: "T" }))
+        .filter(Boolean)
+        .map((text) => `<li>${text}</li>`)
+        .join("");
+      return `
+        <div class="summary-card">
+          <div class="summary-heading">Transit</div>
+          <div class="summary-points">
+            <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", transitSubject.sun, { prefix: "T" })}</p>
+            <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", transitSubject.moon, { prefix: "T" })}</p>
+            <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", transitSubject.ascendant, { prefix: "T" })}</p>
+          </div>
+          <div class="summary-aspects">
+            <h4>Transit aspects (Sun, Moon, Asc)</h4>
+            ${aspectItems ? `<ul>${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
+          </div>
+          ${renderLunationBlock(getLunationInfo(transitDateParts), "Moon cycle at moment")}
+        </div>
+      `;
+    })();
+
+    const crossBlock = (() => {
+      const dualAspects = computeTransitNatalAspects(natalSubject, transitSubject, baseNames).slice(0, 3);
+      const items = dualAspects
+        .map((asp) => formatCrossAspectLabel(natalSubject, transitSubject, asp))
+        .filter(Boolean)
+        .map((text) => `<li>${text}</li>`)
+        .join("");
+      return `
+        <div class="summary-card">
+          <div class="summary-heading">Transit to natal</div>
+          <div class="summary-aspects">
+            <h4>Key inter-chart aspects</h4>
+            ${items ? `<ul>${items}</ul>` : "<p>No inter-chart aspects within the orbs.</p>"}
+          </div>
+        </div>
+      `;
+    })();
+
+    summaryEl.innerHTML = `
+      <div class="summary-grid">
+        ${natalBlock}
+        ${transitBlock}
+      </div>
+      ${crossBlock}
+    `;
+  }
+
+  function getValue(id) {
+    const el = document.getElementById(id);
+    return el ? el.value : "";
+  }
+
+  function toFloat(id, fallback) {
+    const v = parseFloat(getValue(id));
+    return Number.isFinite(v) ? v : fallback;
+  }
+
+  function getDateTimeParts(dateId, timeId, defaults) {
+    const datePart = (getValue(dateId) || "").trim();
+    const timePart = (getValue(timeId) || "").trim();
+    const [year, month, day] = datePart.split("-").map((n) => parseInt(n, 10));
+    const [hourRaw = `${defaults.hour}`, minuteRaw = `${defaults.minute}`] = timePart.split(":");
+    const hour = parseInt(hourRaw, 10);
+    const minute = parseInt(minuteRaw, 10);
+    return {
+      year: Number.isFinite(year) ? year : defaults.year,
+      month: Number.isFinite(month) ? month : defaults.month,
+      day: Number.isFinite(day) ? day : defaults.day,
+      hour: Number.isFinite(hour) ? hour : defaults.hour,
+      minute: Number.isFinite(minute) ? minute : defaults.minute,
+    };
+  }
+
+  function buildPayloadFromForm(mode) {
+    const birthDateParts = getDateTimeParts("dateInput", "timeInput", {
+      year: 1990,
+      month: 1,
+      day: 1,
+      hour: 12,
+      minute: 0,
+    });
+
+    const transitDateParts = getDateTimeParts("transitDateInput", "transitTimeInput", {
+      year: 2025,
+      month: 1,
+      day: 1,
+      hour: 12,
+      minute: 0,
+    });
+
+    const config = {
+      theme: getValue("theme") || "classic",
     };
 
-    const dateTime = parseDateTimeValue();
-
-    const common = {
-      year: dateTime?.year ?? 1990,
-      month: dateTime?.month ?? 1,
-      day: dateTime?.day ?? 1,
-      hour: dateTime?.hour ?? 12,
-      minute: dateTime?.minute ?? 0,
+    const birth = {
+      name: getValue("name") || "Subject",
+      ...birthDateParts,
       lat: toFloat("lat", 52.3702),
       lng: toFloat("lng", 4.8952),
       tz_str: getValue("tz_str") || "Europe/Amsterdam",
@@ -348,36 +658,47 @@
       nation: getValue("nation") || "NL",
     };
 
-    const config = {
-      theme: getValue("theme") || "classic",
+    const moment = {
+      ...transitDateParts,
+      lat: toFloat("transitLat", 52.3702),
+      lng: toFloat("transitLng", 4.8952),
+      tz_str: getValue("transitTz") || "Europe/Amsterdam",
+      city: getValue("transitCity") || "Amsterdam",
+      nation: getValue("transitNation") || "NL",
     };
 
-    if (mode === "transit") {
-      const moment = {
-        ...common,
-      };
-
+    if (mode === "natal") {
       return {
-        isNatal: false,
+        payload: {
+          birth,
+          config,
+        },
+        birthDateParts,
+        transitDateParts: null,
+      };
+    }
+
+    if (mode === "transit") {
+      return {
         payload: {
           moment,
           birth: null,
           config,
         },
+        birthDateParts: null,
+        transitDateParts,
       };
     }
 
-    const birth = {
-      name: getValue("name") || "Subject",
-      ...common,
-    };
-
+    // natal_transit dual wheel
     return {
-      isNatal: true,
       payload: {
+        moment,
         birth,
         config,
       },
+      birthDateParts,
+      transitDateParts,
     };
   }
 
