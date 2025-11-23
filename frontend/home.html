@@ -2,21 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Astro App – Natal Chart Generator</title>
+    <title>Astro App – Natal &amp; Transit Charts</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="/static/css/home.css" />
   </head>
   <body>
     <header class="page-header">
       <h1>Astro App</h1>
-      <p class="subtitle">Generate a natal SVG chart using the /api/svg/natal endpoint.</p>
+      <p class="subtitle">
+        Generate natal or transit SVG charts using the API and see a short natal summary (Sun, Moon, Ascendant &amp; key aspects).
+      </p>
     </header>
 
     <main class="page-main">
       <section class="panel panel-form">
-        <h2>Natal chart input</h2>
+        <h2>Chart input</h2>
         <form id="natalForm">
           <div class="field-row">
+            <label>Mode</label>
+            <div class="field-inline">
+              <label class="mode-option">
+                <input type="radio" name="mode" value="natal" checked />
+                <span>Natal</span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="mode" value="transit" />
+                <span>Transit</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field-row" id="nameRow">
             <label for="name">Name</label>
             <input id="name" name="name" type="text" value="Subject" />
           </div>
@@ -102,10 +118,21 @@
       </section>
 
       <section class="panel panel-chart">
-        <h2>SVG chart</h2>
+        <h2>Summary &amp; SVG chart</h2>
+
+        <section class="summary-block">
+          <h3 class="summary-title">Natal summary</h3>
+          <div id="summaryContent" class="summary-content">
+            <p class="hint">
+              After generating a natal chart, the Sun, Moon, Ascendant and the three tightest aspects involving them
+              will appear here.
+            </p>
+          </div>
+        </section>
+
         <div id="chartContainer" class="chart-container">
           <p class="hint">
-            Fill in the form and click <strong>Generate chart</strong> to render a natal SVG here.
+            Fill in the form and click <strong>Generate chart</strong> to render a natal or transit SVG here.
           </p>
         </div>
       </section>

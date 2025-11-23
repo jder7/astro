@@ -186,3 +186,52 @@ button:disabled {
     flex-direction: column;
   }
 }
+
+
+/* Mode selector */
+.mode-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-right: 1rem;
+  font-size: 0.9rem;
+}
+
+/* Summary block */
+.summary-block {
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.summary-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.summary-content {
+  font-size: 0.9rem;
+  color: #e5e7eb;
+}
+
+.summary-points p {
+  margin: 0.15rem 0;
+}
+
+.summary-aspects {
+  margin-top: 0.4rem;
+}
+
+.summary-aspects h4 {
+  margin: 0 0 0.2rem;
+  font-size: 0.9rem;
+}
+
+.summary-aspects ul {
+  margin: 0.2rem 0 0;
+  padding-left: 1.2rem;
+}
