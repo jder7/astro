@@ -4,148 +4,309 @@
     <meta charset="UTF-8" />
     <title>Astro App – Natal &amp; Transit Charts</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ['"Space Grotesk"', "Inter", "system-ui", "sans-serif"],
+              body: ["Inter", "system-ui", "sans-serif"],
+            },
+            colors: {
+              nebula: {
+                50: "#e6f7ff",
+                100: "#c9edff",
+                500: "#38bdf8",
+                700: "#0ea5e9",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
+      integrity="sha512-4CrzvWKAMiv1znMPFPA/lqlo9ykTDj9GdHwq3iujHBNSnopB7UpRz45dQ/gGn5ed7DF1NsA8OmUp7YHEV+mFKg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <link rel="stylesheet" href="/static/css/home.css" />
   </head>
-  <body>
-    <header class="page-header">
-      <h1>Astro App</h1>
-      <p class="subtitle">
-        Generate natal or transit SVG charts using the API and see a short natal summary (Sun, Moon, Ascendant &amp; key aspects).
-      </p>
-    </header>
-
-    <main class="page-main">
-      <section class="panel panel-form">
-        <h2>Chart input</h2>
-        <form id="natalForm">
-          <div class="field-row">
-            <label>Mode</label>
-            <div class="field-inline">
-              <label class="mode-option">
-                <input type="radio" name="mode" value="natal" checked />
-                <span>Natal</span>
-              </label>
-              <label class="mode-option">
-                <input type="radio" name="mode" value="transit" />
-                <span>Transit</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="field-row" id="nameRow">
-            <label for="name">Name</label>
-            <input id="name" name="name" type="text" value="Subject" />
-          </div>
-
-          <div class="field-row">
-            <label>Date</label>
-            <div class="field-inline">
-              <input id="year" name="year" type="number" value="1990" min="1900" max="2100" />
-              <span class="field-inline-label">Year</span>
-            </div>
-            <div class="field-inline">
-              <input id="month" name="month" type="number" value="1" min="1" max="12" />
-              <span class="field-inline-label">Month</span>
-            </div>
-            <div class="field-inline">
-              <input id="day" name="day" type="number" value="1" min="1" max="31" />
-              <span class="field-inline-label">Day</span>
-            </div>
-          </div>
-
-          <div class="field-row">
-            <label>Time</label>
-            <div class="field-inline">
-              <input id="hour" name="hour" type="number" value="12" min="0" max="23" />
-              <span class="field-inline-label">Hour</span>
-            </div>
-            <div class="field-inline">
-              <input id="minute" name="minute" type="number" value="0" min="0" max="59" />
-              <span class="field-inline-label">Minute</span>
-            </div>
-          </div>
-
-          <div class="field-row">
-            <label>Location</label>
-            <div class="field-inline">
-              <input id="lat" name="lat" type="number" step="0.0001" value="52.3702" />
-              <span class="field-inline-label">Lat</span>
-            </div>
-            <div class="field-inline">
-              <input id="lng" name="lng" type="number" step="0.0001" value="4.8952" />
-              <span class="field-inline-label">Lng</span>
-            </div>
-          </div>
-
-          <div class="field-row">
-            <label for="tz_str">Timezone</label>
-            <input
-              id="tz_str"
-              name="tz_str"
-              type="text"
-              value="Europe/Amsterdam"
-              placeholder="IANA timezone (e.g. Europe/Amsterdam)"
-            />
-          </div>
-
-          <div class="field-row">
-            <label for="city">City</label>
-            <input id="city" name="city" type="text" value="Amsterdam" />
-          </div>
-
-          <div class="field-row">
-            <label for="nation">Country code</label>
-            <input id="nation" name="nation" type="text" value="NL" maxlength="2" />
-          </div>
-
-          <div class="field-row">
-            <label for="theme">Theme</label>
-            <select id="theme" name="theme">
-              <option value="classic" selected>classic</option>
-              <option value="dark">dark</option>
-              <option value="dark-high-contrast">dark-high-contrast</option>
-              <option value="light">light</option>
-              <option value="strawberry">strawberry</option>
-              <option value="black-and-white">black-and-white</option>
-            </select>
-          </div>
-
-          <div class="actions">
-            <button type="submit" id="generateBtn">Generate chart</button>
-            <span id="status" class="status"></span>
-          </div>
-        </form>
-      </section>
-
-      <section class="panel panel-chart">
-        <h2>Summary &amp; SVG chart</h2>
-
-        <section class="summary-block">
-          <h3 class="summary-title">Natal summary</h3>
-          <div id="summaryContent" class="summary-content">
-            <p class="hint">
-              After generating a natal chart, the Sun, Moon, Ascendant and the three tightest aspects involving them
-              will appear here.
+  <body class="bg-slate-950 text-slate-50 font-body min-h-screen">
+    <div class="bg-[radial-gradient(circle_at_10%_20%,rgba(56,189,248,0.15),transparent_25%),radial-gradient(circle_at_90%_10%,rgba(129,140,248,0.15),transparent_25%),radial-gradient(circle_at_50%_75%,rgba(14,165,233,0.12),transparent_30%)]">
+      <header class="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-8">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-sm uppercase tracking-[0.4em] text-cyan-200/70 font-semibold">Astrology Toolkit</p>
+            <h1 class="font-display text-3xl sm:text-4xl mt-2 leading-tight">Astro App</h1>
+            <p class="text-slate-300 mt-3 max-w-3xl">
+              Generate natal or transit SVG charts with a single request and view a concise natal summary focused on
+              the Sun, Moon, Ascendant and their tightest aspects.
             </p>
           </div>
-        </section>
-
-        <div id="chartContainer" class="chart-container">
-          <p class="hint">
-            Fill in the form and click <strong>Generate chart</strong> to render a natal or transit SVG here.
-          </p>
+          <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-slate-800/70 border border-slate-700 text-xs font-semibold tracking-wide text-cyan-200">
+            API-ready
+          </span>
         </div>
-      </section>
-    </main>
+      </header>
 
-    <footer class="page-footer">
-      <p>
-        Astro App &amp; API – powered by
-        <a href="https://www.kerykeion.net/" target="_blank" rel="noreferrer">Kerykeion</a>
-        and FastAPI.
-      </p>
-    </footer>
+      <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-12">
+        <div class="grid lg:grid-cols-3 gap-6">
+          <section class="lg:col-span-1">
+            <div class="flowbite-card h-full">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <p class="text-sm text-cyan-200/80 font-semibold">Chart input</p>
+                  <h2 class="text-xl font-semibold text-white">Configure request</h2>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-full bg-slate-800 text-cyan-100/80 border border-slate-700">
+                  Live
+                </span>
+              </div>
 
+              <form id="natalForm" class="space-y-6">
+                <div>
+                  <label class="block mb-3 text-sm font-medium text-slate-200">Mode</label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <label class="flowbite-radio">
+                      <input type="radio" name="mode" value="natal" checked class="peer" />
+                      <div class="flowbite-radio-label">
+                        <span class="text-sm font-semibold text-white">Natal</span>
+                        <span class="text-xs text-slate-400">Use birth details</span>
+                      </div>
+                    </label>
+                    <label class="flowbite-radio">
+                      <input type="radio" name="mode" value="transit" class="peer" />
+                      <div class="flowbite-radio-label">
+                        <span class="text-sm font-semibold text-white">Transit</span>
+                        <span class="text-xs text-slate-400">Moment only</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div id="nameRow">
+                  <label for="name" class="flowbite-label">Name</label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value="Subject"
+                    class="flowbite-input"
+                    placeholder="Person or chart label"
+                  />
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label for="dateInput" class="flowbite-label">Date</label>
+                    <div class="relative">
+                      <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
+                        </svg>
+                      </div>
+                      <input
+                        id="dateInput"
+                        name="dateInput"
+                        type="text"
+                        value="1990-01-01"
+                        class="flowbite-input pl-10"
+                        placeholder="YYYY-MM-DD"
+                        datepicker
+                        datepicker-buttons
+                        datepicker-autohide
+                        datepicker-format="yyyy-mm-dd"
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label for="timeInput" class="flowbite-label">Time</label>
+                    <div class="relative">
+                      <input
+                        id="timeInput"
+                        name="timeInput"
+                        type="text"
+                        value="12:00"
+                        class="flowbite-input pr-12"
+                        placeholder="HH:MM"
+                        autocomplete="off"
+                      />
+                      <button
+                        type="button"
+                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200 transition"
+                        data-timepicker-toggle
+                        data-target="#timeInput"
+                        aria-label="Open time picker"
+                      >
+                        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3.5 2" />
+                          <circle cx="12" cy="12" r="9" />
+                        </svg>
+                      </button>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-400">Flowbite date + time pickers; defaults to UTC if no timezone offset is applied.</p>
+                  </div>
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label for="lat" class="flowbite-label">Latitude</label>
+                    <input id="lat" name="lat" type="number" step="0.0001" value="52.3702" class="flowbite-input" />
+                  </div>
+                  <div>
+                    <label for="lng" class="flowbite-label">Longitude</label>
+                    <input id="lng" name="lng" type="number" step="0.0001" value="4.8952" class="flowbite-input" />
+                  </div>
+                </div>
+
+                <div>
+                  <label for="tz_str" class="flowbite-label">Timezone</label>
+                  <input
+                    id="tz_str"
+                    name="tz_str"
+                    type="text"
+                    value="Europe/Amsterdam"
+                    class="flowbite-input"
+                    placeholder="IANA timezone (e.g. Europe/Amsterdam)"
+                  />
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label for="city" class="flowbite-label">City</label>
+                    <input id="city" name="city" type="text" value="Amsterdam" class="flowbite-input" />
+                  </div>
+                  <div>
+                    <label for="nation" class="flowbite-label">Country code</label>
+                    <input id="nation" name="nation" type="text" value="NL" maxlength="2" class="flowbite-input" />
+                  </div>
+                </div>
+
+                <div>
+                  <label for="theme" class="flowbite-label">Theme</label>
+                  <select id="theme" name="theme" class="flowbite-input">
+                    <option value="classic" selected>classic</option>
+                    <option value="dark">dark</option>
+                    <option value="dark-high-contrast">dark-high-contrast</option>
+                    <option value="light">light</option>
+                    <option value="strawberry">strawberry</option>
+                    <option value="black-and-white">black-and-white</option>
+                  </select>
+                </div>
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                  <button
+                    type="submit"
+                    id="generateBtn"
+                    class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/40 focus:ring-4 focus:outline-none focus:ring-cyan-300 transition"
+                  >
+                    Generate chart
+                  </button>
+                  <span id="status" class="status"></span>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <section class="lg:col-span-2 space-y-6">
+            <div class="flowbite-card">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <p class="text-sm text-cyan-200/80 font-semibold">Summary</p>
+                  <h2 class="text-xl font-semibold text-white">Natal highlights</h2>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700">
+                  Sun · Moon · Asc
+                </span>
+              </div>
+              <div id="summaryContent" class="summary-content">
+                <p class="hint">
+                  After generating a natal chart, the Sun, Moon, Ascendant and the three tightest aspects involving them
+                  will appear here.
+                </p>
+              </div>
+            </div>
+
+            <div class="flowbite-card">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <p class="text-sm text-cyan-200/80 font-semibold">SVG output</p>
+                  <h2 class="text-xl font-semibold text-white">Chart preview</h2>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700">
+                  Live render
+                </span>
+              </div>
+              <div id="chartContainer" class="chart-container">
+                <p class="hint">
+                  Fill in the form and click <strong>Generate chart</strong> to render a natal or transit SVG here.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer class="border-t border-slate-800/80 bg-slate-950/70 backdrop-blur">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 text-sm text-slate-300 flex flex-wrap items-center gap-2">
+          <span class="font-semibold text-white">Astro App &amp; API</span>
+          <span class="text-slate-500">— powered by</span>
+          <a class="text-cyan-200 hover:text-cyan-100 font-semibold" href="https://www.kerykeion.net/" target="_blank" rel="noreferrer">
+            Kerykeion
+          </a>
+          <span class="text-slate-500">and FastAPI.</span>
+        </div>
+      </footer>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"
+      integrity="sha512-eNB1lPVKSAW5mXqnboj6QX9kTZKEq4t2f2c5ytUhb+QzPudY3imnjHyXYhIXavZo9e3slCjhDpOJhuMm9uSwzw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/datepicker.min.js" referrerpolicy="no-referrer"></script>
+    <script>
+      (function () {
+        const dateInput = document.getElementById("dateInput");
+        if (dateInput && typeof Datepicker !== "undefined") {
+          try {
+            const existing = Datepicker.getInstance(dateInput);
+            if (!existing) {
+              new Datepicker(dateInput, {
+                autohide: true,
+                format: "yyyy-mm-dd",
+                orientation: "bottom",
+                todayHighlight: true,
+                weekStart: 1,
+              });
+            }
+          } catch (err) {
+            console.warn("Datepicker init failed", err);
+          }
+        }
+
+        const timeInput = document.getElementById("timeInput");
+        if (timeInput && typeof Timepicker !== "undefined") {
+          try {
+            const existingTime = Timepicker.getInstance(timeInput);
+            if (!existingTime) {
+              new Timepicker(timeInput, {
+                defaultTime: "12:00",
+                minuteStep: 1,
+                format: "HH:mm",
+              });
+            }
+          } catch (err) {
+            console.warn("Timepicker init failed", err);
+          }
+        }
+      })();
+    </script>
     <script src="/static/js/home.js"></script>
   </body>
 </html>

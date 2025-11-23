@@ -306,22 +306,41 @@
       return el ? el.value : "";
     };
 
-    const toInt = (id, fallback) => {
-      const v = parseInt(getValue(id), 10);
-      return Number.isFinite(v) ? v : fallback;
-    };
-
     const toFloat = (id, fallback) => {
       const v = parseFloat(getValue(id));
       return Number.isFinite(v) ? v : fallback;
     };
 
+    const parseDateTimeValue = () => {
+      const datePart = (getValue("dateInput") || "").trim();
+      const timePart = (getValue("timeInput") || "").trim();
+
+      if (!datePart) return null;
+      const [year, month, day] = datePart.split("-").map((n) => parseInt(n, 10));
+      const [hourRaw = "12", minuteRaw = "0"] = timePart.split(":");
+      const hour = parseInt(hourRaw, 10);
+      const minute = parseInt(minuteRaw, 10);
+
+      if ([year, month, day].some((n) => !Number.isFinite(n))) {
+        return null;
+      }
+      return {
+        year,
+        month,
+        day,
+        hour: Number.isFinite(hour) ? hour : 12,
+        minute: Number.isFinite(minute) ? minute : 0,
+      };
+    };
+
+    const dateTime = parseDateTimeValue();
+
     const common = {
-      year: toInt("year", 1990),
-      month: toInt("month", 1),
-      day: toInt("day", 1),
-      hour: toInt("hour", 12),
-      minute: toInt("minute", 0),
+      year: dateTime?.year ?? 1990,
+      month: dateTime?.month ?? 1,
+      day: dateTime?.day ?? 1,
+      hour: dateTime?.hour ?? 12,
+      minute: dateTime?.minute ?? 0,
       lat: toFloat("lat", 52.3702),
       lng: toFloat("lng", 4.8952),
       tz_str: getValue("tz_str") || "Europe/Amsterdam",
