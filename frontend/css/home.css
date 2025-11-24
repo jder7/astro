@@ -91,6 +91,18 @@ body {
   color: #fecdd3;
 }
 
+.config-panel {
+  border: 1px solid #1f2937;
+  border-radius: 0.9rem;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(99, 102, 241, 0.08));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.config-panel.hidden {
+  display: none;
+}
+
 .summary-content {
   color: #e2e8f0;
   font-size: 0.95rem;

@@ -56,14 +56,84 @@
         <div class="grid lg:grid-cols-3 gap-6">
           <section class="lg:col-span-1">
             <div class="flowbite-card h-full">
-              <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center justify-between mb-4">
                 <div>
                   <p class="text-sm text-cyan-200/80 font-semibold">Chart input</p>
                   <h2 class="text-xl font-semibold text-white">Configure request</h2>
                 </div>
-                <span class="text-xs px-2 py-1 rounded-full bg-slate-800 text-cyan-100/80 border border-slate-700">
-                  Live
-                </span>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    id="configToggle"
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-cyan-400 hover:shadow-cyan-500/25 shadow-lg transition"
+                    aria-label="Open configuration"
+                  >
+                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div id="configPanel" class="config-panel hidden">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <p class="text-xs uppercase tracking-[0.25em] text-cyan-200/80 font-semibold">Chart config</p>
+                    <p class="text-sm text-slate-300">Defaults persist in this browser.</p>
+                  </div>
+                  <button type="button" id="configClose" class="text-slate-400 hover:text-white transition" aria-label="Close config">
+                    <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <label for="configPerspective" class="flowbite-label">Perspective</label>
+                    <select id="configPerspective" class="flowbite-input">
+                      <option value="Topocentric" selected>Topocentric</option>
+                      <option value="Apparent Geocentric">Apparent Geocentric</option>
+                      <option value="True Geocentric">True Geocentric</option>
+                      <option value="Heliocentric">Heliocentric</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="configZodiac" class="flowbite-label">Zodiac type</label>
+                    <select id="configZodiac" class="flowbite-input">
+                      <option value="Sidereal" selected>Sidereal</option>
+                      <option value="Tropic">Tropic</option>
+                    </select>
+                  </div>
+                  <div id="siderealRow">
+                    <label for="configSiderealMode" class="flowbite-label">Sidereal mode</label>
+                    <select id="configSiderealMode" class="flowbite-input">
+                      <option value="KRISHNAMURTI" selected>KRISHNAMURTI</option>
+                      <option value="LAHIRI">LAHIRI</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="configHouse" class="flowbite-label">House system</label>
+                    <select id="configHouse" class="flowbite-input">
+                      <option value="W" selected>Whole sign (W)</option>
+                      <option value="P">Placidus (P)</option>
+                      <option value="K">Koch (K)</option>
+                      <option value="R">Regiomontanus (R)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="configTheme" class="flowbite-label">Theme</label>
+                    <select id="configTheme" class="flowbite-input">
+                      <option value="dark" selected>dark</option>
+                      <option value="classic">classic</option>
+                      <option value="dark-high-contrast">dark-high-contrast</option>
+                      <option value="light">light</option>
+                      <option value="strawberry">strawberry</option>
+                      <option value="black-and-white">black-and-white</option>
+                    </select>
+                  </div>
+                </div>
+                <p class="mt-3 text-xs text-slate-400">Saved automatically to this browser and applied to all API requests.</p>
               </div>
 
               <form id="natalForm" class="space-y-6">
@@ -290,24 +360,6 @@
                   </div>
                 </div>
 
-                <div class="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label for="theme" class="flowbite-label">Theme</label>
-                    <select id="theme" name="theme" class="flowbite-input">
-                      <option value="classic" selected>classic</option>
-                      <option value="dark">dark</option>
-                      <option value="dark-high-contrast">dark-high-contrast</option>
-                      <option value="light">light</option>
-                      <option value="strawberry">strawberry</option>
-                      <option value="black-and-white">black-and-white</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label for="status" class="flowbite-label">Status</label>
-                    <span id="status" class="status block"></span>
-                  </div>
-                </div>
-
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                   <button
                     type="submit"
@@ -316,6 +368,7 @@
                   >
                     Generate chart
                   </button>
+                  <span id="status" class="status"></span>
                 </div>
               </form>
             </div>

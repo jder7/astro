@@ -88,7 +88,7 @@ Most endpoints accept a nested `config` object of type `ChartConfig`:
 ```jsonc
 {
   "perspective": "TOPOCENTRIC",       // enum Perspective
-  "zodiac_type": "SIDEREAL",          // enum ZodiacType ("TROPICAL" or "SIDEREAL")
+  "zodiac_type": "SIDEREAL",          // enum ZodiacType ("TROPIC" or "SIDEREAL")
   "sidereal_mode": "KRISHNAMURTI",    // enum SiderealMode (for sidereal only)
   "house_system": "WHOLE_SIGN",       // enum HouseSystem (default Whole Sign / "W")
   "theme": "classic"                  // enum Theme (SVG visual style)

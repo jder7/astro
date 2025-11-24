@@ -68,7 +68,7 @@ Used only in `/api/transit-range` to mark the end of the interval:
 ```jsonc
 {
   "perspective": "TOPOCENTRIC",       // Perspective
-  "zodiac_type": "SIDEREAL",          // "TROPICAL" or "SIDEREAL"
+  "zodiac_type": "SIDEREAL",          // "TROPIC" or "SIDEREAL"
   "sidereal_mode": "KRISHNAMURTI",    // for sidereal only
   "house_system": "WHOLE_SIGN",       // default Whole Sign ("W")
   "theme": "classic"                  // SVG theme

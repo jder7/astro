@@ -10,6 +10,25 @@
   const transitSection = document.getElementById("transitSection");
   const transitDateInput = document.getElementById("transitDateInput");
   const transitTimeInput = document.getElementById("transitTimeInput");
+  const configPanel = document.getElementById("configPanel");
+  const configToggle = document.getElementById("configToggle");
+  const configClose = document.getElementById("configClose");
+  const configInputs = {
+    perspective: document.getElementById("configPerspective"),
+    zodiac_type: document.getElementById("configZodiac"),
+    sidereal_mode: document.getElementById("configSiderealMode"),
+    house_system: document.getElementById("configHouse"),
+    theme: document.getElementById("configTheme"),
+  };
+  const siderealRow = document.getElementById("siderealRow");
+
+  const DEFAULT_CONFIG = {
+    perspective: "Topocentric",
+    zodiac_type: "Sidereal",
+    sidereal_mode: "KRISHNAMURTI",
+    house_system: "W",
+    theme: "dark",
+  };
 
   if (!form || !chartContainer) {
     console.error("Home form or chart container missing from DOM.");
@@ -49,6 +68,89 @@
     input.addEventListener("change", updateModeVisibility);
   });
   updateModeVisibility();
+
+  function loadConfig() {
+    let stored = {};
+    try {
+      const raw = localStorage.getItem("astroConfig");
+      if (raw) stored = JSON.parse(raw);
+    } catch (err) {
+      console.warn("Could not load config from localStorage", err);
+    }
+    const merged = { ...DEFAULT_CONFIG, ...stored };
+    // Normalize legacy or invalid values
+    if (merged.zodiac_type === "Tropical") {
+      merged.zodiac_type = "Tropic";
+    }
+    if (!["Sidereal", "Tropic"].includes(merged.zodiac_type)) {
+      merged.zodiac_type = DEFAULT_CONFIG.zodiac_type;
+    }
+    Object.entries(configInputs).forEach(([key, el]) => {
+      if (el && merged[key]) {
+        el.value = merged[key];
+      }
+    });
+    toggleSiderealVisibility(merged.zodiac_type);
+    return merged;
+  }
+
+  function saveConfig() {
+    const cfg = getConfigFromInputs();
+    try {
+      localStorage.setItem("astroConfig", JSON.stringify(cfg));
+    } catch (err) {
+      console.warn("Could not save config to localStorage", err);
+    }
+    return cfg;
+  }
+
+  function getConfigFromInputs() {
+    const cfg = { ...DEFAULT_CONFIG };
+    Object.entries(configInputs).forEach(([key, el]) => {
+      if (el && el.value) {
+        cfg[key] = el.value;
+      }
+    });
+    if (cfg.zodiac_type !== "Sidereal") {
+      cfg.sidereal_mode = null;
+    }
+    return cfg;
+  }
+
+  function bindConfigInputs() {
+    Object.values(configInputs).forEach((el) => {
+      if (!el) return;
+      el.addEventListener("change", saveConfig);
+      el.addEventListener("blur", saveConfig);
+    });
+  }
+
+  function showConfigPanel(show) {
+    if (!configPanel) return;
+    configPanel.classList.toggle("hidden", !show);
+  }
+
+  if (configToggle) {
+    configToggle.addEventListener("click", () => showConfigPanel(true));
+  }
+  if (configClose) {
+    configClose.addEventListener("click", () => showConfigPanel(false));
+  }
+
+  function toggleSiderealVisibility(zodiacType) {
+    if (!siderealRow) return;
+    siderealRow.style.display = zodiacType === "Sidereal" ? "" : "none";
+  }
+
+  loadConfig();
+  if (configInputs.zodiac_type) {
+    configInputs.zodiac_type.addEventListener("change", (e) => {
+      toggleSiderealVisibility(e.target.value);
+      saveConfig();
+    });
+  }
+  toggleSiderealVisibility(configInputs.zodiac_type?.value);
+  bindConfigInputs();
 
   function setStatus(message, isError) {
     if (!statusEl) return;
@@ -644,9 +746,7 @@
       minute: 0,
     });
 
-    const config = {
-      theme: getValue("theme") || "classic",
-    };
+    const config = getConfigFromInputs();
 
     const birth = {
       name: getValue("name") || "Subject",
@@ -667,11 +767,16 @@
       nation: getValue("transitNation") || "NL",
     };
 
+    const normalizedConfig = {
+      ...config,
+      sidereal_mode: config.zodiac_type === "Sidereal" ? config.sidereal_mode : null,
+    };
+
     if (mode === "natal") {
       return {
         payload: {
           birth,
-          config,
+          config: normalizedConfig,
         },
         birthDateParts,
         transitDateParts: null,
@@ -683,7 +788,7 @@
         payload: {
           moment,
           birth: null,
-          config,
+          config: normalizedConfig,
         },
         birthDateParts: null,
         transitDateParts,
@@ -695,7 +800,7 @@
       payload: {
         moment,
         birth,
-        config,
+        config: normalizedConfig,
       },
       birthDateParts,
       transitDateParts,

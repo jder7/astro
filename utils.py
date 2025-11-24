@@ -26,7 +26,7 @@ def ensure_config(config: Optional[ChartConfig]) -> ChartConfig:
     if config is None:
         config = ChartConfig()
     # If zodiac is tropical, sidereal mode should not affect calculations.
-    if config.zodiac_type == ZodiacType.TROPICAL:
+    if config.zodiac_type == ZodiacType.TROPIC:
         config.sidereal_mode = None
     return config
 

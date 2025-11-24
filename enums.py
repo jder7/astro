@@ -11,7 +11,7 @@ class Perspective(str, Enum):
 
 class ZodiacType(str, Enum):
     """Zodiac reference frame."""
-    TROPICAL = "Tropic"
+    TROPIC = "Tropic"
     SIDEREAL = "Sidereal"
 
 
