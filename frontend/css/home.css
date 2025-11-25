@@ -220,3 +220,58 @@ body {
   font-size: 0.95rem;
   color: #94a3b8;
 }
+
+.report-container {
+  min-height: 120px;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: #0b152b;
+  border: 1px solid #1f2937;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+}
+
+.svg-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+
+.svg-modal.open {
+  display: flex;
+}
+
+.svg-modal-content {
+  background: #0b152b;
+  border: 1px solid #1f2937;
+  border-radius: 0.75rem;
+  max-height: 90vh;
+  max-width: 90vw;
+  overflow: auto;
+  padding: 0.75rem;
+  position: relative;
+}
+
+.svg-modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #1f2937;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+
+.svg-modal svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}

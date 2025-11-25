@@ -57,11 +57,11 @@
         <div class="grid lg:grid-cols-3 gap-6">
           <section class="lg:col-span-1">
             <div class="flowbite-card h-full">
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <p class="text-sm text-cyan-200/80 font-semibold">Chart input</p>
-                  <h2 class="text-xl font-semibold text-white">Configure request</h2>
-                </div>
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <p class="text-sm text-cyan-200/80 font-semibold">Chart input</p>
+                    <h2 class="text-xl font-semibold text-white">Configure request</h2>
+                  </div>
                 <div class="flex items-center gap-2">
                   <button
                     type="button"
@@ -72,6 +72,16 @@
                     <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                       <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    id="clearStateBtn"
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-rose-400 hover:shadow-rose-500/25 shadow-lg transition"
+                    aria-label="Clear saved state"
+                  >
+                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 20h18M9 4l6 16M10 9h4" />
                     </svg>
                   </button>
                 </div>
@@ -140,7 +150,7 @@
               <form id="natalForm" class="space-y-6">
                 <div>
                   <label class="block mb-3 text-sm font-medium text-slate-200">Mode</label>
-                  <div class="grid grid-cols-3 gap-3">
+                  <div class="grid grid-cols-4 gap-3">
                     <label class="flowbite-radio">
                       <input type="radio" name="mode" value="natal" checked class="peer" />
                       <div class="flowbite-radio-label">
@@ -160,6 +170,13 @@
                       <div class="flowbite-radio-label">
                         <span class="text-sm font-semibold text-white">Natal + Transit</span>
                         <span class="text-xs text-slate-400">Dual wheel</span>
+                      </div>
+                    </label>
+                    <label class="flowbite-radio">
+                      <input type="radio" name="mode" value="relationship" class="peer" />
+                      <div class="flowbite-radio-label">
+                        <span class="text-sm font-semibold text-white">Relationship</span>
+                        <span class="text-xs text-slate-400">Synastry</span>
                       </div>
                     </label>
                   </div>
@@ -361,6 +378,95 @@
                   </div>
                 </div>
 
+                <div id="relationshipSection" class="space-y-6 hidden">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-[0.2em]">Relationship</h3>
+                    <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-rose-200 border border-slate-700">Synastry</span>
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-semibold text-slate-300 uppercase tracking-[0.2em]">Partner A</h4>
+                        <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700">Inner</span>
+                      </div>
+                      <label for="firstName" class="flowbite-label">Name</label>
+                      <input id="firstName" name="firstName" class="flowbite-input" value="Partner A" />
+                      <div class="grid sm:grid-cols-2 gap-3">
+                        <div>
+                          <label class="flowbite-label" for="firstDate">Date</label>
+                          <input id="firstDate" class="flowbite-input" value="1990-01-01" />
+                        </div>
+                        <div>
+                          <label class="flowbite-label" for="firstTime">Time</label>
+                          <input id="firstTime" class="flowbite-input" value="12:00" />
+                        </div>
+                      </div>
+                      <div class="grid sm:grid-cols-2 gap-3">
+                        <div>
+                          <label class="flowbite-label" for="firstLat">Latitude</label>
+                          <input id="firstLat" type="number" step="0.0001" class="flowbite-input" value="52.3702" />
+                        </div>
+                        <div>
+                          <label class="flowbite-label" for="firstLng">Longitude</label>
+                          <input id="firstLng" type="number" step="0.0001" class="flowbite-input" value="4.8952" />
+                        </div>
+                      </div>
+                      <label class="flowbite-label" for="firstTz">Timezone</label>
+                      <input id="firstTz" class="flowbite-input" value="Europe/Amsterdam" />
+                      <div class="grid sm:grid-cols-2 gap-3">
+                        <div>
+                          <label class="flowbite-label" for="firstCity">City</label>
+                          <input id="firstCity" class="flowbite-input" value="Amsterdam" />
+                        </div>
+                        <div>
+                          <label class="flowbite-label" for="firstNation">Country code</label>
+                          <input id="firstNation" class="flowbite-input" value="NL" maxlength="2" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-semibold text-slate-300 uppercase tracking-[0.2em]">Partner B</h4>
+                        <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700">Outer</span>
+                      </div>
+                      <label for="secondName" class="flowbite-label">Name</label>
+                      <input id="secondName" name="secondName" class="flowbite-input" value="Partner B" />
+                      <div class="grid sm:grid-cols-2 gap-3">
+                        <div>
+                          <label class="flowbite-label" for="secondDate">Date</label>
+                          <input id="secondDate" class="flowbite-input" value="1992-02-02" />
+                        </div>
+                        <div>
+                          <label class="flowbite-label" for="secondTime">Time</label>
+                          <input id="secondTime" class="flowbite-input" value="14:00" />
+                        </div>
+                      </div>
+                      <div class="grid sm:grid-cols-2 gap-3">
+                        <div>
+                          <label class="flowbite-label" for="secondLat">Latitude</label>
+                          <input id="secondLat" type="number" step="0.0001" class="flowbite-input" value="40.7128" />
+                        </div>
+                        <div>
+                          <label class="flowbite-label" for="secondLng">Longitude</label>
+                          <input id="secondLng" type="number" step="0.0001" class="flowbite-input" value="-74.0060" />
+                        </div>
+                      </div>
+                      <label class="flowbite-label" for="secondTz">Timezone</label>
+                      <input id="secondTz" class="flowbite-input" value="America/New_York" />
+                      <div class="grid sm:grid-cols-2 gap-3">
+                        <div>
+                          <label class="flowbite-label" for="secondCity">City</label>
+                          <input id="secondCity" class="flowbite-input" value="New York" />
+                        </div>
+                        <div>
+                          <label class="flowbite-label" for="secondNation">Country code</label>
+                          <input id="secondNation" class="flowbite-input" value="US" maxlength="2" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                   <button
                     type="submit"
@@ -400,12 +506,22 @@
                   <p class="text-sm text-cyan-200/80 font-semibold">SVG output</p>
                   <h2 class="text-xl font-semibold text-white">Chart preview</h2>
                 </div>
-                <div class="flex items-center gap-2">
-                  <button
-                    type="button"
-                    id="downloadPdfBtn"
-                    class="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-white rounded-lg border border-slate-700 bg-slate-800/80 hover:border-cyan-400 hover:text-cyan-100 transition"
-                  >
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      id="zoomBtn"
+                      class="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-white rounded-lg border border-slate-700 bg-slate-800/80 hover:border-cyan-400 hover:text-cyan-100 transition"
+                    >
+                      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 4v4H6m4 0V4m0 4h4m-4 0v4m3 7 4 4m0 0 3-3m-3 3-3-3M4 8l4 4m0 0-4 4m4-4 4 4" />
+                      </svg>
+                      Zoom
+                    </button>
+                    <button
+                      type="button"
+                      id="downloadPdfBtn"
+                      class="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-white rounded-lg border border-slate-700 bg-slate-800/80 hover:border-cyan-400 hover:text-cyan-100 transition"
+                    >
                     <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4 4-4M4 20h16" />
                     </svg>
@@ -420,6 +536,34 @@
                 <p class="hint">
                   Fill in the form and click <strong>Generate chart</strong> to render a natal, transit, or dual-wheel SVG here.
                 </p>
+              </div>
+            </div>
+
+            <div class="flowbite-card">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <p class="text-sm text-cyan-200/80 font-semibold">Full report</p>
+                  <h2 class="text-xl font-semibold text-white">Detailed text</h2>
+                </div>
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    id="loadReportBtn"
+                    class="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-white rounded-lg border border-slate-700 bg-slate-800/80 hover:border-cyan-400 hover:text-cyan-100 transition"
+                  >
+                    Load report
+                  </button>
+                  <button
+                    type="button"
+                    id="downloadReportBtn"
+                    class="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-white rounded-lg border border-slate-700 bg-slate-800/80 hover:border-cyan-400 hover:text-cyan-100 transition"
+                  >
+                    Download report PDF
+                  </button>
+                </div>
+              </div>
+              <div id="reportContainer" class="report-container">
+                <p class="hint">Click "Load report" to fetch the full text report for the current mode.</p>
               </div>
             </div>
           </section>
@@ -445,6 +589,12 @@
       referrerpolicy="no-referrer"
     ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/datepicker.min.js" referrerpolicy="no-referrer"></script>
+    <div id="svgModal" class="svg-modal">
+      <div class="svg-modal-content">
+        <button id="svgModalClose" class="svg-modal-close">Close</button>
+        <div id="svgModalBody"></div>
+      </div>
+    </div>
     <script>
       (function () {
         const dateInput = document.getElementById("dateInput");
@@ -516,6 +666,11 @@
         }
       })();
     </script>
-    <script src="/static/js/home.js"></script>
+    <script src="/static/js/home/shared.js"></script>
+    <script src="/static/js/home/config.js"></script>
+    <script src="/static/js/home/payloads.js"></script>
+    <script src="/static/js/home/render.js"></script>
+    <script src="/static/js/home/state.js"></script>
+    <script src="/static/js/home/actions.js"></script>
   </body>
 </html>

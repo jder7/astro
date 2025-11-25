@@ -210,6 +210,30 @@ def generate_report_text(request: ReportRequest) -> str:
     return buffer.getvalue()
 
 
+def render_report_text_pdf(report_text: str, filename_prefix: str = "report") -> bytes:
+    """
+    Render plain report text into a simple PDF for download.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="kerykeion_report_pdf_"))
+    try:
+        pdf_path = tmp_dir / f"{filename_prefix}.pdf"
+        c = canvas.Canvas(str(pdf_path), pagesize=letter)
+        width, height = letter
+        y = height - 40
+        c.setFont("Helvetica", 10)
+        for line in report_text.splitlines():
+            for wrapped in textwrap.wrap(line, width=110) or [""]:
+                c.drawString(40, y, wrapped)
+                y -= 12
+                if y < 40:
+                    c.showPage()
+                    c.setFont("Helvetica", 10)
+                    y = height - 40
+        c.save()
+        return pdf_path.read_bytes()
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
 def normalize_svg_colors(svg_text: str) -> str:
     """
     Resolve CSS var() references while preserving the original styling and colors.

@@ -9,11 +9,9 @@ from endpoints.health import router as health_router
 from endpoints.natal import router as natal_router
 from endpoints.transit import router as transit_router
 from endpoints.transit_range import router as transit_range_router
-from endpoints.natal_svg import router as natal_svg_router
-from endpoints.transit_svg import router as transit_svg_router
+from endpoints.svg_chart import router as svg_chart_router
 from endpoints.report import router as report_router
 from endpoints.relationship import router as relationship_router
-from endpoints.synastry_svg import router as synastry_svg_router
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -74,6 +72,4 @@ app.include_router(transit_router, prefix=API_PREFIX)
 app.include_router(transit_range_router, prefix=API_PREFIX)
 app.include_router(report_router, prefix=API_PREFIX)
 app.include_router(relationship_router, prefix=API_PREFIX)
-app.include_router(natal_svg_router, prefix=API_PREFIX)
-app.include_router(transit_svg_router, prefix=API_PREFIX)
-app.include_router(synastry_svg_router, prefix=API_PREFIX)
+app.include_router(svg_chart_router, prefix=API_PREFIX)

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 from pydantic import BaseModel, Field
 
@@ -384,6 +384,29 @@ class ReportRequest(BaseModel):
         default=None,
         description="Transit-style moment used for transit or dual-wheel PDFs.",
     )
+    mode: Optional[Literal["natal", "transit", "natal_transit", "relationship"]] = Field(
+        default=None,
+        description="Optional report mode label used for naming/handling PDF downloads.",
+        examples=["natal"],
+    )
+
+
+class SvgPdfRequest(BaseModel):
+    """
+    Request body for generating chart PDFs from SVGs.
+    """
+
+    mode: Literal["natal", "transit", "natal_transit", "relationship"] = Field(
+        default="natal",
+        description="Chart mode to render as PDF.",
+        examples=["natal"],
+    )
+    birth: Optional[BirthData] = Field(default=None, description="Birth data for natal / inner wheel.")
+    moment: Optional[TransitMomentInput] = Field(default=None, description="Transit moment for transit / outer wheel.")
+    first: Optional[BirthData] = Field(default=None, description="First partner for relationship charts.")
+    second: Optional[BirthData] = Field(default=None, description="Second partner for relationship charts.")
+    config: ChartConfig = Field(default_factory=ChartConfig, description="Chart configuration.")
+    grid_view: bool = Field(default=False, description="Show synastry grid view when mode=relationship.")
 
 
 class ReportResponse(BaseModel):
