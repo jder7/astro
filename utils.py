@@ -2,17 +2,30 @@ from __future__ import annotations
 
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta
-from io import StringIO
+from io import StringIO, BytesIO
 from pathlib import Path
 import shutil
 import tempfile
 from typing import Generator, Optional
 from zoneinfo import ZoneInfo
 from calendar import monthrange
+import re
+import textwrap
 
 from kerykeion import AstrologicalSubjectFactory, ReportGenerator, AspectsFactory  # type: ignore
 from kerykeion.chart_data_factory import ChartDataFactory  # type: ignore
 from kerykeion.charts.chart_drawer import ChartDrawer  # type: ignore
+from reportlab.lib.pagesizes import letter  # type: ignore
+from reportlab.pdfgen import canvas  # type: ignore
+from reportlab.graphics import renderPDF  # type: ignore
+from svglib.svglib import svg2rlg  # type: ignore
+from reportlab.lib.units import inch  # type: ignore
+from reportlab.lib import colors  # type: ignore
+from reportlab.platypus import SimpleDocTemplate, Image, Spacer, Table, TableStyle, Paragraph  # type: ignore
+from reportlab.lib.styles import getSampleStyleSheet  # type: ignore
+import cairosvg  # type: ignore
+from reportlab.platypus.doctemplate import LayoutError  # type: ignore
+from reportlab.lib.utils import ImageReader  # type: ignore
 
 from enums import RangeGranularity, ZodiacType, ReportKind
 from schemas import BirthData, ChartConfig, ReportRequest
@@ -195,6 +208,135 @@ def generate_report_text(request: ReportRequest) -> str:
         )
 
     return buffer.getvalue()
+
+
+def normalize_svg_colors(svg_text: str) -> str:
+    """
+    Resolve CSS var() references while preserving the original styling and colors.
+    We avoid injecting custom styles to keep the chart appearance intact.
+    """
+    css_vars = dict(re.findall(r"--([\w-]+)\s*:\s*([^;]+);", svg_text))
+
+    def replace_var(match: re.Match[str]) -> str:
+        key = match.group(1)
+        # match keys with and without leading dashes
+        value = css_vars.get(key.lstrip("-")) or css_vars.get(key)
+        return value.strip() if value else match.group(0)
+
+    return re.sub(r"var\((--[-a-zA-Z0-9_]+)\)", replace_var, svg_text)
+
+
+def transform_report_text(report_text: str) -> str:
+    """
+    Prepare report text for PDF: replace glyphs, normalize, and wrap lines.
+    """
+    glyph_map = {
+        "☉": "Sun",
+        "☽": "Moon",
+        "☿": "Mercury",
+        "♀": "Venus",
+        "♂": "Mars",
+        "♃": "Jupiter",
+        "♄": "Saturn",
+        "♅": "Uranus",
+        "♆": "Neptune",
+        "♇": "Pluto",
+        "☊": "Node",
+        "☋": "Node",
+        "♈": "Aries",
+        "♉": "Taurus",
+        "♊": "Gemini",
+        "♋": "Cancer",
+        "♌": "Leo",
+        "♍": "Virgo",
+        "♎": "Libra",
+        "♏": "Scorpio",
+        "♐": "Sagittarius",
+        "♑": "Capricorn",
+        "♒": "Aquarius",
+        "♓": "Pisces",
+    }
+
+    def replace_glyphs(text: str) -> str:
+        for glyph, word in glyph_map.items():
+            text = text.replace(glyph, word)
+        return text
+
+    cleaned = replace_glyphs(report_text)
+    wrapped_lines: list[str] = []
+    for line in cleaned.splitlines():
+        line = line.expandtabs(2)
+        for chunk in textwrap.wrap(line, width=100) or [""]:
+            wrapped_lines.append(chunk)
+    return "\n".join(wrapped_lines)
+
+
+def render_pdf_from_svg(svg_text: str, filename_prefix: str = "chart") -> bytes:
+    """
+    Render a PDF that embeds only the chart (converted to PNG) with no report text.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="kerykeion_pdf_"))
+    try:
+        pdf_path = tmp_dir / f"{filename_prefix}.pdf"
+        fixed_svg = normalize_svg_colors(svg_text)
+
+        # First try to convert SVG directly to PDF (vector) for maximum quality and native styling.
+        try:
+            pdf_bytes = cairosvg.svg2pdf(bytestring=fixed_svg.encode("utf-8"), dpi=300, unsafe=True)
+            (tmp_dir / f"{filename_prefix}.pdf").write_bytes(pdf_bytes)
+            return pdf_bytes
+        except Exception:
+            pass
+
+        png_bytes: Optional[bytes] = None
+        try:
+            png_bytes = cairosvg.svg2png(bytestring=fixed_svg.encode("utf-8"), dpi=300, unsafe=True)
+        except Exception:
+            try:
+                svg_path = tmp_dir / f"{filename_prefix}.svg"
+                svg_path.write_text(fixed_svg, encoding="utf-8")
+                drawing = svg2rlg(str(svg_path))
+                renderPDF.drawToFile(drawing, str(tmp_dir / "tmp.pdf"))
+            except Exception:
+                png_bytes = None
+
+        story = []
+        if png_bytes:
+            try:
+                img = Image(BytesIO(png_bytes))
+                img._restrictSize(7.5 * inch, 9.0 * inch)
+                story.append(img)
+            except Exception:
+                pass
+
+        doc = SimpleDocTemplate(str(pdf_path), pagesize=letter, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
+        try:
+            doc.build(story)
+        except Exception:
+            # Fallback: draw directly onto canvas
+            c = canvas.Canvas(str(pdf_path), pagesize=letter)
+            width, height = letter
+            if png_bytes:
+                try:
+                    reader = ImageReader(BytesIO(png_bytes))
+                    iw, ih = reader.getSize()
+                    scale = min((width - 80) / iw, (height - 80) / ih, 1.0)
+                    c.drawImage(
+                        reader,
+                        40,
+                        40,
+                        width=iw * scale,
+                        height=ih * scale,
+                        preserveAspectRatio=True,
+                        mask="auto",
+                    )
+                except Exception:
+                    pass
+            c.save()
+
+        return pdf_path.read_bytes()
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 def compute_dual_chart_aspects(

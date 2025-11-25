@@ -184,6 +184,17 @@ Generate a **plain-text report** via Kerykeion’s `ReportGenerator`.
 
 ---
 
+## `POST /api/report/pdf`
+
+Generate a **PDF** that embeds the natal chart SVG and appends the report text.
+
+- **Request body**: `ReportRequest`
+  - Uses `birth` + `config` to build the natal chart and report.
+- **Response**: `application/pdf` (binary).
+- Notes:
+  - The PDF is generated server-side using the same chart configuration (perspective, zodiac, sidereal mode, house system, theme).
+  - Returns an attachment filename `natal-report.pdf`.
+
 ## `POST /api/relationship`
 
 Compute **dual-chart aspects** between two subjects.

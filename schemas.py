@@ -380,6 +380,10 @@ class ReportRequest(BaseModel):
         description="Maximum number of aspects when generating NATAL reports.",
         examples=[50],
     )
+    moment: Optional[TransitMomentInput] = Field(
+        default=None,
+        description="Transit-style moment used for transit or dual-wheel PDFs.",
+    )
 
 
 class ReportResponse(BaseModel):

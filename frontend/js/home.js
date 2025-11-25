@@ -13,6 +13,7 @@
   const configPanel = document.getElementById("configPanel");
   const configToggle = document.getElementById("configToggle");
   const configClose = document.getElementById("configClose");
+  const downloadBtn = document.getElementById("downloadPdfBtn");
   const configInputs = {
     perspective: document.getElementById("configPerspective"),
     zodiac_type: document.getElementById("configZodiac"),
@@ -21,6 +22,9 @@
     theme: document.getElementById("configTheme"),
   };
   const siderealRow = document.getElementById("siderealRow");
+  const STORAGE_KEY = "astroFormState";
+  let hasChart = false;
+  let hasLoadedState = false;
 
   const DEFAULT_CONFIG = {
     perspective: "Topocentric",
@@ -41,6 +45,7 @@
   }
 
   function setTransitNow() {
+    if (hasLoadedState) return;
     if (!transitDateInput || !transitTimeInput) return;
     const now = new Date();
     const pad = (n) => n.toString().padStart(2, "0");
@@ -64,9 +69,72 @@
     }
   }
 
+  function setField(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  }
+
+  function getDefaultState() {
+    return { mode: "natal", natal: null, transit: null };
+  }
+
+  function saveFormState(mode, payload) {
+    try {
+      let state = getDefaultState();
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) state = { ...state, ...JSON.parse(raw) };
+
+      state.mode = mode;
+      if (payload.birth) state.natal = payload.birth;
+      if (payload.moment) state.transit = payload.moment;
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (err) {
+      console.warn("Could not save form state", err);
+    }
+  }
+
+  function loadSavedState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const state = { ...getDefaultState(), ...JSON.parse(raw) };
+
+      if (state.mode) {
+        const target = modeInputs.find((m) => m.value === state.mode);
+        if (target) target.checked = true;
+      }
+      if (state.natal) {
+        const b = state.natal;
+        setField("name", b.name || "");
+        setField("dateInput", `${b.year}-${String(b.month).padStart(2, "0")}-${String(b.day).padStart(2, "0")}`);
+        setField("timeInput", `${String(b.hour).padStart(2, "0")}:${String(b.minute).padStart(2, "0")}`);
+        setField("lat", b.lat);
+        setField("lng", b.lng);
+        setField("tz_str", b.tz_str);
+        setField("city", b.city);
+        setField("nation", b.nation);
+      }
+      if (state.transit) {
+        const t = state.transit;
+        setField("transitDateInput", `${t.year}-${String(t.month).padStart(2, "0")}-${String(t.day).padStart(2, "0")}`);
+        setField("transitTimeInput", `${String(t.hour).padStart(2, "0")}:${String(t.minute).padStart(2, "0")}`);
+        setField("transitLat", t.lat);
+        setField("transitLng", t.lng);
+        setField("transitTz", t.tz_str);
+        setField("transitCity", t.city);
+        setField("transitNation", t.nation);
+      }
+      hasLoadedState = true;
+    } catch (err) {
+      console.warn("Could not load saved form state", err);
+    }
+  }
+
   modeInputs.forEach((input) => {
     input.addEventListener("change", updateModeVisibility);
   });
+  loadSavedState();
   updateModeVisibility();
 
   function loadConfig() {
@@ -166,6 +234,8 @@
 
   function clearChart() {
     chartContainer.innerHTML = "";
+    hasChart = false;
+    updateDownloadState();
   }
 
   async function handleSubmit(event) {
@@ -217,6 +287,8 @@
 
         const svgText = await svgResp.text();
         chartContainer.innerHTML = svgText;
+        hasChart = true;
+        updateDownloadState();
         setStatus("Natal chart generated.");
       } else if (mode === "transit") {
         const jsonResp = await fetch("/api/transit", {
@@ -250,6 +322,8 @@
 
         const svgText = await svgResp.text();
         chartContainer.innerHTML = svgText;
+        hasChart = true;
+        updateDownloadState();
         setStatus("Transit chart generated.");
       } else {
         const jsonResp = await fetch("/api/transit", {
@@ -283,6 +357,8 @@
 
         const svgText = await svgResp.text();
         chartContainer.innerHTML = svgText;
+        hasChart = true;
+        updateDownloadState();
         setStatus("Natal + Transit chart generated.");
       }
     } catch (err) {
@@ -297,6 +373,7 @@
         generateBtn.disabled = false;
         generateBtn.textContent = "Generate chart";
       }
+      updateDownloadState();
     }
   }
 
@@ -308,19 +385,32 @@
     { name: "opposition", angle: 180, orb: 6 },
   ];
 
-  const HOUSE_LABELS = {
-    First_House: "1st house",
-    Second_House: "2nd house",
-    Third_House: "3rd house",
-    Fourth_House: "4th house",
-    Fifth_House: "5th house",
-    Sixth_House: "6th house",
-    Seventh_House: "7th house",
-    Eighth_House: "8th house",
-    Ninth_House: "9th house",
-    Tenth_House: "10th house",
-    Eleventh_House: "11th house",
-    Twelfth_House: "12th house",
+  const ALLOWED_POINTS = new Set([
+    "sun",
+    "moon",
+    "ascendant",
+    "mercury",
+    "venus",
+    "mars",
+    "jupiter",
+    "saturn",
+    "uranus",
+    "neptune",
+    "pluto",
+  ]);
+
+  const ICONS = {
+    sun: "☀️",
+    moon: "🌙",
+    ascendant: "↗️",
+    mercury: "☿️",
+    venus: "♀️",
+    mars: "♂️",
+    jupiter: "♃",
+    saturn: "♄",
+    uranus: "⛢",
+    neptune: "♆",
+    pluto: "♇",
   };
 
   function normalizeAngleDiff(a, b) {
@@ -349,11 +439,11 @@
     return points;
   }
 
-  function computeKeyAspects(subject, baseNames) {
+  function computeKeyAspects(subject, baseNames, allowedTargets) {
     const points = extractPoints(subject);
     const aspects = [];
     const baseSet = new Set(baseNames);
-    const keys = Object.keys(points);
+    const keys = Object.keys(points).filter((k) => !allowedTargets || allowedTargets.has(k));
 
     for (const base of baseNames) {
       const basePoint = points[base];
@@ -386,12 +476,6 @@
     return aspects;
   }
 
-  function formatHouse(house) {
-    if (!house) return "";
-    const label = HOUSE_LABELS[house] || house.replace(/_/g, " ");
-    return label;
-  }
-
   function formatPointLabel(key, point, options = {}) {
     const baseNameMap = {
       sun: "Sun",
@@ -401,12 +485,9 @@
     const label = baseNameMap[key] || point.name || key;
     const deg = typeof point.position === "number" ? point.position.toFixed(2) : "?";
     const sign = point.sign || "";
-    const houseLabel = formatHouse(point.house);
     const prefix = options.prefix ? `${options.prefix} ` : "";
-    const parts = [`${prefix}${label} ${sign} ${deg}°`];
-    if (houseLabel) {
-      parts.push(`(${houseLabel})`);
-    }
+    const icon = ICONS[key] || "✶";
+    const parts = [`${icon} ${prefix}${label} ${sign} ${deg}°`];
     return parts.join(" ");
   }
 
@@ -495,14 +576,14 @@
     }
 
     const baseNames = ["sun", "moon", "ascendant"];
-    const aspects = computeKeyAspects(subject, baseNames);
-    const topThree = aspects.slice(0, 3);
+    const aspects = computeKeyAspects(subject, baseNames, ALLOWED_POINTS);
+    const topList = aspects.slice(0, 7);
 
     const sunText = formatPointLabel("sun", sun);
     const moonText = formatPointLabel("moon", moon);
     const ascText = formatPointLabel("ascendant", asc);
 
-    const aspectItems = topThree
+    const aspectItems = topList
       .map((asp) => formatAspectLabel(subject, asp))
       .filter(Boolean)
       .map((text) => `<li>${text}</li>`)
@@ -541,7 +622,7 @@
     const moon = subject.moon;
     const asc = subject.ascendant;
     const baseNames = ["sun", "moon", "ascendant"];
-    const aspects = computeKeyAspects(subject, baseNames).slice(0, 3);
+    const aspects = computeKeyAspects(subject, baseNames, ALLOWED_POINTS).slice(0, 7);
 
     const aspectItems = aspects
       .map((asp) => formatAspectLabel(subject, asp, { basePrefix: "T", otherPrefix: "T" }))
@@ -573,7 +654,7 @@
   function computeTransitNatalAspects(natalSubject, transitSubject, baseNames) {
     const natalPoints = extractPoints(natalSubject || {});
     const transitPoints = extractPoints(transitSubject || {});
-    const natalKeys = Object.keys(natalPoints);
+    const natalKeys = Object.keys(natalPoints).filter((k) => ALLOWED_POINTS.has(k));
     const aspects = [];
 
     for (const base of baseNames) {
@@ -629,7 +710,7 @@
 
     const baseNames = ["sun", "moon", "ascendant"];
     const natalBlock = (() => {
-      const aspects = computeKeyAspects(natalSubject, baseNames).slice(0, 3);
+      const aspects = computeKeyAspects(natalSubject, baseNames, ALLOWED_POINTS).slice(0, 7);
       const aspectItems = aspects
         .map((asp) => formatAspectLabel(natalSubject, asp))
         .filter(Boolean)
@@ -653,7 +734,7 @@
     })();
 
     const transitBlock = (() => {
-      const aspects = computeKeyAspects(transitSubject, baseNames).slice(0, 3);
+      const aspects = computeKeyAspects(transitSubject, baseNames, ALLOWED_POINTS).slice(0, 7);
       const aspectItems = aspects
         .map((asp) => formatAspectLabel(transitSubject, asp, { basePrefix: "T", otherPrefix: "T" }))
         .filter(Boolean)
@@ -677,7 +758,7 @@
     })();
 
     const crossBlock = (() => {
-      const dualAspects = computeTransitNatalAspects(natalSubject, transitSubject, baseNames).slice(0, 3);
+      const dualAspects = computeTransitNatalAspects(natalSubject, transitSubject, baseNames).slice(0, 7);
       const items = dualAspects
         .map((asp) => formatCrossAspectLabel(natalSubject, transitSubject, asp))
         .filter(Boolean)
@@ -780,6 +861,7 @@
         },
         birthDateParts,
         transitDateParts: null,
+        config: normalizedConfig,
       };
     }
 
@@ -792,6 +874,7 @@
         },
         birthDateParts: null,
         transitDateParts,
+        config: normalizedConfig,
       };
     }
 
@@ -804,8 +887,97 @@
       },
       birthDateParts,
       transitDateParts,
+      config: normalizedConfig,
     };
   }
 
   form.addEventListener("submit", handleSubmit);
+
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", handleDownloadPdf);
+    updateDownloadState();
+  }
+
+  async function handleDownloadPdf() {
+    setStatus("");
+    const mode = getSelectedMode();
+    const { payload, config, transitDateParts } = buildPayloadFromForm(mode);
+
+    if (!hasChart) {
+      setStatus("Generate a chart first to download PDF.", true);
+      return;
+    }
+
+    let birthForReport = payload.birth;
+    if (!birthForReport && payload.moment) {
+      // Build a BirthData-like structure from the transit moment for reporting.
+      birthForReport = {
+        name: "Transit snapshot",
+        ...payload.moment,
+      };
+    }
+
+    const momentForReport =
+      mode === "natal"
+        ? null
+        : payload.moment || {
+            ...transitDateParts,
+            lat: toFloat("transitLat", 52.3702),
+            lng: toFloat("transitLng", 4.8952),
+            tz_str: getValue("transitTz") || "Europe/Amsterdam",
+            city: getValue("transitCity") || "Amsterdam",
+            nation: getValue("transitNation") || "NL",
+          };
+
+    if (!birthForReport) {
+      setStatus("PDF download needs birth data or a transit moment.", true);
+      return;
+    }
+
+    try {
+      downloadBtn.disabled = true;
+      const requestBody = {
+        kind: "NATAL",
+        birth: birthForReport,
+        config: { ...config, theme: "classic" },
+        include_aspects: true,
+        max_aspects: 50,
+        moment: momentForReport,
+      };
+
+      const resp = await fetch(`/api/report/pdf?mode=${encodeURIComponent(mode)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error(`PDF request failed: ${resp.status} ${resp.statusText} - ${text}`);
+      }
+
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${mode}-report.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setStatus("PDF downloaded.");
+    } catch (err) {
+      console.error(err);
+      setStatus(err.message || "Could not download PDF.", true);
+    } finally {
+      updateDownloadState();
+    }
+  }
+
+  function updateDownloadState() {
+    if (!downloadBtn) return;
+    downloadBtn.disabled = !hasChart;
+    downloadBtn.classList.toggle("opacity-60", !hasChart);
+    downloadBtn.classList.toggle("cursor-not-allowed", !hasChart);
+  }
 })();
