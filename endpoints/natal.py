@@ -11,6 +11,7 @@ async def natal_chart(payload: NatalRequest) -> NatalResponse:
     """
     Compute a natal chart configuration as a structured JSON response.
     """
+    print("POST /natal", payload.dict(exclude_none=True))
     cfg = ensure_config(payload.config)
     subject = build_subject(payload.birth, cfg)
     subject_dict = subject.model_dump(mode="json")

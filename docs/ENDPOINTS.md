@@ -170,7 +170,7 @@ Compute a **sequence of transit snapshots** between two datetimes.
 
 ## `POST /api/report`
 
-Generate a **plain-text report** via Kerykeion’s `ReportGenerator`.
+Generate a **structured report** via Kerykeion (Markdown text + raw data).
 
 - **Request body**: `ReportRequest`
   - `kind`: `"SUBJECT"` or `"NATAL"`.
@@ -180,20 +180,21 @@ Generate a **plain-text report** via Kerykeion’s `ReportGenerator`.
   - `max_aspects`: `int` (mainly for `NATAL`).
 - **Response**: `ReportResponse`
   - `kind`: report kind.
-  - `text`: ASCII text produced by `print_report()`.
+  - `text`: Markdown-formatted report body (ready to display in the app).
+  - `structured`: Structured report data (subjects, houses, aspects) for PDF rendering.
 
 ---
 
 ## `POST /api/report/pdf`
 
-Generate a **PDF** that embeds the natal chart SVG and appends the report text.
+Generate a **PDF** version of the structured report (no chart).
 
 - **Request body**: `ReportRequest`
-  - Uses `birth` + `config` to build the natal chart and report.
+  - Uses `birth` + `config` (and optional dual inputs) to build the report.
 - **Response**: `application/pdf` (binary).
 - Notes:
-  - The PDF is generated server-side using the same chart configuration (perspective, zodiac, sidereal mode, house system, theme).
-  - Returns an attachment filename `natal-report.pdf`.
+  - The PDF is generated server-side from the structured report sections (planets, houses, synastry aspects).
+  - Returns an attachment filename `<mode>-report.pdf`.
 
 ## `POST /api/relationship`
 

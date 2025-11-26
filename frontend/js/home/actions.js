@@ -26,7 +26,7 @@
       dom.generateBtn.textContent = "Generating…";
     }
 
-    const mode = utils.getSelectedMode();
+    const mode = utils.getSelectedMode() || "natal";
 
     try {
       const { payload, birthDateParts, transitDateParts } = buildPayloadFromForm(mode);
@@ -191,35 +191,39 @@
 
   async function loadReport() {
     if (!dom.reportContainer) return;
-    const mode = utils.getSelectedMode();
+    const mode = utils.getSelectedMode() || "natal";
     const { payload } = buildPayloadFromForm(mode);
-    let birthForReport = payload.birth;
-    if (!birthForReport && payload.moment) {
-      birthForReport = {
-        name: "Transit snapshot",
-        ...payload.moment,
-      };
-    }
-    if (mode === "relationship") {
-      birthForReport = payload.first;
-    }
-    if (!birthForReport) {
+    const baseBirth =
+      payload.birth ||
+      (payload.moment
+        ? {
+            name: "Transit snapshot",
+            ...payload.moment,
+          }
+        : null) ||
+      (mode === "relationship" ? payload.first : null);
+    if (!baseBirth) {
       dom.reportContainer.innerHTML = '<p class="hint">No birth data available for report.</p>';
       return;
     }
     try {
       dom.reportContainer.innerHTML = '<p class="hint">Loading report…</p>';
+      const requestBody = {
+        kind: "NATAL",
+        mode,
+        birth: baseBirth,
+        first: mode === "relationship" ? payload.first : null,
+        second: mode === "relationship" ? payload.second : null,
+        config: payload.config || config.getConfigFromInputs(),
+        include_aspects: true,
+        max_aspects: 50,
+        moment: mode !== "natal" ? payload.moment : null,
+      };
+      console.debug("Report request body", requestBody);
       const resp = await fetch("/api/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          kind: "NATAL",
-          birth: birthForReport,
-          config: payload.config || config.getConfigFromInputs(),
-          include_aspects: true,
-          max_aspects: 50,
-          moment: mode !== "natal" ? payload.moment : null,
-        }),
+        body: JSON.stringify(requestBody),
       });
       if (!resp.ok) {
         const text = await resp.text();
@@ -238,34 +242,37 @@
   async function downloadReportPdf() {
     const mode = utils.getSelectedMode();
     const { payload } = buildPayloadFromForm(mode);
-    let birthForReport = payload.birth;
-    if (!birthForReport && payload.moment) {
-      birthForReport = {
-        name: "Transit snapshot",
-        ...payload.moment,
-      };
-    }
-    if (mode === "relationship") {
-      birthForReport = payload.first;
-    }
-    if (!birthForReport) {
+    const baseBirth =
+      payload.birth ||
+      (payload.moment
+        ? {
+            name: "Transit snapshot",
+            ...payload.moment,
+          }
+        : null) ||
+      (mode === "relationship" ? payload.first : null);
+    if (!baseBirth) {
       utils.setStatus("No birth data for report download.", true);
       return;
     }
     try {
       utils.setStatus("Downloading report…");
+      const requestBody = {
+        kind: "NATAL",
+        mode,
+        birth: baseBirth,
+        first: mode === "relationship" ? payload.first : null,
+        second: mode === "relationship" ? payload.second : null,
+        config: payload.config || config.getConfigFromInputs(),
+        include_aspects: true,
+        max_aspects: 50,
+        moment: mode !== "natal" ? payload.moment : null,
+      };
+      console.debug("Report PDF request body", requestBody);
       const resp = await fetch(`/api/report/pdf`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          kind: "NATAL",
-          birth: birthForReport,
-          config: payload.config || config.getConfigFromInputs(),
-          include_aspects: true,
-          max_aspects: 50,
-          moment: mode !== "natal" ? payload.moment : null,
-          mode,
-        }),
+        body: JSON.stringify(requestBody),
       });
       if (!resp.ok) {
         const text = await resp.text();

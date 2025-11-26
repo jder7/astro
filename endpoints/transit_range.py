@@ -28,6 +28,7 @@ async def transit_range(payload: TransitRangeRequest) -> TransitRangeResponse:
     `end` date/time. Location (lat, lng, tz, city, nation) from `moment` is
     reused across the entire range.
     """
+    print("POST /transit-range", payload.dict(exclude_none=True))
     cfg = ensure_config(payload.config)
 
     # Build BirthData representations for the start and end timestamps.

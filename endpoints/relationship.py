@@ -13,6 +13,7 @@ async def relationship(payload: RelationshipRequest) -> RelationshipResponse:
 
     Returns both AstrologicalSubject JSON dumps plus the dual-chart aspects model.
     """
+    print("POST /relationship", payload.dict(exclude_none=True))
     first_subject, second_subject, aspects_model = compute_dual_chart_aspects(
         payload.first,
         payload.second,

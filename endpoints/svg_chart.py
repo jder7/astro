@@ -17,6 +17,7 @@ router = APIRouter(tags=["svg"])
 
 @router.post("/svg/natal", response_class=Response)
 async def natal_svg(payload: NatalRequest) -> Response:
+    print("POST /svg/natal", payload.dict(exclude_none=True))
     cfg = ensure_config(payload.config)
     subject = build_subject(payload.birth, cfg)
     chart_data = ChartDataFactory.create_natal_chart_data(subject)
@@ -27,6 +28,7 @@ async def natal_svg(payload: NatalRequest) -> Response:
 
 @router.post("/svg/transit", response_class=Response)
 async def transit_svg(payload: TransitMomentRequest) -> Response:
+    print("POST /svg/transit", payload.dict(exclude_none=True))
     cfg = ensure_config(payload.config)
     m = payload.moment
     moment_birth = BirthData(
@@ -63,6 +65,7 @@ async def transit_svg(payload: TransitMomentRequest) -> Response:
 
 @router.post("/svg/synastry", response_class=Response)
 async def synastry_svg(payload: SynastrySvgRequest) -> Response:
+    print("POST /svg/synastry", payload.dict(exclude_none=True))
     cfg = ensure_config(payload.config)
     first_subject = build_subject(payload.first, cfg)
     second_subject = build_subject(payload.second, cfg)
@@ -92,6 +95,7 @@ async def svg_pdf(payload: SvgPdfRequest) -> Response:
     """
     Generate a PDF from chart data for natal, transit (single or dual), or relationship (synastry).
     """
+    print("POST /svg/pdf", payload.dict(exclude_none=True))
     cfg = ensure_config(payload.config)
 
     mode = payload.mode

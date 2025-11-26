@@ -82,3 +82,11 @@ class Theme(str, Enum):
     LIGHT = "light"
     STRAWBERRY = "strawberry"
     BLACK_AND_WHITE = "black-and-white"
+
+
+class Mode(str, Enum):
+    """Chart/report mode identifiers used across the API."""
+    NATAL = "natal"
+    TRANSIT = "transit"
+    NATAL_TRANSIT = "natal_transit"
+    RELATIONSHIP = "relationship"
