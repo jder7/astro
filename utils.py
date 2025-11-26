@@ -39,6 +39,19 @@ def ensure_config(config: Optional[ChartConfig]) -> ChartConfig:
     # If zodiac is tropical, sidereal mode should not affect calculations.
     if config.zodiac_type == ZodiacType.TROPIC:
         config.sidereal_mode = None
+
+    # Normalize active points to Kerykeion-friendly casing.
+    normalized_points = []
+    for pt in getattr(config, "active_points", []) or []:
+        if not pt:
+            continue
+        # convert snake_case to Title_Case with underscores
+        norm = str(pt).replace("-", "_").replace(" ", "_").lower().split("_")
+        norm = [s.capitalize() for s in norm if s]
+        val = "_".join(norm)
+        normalized_points.append(val or pt)
+    if normalized_points:
+        config.active_points = normalized_points
     return config
 
 

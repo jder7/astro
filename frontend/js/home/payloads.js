@@ -96,6 +96,9 @@
     const normalizedConfig = {
       ...config,
       sidereal_mode: config.zodiac_type === "Sidereal" ? config.sidereal_mode : null,
+      active_points: Array.isArray(config.active_points) && config.active_points.length
+        ? config.active_points
+        : (HomeApp?.constants?.DEFAULT_CONFIG?.active_points || []),
     };
 
     if (mode === "natal") {

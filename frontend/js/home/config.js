@@ -50,6 +50,10 @@
       console.warn("Could not load config from localStorage", err);
     }
     const merged = { ...DEFAULT_CONFIG, ...stored };
+    // Backward compatibility: migrate legacy base_aspect_points into active_points.
+    if (!merged.active_points && Array.isArray(stored.base_aspect_points)) {
+      merged.active_points = stored.base_aspect_points;
+    }
     if (merged.zodiac_type === "Tropical") {
       merged.zodiac_type = "Tropic";
     }

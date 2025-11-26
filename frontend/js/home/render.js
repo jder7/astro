@@ -40,25 +40,20 @@
   };
 
   function getAspectBasePoints() {
-    const fallback = (constants && constants.DEFAULT_CONFIG && constants.DEFAULT_CONFIG.base_aspect_points) || [
-      "sun",
-      "moon",
-      "ascendant",
-      "mercury",
-      "venus",
-      "mars",
-      "jupiter",
-      "saturn",
-    ];
+    const fallback =
+      (constants && constants.DEFAULT_CONFIG && constants.DEFAULT_CONFIG.active_points) || [];
+    const allowedPool = fallback;
     try {
       const cfg =
         config && typeof config.getConfigFromInputs === "function"
           ? config.getConfigFromInputs()
           : null;
-      const vals = cfg && Array.isArray(cfg.base_aspect_points) ? cfg.base_aspect_points : null;
-      const result = vals && vals.length ? vals : fallback;
-      console.debug("Aspect base points selected", { selected: vals, used: result });
-      return result;
+      const vals = cfg && Array.isArray(cfg.active_points) ? cfg.active_points : null;
+      const result = (vals && vals.length ? vals : fallback).filter((p) => p);
+      const filtered = allowedPool.length
+        ? result.filter((p) => allowedPool.some((ap) => ap.toLowerCase() === p.toLowerCase()))
+        : result;
+      return filtered.length ? filtered : fallback;
     } catch (err) {
       console.warn("Could not read aspect base points from config", err);
       return fallback;
@@ -245,7 +240,8 @@
     }
 
     const baseNames = getAspectBasePoints();
-    const aspects = computeKeyAspects(subject, baseNames, ALLOWED_POINTS);
+    const allowed = new Set(baseNames);
+    const aspects = computeKeyAspects(subject, baseNames, allowed);
     const topList = aspects.slice(0, 7);
 
     const birthLabel = birthDateParts
@@ -299,7 +295,8 @@
     const moon = subject.moon;
     const asc = subject.ascendant;
     const baseNames = getAspectBasePoints();
-    const aspects = computeKeyAspects(subject, baseNames, ALLOWED_POINTS).slice(0, 7);
+    const allowed = new Set(baseNames);
+    const aspects = computeKeyAspects(subject, baseNames, allowed).slice(0, 7);
 
     const transitLabel = transitDateParts
       ? `${transitDateParts.year}-${String(transitDateParts.month).padStart(2, "0")}-${String(
@@ -336,10 +333,11 @@
     `;
   }
 
-  function computeTransitNatalAspects(natalSubject, transitSubject, baseNames) {
+  function computeTransitNatalAspects(natalSubject, transitSubject, baseNames, allowedSet) {
     const natalPoints = extractPoints(natalSubject || {});
     const transitPoints = extractPoints(transitSubject || {});
-    const natalKeys = Object.keys(natalPoints).filter((k) => ALLOWED_POINTS.has(k));
+    const allowed = allowedSet || ALLOWED_POINTS;
+    const natalKeys = Object.keys(natalPoints).filter((k) => allowed.has(k));
     const aspects = [];
 
     for (const base of baseNames) {
@@ -394,7 +392,8 @@
 
     const baseNames = getAspectBasePoints();
     const natalBlock = (() => {
-      const aspects = computeKeyAspects(natalSubject, baseNames, ALLOWED_POINTS).slice(0, 7);
+      const allowed = new Set(baseNames);
+      const aspects = computeKeyAspects(natalSubject, baseNames, allowed).slice(0, 7);
       const aspectItems = aspects
         .map((asp) => formatAspectLabel(natalSubject, asp))
         .filter(Boolean)
@@ -418,7 +417,8 @@
     })();
 
     const transitBlock = (() => {
-      const aspects = computeKeyAspects(transitSubject, baseNames, ALLOWED_POINTS).slice(0, 7);
+      const allowed = new Set(baseNames);
+      const aspects = computeKeyAspects(transitSubject, baseNames, allowed).slice(0, 7);
       const aspectItems = aspects
         .map((asp) => formatAspectLabel(transitSubject, asp, { basePrefix: "Transit", otherPrefix: "Transit" }))
         .filter(Boolean)
@@ -442,7 +442,8 @@
     })();
 
     const crossBlock = (() => {
-      const dualAspects = computeTransitNatalAspects(natalSubject, transitSubject, baseNames).slice(0, 7);
+      const allowed = new Set(baseNames);
+      const dualAspects = computeTransitNatalAspects(natalSubject, transitSubject, baseNames, allowed).slice(0, 7);
       const items = dualAspects
         .map((asp) => formatCrossAspectLabel(natalSubject, transitSubject, asp))
         .filter(Boolean)

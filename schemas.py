@@ -125,6 +125,19 @@ class ChartConfig(BaseModel):
         description="Visual theme used for SVG chart rendering.",
         examples=[Theme.CLASSIC],
     )
+    active_points: list[str] = Field(
+        default_factory=lambda: [
+            "sun",
+            "moon",
+            "mercury",
+            "venus",
+            "mars",
+            "jupiter",
+            "saturn",
+            "ascendant",
+        ],
+        description="Chart points to include (passed to Kerykeion).",
+    )
 
 
 class NatalRequest(BaseModel):

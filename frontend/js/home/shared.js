@@ -37,7 +37,7 @@
       sidereal_mode: document.getElementById("configSiderealMode"),
       house_system: document.getElementById("configHouse"),
       theme: document.getElementById("configTheme"),
-      base_aspect_points: document.getElementById("configAspectPoints"),
+      active_points: document.getElementById("configAspectPoints"),
     },
   };
 
@@ -51,7 +51,16 @@
       sidereal_mode: "KRISHNAMURTI",
       house_system: "W",
       theme: "dark",
-      base_aspect_points: ["sun", "moon", "ascendant", "mercury", "venus", "mars", "jupiter", "saturn"],
+      active_points: [
+        "sun",
+        "moon",
+        "mercury",
+        "venus",
+        "mars",
+        "jupiter",
+        "saturn",
+        "ascendant",
+      ],
     },
   };
 

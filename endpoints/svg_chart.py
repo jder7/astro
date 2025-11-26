@@ -20,7 +20,7 @@ async def natal_svg(payload: NatalRequest) -> Response:
     print("POST /svg/natal", payload.dict(exclude_none=True))
     cfg = ensure_config(payload.config)
     subject = build_subject(payload.birth, cfg)
-    chart_data = ChartDataFactory.create_natal_chart_data(subject)
+    chart_data = ChartDataFactory.create_natal_chart_data(subject, active_points=cfg.active_points)
     drawer = ChartDrawer(chart_data=chart_data, theme=cfg.theme.value)
     svg = render_svg_to_string(drawer, filename_prefix="natal")
     return Response(content=svg, media_type="image/svg+xml")
@@ -51,11 +51,12 @@ async def transit_svg(payload: TransitMomentRequest) -> Response:
         chart_data = ChartDataFactory.create_transit_chart_data(
             natal_subject,
             transit_subject,
+            active_points=cfg.active_points,
         )
         drawer = ChartDrawer(chart_data=chart_data, theme=cfg.theme.value)
         filename_prefix = "transit-dual"
     else:
-        chart_data = ChartDataFactory.create_natal_chart_data(transit_subject)
+        chart_data = ChartDataFactory.create_natal_chart_data(transit_subject, active_points=cfg.active_points)
         drawer = ChartDrawer(chart_data=chart_data, theme=cfg.theme.value)
         filename_prefix = "transit"
 
@@ -73,6 +74,7 @@ async def synastry_svg(payload: SynastrySvgRequest) -> Response:
     chart_data = ChartDataFactory.create_synastry_chart_data(
         first_subject,
         second_subject,
+        active_points=cfg.active_points,
     )
 
     if payload.grid_view:
@@ -131,10 +133,11 @@ async def svg_pdf(payload: SvgPdfRequest) -> Response:
             chart_data = ChartDataFactory.create_transit_chart_data(
                 natal_subject,
                 transit_subject,
+                active_points=cfg.active_points,
             )
             filename_prefix = "transit-dual"
         else:
-            chart_data = ChartDataFactory.create_natal_chart_data(transit_subject)
+            chart_data = ChartDataFactory.create_natal_chart_data(transit_subject, active_points=cfg.active_points)
             filename_prefix = "transit"
         drawer = ChartDrawer(chart_data=chart_data, theme=cfg.theme.value)
         svg_text = render_svg_to_string(drawer, filename_prefix=filename_prefix)
