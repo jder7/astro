@@ -23,6 +23,7 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
     When `birth` is provided, the corresponding natal chart is evaluated using
     the same configuration and returned as `natal_subject`.
     """
+    print("POST /transit", payload.dict(exclude_none=True))
     cfg = ensure_config(payload.config)
 
     # Convert transit moment input (no name) into a BirthData-like structure.
