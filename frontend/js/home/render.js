@@ -15,7 +15,6 @@
   const ALLOWED_POINTS = new Set([
     "sun",
     "moon",
-    "ascendant",
     "mercury",
     "venus",
     "mars",
@@ -279,7 +278,7 @@
           <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", asc, { prefix: "T" })}</p>
         </div>
         <div class="summary-aspects">
-          <h4>Transit aspects (Sun, Moon, Asc)</h4>
+          <h4>Transit aspects</h4>
           ${
             aspectItems
               ? `<ul>${aspectItems}</ul>`
@@ -347,7 +346,7 @@
       return;
     }
 
-    const baseNames = ["sun", "moon", "ascendant"];
+    const baseNames = ["sun", "moon", "ascendant", "mercury", "venus", "mars", "jupiter", "saturn"];
     const natalBlock = (() => {
       const aspects = computeKeyAspects(natalSubject, baseNames, ALLOWED_POINTS).slice(0, 7);
       const aspectItems = aspects
@@ -425,30 +424,65 @@
 
   function renderRelationshipSummary(relJson) {
     if (!dom.summaryEl) return;
-    const aspects =
-      (relJson && relJson.aspects && relJson.aspects.aspects) || relJson.aspects || [];
-    const filtered = (aspects || []).filter(
-      (a) =>
-        ALLOWED_POINTS.has((a.planet1 || "").toLowerCase()) &&
-        ALLOWED_POINTS.has((a.planet2 || "").toLowerCase())
-    );
-    filtered.sort((a, b) => (a.orb || 999) - (b.orb || 999));
-    const top = filtered.slice(0, 7);
+    const firstName =
+      relJson?.first_subject?.meta?.name ||
+      relJson?.first_subject?.name ||
+      "Partner A";
+    const secondName =
+      relJson?.second_subject?.meta?.name ||
+      relJson?.second_subject?.name ||
+      "Partner B";
+
+    const extractAspects = (payload) => {
+      const source = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.aspects)
+        ? payload.aspects
+        : Array.isArray(payload?.active_aspects)
+        ? payload.active_aspects
+        : [];
+      return source
+        .map((a) => {
+          const baseKey =
+            (a.planet1 || a.p1_name || a.left || a.body1 || a.source || a.p1 || "").toLowerCase();
+          const otherKey =
+            (a.planet2 || a.p2_name || a.right || a.body2 || a.target || a.p2 || "").toLowerCase();
+          const type = a.aspect_type || a.aspect || a.type || a.name || "";
+          const orbRaw = a.orb ?? a.orbit ?? a.diff ?? a.orb_value ?? a.aspect_orb;
+          const orb = typeof orbRaw === "number" ? orbRaw : parseFloat(orbRaw || "9999");
+          const position1 = a.position1 ?? a.p1_abs_pos ?? a.abs_pos1 ?? a.left_abs_pos;
+          const position2 = a.position2 ?? a.p2_abs_pos ?? a.abs_pos2 ?? a.right_abs_pos;
+          const sign1 = a.sign1 || a.p1_sign || "";
+          const sign2 = a.sign2 || a.p2_sign || "";
+          return { baseKey, otherKey, type, orb, position1, position2, sign1, sign2 };
+        })
+        .filter(
+          (a) => ALLOWED_POINTS.has(a.baseKey) && ALLOWED_POINTS.has(a.otherKey) && Number.isFinite(a.orb)
+        );
+    };
+
+    const normalized = extractAspects(relJson?.aspects || relJson);
+    normalized.sort((a, b) => (a.orb || 999) - (b.orb || 999));
+    const totalAspects = normalized.length;
+    const top = normalized.slice(0, 7);
     const items = top
       .map((a) => {
-        const baseKey = (a.planet1 || "").toLowerCase();
-        const otherKey = (a.planet2 || "").toLowerCase();
-        const baseLabel = formatPointLabel(baseKey, { position: a.position1 || 0, sign: a.sign1 || "" });
-        const otherLabel = formatPointLabel(otherKey, { position: a.position2 || 0, sign: a.sign2 || "" });
-        const typeIcon = ASPECT_ICON[a.aspect_type] || "✦";
-        const orb = typeof a.orb === "number" ? a.orb.toFixed(2) : "?";
-        return `<li>${typeIcon} ${baseLabel} ${a.aspect_type || ""} ${otherLabel} (orb ${orb}°)</li>`;
+        const baseLabel = formatPointLabel(a.baseKey, { position: a.position1 || 0, sign: a.sign1 || "" });
+        const otherLabel = formatPointLabel(a.otherKey, { position: a.position2 || 0, sign: a.sign2 || "" });
+        const typeIcon = ASPECT_ICON[a.type] || "✦";
+        const orbText = Number.isFinite(a.orb) ? a.orb.toFixed(2) : "?";
+        return `<li>${typeIcon} ${baseLabel} ${a.type || ""} ${otherLabel} (orb ${orbText}°)</li>`;
       })
       .join("");
 
     dom.summaryEl.innerHTML = `
       <div class="summary-card">
-        <div class="summary-heading">Relationship aspects</div>
+        <div class="summary-heading">Synastry highlights</div>
+        <p class="summary-subheading">${firstName} &amp; ${secondName}</p>
+        <div class="summary-stats">
+          <div><span class="summary-stat-number">${totalAspects || 0}</span><span class="summary-stat-label">aspects</span></div>
+          <div><span class="summary-stat-number">${top.length || 0}</span><span class="summary-stat-label">key ties</span></div>
+        </div>
         ${
           items
             ? `<ul>${items}</ul>`

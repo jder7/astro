@@ -591,7 +591,7 @@ def generate_report_content(request: ReportRequest) -> tuple[dict, str]:
     if mode == Mode.RELATIONSHIP and request.first and request.second:
         first_block, first_subject = add_subject(request.first, "Partner A")
         second_block, second_subject = add_subject(request.second, "Partner B")
-        structured["title"] = f"Synastry report - {first_block['meta']['name']} + {second_block['meta']['name']}"
+        structured["title"] = f"Synastry report - {first_block['meta']['name']} natal + {second_block['meta']['name']} natal"
         structured["summary"] = "Dual-wheel synastry overview with shared aspects."
 
         aspects_model = AspectsFactory.dual_chart_aspects(first_subject, second_subject)
@@ -624,7 +624,7 @@ def generate_report_content(request: ReportRequest) -> tuple[dict, str]:
             nation=m.nation,
         )
         transit_block, transit_subject = add_subject(transit_birth, "Transit")
-        structured["title"] = f"Dual-wheel report - {natal_block['meta']['name']} + transit"
+        structured["title"] = f"Dual-wheel report - {natal_block['meta']['name']} natal + transit"
         structured["summary"] = "Natal chart paired with a transit snapshot."
 
         try:

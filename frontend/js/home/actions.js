@@ -190,7 +190,8 @@
   }
 
   async function loadReport() {
-    if (!dom.reportContainer) return;
+    const target = dom.reportContent || dom.reportContainer;
+    if (!target) return;
     const mode = utils.getSelectedMode() || "natal";
     const { payload } = buildPayloadFromForm(mode);
     const baseBirth =
@@ -203,11 +204,11 @@
         : null) ||
       (mode === "relationship" ? payload.first : null);
     if (!baseBirth) {
-      dom.reportContainer.innerHTML = '<p class="hint">No birth data available for report.</p>';
+      target.innerHTML = '<p class="hint">No birth data available for report.</p>';
       return;
     }
     try {
-      dom.reportContainer.innerHTML = '<p class="hint">Loading report…</p>';
+      target.innerHTML = '<p class="hint">Loading report…</p>';
       const requestBody = {
         kind: "NATAL",
         mode,
@@ -231,11 +232,69 @@
       }
       const data = await resp.json();
       const text = data.text || "Report returned empty.";
-      dom.reportContainer.textContent = text;
-      state.saveApiData(mode, { report: text });
+      const title =
+        (data.structured && data.structured.title) ||
+        (payload.birth && payload.birth.name ? `Report - ${payload.birth.name}` : "Detailed text");
+      const renderMarkdown =
+        utils && typeof utils.renderReportMarkdown === "function"
+          ? utils.renderReportMarkdown
+          : (el, content) => {
+              if (el) el.textContent = content || "";
+            };
+      renderMarkdown(target, text);
+      if (utils && typeof utils.setReportTitle === "function") {
+        utils.setReportTitle(title);
+      }
+      state.saveApiData(mode, { report: { text, title } });
     } catch (err) {
       console.error(err);
-      dom.reportContainer.innerHTML = `<p class="hint">Could not load report: ${err.message || err}</p>`;
+      target.innerHTML = `<p class="hint">Could not load report: ${err.message || err}</p>`;
+    }
+  }
+
+  function getReportForMode(mode) {
+    const rep = runtime.storedReports && runtime.storedReports[mode];
+    if (!rep) return null;
+    if (typeof rep === "string") return { text: rep, title: null };
+    if (typeof rep === "object") return { text: rep.text || "", title: rep.title || null };
+    return null;
+  }
+
+  function copyReportToClipboard() {
+    const mode = utils.getSelectedMode() || "natal";
+    const rep = getReportForMode(mode);
+    if (!rep || !rep.text) {
+      utils.setStatus("No report loaded to copy.", true);
+      return;
+    }
+    const content = rep.text;
+    const handleError = (err) => {
+      console.warn("Clipboard copy failed", err);
+      utils.setStatus("Could not copy report.", true);
+    };
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      navigator.clipboard.writeText(content).then(() => {
+        utils.setStatus("Report copied to clipboard.");
+      }, handleError);
+      return;
+    }
+    try {
+      const area = document.createElement("textarea");
+      area.value = content;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.focus();
+      area.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(area);
+      if (ok) {
+        utils.setStatus("Report copied to clipboard.");
+      } else {
+        handleError(new Error("execCommand copy failed"));
+      }
+    } catch (err) {
+      handleError(err);
     }
   }
 
@@ -360,9 +419,27 @@
 
   function bindZoom() {
     if (dom.zoomBtn && dom.svgModal && dom.svgModalBody && dom.svgModalClose) {
+      let zoomScale = 1;
+      let zoomTarget = null;
+
+      const applyScale = () => {
+        if (!zoomTarget) return;
+        zoomTarget.style.transform = `scale(${zoomScale})`;
+      };
+
+      const setZoomTarget = () => {
+        const inner = dom.svgModalBody.querySelector(".svg-zoom-inner");
+        zoomTarget = inner || dom.svgModalBody;
+        zoomTarget.style.transformOrigin = "top center";
+        zoomTarget.style.transition = "transform 120ms ease-out";
+        zoomScale = 1;
+        applyScale();
+      };
+
       dom.zoomBtn.addEventListener("click", () => {
         const svgContent = dom.chartContainer.innerHTML;
-        dom.svgModalBody.innerHTML = svgContent || '<p class="hint">No chart to zoom.</p>';
+        dom.svgModalBody.innerHTML = `<div class="svg-zoom-inner">${svgContent || '<p class="hint">No chart to zoom.</p>'}</div>`;
+        setZoomTarget();
         dom.svgModal.classList.add("open");
       });
       dom.svgModalClose.addEventListener("click", () => dom.svgModal.classList.remove("open"));
@@ -372,6 +449,19 @@
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") dom.svgModal.classList.remove("open");
       });
+
+      if (dom.svgZoomIn) {
+        dom.svgZoomIn.addEventListener("click", () => {
+          zoomScale = Math.min(3, zoomScale + 0.2);
+          applyScale();
+        });
+      }
+      if (dom.svgZoomOut) {
+        dom.svgZoomOut.addEventListener("click", () => {
+          zoomScale = Math.max(0.5, zoomScale - 0.2);
+          applyScale();
+        });
+      }
     }
   }
 
@@ -391,6 +481,9 @@
   }
   if (dom.downloadReportBtn && typeof downloadReportPdf === "function") {
     dom.downloadReportBtn.addEventListener("click", downloadReportPdf);
+  }
+  if (dom.copyReportBtn && typeof copyReportToClipboard === "function") {
+    dom.copyReportBtn.addEventListener("click", copyReportToClipboard);
   }
   if (dom.clearStateBtn) {
     dom.clearStateBtn.addEventListener("click", clearSavedState);

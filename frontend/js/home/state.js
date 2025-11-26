@@ -46,6 +46,11 @@
       if (data.summary) {
         state.summaries[mode] = data.summary;
       }
+      if (data.report && typeof data.report === "object" && data.report.text) {
+        state.reports[mode] = { text: data.report.text, title: data.report.title || null };
+      } else if (data.report) {
+        state.reports[mode] = data.report;
+      }
       localStorage.setItem(STORAGE_API, JSON.stringify(state));
       runtime.storedSvgs = state.svgs || {};
       runtime.storedSummaries = state.summaries || {};
@@ -55,11 +60,32 @@
     }
   }
 
+  function normalizeReport(rep) {
+    if (!rep) return null;
+    if (typeof rep === "string") return { text: rep, title: null };
+    if (typeof rep === "object") {
+      const text = rep.text || rep.body || "";
+      const title = rep.title || null;
+      return { text, title };
+    }
+    return null;
+  }
+
   function restoreSavedReport(mode) {
-    if (!dom.reportContainer) return;
-    const rep = runtime.storedReports[mode];
-    if (rep) {
-      dom.reportContainer.textContent = rep;
+    const target = dom.reportContent || dom.reportContainer;
+    if (!target) return;
+    const repData = normalizeReport(runtime.storedReports[mode]);
+    if (repData) {
+      const renderMarkdown =
+        utils && typeof utils.renderReportMarkdown === "function"
+          ? utils.renderReportMarkdown
+          : (el, content) => {
+              if (el) el.textContent = content || "";
+            };
+      renderMarkdown(target, repData.text);
+      if (utils && typeof utils.setReportTitle === "function") {
+        utils.setReportTitle(repData.title);
+      }
     } else {
       utils.clearReport();
     }
