@@ -415,6 +415,37 @@ body {
   background: #0b152b;
 }
 
+.datetime-time-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.55rem;
+  border-radius: 0.85rem;
+  border: 1px solid #1f2937;
+  background: #0f172a;
+  color: #c7d2fe;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  cursor: pointer;
+}
+
+.datetime-time-btn:hover {
+  border-color: #38bdf8;
+  color: #e0f2fe;
+  background: #0b152b;
+  transform: translateY(-1px);
+}
+
+.peer:checked + .datetime-time-btn {
+  border-color: #38bdf8;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(99, 102, 241, 0.14));
+  color: #0b1326;
+  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.25);
+}
+
 .svg-modal {
   position: fixed;
   inset: 0;

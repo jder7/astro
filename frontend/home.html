@@ -235,57 +235,28 @@
                     />
                   </div>
 
-                  <div class="grid sm:grid-cols-2 gap-4">
+                  <div class="flex items-center justify-between gap-3">
                     <div>
-                      <label for="dateInput" class="flowbite-label">Date</label>
-                      <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
-                          </svg>
-                        </div>
-                        <input
-                          id="dateInput"
-                          name="dateInput"
-                          type="text"
-                          value="1990-01-01"
-                          class="flowbite-input pl-10"
-                          placeholder="YYYY-MM-DD"
-                          datepicker
-                          datepicker-buttons
-                          datepicker-autohide
-                          datepicker-format="yyyy-mm-dd"
-                          autocomplete="off"
-                        />
-                      </div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-cyan-200/80 font-semibold">Date &amp; time</p>
+                      <p class="text-sm text-slate-300">Birth moment</p>
                     </div>
-                    <div>
-                      <label for="timeInput" class="flowbite-label">Time</label>
-                      <div class="relative">
-                        <input
-                          id="timeInput"
-                          name="timeInput"
-                          type="text"
-                          value="12:00"
-                          class="flowbite-input pr-12"
-                          placeholder="HH:MM"
-                          autocomplete="off"
-                        />
-                        <button
-                          type="button"
-                          class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200 transition"
-                          data-timepicker-toggle
-                          data-target="#timeInput"
-                          aria-label="Open time picker"
-                        >
-                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3.5 2" />
-                            <circle cx="12" cy="12" r="9" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
+                    <button
+                      type="button"
+                      data-datetime-target="birth"
+                      data-modal-target="datetime-modal"
+                      data-modal-toggle="datetime-modal"
+                      class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    >
+                      <span id="birthDatetimeDisplay" class="whitespace-nowrap">1990-01-01 · 12:00</span>
+                      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                      </svg>
+                      <span class="sr-only">Edit birth date and time</span>
+                    </button>
                   </div>
+                  <input id="dateInput" name="dateInput" type="hidden" value="1990-01-01" />
+                  <input id="timeInput" name="timeInput" type="hidden" value="12:00" />
 
                   <div class="grid sm:grid-cols-2 gap-4">
                     <div>
@@ -327,57 +298,28 @@
                     <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-[0.2em]">Transit moment</h3>
                     <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-amber-200 border border-slate-700">Outer wheel</span>
                   </div>
-                  <div class="grid sm:grid-cols-2 gap-4">
+                  <div class="flex items-center justify-between gap-3">
                     <div>
-                      <label for="transitDateInput" class="flowbite-label">Date</label>
-                      <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
-                          </svg>
-                        </div>
-                        <input
-                          id="transitDateInput"
-                          name="transitDateInput"
-                          type="text"
-                          value="2025-01-01"
-                          class="flowbite-input pl-10"
-                          placeholder="YYYY-MM-DD"
-                          datepicker
-                          datepicker-buttons
-                          datepicker-autohide
-                          datepicker-format="yyyy-mm-dd"
-                          autocomplete="off"
-                        />
-                      </div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-cyan-200/80 font-semibold">Date &amp; time</p>
+                      <p class="text-sm text-slate-300">Transit moment</p>
                     </div>
-                    <div>
-                      <label for="transitTimeInput" class="flowbite-label">Time</label>
-                      <div class="relative">
-                        <input
-                          id="transitTimeInput"
-                          name="transitTimeInput"
-                          type="text"
-                          value="12:00"
-                          class="flowbite-input pr-12"
-                          placeholder="HH:MM"
-                          autocomplete="off"
-                        />
-                        <button
-                          type="button"
-                          class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200 transition"
-                          data-timepicker-toggle
-                          data-target="#transitTimeInput"
-                          aria-label="Open time picker"
-                        >
-                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3.5 2" />
-                            <circle cx="12" cy="12" r="9" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
+                    <button
+                      type="button"
+                      data-datetime-target="transit"
+                      data-modal-target="datetime-modal"
+                      data-modal-toggle="datetime-modal"
+                      class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    >
+                      <span id="transitDatetimeDisplay" class="whitespace-nowrap">2025-01-01 · 12:00</span>
+                      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                      </svg>
+                      <span class="sr-only">Edit transit date and time</span>
+                    </button>
                   </div>
+                  <input id="transitDateInput" name="transitDateInput" type="hidden" value="2025-01-01" />
+                  <input id="transitTimeInput" name="transitTimeInput" type="hidden" value="12:00" />
 
                   <div class="grid sm:grid-cols-2 gap-4">
                     <div>
@@ -636,13 +578,116 @@
       </footer>
     </div>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"
-      integrity="sha512-eNB1lPVKSAW5mXqnboj6QX9kTZKEq4t2f2c5ytUhb+QzPudY3imnjHyXYhIXavZo9e3slCjhDpOJhuMm9uSwzw=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/datepicker.min.js" referrerpolicy="no-referrer"></script>
+    <script src="/static/vendor/flowbite/flowbite.min.js"></script>
+    <script src="/static/vendor/flowbite/datepicker.min.js"></script>
+    <div
+      id="datetime-modal"
+      tabindex="-1"
+      aria-hidden="true"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" data-modal-hide="datetime-modal"></div>
+      <div class="relative w-full max-w-lg">
+        <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+            <div>
+              <p class="text-[11px] uppercase tracking-[0.22em] text-cyan-200/70 font-semibold">Date &amp; time</p>
+              <h3 id="datetimeModalTitle" class="text-lg font-semibold text-white">Edit moment</h3>
+            </div>
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 text-slate-300 hover:text-white hover:border-cyan-400"
+              data-modal-hide="datetime-modal"
+              aria-label="Close date time modal"
+            >
+              <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="px-5 py-4 space-y-4">
+            <div
+              id="datetimeInlinePicker"
+              inline-datepicker
+              datepicker-format="yyyy-mm-dd"
+              datepicker-autoselect-today
+              class="mx-auto flex justify-center [&>div>div]:shadow-none [&>div>div]:bg-slate-900 [&_div>button]:bg-slate-900"
+            ></div>
+            <div class="mt-3 grid sm:grid-cols-2 gap-3">
+              <div>
+                <label for="datetimeDateField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em] block mb-1">
+                  Precise date
+                </label>
+                <input
+                  type="date"
+                  id="datetimeDateField"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500"
+                  value="2025-01-01"
+                />
+                <p class="text-[11px] text-slate-400 mt-1">Use the calendar or enter a date directly.</p>
+              </div>
+              <div>
+                <label for="datetimeTimeField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em] block mb-1">Precise time</label>
+                <input
+                  type="time"
+                  id="datetimeTimeField"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500"
+                  step="60"
+                  value="12:00"
+                />
+                <p class="text-[11px] text-slate-400 mt-1">Use a preset or set an exact time.</p>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em] mb-3">Quick time picks</p>
+              <ul id="datetimeTimeList" class="grid w-full grid-cols-3 gap-2">
+                <li>
+                  <input type="radio" id="dt-09-00" value="09:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-09-00" class="datetime-time-btn">09:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-12-00" value="12:00" class="hidden peer" name="datetimeTimeOption" checked />
+                  <label for="dt-12-00" class="datetime-time-btn">12:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-15-00" value="15:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-15-00" class="datetime-time-btn">15:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-18-00" value="18:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-18-00" class="datetime-time-btn">18:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-21-00" value="21:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-21-00" class="datetime-time-btn">21:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-23-00" value="23:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-23-00" class="datetime-time-btn">23:00</label>
+                </li>
+              </ul>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                id="datetimeSaveBtn"
+                data-modal-hide="datetime-modal"
+                class="w-full rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                data-modal-hide="datetime-modal"
+                class="w-full rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-200 hover:border-slate-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-slate-600"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="svgModal" class="svg-modal">
       <div class="svg-modal-content">
         <div class="svg-modal-header">
@@ -667,77 +712,6 @@
         <div id="svgModalBody" class="svg-modal-body"></div>
       </div>
     </div>
-    <script>
-      (function () {
-        const dateInput = document.getElementById("dateInput");
-        if (dateInput && typeof Datepicker !== "undefined") {
-          try {
-            const existing = Datepicker.getInstance(dateInput);
-            if (!existing) {
-              new Datepicker(dateInput, {
-                autohide: true,
-                format: "yyyy-mm-dd",
-                orientation: "bottom",
-                todayHighlight: true,
-                weekStart: 1,
-              });
-            }
-          } catch (err) {
-            console.warn("Datepicker init failed", err);
-          }
-        }
-
-        const timeInput = document.getElementById("timeInput");
-        if (timeInput && typeof Timepicker !== "undefined") {
-          try {
-            const existingTime = Timepicker.getInstance(timeInput);
-            if (!existingTime) {
-              new Timepicker(timeInput, {
-                defaultTime: "12:00",
-                minuteStep: 1,
-                format: "HH:mm",
-              });
-            }
-          } catch (err) {
-            console.warn("Timepicker init failed", err);
-          }
-        }
-
-        const transitDateInput = document.getElementById("transitDateInput");
-        if (transitDateInput && typeof Datepicker !== "undefined") {
-          try {
-            const existing = Datepicker.getInstance(transitDateInput);
-            if (!existing) {
-              new Datepicker(transitDateInput, {
-                autohide: true,
-                format: "yyyy-mm-dd",
-                orientation: "bottom",
-                todayHighlight: true,
-                weekStart: 1,
-              });
-            }
-          } catch (err) {
-            console.warn("Transit datepicker init failed", err);
-          }
-        }
-
-        const transitTimeInput = document.getElementById("transitTimeInput");
-        if (transitTimeInput && typeof Timepicker !== "undefined") {
-          try {
-            const existingTime = Timepicker.getInstance(transitTimeInput);
-            if (!existingTime) {
-              new Timepicker(transitTimeInput, {
-                defaultTime: "12:00",
-                minuteStep: 1,
-                format: "HH:mm",
-              });
-            }
-          } catch (err) {
-            console.warn("Transit timepicker init failed", err);
-          }
-        }
-      })();
-    </script>
     <script src="/static/js/home/shared.js"></script>
     <script src="/static/js/home/config.js"></script>
     <script src="/static/js/home/payloads.js"></script>

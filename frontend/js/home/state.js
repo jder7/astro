@@ -166,6 +166,9 @@
       runtime.storedSummaries = apiState.summaries || {};
       runtime.storedReports = apiState.reports || {};
       runtime.hasLoadedState = true;
+      if (HomeApp.utils && typeof HomeApp.utils.refreshDateTimeBadges === "function") {
+        HomeApp.utils.refreshDateTimeBadges();
+      }
     } catch (err) {
       console.warn("Could not load saved form state", err);
     }
@@ -255,6 +258,9 @@
       const natalRadio = document.querySelector('input[name="mode"][value="natal"]');
       if (natalRadio) natalRadio.checked = true;
       updateModeVisibility();
+      if (HomeApp.utils && typeof HomeApp.utils.refreshDateTimeBadges === "function") {
+        HomeApp.utils.refreshDateTimeBadges();
+      }
       utils.setStatus("Local state cleared.");
     } catch (err) {
       console.warn("Could not clear state", err);
