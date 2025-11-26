@@ -155,6 +155,7 @@
     const daysSince = (target - knownNewMoon) / 86400000;
     const normalized = ((daysSince % synodic) + synodic) % synodic;
     const fraction = normalized / synodic;
+    const illumination = 0.5 * (1 - Math.cos((normalized / 29.53) * 2 * Math.PI));
 
     const phases = [
       { name: "New Moon", icon: "🌑" },
@@ -175,6 +176,7 @@
       name: phase.name,
       icon: phase.icon,
       fraction,
+      illumination,
       age,
       cycle: `${age.toFixed(1)} / 29.5 days`,
     };
@@ -182,7 +184,7 @@
 
   function renderLunationBlock(info, title) {
     if (!info) return "";
-    const percent = Math.round(info.fraction * 100);
+    const percent = Math.round((info.illumination ?? info.fraction) * 100);
     return `
       <div class="lunation">
         <div class="lunation-header">

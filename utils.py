@@ -506,6 +506,27 @@ def render_markdown_report(structured: dict) -> str:
                     f"| {row.get('name','')} | {row.get('sign','')} | {row.get('degree','')} |"
                 )
 
+        aspects_block = subject.get("aspects") or {}
+        aspects_rows = aspects_block.get("rows") or []
+        aspects_summary = aspects_block.get("summary") or {}
+        if aspects_rows:
+            lines.append("")
+            lines.append("### Aspects")
+            if aspects_block.get("title"):
+                lines.append(f"**{aspects_block['title']}**")
+            if aspects_summary:
+                lines.append(
+                    f"- Total aspects: {aspects_summary.get('total', 0)} "
+                    f"(Applying: {aspects_summary.get('applying', 0)}, Separating: {aspects_summary.get('separating', 0)}, Fixed: {aspects_summary.get('fixed', 0)})"
+                )
+            lines.append("")
+            lines.append("| Point A | Aspect | Point B | Orb | Movement |")
+            lines.append("| --- | --- | --- | --- | --- |")
+            for row in aspects_rows:
+                lines.append(
+                    f"| {row.get('left','')} | {row.get('aspect','')} | {row.get('right','')} | {row.get('orb','')} | {row.get('movement','')} |"
+                )
+
     synastry = structured.get("synastry")
     if synastry:
         lines.append("")
@@ -555,6 +576,21 @@ def generate_report_content(request: ReportRequest) -> tuple[dict, str]:
 
     def add_subject(birth: BirthData, label: str) -> tuple[dict, object]:
         block, subject = build_subject_block(birth, cfg, label)
+        if request.include_aspects:
+            try:
+                aspects_model = AspectsFactory.natal_aspects(subject)
+                aspects_dump = aspects_model.model_dump(mode="json")
+                aspect_rows = extract_aspect_rows(aspects_dump)
+                if request.max_aspects:
+                    aspect_rows = aspect_rows[: request.max_aspects]
+                block["aspects"] = {
+                    "title": f"{label} aspects",
+                    "rows": aspect_rows,
+                    "summary": build_synastry_summary(aspect_rows),
+                    "raw": aspects_dump,
+                }
+            except Exception:
+                block["aspects"] = {"rows": [], "summary": {}}
         structured["subjects"].append(block)
         return block, subject
 
@@ -804,6 +840,43 @@ def render_structured_report_pdf(report: dict, filename_prefix: str = "report") 
                 for row in houses:
                     table_data.append(
                         [row.get("name", ""), row.get("sign", ""), row.get("degree", "")]
+                    )
+                table = Table(table_data, repeatRows=1)
+                table.setStyle(
+                    TableStyle(
+                        [
+                            ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+                            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                            ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                        ]
+                    )
+                )
+                story.append(table)
+
+            aspects = subject.get("aspects", {})
+            aspect_rows = aspects.get("rows") or []
+            if aspect_rows:
+                story.append(Spacer(1, 8))
+                story.append(Paragraph("Aspects", styles["Heading3"]))
+                summary = aspects.get("summary") or {}
+                if summary:
+                    summary_text = (
+                        f"Total: {summary.get('total', 0)} "
+                        f"(Applying: {summary.get('applying', 0)}, Separating: {summary.get('separating', 0)}, Fixed: {summary.get('fixed', 0)})"
+                    )
+                    story.append(Paragraph(summary_text, styles["BodyText"]))
+                table_data = [["Point A", "Aspect", "Point B", "Orb", "Movement"]]
+                for row in aspect_rows:
+                    table_data.append(
+                        [
+                            row.get("left", ""),
+                            row.get("aspect", ""),
+                            row.get("right", ""),
+                            str(row.get("orb", "")),
+                            row.get("movement", ""),
+                        ]
                     )
                 table = Table(table_data, repeatRows=1)
                 table.setStyle(

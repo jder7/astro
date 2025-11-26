@@ -246,7 +246,7 @@
         configZodiac: "Sidereal",
         configPerspective: "Topocentric",
         configSiderealMode: "KRISHNAMURTI",
-        configHouse: "W",
+        configHouse: "P",
       };
       Object.entries(resetInputs).forEach(([id, val]) => {
         const el = document.getElementById(id);
