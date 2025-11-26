@@ -81,6 +81,106 @@ body {
   transform: translateY(-1px);
 }
 
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .mode-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mode-card {
+  position: relative;
+  display: block;
+  height: 100%;
+  cursor: pointer;
+}
+
+.mode-card input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mode-card-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.1rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid #1f2937;
+  background: linear-gradient(145deg, rgba(11, 21, 43, 0.95), rgba(12, 18, 34, 0.95));
+  transition: border-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease, background-color 0.15s ease;
+  position: relative;
+  min-height: 130px;
+  text-align: center;
+}
+
+.mode-card-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.9rem;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, rgba(56, 189, 248, 0.12), rgba(99, 102, 241, 0.12));
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  font-size: 1.35rem;
+}
+
+.mode-card-title {
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 0.01em;
+  font-size: 1.05rem;
+}
+
+.mode-card-sub {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.mode-card-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  border: 2px solid #334155;
+  background: rgba(12, 18, 34, 0.8);
+  box-shadow: inset 0 0 0 2px rgba(12, 18, 34, 0.6);
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.2s ease;
+}
+
+.mode-card:hover .mode-card-inner,
+.mode-card:focus-within .mode-card-inner {
+  border-color: #38bdf8;
+  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.15);
+  transform: translateY(-1px);
+}
+
+.mode-card input:checked + .mode-card-inner,
+.mode-card input:checked ~ .mode-card-inner {
+  border-color: #38bdf8;
+  box-shadow: 0 14px 34px rgba(56, 189, 248, 0.22);
+  background: linear-gradient(145deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.12));
+}
+
+.mode-card input:checked + .mode-card-inner .mode-card-check,
+.mode-card input:checked ~ .mode-card-inner .mode-card-check {
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  border-color: #c7d2fe;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
 .status {
   min-height: 1.25rem;
   color: #a5b4fc;
