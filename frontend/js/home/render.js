@@ -2,7 +2,7 @@
   const HomeApp = window.HomeApp || {};
   if (HomeApp.disabled) return;
 
-  const { dom } = HomeApp;
+  const { dom, constants, config } = HomeApp;
 
   const ASPECTS = [
     { name: "conjunction", angle: 0, orb: 6 },
@@ -38,6 +38,32 @@
     neptune: "♆",
     pluto: "♇",
   };
+
+  function getAspectBasePoints() {
+    const fallback = (constants && constants.DEFAULT_CONFIG && constants.DEFAULT_CONFIG.base_aspect_points) || [
+      "sun",
+      "moon",
+      "ascendant",
+      "mercury",
+      "venus",
+      "mars",
+      "jupiter",
+      "saturn",
+    ];
+    try {
+      const cfg =
+        config && typeof config.getConfigFromInputs === "function"
+          ? config.getConfigFromInputs()
+          : null;
+      const vals = cfg && Array.isArray(cfg.base_aspect_points) ? cfg.base_aspect_points : null;
+      const result = vals && vals.length ? vals : fallback;
+      console.debug("Aspect base points selected", { selected: vals, used: result });
+      return result;
+    } catch (err) {
+      console.warn("Could not read aspect base points from config", err);
+      return fallback;
+    }
+  }
 
   const ASPECT_ICON = {
     conjunction: "◎",
@@ -185,18 +211,20 @@
   function renderLunationBlock(info, title) {
     if (!info) return "";
     const percent = Math.round((info.illumination ?? info.fraction) * 100);
+    const isWaning = info.fraction > 0.5;
+    const barColor = isWaning ? "linear-gradient(90deg, #f472b6, #f87171)" : "linear-gradient(90deg, #38bdf8, #6366f1)";
     return `
       <div class="lunation">
         <div class="lunation-header">
           <span class="lunation-icon" aria-hidden="true">${info.icon}</span>
           <div>
             <div class="lunation-title">${title}</div>
-            <div class="lunation-phase">${info.name} · ${info.cycle}</div>
+            <div class="lunation-phase">${info.name} · ${info.cycle} · ${percent}% illumination</div>
           </div>
           <span class="lunation-chip">${percent}%</span>
         </div>
         <div class="lunation-bar">
-          <span style="width:${percent}%;"></span>
+          <span style="width:${percent}%;background:${barColor};"></span>
         </div>
       </div>
     `;
@@ -216,9 +244,17 @@
       return;
     }
 
-    const baseNames = ["sun", "moon", "ascendant"];
+    const baseNames = getAspectBasePoints();
     const aspects = computeKeyAspects(subject, baseNames, ALLOWED_POINTS);
     const topList = aspects.slice(0, 7);
+
+    const birthLabel = birthDateParts
+      ? `${birthDateParts.year}-${String(birthDateParts.month).padStart(2, "0")}-${String(
+          birthDateParts.day
+        ).padStart(2, "0")} ${String(birthDateParts.hour).padStart(2, "0")}:${String(
+          birthDateParts.minute
+        ).padStart(2, "0")}`
+      : "";
 
     const sunText = formatPointLabel("sun", sun);
     const moonText = formatPointLabel("moon", moon);
@@ -232,7 +268,7 @@
 
     dom.summaryEl.innerHTML = `
       <div class="summary-card">
-        <div class="summary-heading">Natal highlights</div>
+        <div class="summary-heading">Natal highlights ${birthLabel ? `· ${birthLabel}` : ""}</div>
         <div class="summary-points">
           <p><strong>Sun:</strong> ${sunText}</p>
           <p><strong>Moon:</strong> ${moonText}</p>
@@ -262,22 +298,30 @@
     const sun = subject.sun;
     const moon = subject.moon;
     const asc = subject.ascendant;
-    const baseNames = ["sun", "moon", "ascendant"];
+    const baseNames = getAspectBasePoints();
     const aspects = computeKeyAspects(subject, baseNames, ALLOWED_POINTS).slice(0, 7);
 
+    const transitLabel = transitDateParts
+      ? `${transitDateParts.year}-${String(transitDateParts.month).padStart(2, "0")}-${String(
+          transitDateParts.day
+        ).padStart(2, "0")} ${String(transitDateParts.hour).padStart(2, "0")}:${String(
+          transitDateParts.minute
+        ).padStart(2, "0")}`
+      : "";
+
     const aspectItems = aspects
-      .map((asp) => formatAspectLabel(subject, asp, { basePrefix: "T", otherPrefix: "T" }))
+      .map((asp) => formatAspectLabel(subject, asp))
       .filter(Boolean)
       .map((text) => `<li>${text}</li>`)
       .join("");
 
     dom.summaryEl.innerHTML = `
       <div class="summary-card">
-        <div class="summary-heading">Transit snapshot</div>
+        <div class="summary-heading">Transit snapshot ${transitLabel ? `· ${transitLabel}` : ""}</div>
         <div class="summary-points">
-          <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", sun, { prefix: "T" })}</p>
-          <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", moon, { prefix: "T" })}</p>
-          <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", asc, { prefix: "T" })}</p>
+          <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", sun)}</p>
+          <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", moon)}</p>
+          <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", asc)}</p>
         </div>
         <div class="summary-aspects">
           <h4>Transit aspects</h4>
@@ -333,8 +377,8 @@
     const otherPoint = natalPoints[aspect.other];
     if (!basePoint || !otherPoint) return null;
 
-    const baseLabel = formatPointLabel(aspect.base, basePoint, { prefix: "T" });
-    const otherLabel = formatPointLabel(aspect.other, otherPoint, { prefix: "N" });
+    const baseLabel = formatPointLabel(aspect.base, basePoint, { prefix: "Transit" });
+    const otherLabel = formatPointLabel(aspect.other, otherPoint, { prefix: "Natal" });
     const orbText = aspect.orb.toFixed(2);
     return `${baseLabel} ${aspect.type} ${otherLabel} (orb ${orbText}°)`;
   }
@@ -348,7 +392,7 @@
       return;
     }
 
-    const baseNames = ["sun", "moon", "ascendant", "mercury", "venus", "mars", "jupiter", "saturn"];
+    const baseNames = getAspectBasePoints();
     const natalBlock = (() => {
       const aspects = computeKeyAspects(natalSubject, baseNames, ALLOWED_POINTS).slice(0, 7);
       const aspectItems = aspects
@@ -376,7 +420,7 @@
     const transitBlock = (() => {
       const aspects = computeKeyAspects(transitSubject, baseNames, ALLOWED_POINTS).slice(0, 7);
       const aspectItems = aspects
-        .map((asp) => formatAspectLabel(transitSubject, asp, { basePrefix: "T", otherPrefix: "T" }))
+        .map((asp) => formatAspectLabel(transitSubject, asp, { basePrefix: "Transit", otherPrefix: "Transit" }))
         .filter(Boolean)
         .map((text) => `<li>${text}</li>`)
         .join("");
@@ -384,9 +428,9 @@
         <div class="summary-card">
           <div class="summary-heading">Transit</div>
           <div class="summary-points">
-            <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", transitSubject.sun, { prefix: "T" })}</p>
-            <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", transitSubject.moon, { prefix: "T" })}</p>
-            <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", transitSubject.ascendant, { prefix: "T" })}</p>
+            <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", transitSubject.sun)}</p>
+            <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", transitSubject.moon)}</p>
+            <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", transitSubject.ascendant)}</p>
           </div>
           <div class="summary-aspects">
             <h4>Transit aspects (Sun, Moon, Asc)</h4>

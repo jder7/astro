@@ -6,6 +6,19 @@
   const { DEFAULT_CONFIG, STORAGE_CONFIG } = constants;
   const configInputs = dom.configInputs || {};
 
+  function getMultiSelectValues(el) {
+    if (!el || !el.multiple) return [];
+    return Array.from(el.selectedOptions || []).map((opt) => opt.value);
+  }
+
+  function setMultiSelectValues(el, values) {
+    if (!el || !el.options) return;
+    const set = new Set(values || []);
+    Array.from(el.options).forEach((opt) => {
+      opt.selected = set.has(opt.value);
+    });
+  }
+
   function toggleSiderealVisibility(zodiacType) {
     if (!dom.siderealRow) return;
     dom.siderealRow.style.display = zodiacType === "Sidereal" ? "" : "none";
@@ -14,7 +27,11 @@
   function getConfigFromInputs() {
     const cfg = { ...DEFAULT_CONFIG };
     Object.entries(configInputs).forEach(([key, el]) => {
-      if (el && el.value) {
+      if (!el) return;
+      if (el.multiple) {
+        const vals = getMultiSelectValues(el);
+        cfg[key] = vals;
+      } else if (el.value) {
         cfg[key] = el.value;
       }
     });
@@ -41,7 +58,11 @@
     }
     Object.entries(configInputs).forEach(([key, el]) => {
       if (el && merged[key]) {
-        el.value = merged[key];
+        if (el.multiple && Array.isArray(merged[key])) {
+          setMultiSelectValues(el, merged[key]);
+        } else {
+          el.value = merged[key];
+        }
       }
     });
     toggleSiderealVisibility(merged.zodiac_type);
@@ -72,7 +93,10 @@
   }
 
   if (dom.configToggle) {
-    dom.configToggle.addEventListener("click", () => showConfigPanel(true));
+    dom.configToggle.addEventListener("click", () => {
+      const isHidden = dom.configPanel?.classList.contains("hidden");
+      showConfigPanel(Boolean(isHidden));
+    });
   }
   if (dom.configClose) {
     dom.configClose.addEventListener("click", () => showConfigPanel(false));
