@@ -1,5 +1,6 @@
 (function () {
-  const HomeApp = (window.HomeApp = window.HomeApp || {});
+  const ns = window.AppNamespace || "HomeApp";
+  const App = (window[ns] = window[ns] || {});
 
   const dom = {
     form: document.getElementById("natalForm"),
@@ -505,7 +506,6 @@
       const tzPart = parts.find((p) => p.type === "timeZoneName");
       if (tzPart && tzPart.value) return tzPart.value;
     } catch (err) {
-      console.debug("[location] Could not format timezone", err);
     }
     return typeof tz === "string" ? tz : "";
   }
@@ -548,12 +548,11 @@
 
   function persistFormState() {
     try {
-      if (!HomeApp.payloads || !HomeApp.payloads.buildPayloadFromForm || !HomeApp.state) return;
+      if (!App.payloads || !App.payloads.buildPayloadFromForm || !App.state) return;
       const mode = typeof utils.getSelectedMode === "function" ? utils.getSelectedMode() : "natal";
-      const { payload } = HomeApp.payloads.buildPayloadFromForm(mode) || {};
-      HomeApp.state.saveFormState(mode, payload || {});
+      const { payload } = App.payloads.buildPayloadFromForm(mode) || {};
+      App.state.saveFormState(mode, payload || {});
     } catch (err) {
-      console.warn("[state] could not persist form state", err);
     }
   }
  
@@ -738,12 +737,10 @@
         try {
           el.innerHTML = marked.parse(content);
         } catch (err) {
-          console.warn("Markdown render failed", err);
           el.textContent = content;
         }
       })
       .catch((err) => {
-        console.warn("Could not load Marked.js", err);
         el.textContent = content;
       });
   }
@@ -772,7 +769,6 @@
       try {
         window.Flowbite.initDatepickers();
       } catch (err) {
-        console.warn("[datetime] Flowbite initDatepickers failed", err);
       }
       return captureInstance(inlineEl.datepicker);
     }
@@ -780,9 +776,8 @@
   }
 
 
-  if (!dom.form || !dom.chartContainer) {
-    console.error("Home form or chart container missing from DOM.");
-    HomeApp.disabled = true;
+  if (!dom.form || (!dom.chartContainer && !(App.flags && App.flags.skipSvg))) {
+    App.disabled = true;
     return;
   }
 
@@ -815,7 +810,9 @@
   }
 
   function clearChart() {
-    dom.chartContainer.innerHTML = "";
+    if (dom.chartContainer) {
+      dom.chartContainer.innerHTML = "";
+    }
     runtime.hasChart = false;
     updateDownloadState();
   }
@@ -843,7 +840,6 @@
   function initDatetimeModal() {
     refreshDateTimeBadges();
     if (!dom.datetimeModal || !dom.datetimeInlinePicker) return;
-    console.debug("[datetime] init start");
 
     let activeTarget = "birth";
     const timeRadios = dom.datetimeTimeList
@@ -853,9 +849,7 @@
     let inlinePicker = getDatepickerInstance();
     let selectedModalDate = null;
     if (inlinePicker) {
-      console.debug("[datetime] Inline datepicker available");
     } else {
-      console.warn("[datetime] Datepicker class missing; using native date input fallback");
       dom.datetimeInlinePicker.style.display = "none";
     }
     dom.datetimeInlinePicker.addEventListener("changeDate", (event) => {
@@ -870,7 +864,6 @@
       if (dateVal instanceof Date && !Number.isNaN(dateVal.getTime())) {
         selectedModalDate = `${dateVal.getFullYear()}-${pad(dateVal.getMonth() + 1)}-${pad(dateVal.getDate())}`;
         setDateFieldValue(selectedModalDate);
-        console.debug("[datetime] changeDate captured", selectedModalDate);
       }
     });
     dom.datetimeInlinePicker.addEventListener("click", (event) => {
@@ -882,7 +875,6 @@
       if (parsed instanceof Date && !Number.isNaN(parsed.getTime())) {
         selectedModalDate = `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}`;
         setDateFieldValue(selectedModalDate);
-        console.debug("[datetime] click cell captured", selectedModalDate);
       }
     });
 
@@ -892,13 +884,11 @@
     if (inlinePicker && Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)) {
       inlinePicker.setDate(new Date(y, m - 1, d));
       selectedModalDate = `${pad(y)}-${pad(m)}-${pad(d)}`;
-      console.debug("[datetime] setInlineDate applied", selectedModalDate);
       } else {
         selectedModalDate = dateStr || null;
         if (!inlinePicker && dom.datetimeInlinePicker) {
           dom.datetimeInlinePicker.textContent = selectedModalDate || "";
         }
-        console.debug("[datetime] setInlineDate fallback", selectedModalDate);
       }
       setDateFieldValue(selectedModalDate);
     };
@@ -910,18 +900,15 @@
         const val = inlinePicker.getDate();
         if (val instanceof Date && !Number.isNaN(val.getTime())) {
           const resolved = `${val.getFullYear()}-${pad(val.getMonth() + 1)}-${pad(val.getDate())}`;
-          console.debug("[datetime] getInlineDate from picker", resolved);
           return resolved;
         }
       }
       if (dom.datetimeDateField && dom.datetimeDateField.value) {
         const normalized = normalizeDateString(dom.datetimeDateField.value, null);
         if (normalized) {
-          console.debug("[datetime] getInlineDate from date field", normalized);
           return normalized;
         }
       }
-      console.debug("[datetime] getInlineDate missing, returning null");
       return null;
     };
 
@@ -1001,7 +988,6 @@
         if (dom.datetimeTimeField) {
           dom.datetimeTimeField.value = nowStr;
         }
-        console.debug("[datetime] now applied", nowStr);
       });
     }
 
@@ -1017,7 +1003,6 @@
               inlinePicker.setDate(new Date(y, m - 1, d));
             }
           }
-          console.debug("[datetime] manual date input", normalized);
         }
       });
     }
@@ -1032,7 +1017,6 @@
         if (dom.datetimeDateField) {
           dom.datetimeDateField.value = todayStr;
         }
-        console.debug("[datetime] today applied", todayStr);
       });
     }
 
@@ -1049,7 +1033,6 @@
       if (dom.datetimeModalTitle) {
         dom.datetimeModalTitle.textContent = target.title;
       }
-      console.debug("[datetime] syncModal", { targetKey, nextDate, nextTime });
     };
 
     let modalInstance = null;
@@ -1060,7 +1043,6 @@
           closable: true,
         });
       } catch (err) {
-        console.warn("Datetime modal init failed", err);
       }
     }
 
@@ -1072,7 +1054,6 @@
         dom.datetimeModal.removeAttribute("aria-hidden");
         dom.datetimeModal.removeAttribute("inert");
       }
-      console.debug("[datetime] modal opened", { activeTarget });
     };
 
     const closeModal = () => {
@@ -1086,7 +1067,6 @@
         dom.datetimeModal.setAttribute("aria-hidden", "true");
         dom.datetimeModal.setAttribute("inert", "true");
       }
-      console.debug("[datetime] modal closed");
     };
 
     dom.datetimeTriggers.forEach((btn) => {
@@ -1119,7 +1099,6 @@
         if (dateInput) dateInput.value = selectedDate;
         if (timeInput) timeInput.value = selectedTime;
         refreshDateTimeBadges(activeTarget);
-        console.debug("[datetime] save applied", { target: activeTarget, selectedDate, selectedTime });
         pendingTime = null;
         selectedModalDate = null;
         persistFormState();
@@ -1146,7 +1125,6 @@
 
     hydrateAllLocations();
     if (!dom.locationModal) return;
-    console.debug("[location] init start");
 
     let activeTarget = "birth";
     let activeSnapshot = null;
@@ -1185,7 +1163,6 @@
           closable: true,
         });
       } catch (err) {
-        console.warn("[location] Modal init failed", err);
       }
     }
 
@@ -1197,7 +1174,6 @@
         dom.locationModal.removeAttribute("aria-hidden");
         dom.locationModal.removeAttribute("inert");
       }
-      console.debug("[location] modal opened", { activeTarget });
     };
 
     const closeModal = () => {
@@ -1211,7 +1187,6 @@
         dom.locationModal.setAttribute("aria-hidden", "true");
         dom.locationModal.setAttribute("inert", "true");
       }
-      console.debug("[location] modal closed");
     };
 
     dom.locationTriggers.forEach((btn) => {
@@ -1279,7 +1254,6 @@
             activeSnapshot = getLocationValues(activeTarget);
           })
           .catch((err) => {
-            console.warn("[location] clipboard read failed", err);
           });
       });
     }
@@ -1312,7 +1286,6 @@
           dom.locationLookupLink.href = buildLookupHref(activeSnapshot);
         }
         persistFormState();
-        console.debug("[location] save applied", { activeTarget });
         closeModal();
       });
     }
@@ -1396,11 +1369,11 @@
     });
   }
 
-  HomeApp.dom = dom;
-  HomeApp.constants = constants;
-  HomeApp.runtime = runtime;
-  HomeApp.setReportTitle = setReportTitle;
-  HomeApp.utils = {
+  App.dom = dom;
+  App.constants = constants;
+  App.runtime = runtime;
+  App.setReportTitle = setReportTitle;
+  App.utils = {
     getSelectedMode,
     setTransitNow,
     setStatus,

@@ -9,6 +9,7 @@
     <script src="/static/vendor/flowbite/tailwind.js"></script>
     <script src="/static/vendor/flowbite/flowbite.min.js"></script>
     <script src="/static/vendor/flowbite/datepicker.min.js"></script>
+    <script>window.AppNamespace = "HomeApp";</script>
     <script>
       tailwind.config = {
         theme: {
@@ -73,7 +74,7 @@
                 <div class="flex items-center justify-between mb-4">
                   <div>
                     <p class="text-sm text-cyan-200/80 font-semibold">Chart input</p>
-                    <h2 class="text-xl font-semibold text-white">Configure request</h2>
+                    <h2 class="text-xl font-semibold text-white">Configuration</h2>
                   </div>
                 <div class="flex items-center gap-2">
                   <button
@@ -1611,11 +1612,13 @@
         <div id="svgModalBody" class="svg-modal-body"></div>
       </div>
     </div>
-    <script src="/static/js/home/shared.js"></script>
-    <script src="/static/js/home/config.js"></script>
-    <script src="/static/js/home/payloads.js"></script>
-    <script src="/static/js/home/render.js"></script>
-    <script src="/static/js/home/state.js"></script>
-    <script src="/static/js/home/actions.js"></script>
+    <script src="/static/js/shared/core.js"></script>
+    <script src="/static/js/shared/shared.js"></script>
+    <script src="/static/js/shared/config.js"></script>
+    <script src="/static/js/shared/payloads.js"></script>
+    <script src="/static/js/shared/render.js"></script>
+    <script src="/static/js/shared/state.js"></script>
+    <script src="/static/js/home/main.js"></script>
+    <script src="/static/js/shared/actions.js"></script>
   </body>
 </html>

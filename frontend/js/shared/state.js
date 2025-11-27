@@ -1,8 +1,9 @@
 (function () {
-  const HomeApp = window.HomeApp || {};
-  if (HomeApp.disabled) return;
+  const ns = window.AppNamespace || "HomeApp";
+  const App = (window[ns] = window[ns] || {});
+  if (App.disabled) return;
 
-  const { dom, constants, runtime, utils } = HomeApp;
+  const { dom, constants, runtime, utils } = App;
   const { STORAGE_INPUT, STORAGE_API } = constants;
 
   function readStoredState(key, fallback) {
@@ -17,7 +18,6 @@
         return { state: merged, hasData };
       }
     } catch (err) {
-      console.warn(`[state] Invalid data for ${key}, resetting.`, err);
     }
     localStorage.removeItem(key);
     return { state: base, hasData: false };
@@ -44,7 +44,6 @@
       localStorage.setItem(STORAGE_INPUT, JSON.stringify(next));
       runtime.hasLoadedState = true;
     } catch (err) {
-      console.warn("Could not save form state", err);
     }
   }
 
@@ -75,7 +74,6 @@
       runtime.storedReports = next.reports || {};
       runtime.hasLoadedState = true;
     } catch (err) {
-      console.warn("Could not save API state", err);
     }
   }
 
@@ -112,7 +110,7 @@
 
   function restoreSavedPreview(mode) {
     const saved = runtime.storedSvgs[mode];
-    if (saved && saved.svg) {
+    if (saved && saved.svg && dom.chartContainer) {
       dom.chartContainer.innerHTML = saved.svg;
       if (dom.summaryEl) {
         dom.summaryEl.innerHTML = saved.summary || "";
@@ -194,17 +192,16 @@
           Object.keys(runtime.storedSummaries).length ||
           Object.keys(runtime.storedReports).length);
       runtime.hasLoadedState = hasInputState || hasSavedApi;
-      if (HomeApp.utils && typeof HomeApp.utils.syncLocationRuntimeFromDom === "function") {
-        HomeApp.utils.syncLocationRuntimeFromDom();
+      if (App.utils && typeof App.utils.syncLocationRuntimeFromDom === "function") {
+        App.utils.syncLocationRuntimeFromDom();
       }
-      if (HomeApp.utils && typeof HomeApp.utils.refreshDateTimeBadges === "function") {
-        HomeApp.utils.refreshDateTimeBadges();
+      if (App.utils && typeof App.utils.refreshDateTimeBadges === "function") {
+        App.utils.refreshDateTimeBadges();
       }
-      if (HomeApp.utils && typeof HomeApp.utils.refreshLocationBadges === "function") {
-        HomeApp.utils.refreshLocationBadges();
+      if (App.utils && typeof App.utils.refreshLocationBadges === "function") {
+        App.utils.refreshLocationBadges();
       }
     } catch (err) {
-      console.warn("Could not load saved form state", err);
     }
   }
 
@@ -233,11 +230,11 @@
     }
     restoreSavedModeState(mode);
     restoreSavedPreview(mode);
-    if (HomeApp.utils && typeof HomeApp.utils.refreshDateTimeBadges === "function") {
-      HomeApp.utils.refreshDateTimeBadges();
+    if (App.utils && typeof App.utils.refreshDateTimeBadges === "function") {
+      App.utils.refreshDateTimeBadges();
     }
-    if (HomeApp.utils && typeof HomeApp.utils.refreshLocationBadges === "function") {
-      HomeApp.utils.refreshLocationBadges();
+    if (App.utils && typeof App.utils.refreshLocationBadges === "function") {
+      App.utils.refreshLocationBadges();
     }
   }
 
@@ -250,7 +247,6 @@
         try {
           utils.persistFormState();
         } catch (err) {
-          console.warn("[state] Auto-persist failed", err);
         }
       }, 200);
     };
@@ -270,8 +266,8 @@
       runtime.storedReports = {};
       runtime.hasChart = false;
       runtime.hasLoadedState = false;
-      if (HomeApp.runtime) {
-        HomeApp.runtime.locationValues = {};
+      if (App.runtime) {
+        App.runtime.locationValues = {};
       }
       const resetInputs = {
         name: "Subject",
@@ -318,18 +314,17 @@
       const natalRadio = document.querySelector('input[name="mode"][value="natal"]');
       if (natalRadio) natalRadio.checked = true;
       updateModeVisibility();
-      if (HomeApp.utils && typeof HomeApp.utils.refreshDateTimeBadges === "function") {
-        HomeApp.utils.refreshDateTimeBadges();
+      if (App.utils && typeof App.utils.refreshDateTimeBadges === "function") {
+        App.utils.refreshDateTimeBadges();
       }
-      if (HomeApp.utils && typeof HomeApp.utils.refreshLocationBadges === "function") {
-        HomeApp.utils.refreshLocationBadges();
+      if (App.utils && typeof App.utils.refreshLocationBadges === "function") {
+        App.utils.refreshLocationBadges();
       }
-      if (HomeApp.utils && typeof HomeApp.utils.syncLocationRuntimeFromDom === "function") {
-        HomeApp.utils.syncLocationRuntimeFromDom();
+      if (App.utils && typeof App.utils.syncLocationRuntimeFromDom === "function") {
+        App.utils.syncLocationRuntimeFromDom();
       }
       utils.setStatus("Local state cleared.");
     } catch (err) {
-      console.warn("Could not clear state", err);
       utils.setStatus("Failed to clear saved state.", true);
     }
   }
@@ -345,7 +340,7 @@
 
   window.clearSavedState = clearSavedState;
 
-  HomeApp.state = {
+  App.state = {
     getDefaultState,
     getDefaultApiState,
     saveFormState,

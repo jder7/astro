@@ -1,8 +1,9 @@
 (function () {
-  const HomeApp = window.HomeApp || {};
-  if (HomeApp.disabled) return;
+  const ns = window.AppNamespace || "HomeApp";
+  const App = (window[ns] = window[ns] || {});
+  if (App.disabled) return;
 
-  const { dom, constants } = HomeApp;
+  const { dom, constants } = App;
   const { DEFAULT_CONFIG, STORAGE_CONFIG } = constants;
   const configInputs = dom.configInputs || {};
 
@@ -47,7 +48,6 @@
       const raw = localStorage.getItem(STORAGE_CONFIG);
       if (raw) stored = JSON.parse(raw);
     } catch (err) {
-      console.warn("Could not load config from localStorage", err);
     }
     const merged = { ...DEFAULT_CONFIG, ...stored };
     // Backward compatibility: migrate legacy base_aspect_points into active_points.
@@ -78,7 +78,6 @@
     try {
       localStorage.setItem(STORAGE_CONFIG, JSON.stringify(cfg));
     } catch (err) {
-      console.warn("Could not save config to localStorage", err);
     }
     return cfg;
   }
@@ -116,7 +115,7 @@
   toggleSiderealVisibility(configInputs.zodiac_type?.value);
   bindConfigInputs();
 
-  HomeApp.config = {
+  App.config = {
     getConfigFromInputs,
     loadConfig,
     saveConfig,

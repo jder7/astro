@@ -1,8 +1,9 @@
 (function () {
-  const HomeApp = window.HomeApp || {};
-  if (HomeApp.disabled) return;
+  const ns = window.AppNamespace || "HomeApp";
+  const App = (window[ns] = window[ns] || {});
+  if (App.disabled) return;
 
-  const { dom, constants, config } = HomeApp;
+  const { dom, constants, config } = App;
 
   const ASPECTS = [
     { name: "conjunction", angle: 0, orb: 6 },
@@ -55,7 +56,6 @@
         : result;
       return filtered.length ? filtered : fallback;
     } catch (err) {
-      console.warn("Could not read aspect base points from config", err);
       return fallback;
     }
   }
@@ -539,7 +539,7 @@
     `;
   }
 
-  HomeApp.render = {
+  App.render = {
     renderNatalSummary,
     renderTransitSummary,
     renderCombinedSummary,

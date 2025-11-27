@@ -1,8 +1,9 @@
 (function () {
-  const HomeApp = window.HomeApp || {};
-  if (HomeApp.disabled) return;
+  const ns = window.AppNamespace || "HomeApp";
+  const App = (window[ns] = window[ns] || {});
+  if (App.disabled) return;
 
-  const { config } = HomeApp;
+  const { config } = App;
   const { getConfigFromInputs } = config;
 
   function getValue(id) {
@@ -98,7 +99,7 @@
       sidereal_mode: config.zodiac_type === "Sidereal" ? config.sidereal_mode : null,
       active_points: Array.isArray(config.active_points) && config.active_points.length
         ? config.active_points
-        : (HomeApp?.constants?.DEFAULT_CONFIG?.active_points || []),
+        : (App?.constants?.DEFAULT_CONFIG?.active_points || []),
     };
 
     if (mode === "natal") {
@@ -213,7 +214,7 @@
     };
   }
 
-  HomeApp.payloads = {
+  App.payloads = {
     getValue,
     toFloat,
     getDateTimeParts,
