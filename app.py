@@ -63,6 +63,28 @@ async def home() -> FileResponse:
     return FileResponse(FRONTEND_DIR / "home.html")
 
 
+@app.get("/advanced", include_in_schema=False)
+async def advanced() -> FileResponse:
+  """
+  Serve the advanced layout page.
+
+  The page loads `frontend/advanced.html` with its own scoped CSS/JS from
+  `/static/css/advanced` and `/static/js/advanced`.
+  """
+  return FileResponse(FRONTEND_DIR / "advanced.html")
+
+
+@app.get("/esoteric", include_in_schema=False)
+async def esoteric() -> FileResponse:
+  """
+  Serve the esoteric layout page.
+
+  The page loads `frontend/esoteric.html` with its own scoped CSS/JS from
+  `/static/css/esoteric` and `/static/js/esoteric`.
+  """
+  return FileResponse(FRONTEND_DIR / "esoteric.html")
+
+
 # API routers – all mounted under `/api`
 API_PREFIX = "/api"
 

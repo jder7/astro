@@ -1,0 +1,202 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 20% 20%, rgba(67, 97, 238, 0.18), transparent 25%),
+    radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.16), transparent 28%),
+    linear-gradient(145deg, #050910, #0a1224 55%, #070d1c);
+  color: #e6edf7;
+}
+
+a {
+  color: inherit;
+}
+
+.page-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 3rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.header-text h1 {
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  margin: 0.3rem 0;
+}
+
+.header-text p {
+  margin: 0;
+  color: #c7d2e1;
+}
+
+.home-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.9rem;
+  border: 1px solid #1f2a44;
+  background: linear-gradient(140deg, rgba(56, 189, 248, 0.12), rgba(99, 102, 241, 0.1));
+  color: #e6edf7;
+  box-shadow: 0 12px 28px rgba(56, 189, 248, 0.18);
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-link:hover {
+  transform: translateY(-1px);
+  border-color: #38bdf8;
+  box-shadow: 0 16px 36px rgba(56, 189, 248, 0.24);
+}
+
+.grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.panel {
+  background: rgba(8, 15, 29, 0.9);
+  border: 1px solid #17223a;
+  border-radius: 1.1rem;
+  padding: 1.25rem;
+  box-shadow: 0 18px 44px rgba(6, 12, 27, 0.55);
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.panel:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
+  box-shadow: 0 22px 52px rgba(56, 189, 248, 0.16);
+}
+
+.panel h2 {
+  margin: 0.35rem 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.panel p {
+  margin: 0;
+  color: #c7d2e1;
+  line-height: 1.6;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid #1f2a44;
+  background: rgba(56, 189, 248, 0.12);
+  color: #dce9ff;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 0.9rem;
+  background: #0e172a;
+  border: 1px solid #1f2a44;
+  color: #c7d2e1;
+  font-weight: 600;
+  margin-top: 0.4rem;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 60% 20%, rgba(56, 189, 248, 0.08), transparent 40%);
+  pointer-events: none;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.9rem;
+  border: 1px solid #38bdf8;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(59, 130, 246, 0.1));
+  color: #e8f4ff;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.cta-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(56, 189, 248, 0.2);
+}
+
+.feature-list {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.feature-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #d6e1f3;
+}
+
+.feature-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+}
+
+[data-fade-in] {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+[data-fade-in].visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .page-header {
+    flex-direction: row-reverse;
+    align-items: center;
+  }
+
+  .header-text {
+    max-width: 80%;
+  }
+}

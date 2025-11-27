@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Astro App – Esoteric</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <script src="/static/vendor/flowbite/tailwind.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ['"Space Grotesk"', "Inter", "system-ui", "sans-serif"],
+              body: ["Inter", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="/static/css/esoteric/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="page-header">
+        <a class="home-link" href="/" aria-label="Back to home">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12L12 4l9 8" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10" />
+          </svg>
+        </a>
+        <div class="header-text">
+          <p class="badge" data-fade-in>Esoteric Space</p>
+          <h1 data-fade-in>Symbolic, karmic, and mythic lenses</h1>
+          <p data-fade-in>
+            Shift into occult techniques, asteroids, fixed stars, and symbolic timing systems without losing the chart’s
+            clarity.
+          </p>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel hero" data-fade-in>
+          <p class="badge">Deep focus</p>
+          <h2>Esoteric overlays</h2>
+          <p>
+            Add draconic, heliocentric, and karmic overlays while keeping the base wheel grounded. Compare mythical and
+            psychological storylines in one view.
+          </p>
+          <div class="cta-row">
+            <span class="pill">Fixed stars &amp; parans</span>
+            <span class="pill">Asteroid palettes</span>
+            <span class="pill">Lot calculations</span>
+          </div>
+          <div class="cta-row">
+            <a class="cta-button" href="/">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l5 5L20 7" />
+              </svg>
+              Back to main
+            </a>
+            <a class="cta-button" href="/advanced">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
+              </svg>
+              Jump to advanced
+            </a>
+          </div>
+        </section>
+
+        <section class="panel" data-fade-in>
+          <p class="badge">Occult timing</p>
+          <h2>Symbolic triggers</h2>
+          <p>Blend planetary days/hours, decans, terms, and lunar mansions with your base timing flows.</p>
+          <ul class="feature-list">
+            <li><span class="feature-dot"></span>Hermetic planetary hours with custom daybreak</li>
+            <li><span class="feature-dot"></span>Decans, bounds, and monomoiria highlights</li>
+            <li><span class="feature-dot"></span>Lunar mansion ingress alerts</li>
+          </ul>
+        </section>
+
+        <section class="panel" data-fade-in>
+          <p class="badge">Mythic</p>
+          <h2>Story weaving</h2>
+          <p>Pair archetypal keywords with asteroid groupings and aspect patterns to build narrative-ready briefs.</p>
+          <ul class="feature-list">
+            <li><span class="feature-dot"></span>Keyword decks tied to asteroids and stars</li>
+            <li><span class="feature-dot"></span>Midpoint trees and yod/kite detection</li>
+            <li><span class="feature-dot"></span>Save notes per overlay for client work</li>
+          </ul>
+        </section>
+
+        <section class="panel" data-fade-in>
+          <p class="badge">Continuity</p>
+          <h2>Shared presets</h2>
+          <p>Use the same saved configurations across the home and advanced pages so your esoteric stack stays aligned.</p>
+          <ul class="feature-list">
+            <li><span class="feature-dot"></span>Carry themes and active points across pages</li>
+            <li><span class="feature-dot"></span>Reuse report exports with esoteric overlays</li>
+            <li><span class="feature-dot"></span>Keep notes synced for each chart mode</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+    <script src="/static/js/esoteric/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Astro App – Advanced</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <script src="/static/vendor/flowbite/tailwind.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ['"Space Grotesk"', "Inter", "system-ui", "sans-serif"],
+              body: ["Inter", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="/static/css/advanced/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="page-header">
+        <a class="home-link" href="/" aria-label="Back to home">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12L12 4l9 8" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10" />
+          </svg>
+        </a>
+        <div class="header-text">
+          <p class="badge" data-fade-in>Advanced Suite</p>
+          <h1 data-fade-in>Research-grade astrology workflows</h1>
+          <p data-fade-in>
+            Layer predictive techniques, harmonics, and custom point sets to explore charts beyond the quickstart view.
+          </p>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel hero" data-fade-in>
+          <p class="badge">Precision focused</p>
+          <h2>Advanced chart stack</h2>
+          <p>
+            Configure multiple wheels, alternate house systems, and sidereal modes in one place. Compare snapshots or
+            save presets for repeatable research.
+          </p>
+          <div class="cta-row">
+            <span class="pill">Harmonic &amp; composite</span>
+            <span class="pill">Ingress snapshots</span>
+            <span class="pill">Custom points &amp; asteroids</span>
+          </div>
+          <div class="cta-row">
+            <a class="cta-button" href="/">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l5 5L20 7" />
+              </svg>
+              Start a chart
+            </a>
+            <a class="cta-button" href="/esoteric">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
+              </svg>
+              Explore esoteric
+            </a>
+          </div>
+        </section>
+
+        <section class="panel" data-fade-in>
+          <p class="badge">Predictive</p>
+          <h2>Time lords &amp; techniques</h2>
+          <p>Experiment with progressions, directions, profections, and solar arcs side by side.</p>
+          <ul class="feature-list">
+            <li><span class="feature-dot"></span>Primary/secondary directions with adjustable keys</li>
+            <li><span class="feature-dot"></span>Zodiacal releasing and annual profections</li>
+            <li><span class="feature-dot"></span>Transit stacks with custom orb profiles</li>
+          </ul>
+        </section>
+
+        <section class="panel" data-fade-in>
+          <p class="badge">Analysis</p>
+          <h2>Aspect intelligence</h2>
+          <p>Refine summaries with bespoke aspect sets, declination parallels, and midpoint trees.</p>
+          <ul class="feature-list">
+            <li><span class="feature-dot"></span>Save point lists per research thread</li>
+            <li><span class="feature-dot"></span>See orbs highlighted by strength</li>
+            <li><span class="feature-dot"></span>Export SVG or PDF packets instantly</li>
+          </ul>
+        </section>
+
+        <section class="panel" data-fade-in>
+          <p class="badge">Data</p>
+          <h2>Presets &amp; exports</h2>
+          <p>Keep your custom configurations close and reuse them across home, advanced, or esoteric spaces.</p>
+          <ul class="feature-list">
+            <li><span class="feature-dot"></span>Save loadouts for house systems and sidereal modes</li>
+            <li><span class="feature-dot"></span>One-click export to CSV, SVG, and PDF</li>
+            <li><span class="feature-dot"></span>Sync report themes for client handouts</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+    <script src="/static/js/advanced/main.js"></script>
+  </body>
+</html>

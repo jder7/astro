@@ -1358,6 +1358,44 @@
     });
   }
 
+  function initNavMenu() {
+    const toggle = document.getElementById("navToggle");
+    const menu = document.getElementById("navMenu");
+    if (!toggle || !menu) return;
+
+    const closeMenu = () => {
+      if (menu.classList.contains("hidden")) return;
+      menu.classList.add("hidden");
+      toggle.setAttribute("aria-expanded", "false");
+    };
+
+    const openMenu = () => {
+      menu.classList.remove("hidden");
+      toggle.setAttribute("aria-expanded", "true");
+    };
+
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = toggle.getAttribute("aria-expanded") === "true";
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      if (menu.classList.contains("hidden")) return;
+      if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+        closeMenu();
+      }
+    });
+
+    menu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", closeMenu);
+    });
+  }
+
   HomeApp.dom = dom;
   HomeApp.constants = constants;
   HomeApp.runtime = runtime;
@@ -1382,4 +1420,5 @@
 
   initDatetimeModal();
   initLocationModal();
+  initNavMenu();
 })();

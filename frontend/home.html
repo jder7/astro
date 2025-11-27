@@ -34,7 +34,7 @@
   <body class="bg-slate-950 text-slate-50 font-body min-h-screen">
     <div class="bg-[radial-gradient(circle_at_10%_20%,rgba(56,189,248,0.15),transparent_25%),radial-gradient(circle_at_90%_10%,rgba(129,140,248,0.15),transparent_25%),radial-gradient(circle_at_50%_75%,rgba(14,165,233,0.12),transparent_30%)]">
       <header class="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-8">
-        <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start justify-between gap-4 relative">
           <div>
             <p class="text-sm uppercase tracking-[0.4em] text-cyan-200/70 font-semibold">Astrology Toolkit</p>
             <h1 class="font-display text-3xl sm:text-4xl mt-2 leading-tight">Astro App</h1>
@@ -43,9 +43,26 @@
               the Sun, Moon, Ascendant and their tightest aspects.
             </p>
           </div>
-          <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-slate-800/70 border border-slate-700 text-xs font-semibold tracking-wide text-cyan-200">
-            API-ready
-          </span>
+          <div class="flex items-center gap-3">
+            <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-slate-800/70 border border-slate-700 text-xs font-semibold tracking-wide text-cyan-200">
+              API-ready
+            </span>
+            <button
+              type="button"
+              id="navToggle"
+              class="nav-toggle"
+              aria-expanded="false"
+              aria-controls="navMenu"
+              aria-label="Open navigation menu"
+            >
+              <span class="nav-toggle-bars" aria-hidden="true"></span>
+            </button>
+          </div>
+          <div id="navMenu" class="nav-menu hidden" role="menu" aria-label="Site navigation">
+            <a href="/" role="menuitem">Home</a>
+            <a href="/advanced" role="menuitem">Advanced</a>
+            <a href="/esoteric" role="menuitem">Esoteric</a>
+          </div>
         </div>
       </header>
 
