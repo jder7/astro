@@ -180,6 +180,53 @@
     return list.sort((a, b) => a.aspect.orb - b.aspect.orb);
   }
 
+  function renderAspectMatrix(points, keys, aspects) {
+    if (!keys.length || !aspects.length) return "";
+    const norm = (a, b) => (a < b ? `${a}__${b}` : `${b}__${a}`);
+    const aspectMap = new Map();
+    aspects.forEach(({ baseKey, otherKey, aspect }) => {
+      aspectMap.set(norm(baseKey, otherKey), {
+        icon: aspect.icon || "✶",
+        name: aspect.name || "",
+        orb: aspect.orb,
+      });
+    });
+    const iconFor = (key) => {
+      const pt = points[key] || {};
+      return POINTS_ICONS[(pt.name || "").toLowerCase()] || "✶";
+    };
+    const rows = keys
+      .map((rowKey, rowIdx) => {
+        const rowPt = points[rowKey] || {};
+        const cells = keys
+          .map((colKey, colIdx) => {
+            if (colIdx === rowIdx) {
+              return `<td class="adv-matrix-cell adv-matrix-diag" title="${rowPt.name || rowKey}">${iconFor(rowKey)}</td>`;
+            }
+            const pair = norm(rowKey, colKey);
+            const hit = aspectMap.get(pair);
+            if (!hit) return '<td class="adv-matrix-empty"></td>';
+            const note = hit.name ? ` — ${capitalise(hit.name)}` : "";
+            const colName = points[colKey]?.name || colKey;
+            if (colIdx < rowIdx) {
+              return `<td class="adv-matrix-cell" title="${rowPt.name || rowKey} × ${colName}${note}">${hit.icon || "✶"}</td>`;
+            }
+            const orbLabel = Number.isFinite(hit.orb) ? hit.orb.toFixed(2) : "";
+            return `<td class="adv-matrix-cell adv-matrix-orb" title="${rowPt.name || rowKey} × ${colName}${note}">${orbLabel}</td>`;
+          })
+          .join("");
+        return `<tr>${cells}</tr>`;
+      })
+      .join("");
+    return `
+      <div class="adv-matrix-wrap">
+        <table class="adv-aspect-matrix">
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
   function renderAspectRow(entry) {
     const { baseKey, otherKey, aspect, base, other } = entry;
     const baseSign = SIGN_META[base.sign] || { name: base.sign || "", icon: base.emoji || "" };
@@ -287,14 +334,23 @@
       .map(([k, v]) => renderPointRowProxy(v, { labelOverride: formatHouseLabel(v.house || k) }))
       .join("");
     const aspects = computeAspects(points, filteredPointKeys);
+    const aspectKeySet = aspects.reduce((set, a) => {
+      set.add(a.baseKey);
+      set.add(a.otherKey);
+      return set;
+    }, new Set());
+    const matrixKeys = filteredPointKeys.filter((k) => aspectKeySet.has(k));
     const aspectRows = aspects.map(renderAspectRow).join("");
+    const aspectMatrix = renderAspectMatrix(points, matrixKeys, aspects);
+    const aspectContent =
+      aspectMatrix + (aspectRows || "<p class=\"hint\">No aspects found for active points.</p>");
 
     const metaSource = source.birth || source.moment || source.first || source;
     const meta = renderMetaHeader(metaSource);
     const sections = [
-      renderSection("Points", pointRows || "<p class=\"hint\">No points returned.</p>", true),
+      renderSection("Aspects", aspectContent, true),
+      renderSection("Points", pointRows || "<p class=\"hint\">No points returned.</p>", false),
       renderSection("Houses", houseRows || "<p class=\"hint\">No houses returned.</p>", false),
-      renderSection("Aspects", aspectRows || "<p class=\"hint\">No aspects found for active points.</p>", false),
     ].join("");
 
     dom.summaryEl.innerHTML = `${meta}${sections}`;
