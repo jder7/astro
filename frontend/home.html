@@ -5,7 +5,10 @@
     <title>Astro App – Natal &amp; Transit Charts</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-    <script src="https://cdn.tailwindcss.com"></script>
+  
+    <script src="/static/vendor/flowbite/tailwind.js"></script>
+    <script src="/static/vendor/flowbite/flowbite.min.js"></script>
+    <script src="/static/vendor/flowbite/datepicker.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -26,13 +29,6 @@
         },
       };
     </script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
-      integrity="sha512-4CrzvWKAMiv1znMPFPA/lqlo9ykTDj9GdHwq3iujHBNSnopB7UpRz45dQ/gGn5ed7DF1NsA8OmUp7YHEV+mFKg=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
     <link rel="stylesheet" href="/static/css/home.css" />
   </head>
   <body class="bg-slate-950 text-slate-50 font-body min-h-screen">
@@ -577,9 +573,6 @@
         </div>
       </footer>
     </div>
-
-    <script src="/static/vendor/flowbite/flowbite.min.js"></script>
-    <script src="/static/vendor/flowbite/datepicker.min.js"></script>
     <div
       id="datetime-modal"
       tabindex="-1"
