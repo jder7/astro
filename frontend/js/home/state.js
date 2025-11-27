@@ -166,6 +166,9 @@
       runtime.storedSummaries = apiState.summaries || {};
       runtime.storedReports = apiState.reports || {};
       runtime.hasLoadedState = true;
+      if (HomeApp.utils && typeof HomeApp.utils.syncLocationRuntimeFromDom === "function") {
+        HomeApp.utils.syncLocationRuntimeFromDom();
+      }
       if (HomeApp.utils && typeof HomeApp.utils.refreshDateTimeBadges === "function") {
         HomeApp.utils.refreshDateTimeBadges();
       }
@@ -202,6 +205,12 @@
     }
     restoreSavedModeState(mode);
     restoreSavedPreview(mode);
+    if (HomeApp.utils && typeof HomeApp.utils.refreshDateTimeBadges === "function") {
+      HomeApp.utils.refreshDateTimeBadges();
+    }
+    if (HomeApp.utils && typeof HomeApp.utils.refreshLocationBadges === "function") {
+      HomeApp.utils.refreshLocationBadges();
+    }
   }
 
   function clearSavedState() {
@@ -216,6 +225,9 @@
       runtime.storedReports = {};
       runtime.hasChart = false;
       runtime.hasLoadedState = false;
+      if (HomeApp.runtime) {
+        HomeApp.runtime.locationValues = {};
+      }
       const resetInputs = {
         name: "Subject",
         dateInput: "1990-01-01",
@@ -266,6 +278,9 @@
       }
       if (HomeApp.utils && typeof HomeApp.utils.refreshLocationBadges === "function") {
         HomeApp.utils.refreshLocationBadges();
+      }
+      if (HomeApp.utils && typeof HomeApp.utils.syncLocationRuntimeFromDom === "function") {
+        HomeApp.utils.syncLocationRuntimeFromDom();
       }
       utils.setStatus("Local state cleared.");
     } catch (err) {

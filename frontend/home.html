@@ -353,38 +353,55 @@
                       </div>
                       <label for="firstName" class="flowbite-label">Name</label>
                       <input id="firstName" name="firstName" class="flowbite-input" value="Partner A" />
-                      <div class="grid sm:grid-cols-2 gap-3">
+                      <div class="flex items-center justify-between gap-3">
                         <div>
-                          <label class="flowbite-label" for="firstDate">Date</label>
-                          <input id="firstDate" class="flowbite-input" value="1990-01-01" />
+                          <p class="text-xs uppercase tracking-[0.25em] text-cyan-200/80 font-semibold">Date &amp; time</p>
+                          <p class="text-sm text-slate-300">Birth moment</p>
                         </div>
-                        <div>
-                          <label class="flowbite-label" for="firstTime">Time</label>
-                          <input id="firstTime" class="flowbite-input" value="12:00" />
-                        </div>
+                        <button
+                          type="button"
+                          data-datetime-target="first"
+                          data-modal-target="datetime-modal"
+                          data-modal-toggle="datetime-modal"
+                          class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        >
+                          <span id="firstDatetimeDisplay" class="whitespace-nowrap">1990-01-01 · 12:00</span>
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                          </svg>
+                          <span class="sr-only">Edit Partner A date and time</span>
+                        </button>
                       </div>
-                      <div class="grid sm:grid-cols-2 gap-3">
+                      <input id="firstDate" name="firstDate" type="hidden" value="1990-01-01" />
+                      <input id="firstTime" name="firstTime" type="hidden" value="12:00" />
+                      <div class="flex items-center justify-between gap-3">
                         <div>
-                          <label class="flowbite-label" for="firstLat">Latitude</label>
-                          <input id="firstLat" type="number" step="0.0001" class="flowbite-input" value="52.3702" />
+                          <p class="text-xs uppercase tracking-[0.25em] text-cyan-200/80 font-semibold">Location</p>
+                          <p class="text-sm text-slate-300">Birth place</p>
                         </div>
-                        <div>
-                          <label class="flowbite-label" for="firstLng">Longitude</label>
-                          <input id="firstLng" type="number" step="0.0001" class="flowbite-input" value="4.8952" />
-                        </div>
+                        <button
+                          type="button"
+                          data-location-target="first"
+                          data-modal-target="location-modal"
+                          data-modal-toggle="location-modal"
+                          class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        >
+                          <span id="firstLocationDisplay" class="text-left leading-snug max-w-[220px] sm:max-w-[260px]">
+                            Amsterdam, NL
+                          </span>
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                          </svg>
+                          <span class="sr-only">Edit Partner A location</span>
+                        </button>
                       </div>
-                      <label class="flowbite-label" for="firstTz">Timezone</label>
-                      <input id="firstTz" class="flowbite-input" value="Europe/Amsterdam" />
-                      <div class="grid sm:grid-cols-2 gap-3">
-                        <div>
-                          <label class="flowbite-label" for="firstCity">City</label>
-                          <input id="firstCity" class="flowbite-input" value="Amsterdam" />
-                        </div>
-                        <div>
-                          <label class="flowbite-label" for="firstNation">Country code</label>
-                          <input id="firstNation" class="flowbite-input" value="NL" maxlength="2" />
-                        </div>
-                      </div>
+                      <input id="firstLat" name="firstLat" type="hidden" value="52.3702" />
+                      <input id="firstLng" name="firstLng" type="hidden" value="4.8952" />
+                      <input id="firstTz" name="firstTz" type="hidden" value="Europe/Amsterdam" />
+                      <input id="firstCity" name="firstCity" type="hidden" value="Amsterdam" />
+                      <input id="firstNation" name="firstNation" type="hidden" value="NL" />
                     </div>
                     <div class="space-y-3">
                       <div class="flex items-center justify-between">
@@ -393,38 +410,55 @@
                       </div>
                       <label for="secondName" class="flowbite-label">Name</label>
                       <input id="secondName" name="secondName" class="flowbite-input" value="Partner B" />
-                      <div class="grid sm:grid-cols-2 gap-3">
+                      <div class="flex items-center justify-between gap-3">
                         <div>
-                          <label class="flowbite-label" for="secondDate">Date</label>
-                          <input id="secondDate" class="flowbite-input" value="1992-02-02" />
+                          <p class="text-xs uppercase tracking-[0.25em] text-cyan-200/80 font-semibold">Date &amp; time</p>
+                          <p class="text-sm text-slate-300">Birth moment</p>
                         </div>
-                        <div>
-                          <label class="flowbite-label" for="secondTime">Time</label>
-                          <input id="secondTime" class="flowbite-input" value="14:00" />
-                        </div>
+                        <button
+                          type="button"
+                          data-datetime-target="second"
+                          data-modal-target="datetime-modal"
+                          data-modal-toggle="datetime-modal"
+                          class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        >
+                          <span id="secondDatetimeDisplay" class="whitespace-nowrap">1992-02-02 · 14:00</span>
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                          </svg>
+                          <span class="sr-only">Edit Partner B date and time</span>
+                        </button>
                       </div>
-                      <div class="grid sm:grid-cols-2 gap-3">
+                      <input id="secondDate" name="secondDate" type="hidden" value="1992-02-02" />
+                      <input id="secondTime" name="secondTime" type="hidden" value="14:00" />
+                      <div class="flex items-center justify-between gap-3">
                         <div>
-                          <label class="flowbite-label" for="secondLat">Latitude</label>
-                          <input id="secondLat" type="number" step="0.0001" class="flowbite-input" value="40.7128" />
+                          <p class="text-xs uppercase tracking-[0.25em] text-cyan-200/80 font-semibold">Location</p>
+                          <p class="text-sm text-slate-300">Birth place</p>
                         </div>
-                        <div>
-                          <label class="flowbite-label" for="secondLng">Longitude</label>
-                          <input id="secondLng" type="number" step="0.0001" class="flowbite-input" value="-74.0060" />
-                        </div>
+                        <button
+                          type="button"
+                          data-location-target="second"
+                          data-modal-target="location-modal"
+                          data-modal-toggle="location-modal"
+                          class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        >
+                          <span id="secondLocationDisplay" class="text-left leading-snug max-w-[220px] sm:max-w-[260px]">
+                            New York, US
+                          </span>
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                          </svg>
+                          <span class="sr-only">Edit Partner B location</span>
+                        </button>
                       </div>
-                      <label class="flowbite-label" for="secondTz">Timezone</label>
-                      <input id="secondTz" class="flowbite-input" value="America/New_York" />
-                      <div class="grid sm:grid-cols-2 gap-3">
-                        <div>
-                          <label class="flowbite-label" for="secondCity">City</label>
-                          <input id="secondCity" class="flowbite-input" value="New York" />
-                        </div>
-                        <div>
-                          <label class="flowbite-label" for="secondNation">Country code</label>
-                          <input id="secondNation" class="flowbite-input" value="US" maxlength="2" />
-                        </div>
-                      </div>
+                      <input id="secondLat" name="secondLat" type="hidden" value="40.7128" />
+                      <input id="secondLng" name="secondLng" type="hidden" value="-74.0060" />
+                      <input id="secondTz" name="secondTz" type="hidden" value="America/New_York" />
+                      <input id="secondCity" name="secondCity" type="hidden" value="New York" />
+                      <input id="secondNation" name="secondNation" type="hidden" value="US" />
                     </div>
                   </div>
                 </div>
@@ -594,21 +628,41 @@
               datepicker-autoselect-today
               class="mx-auto flex justify-center [&>div>div]:shadow-none [&>div>div]:bg-slate-900 [&_div>button]:bg-slate-900"
             ></div>
-            <div class="mt-3 grid sm:grid-cols-2 gap-3">
-              <div>
-                <label for="datetimeDateField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em] block mb-1">
-                  Precise date
-                </label>
-                <input
-                  type="date"
-                  id="datetimeDateField"
-                  class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500"
-                  value="2025-01-01"
-                />
-                <p class="text-[11px] text-slate-400 mt-1">Use the calendar or enter a date directly.</p>
-              </div>
-              <div>
-                <label for="datetimeTimeField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em] block mb-1">Precise time</label>
+              <div class="mt-3 grid sm:grid-cols-2 gap-3">
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label for="datetimeDateField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em]">
+                      Precise date
+                    </label>
+                    <button
+                      type="button"
+                      id="datetimeTodayBtn"
+                      class="text-[11px] px-2 py-1 rounded-md border border-slate-700 text-cyan-200 hover:border-cyan-400 hover:text-white"
+                    >
+                      Today
+                    </button>
+                  </div>
+                  <input
+                    type="date"
+                    id="datetimeDateField"
+                    class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500"
+                    value="2025-01-01"
+                  />
+                  <p class="text-[11px] text-slate-400 mt-1">Use the calendar or enter a date directly.</p>
+                </div>
+                <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label for="datetimeTimeField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em]">
+                    Precise time
+                  </label>
+                  <button
+                    type="button"
+                    id="datetimeNowBtn"
+                    class="text-[11px] px-2 py-1 rounded-md border border-slate-700 text-cyan-200 hover:border-cyan-400 hover:text-white"
+                  >
+                    Now
+                  </button>
+                </div>
                 <input
                   type="time"
                   id="datetimeTimeField"
@@ -712,12 +766,25 @@
                       <input
                         id="locationNationField"
                         type="text"
-                        value="NL"
-                        maxlength="2"
+                        value="Netherlands"
                         list="countryCodeOptions"
                         class="flowbite-input"
                         placeholder="Search or pick country"
                       />
+                    </div>
+                    <div class="sm:col-span-2 text-xs text-slate-400">
+                      <a
+                        id="locationLookupLink"
+                        href="https://www.google.com/maps/search/?api=1&query="
+                        target="_blank"
+                        rel="noreferrer"
+                        class="text-cyan-200 hover:text-cyan-100 underline-offset-4 hover:underline"
+                      >
+                        Find coordinates for this city
+                      </a>
+                      <p class="mt-1 text-[11px] text-slate-500">
+                        Open the map, right-click the city, copy its coordinates, then paste them below.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -729,7 +796,19 @@
                 </div>
                 <div class="space-y-3">
                   <div>
-                    <label for="locationTzField" class="flowbite-label">Timezone</label>
+                    <div class="flex items-center justify-between gap-2">
+                      <label for="locationTzField" class="flowbite-label mb-0">Timezone</label>
+                      <button
+                        type="button"
+                        id="locationTzCurrentBtn"
+                        class="inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-md border border-slate-700 text-cyan-200 hover:border-cyan-400 hover:text-white"
+                        aria-label="Use detected timezone"
+                      >
+                        <span class="text-slate-400">Current timezone:</span>
+                        <span id="locationTzCurrentLabel" class="font-semibold text-cyan-100">--</span>
+                        <span class="text-slate-400">· use this</span>
+                      </button>
+                    </div>
                     <input
                       id="locationTzField"
                       type="text"
@@ -747,6 +826,19 @@
                     <div>
                       <label for="locationLngField" class="flowbite-label">Longitude</label>
                       <input id="locationLngField" type="number" step="0.0001" value="4.8952" class="flowbite-input" />
+                    </div>
+                    <div class="sm:col-span-2">
+                      <button
+                        type="button"
+                        id="locationPasteBtn"
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-100 hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      >
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Paste coordinates from clipboard
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -774,254 +866,254 @@
       </div>
     </div>
     <datalist id="countryCodeOptions">
-      <option value="AF">Afghanistan</option>
-      <option value="AX">Aland Islands</option>
-      <option value="AL">Albania</option>
-      <option value="DZ">Algeria</option>
-      <option value="AS">American Samoa</option>
-      <option value="AD">Andorra</option>
-      <option value="AO">Angola</option>
-      <option value="AI">Anguilla</option>
-      <option value="AQ">Antarctica</option>
-      <option value="AG">Antigua and Barbuda</option>
-      <option value="AR">Argentina</option>
-      <option value="AM">Armenia</option>
-      <option value="AW">Aruba</option>
-      <option value="AU">Australia</option>
-      <option value="AT">Austria</option>
-      <option value="AZ">Azerbaijan</option>
-      <option value="BS">Bahamas</option>
-      <option value="BH">Bahrain</option>
-      <option value="BD">Bangladesh</option>
-      <option value="BB">Barbados</option>
-      <option value="BY">Belarus</option>
-      <option value="BE">Belgium</option>
-      <option value="BZ">Belize</option>
-      <option value="BJ">Benin</option>
-      <option value="BM">Bermuda</option>
-      <option value="BT">Bhutan</option>
-      <option value="BO">Bolivia</option>
-      <option value="BQ">Bonaire, Sint Eustatius and Saba</option>
-      <option value="BA">Bosnia and Herzegovina</option>
-      <option value="BW">Botswana</option>
-      <option value="BV">Bouvet Island</option>
-      <option value="BR">Brazil</option>
-      <option value="IO">British Indian Ocean Territory</option>
-      <option value="BN">Brunei Darussalam</option>
-      <option value="BG">Bulgaria</option>
-      <option value="BF">Burkina Faso</option>
-      <option value="BI">Burundi</option>
-      <option value="CV">Cabo Verde</option>
-      <option value="KH">Cambodia</option>
-      <option value="CM">Cameroon</option>
-      <option value="CA">Canada</option>
-      <option value="KY">Cayman Islands</option>
-      <option value="CF">Central African Republic</option>
-      <option value="TD">Chad</option>
-      <option value="CL">Chile</option>
-      <option value="CN">China</option>
-      <option value="CX">Christmas Island</option>
-      <option value="CC">Cocos (Keeling) Islands</option>
-      <option value="CO">Colombia</option>
-      <option value="KM">Comoros</option>
-      <option value="CG">Congo</option>
-      <option value="CD">Congo, Democratic Republic of the</option>
-      <option value="CK">Cook Islands</option>
-      <option value="CR">Costa Rica</option>
-      <option value="CI">Cote d'Ivoire</option>
-      <option value="HR">Croatia</option>
-      <option value="CU">Cuba</option>
-      <option value="CW">Curacao</option>
-      <option value="CY">Cyprus</option>
-      <option value="CZ">Czechia</option>
-      <option value="DK">Denmark</option>
-      <option value="DJ">Djibouti</option>
-      <option value="DM">Dominica</option>
-      <option value="DO">Dominican Republic</option>
-      <option value="EC">Ecuador</option>
-      <option value="EG">Egypt</option>
-      <option value="SV">El Salvador</option>
-      <option value="GQ">Equatorial Guinea</option>
-      <option value="ER">Eritrea</option>
-      <option value="EE">Estonia</option>
-      <option value="SZ">Eswatini</option>
-      <option value="ET">Ethiopia</option>
-      <option value="FK">Falkland Islands</option>
-      <option value="FO">Faroe Islands</option>
-      <option value="FJ">Fiji</option>
-      <option value="FI">Finland</option>
-      <option value="FR">France</option>
-      <option value="GF">French Guiana</option>
-      <option value="PF">French Polynesia</option>
-      <option value="TF">French Southern Territories</option>
-      <option value="GA">Gabon</option>
-      <option value="GM">Gambia</option>
-      <option value="GE">Georgia</option>
-      <option value="DE">Germany</option>
-      <option value="GH">Ghana</option>
-      <option value="GI">Gibraltar</option>
-      <option value="GR">Greece</option>
-      <option value="GL">Greenland</option>
-      <option value="GD">Grenada</option>
-      <option value="GP">Guadeloupe</option>
-      <option value="GU">Guam</option>
-      <option value="GT">Guatemala</option>
-      <option value="GG">Guernsey</option>
-      <option value="GN">Guinea</option>
-      <option value="GW">Guinea-Bissau</option>
-      <option value="GY">Guyana</option>
-      <option value="HT">Haiti</option>
-      <option value="HM">Heard Island and McDonald Islands</option>
-      <option value="VA">Holy See</option>
-      <option value="HN">Honduras</option>
-      <option value="HK">Hong Kong</option>
-      <option value="HU">Hungary</option>
-      <option value="IS">Iceland</option>
-      <option value="IN">India</option>
-      <option value="ID">Indonesia</option>
-      <option value="IR">Iran</option>
-      <option value="IQ">Iraq</option>
-      <option value="IE">Ireland</option>
-      <option value="IM">Isle of Man</option>
-      <option value="IL">Israel</option>
-      <option value="IT">Italy</option>
-      <option value="JM">Jamaica</option>
-      <option value="JP">Japan</option>
-      <option value="JE">Jersey</option>
-      <option value="JO">Jordan</option>
-      <option value="KZ">Kazakhstan</option>
-      <option value="KE">Kenya</option>
-      <option value="KI">Kiribati</option>
-      <option value="KP">Korea, North</option>
-      <option value="KR">Korea, South</option>
-      <option value="KW">Kuwait</option>
-      <option value="KG">Kyrgyzstan</option>
-      <option value="LA">Lao People's Democratic Republic</option>
-      <option value="LV">Latvia</option>
-      <option value="LB">Lebanon</option>
-      <option value="LS">Lesotho</option>
-      <option value="LR">Liberia</option>
-      <option value="LY">Libya</option>
-      <option value="LI">Liechtenstein</option>
-      <option value="LT">Lithuania</option>
-      <option value="LU">Luxembourg</option>
-      <option value="MO">Macao</option>
-      <option value="MG">Madagascar</option>
-      <option value="MW">Malawi</option>
-      <option value="MY">Malaysia</option>
-      <option value="MV">Maldives</option>
-      <option value="ML">Mali</option>
-      <option value="MT">Malta</option>
-      <option value="MH">Marshall Islands</option>
-      <option value="MQ">Martinique</option>
-      <option value="MR">Mauritania</option>
-      <option value="MU">Mauritius</option>
-      <option value="YT">Mayotte</option>
-      <option value="MX">Mexico</option>
-      <option value="FM">Micronesia</option>
-      <option value="MD">Moldova</option>
-      <option value="MC">Monaco</option>
-      <option value="MN">Mongolia</option>
-      <option value="ME">Montenegro</option>
-      <option value="MS">Montserrat</option>
-      <option value="MA">Morocco</option>
-      <option value="MZ">Mozambique</option>
-      <option value="MM">Myanmar</option>
-      <option value="NA">Namibia</option>
-      <option value="NR">Nauru</option>
-      <option value="NP">Nepal</option>
-      <option value="NL">Netherlands</option>
-      <option value="NC">New Caledonia</option>
-      <option value="NZ">New Zealand</option>
-      <option value="NI">Nicaragua</option>
-      <option value="NE">Niger</option>
-      <option value="NG">Nigeria</option>
-      <option value="NU">Niue</option>
-      <option value="NF">Norfolk Island</option>
-      <option value="MP">Northern Mariana Islands</option>
-      <option value="NO">Norway</option>
-      <option value="OM">Oman</option>
-      <option value="PK">Pakistan</option>
-      <option value="PW">Palau</option>
-      <option value="PS">Palestine, State of</option>
-      <option value="PA">Panama</option>
-      <option value="PG">Papua New Guinea</option>
-      <option value="PY">Paraguay</option>
-      <option value="PE">Peru</option>
-      <option value="PH">Philippines</option>
-      <option value="PN">Pitcairn</option>
-      <option value="PL">Poland</option>
-      <option value="PT">Portugal</option>
-      <option value="PR">Puerto Rico</option>
-      <option value="QA">Qatar</option>
-      <option value="RE">Reunion</option>
-      <option value="RO">Romania</option>
-      <option value="RU">Russian Federation</option>
-      <option value="RW">Rwanda</option>
-      <option value="BL">Saint Barthelemy</option>
-      <option value="SH">Saint Helena</option>
-      <option value="KN">Saint Kitts and Nevis</option>
-      <option value="LC">Saint Lucia</option>
-      <option value="MF">Saint Martin (French part)</option>
-      <option value="PM">Saint Pierre and Miquelon</option>
-      <option value="VC">Saint Vincent and the Grenadines</option>
-      <option value="WS">Samoa</option>
-      <option value="SM">San Marino</option>
-      <option value="ST">Sao Tome and Principe</option>
-      <option value="SA">Saudi Arabia</option>
-      <option value="SN">Senegal</option>
-      <option value="RS">Serbia</option>
-      <option value="SC">Seychelles</option>
-      <option value="SL">Sierra Leone</option>
-      <option value="SG">Singapore</option>
-      <option value="SX">Sint Maarten (Dutch part)</option>
-      <option value="SK">Slovakia</option>
-      <option value="SI">Slovenia</option>
-      <option value="SB">Solomon Islands</option>
-      <option value="SO">Somalia</option>
-      <option value="ZA">South Africa</option>
-      <option value="GS">South Georgia and the South Sandwich Islands</option>
-      <option value="SS">South Sudan</option>
-      <option value="ES">Spain</option>
-      <option value="LK">Sri Lanka</option>
-      <option value="SD">Sudan</option>
-      <option value="SR">Suriname</option>
-      <option value="SJ">Svalbard and Jan Mayen</option>
-      <option value="SE">Sweden</option>
-      <option value="CH">Switzerland</option>
-      <option value="SY">Syrian Arab Republic</option>
-      <option value="TW">Taiwan</option>
-      <option value="TJ">Tajikistan</option>
-      <option value="TZ">Tanzania</option>
-      <option value="TH">Thailand</option>
-      <option value="TL">Timor-Leste</option>
-      <option value="TG">Togo</option>
-      <option value="TK">Tokelau</option>
-      <option value="TO">Tonga</option>
-      <option value="TT">Trinidad and Tobago</option>
-      <option value="TN">Tunisia</option>
-      <option value="TR">Turkey</option>
-      <option value="TM">Turkmenistan</option>
-      <option value="TC">Turks and Caicos Islands</option>
-      <option value="TV">Tuvalu</option>
-      <option value="UG">Uganda</option>
-      <option value="UA">Ukraine</option>
-      <option value="AE">United Arab Emirates</option>
-      <option value="GB">United Kingdom</option>
-      <option value="UM">United States Minor Outlying Islands</option>
-      <option value="US">United States</option>
-      <option value="UY">Uruguay</option>
-      <option value="UZ">Uzbekistan</option>
-      <option value="VU">Vanuatu</option>
-      <option value="VE">Venezuela</option>
-      <option value="VN">Viet Nam</option>
-      <option value="VG">Virgin Islands, British</option>
-      <option value="VI">Virgin Islands, U.S.</option>
-      <option value="WF">Wallis and Futuna</option>
-      <option value="EH">Western Sahara</option>
-      <option value="YE">Yemen</option>
-      <option value="ZM">Zambia</option>
-      <option value="ZW">Zimbabwe</option>
+      <option value="Afghanistan">Afghanistan (AF)</option>
+      <option value="Aland Islands">Aland Islands (AX)</option>
+      <option value="Albania">Albania (AL)</option>
+      <option value="Algeria">Algeria (DZ)</option>
+      <option value="American Samoa">American Samoa (AS)</option>
+      <option value="Andorra">Andorra (AD)</option>
+      <option value="Angola">Angola (AO)</option>
+      <option value="Anguilla">Anguilla (AI)</option>
+      <option value="Antarctica">Antarctica (AQ)</option>
+      <option value="Antigua and Barbuda">Antigua and Barbuda (AG)</option>
+      <option value="Argentina">Argentina (AR)</option>
+      <option value="Armenia">Armenia (AM)</option>
+      <option value="Aruba">Aruba (AW)</option>
+      <option value="Australia">Australia (AU)</option>
+      <option value="Austria">Austria (AT)</option>
+      <option value="Azerbaijan">Azerbaijan (AZ)</option>
+      <option value="Bahamas">Bahamas (BS)</option>
+      <option value="Bahrain">Bahrain (BH)</option>
+      <option value="Bangladesh">Bangladesh (BD)</option>
+      <option value="Barbados">Barbados (BB)</option>
+      <option value="Belarus">Belarus (BY)</option>
+      <option value="Belgium">Belgium (BE)</option>
+      <option value="Belize">Belize (BZ)</option>
+      <option value="Benin">Benin (BJ)</option>
+      <option value="Bermuda">Bermuda (BM)</option>
+      <option value="Bhutan">Bhutan (BT)</option>
+      <option value="Bolivia">Bolivia (BO)</option>
+      <option value="Bonaire, Sint Eustatius and Saba">Bonaire, Sint Eustatius and Saba (BQ)</option>
+      <option value="Bosnia and Herzegovina">Bosnia and Herzegovina (BA)</option>
+      <option value="Botswana">Botswana (BW)</option>
+      <option value="Bouvet Island">Bouvet Island (BV)</option>
+      <option value="Brazil">Brazil (BR)</option>
+      <option value="British Indian Ocean Territory">British Indian Ocean Territory (IO)</option>
+      <option value="Brunei Darussalam">Brunei Darussalam (BN)</option>
+      <option value="Bulgaria">Bulgaria (BG)</option>
+      <option value="Burkina Faso">Burkina Faso (BF)</option>
+      <option value="Burundi">Burundi (BI)</option>
+      <option value="Cabo Verde">Cabo Verde (CV)</option>
+      <option value="Cambodia">Cambodia (KH)</option>
+      <option value="Cameroon">Cameroon (CM)</option>
+      <option value="Canada">Canada (CA)</option>
+      <option value="Cayman Islands">Cayman Islands (KY)</option>
+      <option value="Central African Republic">Central African Republic (CF)</option>
+      <option value="Chad">Chad (TD)</option>
+      <option value="Chile">Chile (CL)</option>
+      <option value="China">China (CN)</option>
+      <option value="Christmas Island">Christmas Island (CX)</option>
+      <option value="Cocos (Keeling) Islands">Cocos (Keeling) Islands (CC)</option>
+      <option value="Colombia">Colombia (CO)</option>
+      <option value="Comoros">Comoros (KM)</option>
+      <option value="Congo">Congo (CG)</option>
+      <option value="Congo, Democratic Republic of the">Congo, Democratic Republic of the (CD)</option>
+      <option value="Cook Islands">Cook Islands (CK)</option>
+      <option value="Costa Rica">Costa Rica (CR)</option>
+      <option value="Cote d'Ivoire">Cote d'Ivoire (CI)</option>
+      <option value="Croatia">Croatia (HR)</option>
+      <option value="Cuba">Cuba (CU)</option>
+      <option value="Curacao">Curacao (CW)</option>
+      <option value="Cyprus">Cyprus (CY)</option>
+      <option value="Czechia">Czechia (CZ)</option>
+      <option value="Denmark">Denmark (DK)</option>
+      <option value="Djibouti">Djibouti (DJ)</option>
+      <option value="Dominica">Dominica (DM)</option>
+      <option value="Dominican Republic">Dominican Republic (DO)</option>
+      <option value="Ecuador">Ecuador (EC)</option>
+      <option value="Egypt">Egypt (EG)</option>
+      <option value="El Salvador">El Salvador (SV)</option>
+      <option value="Equatorial Guinea">Equatorial Guinea (GQ)</option>
+      <option value="Eritrea">Eritrea (ER)</option>
+      <option value="Estonia">Estonia (EE)</option>
+      <option value="Eswatini">Eswatini (SZ)</option>
+      <option value="Ethiopia">Ethiopia (ET)</option>
+      <option value="Falkland Islands">Falkland Islands (FK)</option>
+      <option value="Faroe Islands">Faroe Islands (FO)</option>
+      <option value="Fiji">Fiji (FJ)</option>
+      <option value="Finland">Finland (FI)</option>
+      <option value="France">France (FR)</option>
+      <option value="French Guiana">French Guiana (GF)</option>
+      <option value="French Polynesia">French Polynesia (PF)</option>
+      <option value="French Southern Territories">French Southern Territories (TF)</option>
+      <option value="Gabon">Gabon (GA)</option>
+      <option value="Gambia">Gambia (GM)</option>
+      <option value="Georgia">Georgia (GE)</option>
+      <option value="Germany">Germany (DE)</option>
+      <option value="Ghana">Ghana (GH)</option>
+      <option value="Gibraltar">Gibraltar (GI)</option>
+      <option value="Greece">Greece (GR)</option>
+      <option value="Greenland">Greenland (GL)</option>
+      <option value="Grenada">Grenada (GD)</option>
+      <option value="Guadeloupe">Guadeloupe (GP)</option>
+      <option value="Guam">Guam (GU)</option>
+      <option value="Guatemala">Guatemala (GT)</option>
+      <option value="Guernsey">Guernsey (GG)</option>
+      <option value="Guinea">Guinea (GN)</option>
+      <option value="Guinea-Bissau">Guinea-Bissau (GW)</option>
+      <option value="Guyana">Guyana (GY)</option>
+      <option value="Haiti">Haiti (HT)</option>
+      <option value="Heard Island and McDonald Islands">Heard Island and McDonald Islands (HM)</option>
+      <option value="Holy See">Holy See (VA)</option>
+      <option value="Honduras">Honduras (HN)</option>
+      <option value="Hong Kong">Hong Kong (HK)</option>
+      <option value="Hungary">Hungary (HU)</option>
+      <option value="Iceland">Iceland (IS)</option>
+      <option value="India">India (IN)</option>
+      <option value="Indonesia">Indonesia (ID)</option>
+      <option value="Iran">Iran (IR)</option>
+      <option value="Iraq">Iraq (IQ)</option>
+      <option value="Ireland">Ireland (IE)</option>
+      <option value="Isle of Man">Isle of Man (IM)</option>
+      <option value="Israel">Israel (IL)</option>
+      <option value="Italy">Italy (IT)</option>
+      <option value="Jamaica">Jamaica (JM)</option>
+      <option value="Japan">Japan (JP)</option>
+      <option value="Jersey">Jersey (JE)</option>
+      <option value="Jordan">Jordan (JO)</option>
+      <option value="Kazakhstan">Kazakhstan (KZ)</option>
+      <option value="Kenya">Kenya (KE)</option>
+      <option value="Kiribati">Kiribati (KI)</option>
+      <option value="Korea, North">Korea, North (KP)</option>
+      <option value="Korea, South">Korea, South (KR)</option>
+      <option value="Kuwait">Kuwait (KW)</option>
+      <option value="Kyrgyzstan">Kyrgyzstan (KG)</option>
+      <option value="Lao People's Democratic Republic">Lao People's Democratic Republic (LA)</option>
+      <option value="Latvia">Latvia (LV)</option>
+      <option value="Lebanon">Lebanon (LB)</option>
+      <option value="Lesotho">Lesotho (LS)</option>
+      <option value="Liberia">Liberia (LR)</option>
+      <option value="Libya">Libya (LY)</option>
+      <option value="Liechtenstein">Liechtenstein (LI)</option>
+      <option value="Lithuania">Lithuania (LT)</option>
+      <option value="Luxembourg">Luxembourg (LU)</option>
+      <option value="Macao">Macao (MO)</option>
+      <option value="Madagascar">Madagascar (MG)</option>
+      <option value="Malawi">Malawi (MW)</option>
+      <option value="Malaysia">Malaysia (MY)</option>
+      <option value="Maldives">Maldives (MV)</option>
+      <option value="Mali">Mali (ML)</option>
+      <option value="Malta">Malta (MT)</option>
+      <option value="Marshall Islands">Marshall Islands (MH)</option>
+      <option value="Martinique">Martinique (MQ)</option>
+      <option value="Mauritania">Mauritania (MR)</option>
+      <option value="Mauritius">Mauritius (MU)</option>
+      <option value="Mayotte">Mayotte (YT)</option>
+      <option value="Mexico">Mexico (MX)</option>
+      <option value="Micronesia">Micronesia (FM)</option>
+      <option value="Moldova">Moldova (MD)</option>
+      <option value="Monaco">Monaco (MC)</option>
+      <option value="Mongolia">Mongolia (MN)</option>
+      <option value="Montenegro">Montenegro (ME)</option>
+      <option value="Montserrat">Montserrat (MS)</option>
+      <option value="Morocco">Morocco (MA)</option>
+      <option value="Mozambique">Mozambique (MZ)</option>
+      <option value="Myanmar">Myanmar (MM)</option>
+      <option value="Namibia">Namibia (NA)</option>
+      <option value="Nauru">Nauru (NR)</option>
+      <option value="Nepal">Nepal (NP)</option>
+      <option value="Netherlands">Netherlands (NL)</option>
+      <option value="New Caledonia">New Caledonia (NC)</option>
+      <option value="New Zealand">New Zealand (NZ)</option>
+      <option value="Nicaragua">Nicaragua (NI)</option>
+      <option value="Niger">Niger (NE)</option>
+      <option value="Nigeria">Nigeria (NG)</option>
+      <option value="Niue">Niue (NU)</option>
+      <option value="Norfolk Island">Norfolk Island (NF)</option>
+      <option value="Northern Mariana Islands">Northern Mariana Islands (MP)</option>
+      <option value="Norway">Norway (NO)</option>
+      <option value="Oman">Oman (OM)</option>
+      <option value="Pakistan">Pakistan (PK)</option>
+      <option value="Palau">Palau (PW)</option>
+      <option value="Palestine, State of">Palestine, State of (PS)</option>
+      <option value="Panama">Panama (PA)</option>
+      <option value="Papua New Guinea">Papua New Guinea (PG)</option>
+      <option value="Paraguay">Paraguay (PY)</option>
+      <option value="Peru">Peru (PE)</option>
+      <option value="Philippines">Philippines (PH)</option>
+      <option value="Pitcairn">Pitcairn (PN)</option>
+      <option value="Poland">Poland (PL)</option>
+      <option value="Portugal">Portugal (PT)</option>
+      <option value="Puerto Rico">Puerto Rico (PR)</option>
+      <option value="Qatar">Qatar (QA)</option>
+      <option value="Reunion">Reunion (RE)</option>
+      <option value="Romania">Romania (RO)</option>
+      <option value="Russian Federation">Russian Federation (RU)</option>
+      <option value="Rwanda">Rwanda (RW)</option>
+      <option value="Saint Barthelemy">Saint Barthelemy (BL)</option>
+      <option value="Saint Helena">Saint Helena (SH)</option>
+      <option value="Saint Kitts and Nevis">Saint Kitts and Nevis (KN)</option>
+      <option value="Saint Lucia">Saint Lucia (LC)</option>
+      <option value="Saint Martin (French part)">Saint Martin (French part) (MF)</option>
+      <option value="Saint Pierre and Miquelon">Saint Pierre and Miquelon (PM)</option>
+      <option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines (VC)</option>
+      <option value="Samoa">Samoa (WS)</option>
+      <option value="San Marino">San Marino (SM)</option>
+      <option value="Sao Tome and Principe">Sao Tome and Principe (ST)</option>
+      <option value="Saudi Arabia">Saudi Arabia (SA)</option>
+      <option value="Senegal">Senegal (SN)</option>
+      <option value="Serbia">Serbia (RS)</option>
+      <option value="Seychelles">Seychelles (SC)</option>
+      <option value="Sierra Leone">Sierra Leone (SL)</option>
+      <option value="Singapore">Singapore (SG)</option>
+      <option value="Sint Maarten (Dutch part)">Sint Maarten (Dutch part) (SX)</option>
+      <option value="Slovakia">Slovakia (SK)</option>
+      <option value="Slovenia">Slovenia (SI)</option>
+      <option value="Solomon Islands">Solomon Islands (SB)</option>
+      <option value="Somalia">Somalia (SO)</option>
+      <option value="South Africa">South Africa (ZA)</option>
+      <option value="South Georgia and the South Sandwich Islands">South Georgia and the South Sandwich Islands (GS)</option>
+      <option value="South Sudan">South Sudan (SS)</option>
+      <option value="Spain">Spain (ES)</option>
+      <option value="Sri Lanka">Sri Lanka (LK)</option>
+      <option value="Sudan">Sudan (SD)</option>
+      <option value="Suriname">Suriname (SR)</option>
+      <option value="Svalbard and Jan Mayen">Svalbard and Jan Mayen (SJ)</option>
+      <option value="Sweden">Sweden (SE)</option>
+      <option value="Switzerland">Switzerland (CH)</option>
+      <option value="Syrian Arab Republic">Syrian Arab Republic (SY)</option>
+      <option value="Taiwan">Taiwan (TW)</option>
+      <option value="Tajikistan">Tajikistan (TJ)</option>
+      <option value="Tanzania">Tanzania (TZ)</option>
+      <option value="Thailand">Thailand (TH)</option>
+      <option value="Timor-Leste">Timor-Leste (TL)</option>
+      <option value="Togo">Togo (TG)</option>
+      <option value="Tokelau">Tokelau (TK)</option>
+      <option value="Tonga">Tonga (TO)</option>
+      <option value="Trinidad and Tobago">Trinidad and Tobago (TT)</option>
+      <option value="Tunisia">Tunisia (TN)</option>
+      <option value="Turkey">Turkey (TR)</option>
+      <option value="Turkmenistan">Turkmenistan (TM)</option>
+      <option value="Turks and Caicos Islands">Turks and Caicos Islands (TC)</option>
+      <option value="Tuvalu">Tuvalu (TV)</option>
+      <option value="Uganda">Uganda (UG)</option>
+      <option value="Ukraine">Ukraine (UA)</option>
+      <option value="United Arab Emirates">United Arab Emirates (AE)</option>
+      <option value="United Kingdom">United Kingdom (GB)</option>
+      <option value="United States Minor Outlying Islands">United States Minor Outlying Islands (UM)</option>
+      <option value="United States">United States (US)</option>
+      <option value="Uruguay">Uruguay (UY)</option>
+      <option value="Uzbekistan">Uzbekistan (UZ)</option>
+      <option value="Vanuatu">Vanuatu (VU)</option>
+      <option value="Venezuela">Venezuela (VE)</option>
+      <option value="Viet Nam">Viet Nam (VN)</option>
+      <option value="Virgin Islands, British">Virgin Islands, British (VG)</option>
+      <option value="Virgin Islands, U.S.">Virgin Islands, U.S. (VI)</option>
+      <option value="Wallis and Futuna">Wallis and Futuna (WF)</option>
+      <option value="Western Sahara">Western Sahara (EH)</option>
+      <option value="Yemen">Yemen (YE)</option>
+      <option value="Zambia">Zambia (ZM)</option>
+      <option value="Zimbabwe">Zimbabwe (ZW)</option>
     </datalist>
     <datalist id="timezoneOptions">
       <option value="Africa/Abidjan"></option>
