@@ -5,6 +5,24 @@
   const { dom, constants, runtime, utils } = HomeApp;
   const { STORAGE_INPUT, STORAGE_API } = constants;
 
+  function readStoredState(key, fallback) {
+    const base = { ...fallback };
+    const raw = localStorage.getItem(key);
+    if (!raw) return { state: base, hasData: false };
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        const merged = { ...base, ...parsed };
+        const hasData = Object.keys(parsed).length > 0;
+        return { state: merged, hasData };
+      }
+    } catch (err) {
+      console.warn(`[state] Invalid data for ${key}, resetting.`, err);
+    }
+    localStorage.removeItem(key);
+    return { state: base, hasData: false };
+  }
+
   function getDefaultState() {
     return { mode: "natal", natal: null, transit: null, relationship: null };
   }
@@ -15,18 +33,16 @@
 
   function saveFormState(mode, payload) {
     try {
-      let state = getDefaultState();
-      const raw = localStorage.getItem(STORAGE_INPUT);
-      if (raw) state = { ...state, ...JSON.parse(raw) };
-
-      state.mode = mode;
-      if (payload.birth) state.natal = payload.birth;
-      if (payload.moment) state.transit = payload.moment;
+      const { state: existing } = readStoredState(STORAGE_INPUT, getDefaultState());
+      const next = { ...existing, mode };
+      if (payload.birth) next.natal = payload.birth;
+      if (payload.moment) next.transit = payload.moment;
       if (payload.first && payload.second) {
-        state.relationship = { first: payload.first, second: payload.second };
+        next.relationship = { first: payload.first, second: payload.second };
       }
 
-      localStorage.setItem(STORAGE_INPUT, JSON.stringify(state));
+      localStorage.setItem(STORAGE_INPUT, JSON.stringify(next));
+      runtime.hasLoadedState = true;
     } catch (err) {
       console.warn("Could not save form state", err);
     }
@@ -34,27 +50,30 @@
 
   function saveApiData(mode, data) {
     try {
-      let state = getDefaultApiState();
-      const raw = localStorage.getItem(STORAGE_API);
-      if (raw) state = { ...state, ...JSON.parse(raw) };
+      const { state: existing } = readStoredState(STORAGE_API, getDefaultApiState());
+      const next = { ...existing };
+      next.svgs = next.svgs && typeof next.svgs === "object" ? next.svgs : {};
+      next.summaries = next.summaries && typeof next.summaries === "object" ? next.summaries : {};
+      next.reports = next.reports && typeof next.reports === "object" ? next.reports : {};
       if (data.svg || data.summary) {
-        state.svgs[mode] = { svg: data.svg || "", summary: data.summary || "" };
+        next.svgs[mode] = { svg: data.svg || "", summary: data.summary || "" };
       }
       if (data.report) {
-        state.reports[mode] = data.report;
+        next.reports[mode] = data.report;
       }
       if (data.summary) {
-        state.summaries[mode] = data.summary;
+        next.summaries[mode] = data.summary;
       }
       if (data.report && typeof data.report === "object" && data.report.text) {
-        state.reports[mode] = { text: data.report.text, title: data.report.title || null };
+        next.reports[mode] = { text: data.report.text, title: data.report.title || null };
       } else if (data.report) {
-        state.reports[mode] = data.report;
+        next.reports[mode] = data.report;
       }
-      localStorage.setItem(STORAGE_API, JSON.stringify(state));
-      runtime.storedSvgs = state.svgs || {};
-      runtime.storedSummaries = state.summaries || {};
-      runtime.storedReports = state.reports || {};
+      localStorage.setItem(STORAGE_API, JSON.stringify(next));
+      runtime.storedSvgs = next.svgs || {};
+      runtime.storedSummaries = next.summaries || {};
+      runtime.storedReports = next.reports || {};
+      runtime.hasLoadedState = true;
     } catch (err) {
       console.warn("Could not save API state", err);
     }
@@ -109,17 +128,16 @@
 
   function loadSavedState() {
     try {
-      const rawInput = localStorage.getItem(STORAGE_INPUT);
-      const rawApi = localStorage.getItem(STORAGE_API);
-      const state = rawInput ? { ...getDefaultState(), ...JSON.parse(rawInput) } : getDefaultState();
-      const apiState = rawApi ? { ...getDefaultApiState(), ...JSON.parse(rawApi) } : getDefaultApiState();
+      const { state, hasData: hasInputState } = readStoredState(STORAGE_INPUT, getDefaultState());
+      const { state: apiState, hasData: hasApiState } = readStoredState(STORAGE_API, getDefaultApiState());
 
-      if (state.mode) {
+      if (hasInputState && state.mode) {
         const target = dom.modeInputs.find((m) => m.value === state.mode);
         if (target) target.checked = true;
       }
-      if (state.natal) {
-        const b = state.natal;
+      const natal = state.natal && typeof state.natal === "object" ? state.natal : null;
+      if (hasInputState && natal) {
+        const b = natal;
         setField("name", b.name || "");
         setField("dateInput", `${b.year}-${String(b.month).padStart(2, "0")}-${String(b.day).padStart(2, "0")}`);
         setField("timeInput", `${String(b.hour).padStart(2, "0")}:${String(b.minute).padStart(2, "0")}`);
@@ -129,8 +147,9 @@
         setField("city", b.city);
         setField("nation", b.nation);
       }
-      if (state.transit) {
-        const t = state.transit;
+      const transit = state.transit && typeof state.transit === "object" ? state.transit : null;
+      if (hasInputState && transit) {
+        const t = transit;
         setField("transitDateInput", `${t.year}-${String(t.month).padStart(2, "0")}-${String(t.day).padStart(2, "0")}`);
         setField("transitTimeInput", `${String(t.hour).padStart(2, "0")}:${String(t.minute).padStart(2, "0")}`);
         setField("transitLat", t.lat);
@@ -139,33 +158,42 @@
         setField("transitCity", t.city);
         setField("transitNation", t.nation);
       }
-      if (state.relationship) {
-        const { first, second } = state.relationship;
-        if (first) {
-          setField("firstName", first.name || "");
-          setField("firstDate", `${first.year}-${String(first.month).padStart(2, "0")}-${String(first.day).padStart(2, "0")}`);
-          setField("firstTime", `${String(first.hour).padStart(2, "0")}:${String(first.minute).padStart(2, "0")}`);
-          setField("firstLat", first.lat);
-          setField("firstLng", first.lng);
-          setField("firstTz", first.tz_str);
-          setField("firstCity", first.city);
-          setField("firstNation", first.nation);
+      const relationship = state.relationship && typeof state.relationship === "object" ? state.relationship : null;
+      if (hasInputState && relationship) {
+        const safeFirst =
+          relationship.first && typeof relationship.first === "object" ? relationship.first : null;
+        if (safeFirst) {
+          setField("firstName", safeFirst.name || "");
+          setField("firstDate", `${safeFirst.year}-${String(safeFirst.month).padStart(2, "0")}-${String(safeFirst.day).padStart(2, "0")}`);
+          setField("firstTime", `${String(safeFirst.hour).padStart(2, "0")}:${String(safeFirst.minute).padStart(2, "0")}`);
+          setField("firstLat", safeFirst.lat);
+          setField("firstLng", safeFirst.lng);
+          setField("firstTz", safeFirst.tz_str);
+          setField("firstCity", safeFirst.city);
+          setField("firstNation", safeFirst.nation);
         }
-        if (second) {
-          setField("secondName", second.name || "");
-          setField("secondDate", `${second.year}-${String(second.month).padStart(2, "0")}-${String(second.day).padStart(2, "0")}`);
-          setField("secondTime", `${String(second.hour).padStart(2, "0")}:${String(second.minute).padStart(2, "0")}`);
-          setField("secondLat", second.lat);
-          setField("secondLng", second.lng);
-          setField("secondTz", second.tz_str);
-          setField("secondCity", second.city);
-          setField("secondNation", second.nation);
+        const safeSecond =
+          relationship.second && typeof relationship.second === "object" ? relationship.second : null;
+        if (safeSecond) {
+          setField("secondName", safeSecond.name || "");
+          setField("secondDate", `${safeSecond.year}-${String(safeSecond.month).padStart(2, "0")}-${String(safeSecond.day).padStart(2, "0")}`);
+          setField("secondTime", `${String(safeSecond.hour).padStart(2, "0")}:${String(safeSecond.minute).padStart(2, "0")}`);
+          setField("secondLat", safeSecond.lat);
+          setField("secondLng", safeSecond.lng);
+          setField("secondTz", safeSecond.tz_str);
+          setField("secondCity", safeSecond.city);
+          setField("secondNation", safeSecond.nation);
         }
       }
-      runtime.storedSvgs = apiState.svgs || {};
-      runtime.storedSummaries = apiState.summaries || {};
-      runtime.storedReports = apiState.reports || {};
-      runtime.hasLoadedState = true;
+      runtime.storedSvgs = apiState.svgs && typeof apiState.svgs === "object" ? apiState.svgs : {};
+      runtime.storedSummaries = apiState.summaries && typeof apiState.summaries === "object" ? apiState.summaries : {};
+      runtime.storedReports = apiState.reports && typeof apiState.reports === "object" ? apiState.reports : {};
+      const hasSavedApi =
+        hasApiState &&
+        (Object.keys(runtime.storedSvgs).length ||
+          Object.keys(runtime.storedSummaries).length ||
+          Object.keys(runtime.storedReports).length);
+      runtime.hasLoadedState = hasInputState || hasSavedApi;
       if (HomeApp.utils && typeof HomeApp.utils.syncLocationRuntimeFromDom === "function") {
         HomeApp.utils.syncLocationRuntimeFromDom();
       }
@@ -186,7 +214,7 @@
 
   function setField(id, value) {
     const el = document.getElementById(id);
-    if (el) el.value = value;
+    if (el) el.value = value ?? "";
   }
 
   function updateModeVisibility() {
@@ -211,6 +239,23 @@
     if (HomeApp.utils && typeof HomeApp.utils.refreshLocationBadges === "function") {
       HomeApp.utils.refreshLocationBadges();
     }
+  }
+
+  function bindFormPersistence() {
+    if (!dom.form || !utils || typeof utils.persistFormState !== "function") return;
+    let persistTimer = null;
+    const schedulePersist = () => {
+      clearTimeout(persistTimer);
+      persistTimer = setTimeout(() => {
+        try {
+          utils.persistFormState();
+        } catch (err) {
+          console.warn("[state] Auto-persist failed", err);
+        }
+      }, 200);
+    };
+    dom.form.addEventListener("input", schedulePersist);
+    dom.form.addEventListener("change", schedulePersist);
   }
 
   function clearSavedState() {
@@ -293,6 +338,7 @@
     dom.modeInputs.forEach((input) => {
       input.addEventListener("change", updateModeVisibility);
     });
+    bindFormPersistence();
     loadSavedState();
     updateModeVisibility();
   }

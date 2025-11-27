@@ -498,12 +498,25 @@
     return clean || "—";
   }
 
+  function formatTimezoneShort(tz) {
+    if (!tz) return "";
+    try {
+      const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" }).formatToParts(new Date());
+      const tzPart = parts.find((p) => p.type === "timeZoneName");
+      if (tzPart && tzPart.value) return tzPart.value;
+    } catch (err) {
+      console.debug("[location] Could not format timezone", err);
+    }
+    return typeof tz === "string" ? tz : "";
+  }
+
   function formatLocationBadge(values, defaults) {
     const city = (values?.city ?? defaults?.city ?? "").trim();
     const name =
       (values?.nation_name ?? COUNTRY_CODES[values?.nation] ?? defaults?.nation_name ?? values?.nation ?? "").trim();
     const cityPart = [city, name].filter(Boolean).join(", ") || "—";
-    return cityPart;
+    const tzLabel = formatTimezoneShort(values?.tz_str || values?.tz || defaults?.tz);
+    return [cityPart, tzLabel].filter(Boolean).join(" · ");
   }
 
   function buildLookupHref(values) {
@@ -1364,6 +1377,7 @@
     refreshLocationBadges,
     syncLocationRuntimeFromDom,
     setDetectedTimezoneLabel,
+    persistFormState,
   };
 
   initDatetimeModal();
