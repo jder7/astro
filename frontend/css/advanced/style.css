@@ -333,8 +333,60 @@ a {
 .adv-row {
   border: 1px solid #13203a;
   border-radius: 0.9rem;
-  padding: 0.65rem 0.75rem;
   background: #0a1224;
+}
+
+.adv-aspect-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .adv-aspect-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.adv-aspect-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.adv-aspect-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.adv-aspect-text strong {
+  color: #eef3ff;
+  font-size: 0.95rem;
+}
+
+.adv-aspect-note {
+  color: #c7d2e1;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adv-aspect-center {
+  justify-content: center;
+  text-align: center;
+}
+
+.adv-aspect-center .adv-aspect-text {
+  align-items: center;
+}
+
+.adv-aspect-orb {
+  justify-content: flex-start;
 }
 
 .adv-row-main {
@@ -366,6 +418,7 @@ a {
   background: rgba(56, 189, 248, 0.14);
   border: 1px solid rgba(56, 189, 248, 0.35);
   font-weight: 700;
+  min-width: 2.1em;
 }
 
 .mode-grid {

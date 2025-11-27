@@ -50,12 +50,45 @@
     { name: "opposition", angle: 180, orb: 6, icon: "☍" },
   ];
 
+  const ASPECT_ICON_MAP = {
+    conjunction: "◎",
+    sextile: "✺",
+    square: "□",
+    trine: "△",
+    opposition: "☍",
+  };
+
+   const POINTS_ICONS = {
+    sun: "☉",
+    moon: "☾",
+    ascendant: "↗",
+    mercury: "☿️",
+    venus: "♀️",
+    mars: "♂️",
+    jupiter: "♃",
+    saturn: "♄",
+    uranus: "⛢",
+    neptune: "♆",
+    pluto: "♇",
+  };
+
+  const MOON_PHASES = [
+      { name: "New Moon", icon: "🌑" },
+      { name: "Waxing Crescent", icon: "🌒" },
+      { name: "First Quarter", icon: "🌓" },
+      { name: "Waxing Gibbous", icon: "🌔" },
+      { name: "Full Moon", icon: "🌕" },
+      { name: "Waning Gibbous", icon: "🌖" },
+      { name: "Last Quarter", icon: "🌗" },
+      { name: "Waning Crescent", icon: "🌘" },
+    ];
+
   function emojiNumber(num) {
-    const map = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+    const map = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "1️⃣1️⃣", "1️⃣2️⃣ "];
     return map[num] || num;
   }
 
-  function toOrdinal(n) {
+  function toOrdinalWithSuffix(n) {
     const num = Number(n);
     if (!Number.isFinite(num)) return "";
     const suffix =
@@ -63,9 +96,15 @@
     return `${num}${suffix}`;
   }
 
+  function formatHouseLabelShort(houseKey) {
+    const idx = houseOrder.indexOf(houseKey);
+    if (idx >= 0) return `${toOrdinalWithSuffix(idx + 1)}`;
+    return houseKey;
+  }
+
   function formatHouseLabel(houseKey) {
     const idx = houseOrder.indexOf(houseKey);
-    if (idx >= 0) return `${toOrdinal(idx + 1)} House`;
+    if (idx >= 0) return `${toOrdinalWithSuffix(idx + 1)} House`;
     const clean = (houseKey || "").replace(/_/g, " ");
     return clean || "House";
   }
@@ -86,6 +125,10 @@
       return { label: obj.iso_formatted_local_datetime || "—", weekday: obj.day_of_week || "", tzShort: "" };
     }
   }
+  function capitalise(str) {
+    if (typeof str !== "string" || str.length === 0) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
 
   window.AppShared = {
     SIGN_META,
@@ -93,9 +136,14 @@
     QUALITY_ICON,
     houseOrder,
     ASPECTS,
+    ASPECT_ICON_MAP,
+    POINTS_ICONS,
+    MOON_PHASES,
     emojiNumber,
-    toOrdinal,
+    toOrdinal: toOrdinalWithSuffix,
     formatHouseLabel,
+    formatHouseLabelShort,
     formatDateLabel,
+    capitalise,
   };
 })();

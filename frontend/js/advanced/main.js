@@ -23,8 +23,7 @@
   };
 
   const shared = window.AppShared || {};
-  const { SIGN_META, ELEMENT_ICON, QUALITY_ICON, houseOrder, ASPECTS, emojiNumber, formatHouseLabel, formatDateLabel } =
-    shared;
+  const { SIGN_META, ELEMENT_ICON, QUALITY_ICON, POINTS_ICONS, ASPECTS,  emojiNumber, formatHouseLabel, formatHouseLabelShort, formatDateLabel, capitalise } = shared;
   const flags = (app.flags = { ...(app.flags || {}), skipSvg: true });
   console.info("[advanced] main init", { ns, skipSvg: flags.skipSvg });
 
@@ -106,6 +105,9 @@
 
   function formatPointRow(point, { labelOverride } = {}) {
     if (!point) return "";
+    const pointIcon = point.point_type === "House" 
+    ? formatHouseLabelShort(point.name) || "🏠" 
+    : POINTS_ICONS[point.name.toLowerCase()] || "✶";
     const signMeta = SIGN_META[point.sign] || { name: point.sign || "—", icon: point.emoji || "?" };
     const element = point.element || "";
     const quality = point.quality || "";
@@ -115,11 +117,11 @@
     const pos = Number.isFinite(point.position) ? `${point.position.toFixed(2)}°` : "—";
     const signNum = Number.isFinite(point.sign_num) ? emojiNumber(point.sign_num) : "";
     const retro = point.retrograde ? " · Rx" : "";
-    const name = labelOverride || point.name || "Point";
+    const name = capitalise(labelOverride || point.name || "Point");
     return `
       <div class="adv-row">
         <div class="adv-row-main">
-          <span class="adv-chip">${point.emoji || signMeta.icon || "✶"}</span>
+          <span class="adv-chip">${pointIcon}</span>
           <span class="adv-label"><strong>${name}</strong> — ${signMeta.name} ${signMeta.icon || ""} — 
           <span>
           <span>${pos} </span>
@@ -184,17 +186,43 @@
     const otherSign = SIGN_META[other.sign] || { name: other.sign || "", icon: other.emoji || "" };
     const basePos = Number.isFinite(base.position) ? `${base.position.toFixed(2)}°` : "—";
     const otherPos = Number.isFinite(other.position) ? `${other.position.toFixed(2)}°` : "—";
+    const orbLabel = Number.isFinite(aspect.orb) ? `${aspect.orb.toFixed(2)}°` : "—";
+    const aspectName = capitalise(aspect.name || "Aspect");
+    const aspectIcon = aspect.icon || "✶";
+    const aspectAngle = Number.isFinite(aspect.angle) ? `${aspect.angle}°` : "";
+    const baseIcon = POINTS_ICONS[(base.name || "").toLowerCase()] || "✶";
+    const otherIcon = POINTS_ICONS[(other.name || "").toLowerCase()] || "✶";
     return `
-      <div class="adv-row">
-        <div class="adv-row-main">
-          <span class="adv-chip">${base.emoji || baseSign.icon || "✶"}</span>
-          <span class="adv-label"><strong>${base.name || baseKey}</strong> ${baseSign.icon || ""} ${baseSign.name} ${basePos}</span>
-        </div>
-        <div class="adv-row-meta">
-          <span>${aspect.icon} ${aspect.name}</span>
-          <span class="adv-chip">${other.emoji || otherSign.icon || "✶"}</span>
-          <span><strong>${other.name || otherKey}</strong> ${otherSign.icon || ""} ${otherSign.name} ${otherPos}</span>
-          <span>Orb ${aspect.orb.toFixed(2)}°</span>
+      <div class="adv-row adv-row-aspect">
+        <div class="adv-aspect-grid">
+          <div class="adv-aspect-cell">
+            <span class="adv-chip">${baseIcon}</span>
+            <div class="adv-aspect-text">
+              <strong>${base.name || baseKey}</strong>
+              <span class="adv-aspect-note">${baseSign.icon || ""} ${baseSign.name} ${basePos}</span>
+            </div>
+          </div>
+          <div class="adv-aspect-cell">
+            <span class="adv-chip">${aspectIcon}</span>
+            <div class="adv-aspect-text">
+              <strong>${aspectName}</strong>
+              ${aspectAngle ? `<span class="adv-aspect-note">@ ${aspectAngle}</span>` : ""}
+            </div>
+          </div>
+          <div class="adv-aspect-cell">
+            <span class="adv-chip">${otherIcon}</span>
+            <div class="adv-aspect-text">
+              <strong>${other.name || otherKey}</strong>
+              <span class="adv-aspect-note">${otherSign.icon || ""} ${otherSign.name} ${otherPos}</span>
+            </div>
+          </div>
+          <div class="adv-aspect-cell adv-aspect-orb">
+            <span class="adv-chip">Orb</span>
+            <div class="adv-aspect-text">
+              <strong>${orbLabel}</strong>
+              <span class="adv-aspect-note">${aspectIcon} ${aspectName}</span>
+            </div>
+          </div>
         </div>
       </div>
     `;

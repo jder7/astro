@@ -4,14 +4,11 @@
   if (App.disabled) return;
 
   const { dom, constants, config } = App;
-
-  const ASPECTS = [
-    { name: "conjunction", angle: 0, orb: 6 },
-    { name: "sextile", angle: 60, orb: 4 },
-    { name: "square", angle: 90, orb: 6 },
-    { name: "trine", angle: 120, orb: 6 },
-    { name: "opposition", angle: 180, orb: 6 },
-  ];
+  const shared = window.AppShared || {};
+  const ASPECTS = shared.ASPECTS || [];
+  const ASPECT_ICON = shared.ASPECT_ICON_MAP || {};
+  const POINTS_ICONS = shared.POINTS_ICONS || {};
+  const MOON_PHASES = shared.MOON_PHASES || [];
 
   const ALLOWED_POINTS = new Set([
     "sun",
@@ -25,20 +22,6 @@
     "neptune",
     "pluto",
   ]);
-
-  const ICONS = {
-    sun: "☀️",
-    moon: "🌙",
-    ascendant: "↗️",
-    mercury: "☿️",
-    venus: "♀️",
-    mars: "♂️",
-    jupiter: "♃",
-    saturn: "♄",
-    uranus: "⛢",
-    neptune: "♆",
-    pluto: "♇",
-  };
 
   function getAspectBasePoints() {
     const fallback =
@@ -59,14 +42,6 @@
       return fallback;
     }
   }
-
-  const ASPECT_ICON = {
-    conjunction: "◎",
-    sextile: "✺",
-    square: "□",
-    trine: "△",
-    opposition: "☍",
-  };
 
   function normalizeAngleDiff(a, b) {
     let diff = Math.abs(a - b) % 360;
@@ -141,7 +116,7 @@
     const deg = typeof point.position === "number" ? point.position.toFixed(2) : "?";
     const sign = point.sign || "";
     const prefix = options.prefix ? `${options.prefix} ` : "";
-    const icon = ICONS[key] || "✶";
+    const icon = POINTS_ICONS[key] || "✶";
     const parts = [`${icon} ${prefix}${label} ${sign} ${deg}°`];
     return parts.join(" ");
   }
@@ -178,19 +153,9 @@
     const fraction = normalized / synodic;
     const illumination = 0.5 * (1 - Math.cos((normalized / 29.53) * 2 * Math.PI));
 
-    const phases = [
-      { name: "New Moon", icon: "🌑" },
-      { name: "Waxing Crescent", icon: "🌒" },
-      { name: "First Quarter", icon: "🌓" },
-      { name: "Waxing Gibbous", icon: "🌔" },
-      { name: "Full Moon", icon: "🌕" },
-      { name: "Waning Gibbous", icon: "🌖" },
-      { name: "Last Quarter", icon: "🌗" },
-      { name: "Waning Crescent", icon: "🌘" },
-    ];
-
     const idx = Math.floor((fraction * 8 + 0.5)) % 8;
-    const phase = phases[idx];
+    const phase = MOON_PHASES[idx];
+    if (!phase) return null;
     const age = normalized;
 
     return {
