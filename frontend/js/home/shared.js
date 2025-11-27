@@ -41,6 +41,19 @@
     datetimeDateField: document.getElementById("datetimeDateField"),
     datetimeSaveBtn: document.getElementById("datetimeSaveBtn"),
     datetimeTriggers: Array.from(document.querySelectorAll("[data-datetime-target]")),
+    birthLocationDisplay: document.getElementById("birthLocationDisplay"),
+    transitLocationDisplay: document.getElementById("transitLocationDisplay"),
+    locationModal: document.getElementById("location-modal"),
+    locationModalTitle: document.getElementById("locationModalTitle"),
+    locationSaveBtn: document.getElementById("locationSaveBtn"),
+    locationTriggers: Array.from(document.querySelectorAll("[data-location-target]")),
+    locationModalFields: {
+      city: document.getElementById("locationCityField"),
+      nation: document.getElementById("locationNationField"),
+      tz: document.getElementById("locationTzField"),
+      lat: document.getElementById("locationLatField"),
+      lng: document.getElementById("locationLngField"),
+    },
     configInputs: {
       perspective: document.getElementById("configPerspective"),
       zodiac_type: document.getElementById("configZodiac"),
@@ -101,6 +114,45 @@
     },
   };
 
+  const locationTargets = {
+    birth: {
+      title: "Birth location",
+      displayEl: () => dom.birthLocationDisplay,
+      fields: {
+        city: "city",
+        nation: "nation",
+        tz: "tz_str",
+        lat: "lat",
+        lng: "lng",
+      },
+      defaults: {
+        city: "Amsterdam",
+        nation: "NL",
+        tz: "Europe/Amsterdam",
+        lat: "52.3702",
+        lng: "4.8952",
+      },
+    },
+    transit: {
+      title: "Transit location",
+      displayEl: () => dom.transitLocationDisplay,
+      fields: {
+        city: "transitCity",
+        nation: "transitNation",
+        tz: "transitTz",
+        lat: "transitLat",
+        lng: "transitLng",
+      },
+      defaults: {
+        city: "Amsterdam",
+        nation: "NL",
+        tz: "Europe/Amsterdam",
+        lat: "52.3702",
+        lng: "4.8952",
+      },
+    },
+  };
+
   const MARKED_SRC = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
   let markedPromise = null;
 
@@ -112,6 +164,65 @@
     const cleanDate = (dateStr || "").trim() || "—";
     const cleanTime = (timeStr || "").trim() || "--:--";
     return `${cleanDate} · ${cleanTime}`;
+  }
+
+  function formatCoordinate(value) {
+    const num = parseFloat(value);
+    if (Number.isFinite(num)) {
+      return num.toFixed(4);
+    }
+    const clean = (value || "").toString().trim();
+    return clean || "—";
+  }
+
+  function formatLocationBadge(values, defaults) {
+    const city = (values?.city ?? defaults?.city ?? "").trim();
+    const nation = (values?.nation ?? defaults?.nation ?? "").trim().toUpperCase();
+    const cityPart = [city, nation].filter(Boolean).join(", ") || "—";
+    return cityPart;
+  }
+
+  function getLocationValues(targetKey) {
+    const target = locationTargets[targetKey];
+    if (!target) return null;
+    const pick = (id, fallback) => {
+      const el = document.getElementById(id);
+      return el && typeof el.value !== "undefined" ? el.value : fallback;
+    };
+    return {
+      city: pick(target.fields.city, target.defaults.city),
+      nation: pick(target.fields.nation, target.defaults.nation),
+      tz: pick(target.fields.tz, target.defaults.tz),
+      tz_str: pick(target.fields.tz, target.defaults.tz),
+      lat: pick(target.fields.lat, target.defaults.lat),
+      lng: pick(target.fields.lng, target.defaults.lng),
+    };
+  }
+
+  function setLocationValues(targetKey, values) {
+    const target = locationTargets[targetKey];
+    if (!target) return;
+    const assign = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val ?? "";
+    };
+    assign(target.fields.city, values?.city ?? target.defaults.city ?? "");
+    assign(target.fields.nation, values?.nation ?? target.defaults.nation ?? "");
+    assign(target.fields.tz, values?.tz_str ?? values?.tz ?? target.defaults.tz ?? "");
+    assign(target.fields.lat, values?.lat ?? target.defaults.lat ?? "");
+    assign(target.fields.lng, values?.lng ?? target.defaults.lng ?? "");
+  }
+
+  function refreshLocationBadges(targetKey) {
+    const targets = targetKey ? [targetKey] : Object.keys(locationTargets);
+    targets.forEach((key) => {
+      const target = locationTargets[key];
+      if (!target) return;
+      const display = target.displayEl && target.displayEl();
+      if (!display) return;
+      const values = getLocationValues(key);
+      display.textContent = formatLocationBadge(values, target.defaults);
+    });
   }
 
   function normalizeTimeString(value, fallback) {
@@ -572,6 +683,113 @@
     });
   }
 
+  function initLocationModal() {
+    refreshLocationBadges();
+    if (!dom.locationModal) return;
+    console.debug("[location] init start");
+
+    let activeTarget = "birth";
+
+    const syncModalFields = (targetKey) => {
+      const target = locationTargets[targetKey] || locationTargets.birth;
+      const vals = getLocationValues(targetKey) || target?.defaults || {};
+      const { city, nation, tz, lat, lng } = dom.locationModalFields || {};
+      if (city) city.value = vals.city || "";
+      if (nation) nation.value = vals.nation || "";
+      if (tz) tz.value = vals.tz || vals.tz_str || "";
+      if (lat) lat.value = vals.lat || "";
+      if (lng) lng.value = vals.lng || "";
+      if (dom.locationModalTitle && target) {
+        dom.locationModalTitle.textContent = target.title || "Edit location";
+      }
+    };
+
+    let modalInstance = null;
+    if (window.Modal && typeof window.Modal === "function") {
+      try {
+        modalInstance = new window.Modal(dom.locationModal, {
+          backdrop: "dynamic",
+          closable: true,
+        });
+      } catch (err) {
+        console.warn("[location] Modal init failed", err);
+      }
+    }
+
+    const openModal = () => {
+      if (modalInstance && typeof modalInstance.show === "function") {
+        modalInstance.show();
+      } else {
+        dom.locationModal.classList.remove("hidden");
+        dom.locationModal.removeAttribute("aria-hidden");
+        dom.locationModal.removeAttribute("inert");
+      }
+      console.debug("[location] modal opened", { activeTarget });
+    };
+
+    const closeModal = () => {
+      if (document.activeElement && typeof document.activeElement.blur === "function") {
+        document.activeElement.blur();
+      }
+      if (modalInstance && typeof modalInstance.hide === "function") {
+        modalInstance.hide();
+      } else {
+        dom.locationModal.classList.add("hidden");
+        dom.locationModal.setAttribute("aria-hidden", "true");
+        dom.locationModal.setAttribute("inert", "true");
+      }
+      console.debug("[location] modal closed");
+    };
+
+    dom.locationTriggers.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const requested = btn.dataset.locationTarget || "birth";
+        activeTarget = locationTargets[requested] ? requested : "birth";
+        syncModalFields(activeTarget);
+        if (dom.locationModalFields?.city) {
+          dom.locationModalFields.city.focus();
+        }
+        openModal();
+      });
+    });
+
+    if (dom.locationSaveBtn) {
+      dom.locationSaveBtn.addEventListener("click", () => {
+        const fields = dom.locationModalFields || {};
+        const readField = (el) => {
+          if (!el) return "";
+          const raw = typeof el.value === "string" ? el.value.trim() : el.value;
+          return raw ?? "";
+        };
+        setLocationValues(activeTarget, {
+          city: readField(fields.city),
+          nation: readField(fields.nation),
+          tz: readField(fields.tz),
+          tz_str: readField(fields.tz),
+          lat: readField(fields.lat),
+          lng: readField(fields.lng),
+        });
+        refreshLocationBadges(activeTarget);
+        console.debug("[location] save applied", { activeTarget });
+        closeModal();
+      });
+    }
+
+    const closeButtons = dom.locationModal.querySelectorAll('[data-modal-hide="location-modal"]');
+    closeButtons.forEach((btn) =>
+      btn.addEventListener("click", () => {
+        syncModalFields(activeTarget);
+        closeModal();
+      })
+    );
+    dom.locationModal.addEventListener("click", (event) => {
+      if (event.target === dom.locationModal) {
+        syncModalFields(activeTarget);
+        closeModal();
+      }
+    });
+  }
+
   HomeApp.dom = dom;
   HomeApp.constants = constants;
   HomeApp.runtime = runtime;
@@ -588,7 +806,9 @@
     renderReportMarkdown,
     setReportTitle,
     refreshDateTimeBadges,
+    refreshLocationBadges,
   };
 
   initDatetimeModal();
+  initLocationModal();
 })();

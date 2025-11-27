@@ -169,6 +169,9 @@
       if (HomeApp.utils && typeof HomeApp.utils.refreshDateTimeBadges === "function") {
         HomeApp.utils.refreshDateTimeBadges();
       }
+      if (HomeApp.utils && typeof HomeApp.utils.refreshLocationBadges === "function") {
+        HomeApp.utils.refreshLocationBadges();
+      }
     } catch (err) {
       console.warn("Could not load saved form state", err);
     }
@@ -260,6 +263,9 @@
       updateModeVisibility();
       if (HomeApp.utils && typeof HomeApp.utils.refreshDateTimeBadges === "function") {
         HomeApp.utils.refreshDateTimeBadges();
+      }
+      if (HomeApp.utils && typeof HomeApp.utils.refreshLocationBadges === "function") {
+        HomeApp.utils.refreshLocationBadges();
       }
       utils.setStatus("Local state cleared.");
     } catch (err) {
