@@ -28,11 +28,11 @@
     ELEMENT_ICON,
     QUALITY_ICON,
     POINTS_ICONS,
+    ASPECT_ICON_MAP,
     computeAspects: computeAspectsShared,
     MAJOR_ASPECT_ICON_MAP,
     MAJOR_ASPECT_PATTERNS,
     getMajorAspectIcon,
-    resolveMajorAspectPatterns,
     emojiNumber,
     formatHouseLabel,
     formatHouseLabelShort,
@@ -176,6 +176,21 @@
     );
   }
 
+  function extractMajorAspects(payload) {
+    if (!payload) return [];
+    if (Array.isArray(payload.major_aspects)) return payload.major_aspects;
+    if (Array.isArray(payload.snapshot?.major_aspects)) return payload.snapshot.major_aspects;
+    if (Array.isArray(payload.subject?.major_aspects)) return payload.subject.major_aspects;
+    return [];
+  }
+
+  function extractNatalMajorAspects(payload) {
+    if (!payload) return [];
+    if (Array.isArray(payload.natal_major_aspects)) return payload.natal_major_aspects;
+    if (Array.isArray(payload.snapshot?.natal_major_aspects)) return payload.snapshot.natal_major_aspects;
+    return [];
+  }
+
   function renderAspectMatrix(points, keys, aspects) {
     if (!keys.length || !aspects.length) return "";
     const norm = (a, b) => (a < b ? `${a}__${b}` : `${b}__${a}`);
@@ -223,66 +238,162 @@
     `;
   }
 
-  function getPointLabel(points, key) {
+  function formatPointInline(points, key) {
+    if (!key) return "";
     const pt = points[key] || {};
-    return pt.name || capitalise(key);
+    const label = pt.name || capitalise(key.replace(/_/g, " "));
+    const sign = pt.sign || "";
+    const pos = Number.isFinite(pt.position) ? `${pt.position.toFixed(2)}°` : "";
+    const icon = POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "✶";
+    return `${icon} ${label}${sign ? ` ${sign}` : ""}${pos ? ` @ ${pos}` : ""}`;
   }
 
-  function formatAspectHit(points, entry) {
-    const { baseKey, otherKey, aspect } = entry;
-    const baseLabel = getPointLabel(points, baseKey);
-    const otherLabel = getPointLabel(points, otherKey);
-    const icon = aspect.icon || "";
-    const orbLabel = Number.isFinite(aspect.orb) ? `${aspect.orb.toFixed(2)}°` : "";
-    return `${baseLabel} ${icon} ${otherLabel}${orbLabel ? ` (${orbLabel})` : ""}`;
+  function formatPointGroup(list, points) {
+    return (list || []).map((key) => formatPointInline(points, key)).filter(Boolean).join(" · ");
   }
 
-  function renderPatternCard(pattern, matches, points) {
+  function formatLinkLine(link, points) {
+    if (!link || !Array.isArray(link.pair)) return "";
+    const [leftKey, rightKey] = link.pair;
+    const aspectIcon = ASPECT_ICON_MAP[link.type] || link.icon || "✶";
+    const orbLabel = Number.isFinite(link.orb) ? `${link.orb.toFixed(2)}°` : "";
+    const left = formatPointInline(points, leftKey);
+    const right = formatPointInline(points, rightKey);
+    const aspectLabel = link.type ? capitalise(link.type) : "Aspect";
+    return `${left} ${aspectIcon} ${aspectLabel} ${right}${orbLabel ? ` (orb ${orbLabel})` : ""}`;
+  }
+
+  const PATTERN_RENDERERS = {
+    stellium: (pattern, points) => {
+      const cluster = pattern.structure?.cluster || pattern.points || [];
+      const text = formatPointGroup(cluster, points);
+      return text ? [`<li><strong>Cluster</strong>: ${text}</li>`] : [];
+    },
+    t_square: (pattern, points) => {
+      const focal = pattern.structure?.focal;
+      const others = (pattern.points || []).filter((k) => k !== focal);
+      const lines = [];
+      if (focal) lines.push(`<li><strong>Focal</strong>: ${formatPointInline(points, focal)}</li>`);
+      if (others.length) lines.push(`<li><strong>Opposition base</strong>: ${formatPointGroup(others, points)}</li>`);
+      return lines;
+    },
+    grand_trine: (pattern, points) => {
+      const triple = pattern.structure?.triple || pattern.points || [];
+      const text = formatPointGroup(triple, points);
+      return text ? [`<li><strong>Triangle</strong>: ${text}</li>`] : [];
+    },
+    kite: (pattern, points) => {
+      const triangle = pattern.structure?.triangle || [];
+      const opposition = pattern.structure?.opposition || [];
+      const lines = [];
+      const triText = formatPointGroup(triangle, points);
+      if (triText) lines.push(`<li><strong>Grand Trine</strong>: ${triText}</li>`);
+      const oppText = formatPointGroup(opposition, points);
+      if (oppText) lines.push(`<li><strong>Spine</strong>: ${oppText}</li>`);
+      return lines;
+    },
+    grand_cross: (pattern, points) => {
+      const axes = pattern.structure?.axes || [];
+      const lines = axes
+        .map((pair, idx) => `<li><strong>Axis ${idx + 1}</strong>: ${formatPointGroup(pair, points)}</li>`)
+        .filter(Boolean);
+      const pointsLine = formatPointGroup(pattern.points || [], points);
+      if (!lines.length && pointsLine) lines.push(`<li><strong>Points</strong>: ${pointsLine}</li>`);
+      return lines;
+    },
+    grand_sextile: (pattern, points) => {
+      const triples = pattern.structure?.triples || [];
+      const lines = triples
+        .map((triple, idx) => `<li><strong>Triangle ${idx + 1}</strong>: ${formatPointGroup(triple, points)}</li>`)
+        .filter(Boolean);
+      if (!lines.length) {
+        const pts = formatPointGroup(pattern.points || [], points);
+        if (pts) lines.push(`<li><strong>Points</strong>: ${pts}</li>`);
+      }
+      return lines;
+    },
+    mystic_rectangle: (pattern, points) => {
+      const oppositions = pattern.structure?.oppositions || [];
+      const lines = oppositions
+        .map((pair, idx) => `<li><strong>Opposition ${idx + 1}</strong>: ${formatPointGroup(pair, points)}</li>`)
+        .filter(Boolean);
+      const pts = formatPointGroup(pattern.points || [], points);
+      if (!lines.length && pts) lines.push(`<li><strong>Points</strong>: ${pts}</li>`);
+      return lines;
+    },
+    trapeze: (pattern, points) => {
+      const chain = pattern.structure?.chain || pattern.points || [];
+      const text = formatPointGroup(chain, points);
+      return text ? [`<li><strong>Chain</strong>: ${text}</li>`] : [];
+    },
+    default: (pattern, points) => {
+      const text = formatPointGroup(pattern.points || [], points);
+      return text ? [`<li><strong>Points</strong>: ${text}</li>`] : [];
+    },
+  };
+
+  function renderPatternLinks(pattern, points) {
+    const links = Array.isArray(pattern.links) ? pattern.links : [];
+    return links
+      .map((link) => formatLinkLine(link, points))
+      .filter(Boolean)
+      .map((text) => `<li>${text}</li>`);
+  }
+
+  function renderPatternCard(pattern, points) {
     const icon = fallbackIcon(pattern.id);
-    const matchCount = matches.length;
-    const matchList =
-      matchCount > 0
-        ? matches.map((entry) => `<li>${formatAspectHit(points, entry)}</li>`)
-            .join("")
-        : `<li class="adv-pattern-none">No ${pattern.aspectsLabel || "matching"} aspects found.</li>`;
-    const aspectsLabel = pattern.aspectsLabel || (pattern.aspects || []).map(capitalise).join(", ");
+    const aspectsLabel = pattern.aspects_label || pattern.aspectsLabel || (pattern.aspects || []).map(capitalise).join(", ");
+    const detailRenderer = PATTERN_RENDERERS[pattern.id] || PATTERN_RENDERERS.default;
+    const detailLines = detailRenderer(pattern, points || {});
+    const linkLines = renderPatternLinks(pattern, points || {});
+    const orbLine = pattern.orb ? `<li><strong>Orb guide</strong>: ${pattern.orb}</li>` : "";
+    const lines = [...detailLines, ...linkLines];
+    if (orbLine) lines.push(orbLine);
+    const list =
+      lines.length > 0
+        ? `<ul class="adv-pattern-hit-list">${lines.join("")}</ul>`
+        : `<p class="adv-pattern-none">No structural links found for this pattern.</p>`;
+    const geometry = pattern.geometry ? `<p class="adv-pattern-sub">${pattern.geometry}</p>` : "";
     return `
       <article class="adv-pattern-card">
         <div class="adv-pattern-title-row">
           <div class="adv-pattern-icon" aria-hidden="true">${icon}</div>
           <div class="adv-pattern-title-stack">
-            <h4>${pattern.name}</h4>
+            <h4>${pattern.name || capitalise(pattern.id || "Pattern")}</h4>
             <p class="adv-pattern-subtitle">${aspectsLabel}</p>
+            ${geometry}
           </div>
-          <span class="adv-pattern-pill">${pattern.planets}</span>
+          <span class="adv-pattern-pill">${pattern.planets || ""}</span>
         </div>
         <div class="adv-pattern-aspects">
-          <ul class="adv-pattern-hit-list">${matchList}</ul>
+          ${list}
         </div>
       </article>
     `;
   }
 
-  function renderMajorAspectsList(aspects, points) {
-    const resolved = resolveMajorAspectPatterns(aspects, points, MAJOR_ASPECT_PATTERNS);
-    const cards = resolved
-      .map(({ pattern, matches }) => renderPatternCard(pattern, matches, points || {}))
-      .join("");
+  function renderMajorAspectsList(patterns, points, title, subtitle, includeModal = true) {
+    if (!Array.isArray(patterns) || patterns.length === 0) return "";
+    const headerTitle = title || "Major Ptolemaic Aspect Configurations";
+    const headerSubtitle = subtitle || "Geometric patterns detected in the response payload.";
+    const cards = patterns.map((pattern) => renderPatternCard(pattern, points || {})).join("");
+    const modal = includeModal ? renderPatternModal(MAJOR_ASPECT_PATTERNS) : "";
+    const infoBtn = includeModal
+      ? `<button type="button" class="adv-pattern-info-btn" data-target="#advPatternModal" aria-label="Show pattern descriptions">i</button>`
+      : "";
     return `
       <div class="adv-patterns">
         <div class="adv-patterns-head">
           <div>
-            <p class="adv-patterns-kicker">Major Ptolemaic Aspect Configurations</p>
-            <h3>Geometric patterns at a glance</h3>
-            <p class="adv-patterns-sub">Only the five Ptolemaic aspects (0°, 60°, 90°, 120°, 180°) stitched into their most common multi-planet shapes.</p>
+            <p class="adv-patterns-kicker">${headerTitle}</p>
+            <h3>${headerSubtitle}</h3>
+            <p class="adv-patterns-sub">Shapes derived from the returned major aspect payload.</p>
           </div>
-          <button type="button" class="adv-pattern-info-btn" data-target="#advPatternModal" aria-label="Show pattern descriptions">
-            i
-          </button>
+          ${infoBtn}
         </div>
         <div class="adv-pattern-grid">${cards}</div>
       </div>
-      ${renderPatternModal(MAJOR_ASPECT_PATTERNS)}
+      ${modal}
     `;
   }
 
@@ -437,6 +548,9 @@
     }
 
     const { points, houses } = collectPoints(source);
+    const natalSource = payload?.natal_subject || payload?.snapshot?.natal_subject;
+    const natalCollected = natalSource ? collectPoints(natalSource) : { points: {}, houses: {} };
+    const natalPoints = natalCollected.points || {};
     const ns = "AdvancedApp";
     const cfg =
       (window[ns]?.config?.getConfigFromInputs?.() || window[ns]?.constants?.DEFAULT_CONFIG) || {};
@@ -461,7 +575,32 @@
     const matrixKeys = filteredPointKeys.filter((k) => aspectKeySet.has(k));
     const aspectRows = aspects.map(renderAspectRow).join("");
     const aspectMatrix = renderAspectMatrix(points, matrixKeys, aspects);
-    const majorAspectsList = renderMajorAspectsList(aspects, points);
+    const majorAspects = extractMajorAspects(payload);
+    const natalMajorAspects = extractNatalMajorAspects(payload);
+    const majorBlocks = [];
+    if (majorAspects.length) {
+      majorBlocks.push(
+        renderMajorAspectsList(
+          majorAspects,
+          points,
+          "Major Ptolemaic Aspect Configurations",
+          "Geometric patterns detected for this chart.",
+          true
+        )
+      );
+    }
+    if (natalMajorAspects.length) {
+      majorBlocks.push(
+        renderMajorAspectsList(
+          natalMajorAspects,
+          natalPoints,
+          "Natal major aspect configurations",
+          "Patterns detected from the provided natal chart.",
+          majorBlocks.length === 0
+        )
+      );
+    }
+    const majorAspectsList = majorBlocks.join("");
     const aspectContent =
       aspectMatrix + majorAspectsList + (aspectRows || "<p class=\"hint\">No aspects found for active points.</p>");
 
@@ -514,7 +653,7 @@
           }
           const natalJson = await jsonResp.json();
           if (natalJson && natalJson.subject) {
-            window.AdvancedApp.render?.renderNatalSummary?.(natalJson.subject, birthDateParts);
+            window.AdvancedApp.render?.renderNatalSummary?.(natalJson);
           } else if (advDom.summaryEl) {
             advDom.summaryEl.innerHTML = "<p>Unexpected response from natal endpoint – subject field not found.</p>";
           }
@@ -533,7 +672,7 @@
           }
           const transitJson = await jsonResp.json();
           if (transitJson && transitJson.snapshot) {
-            window.AdvancedApp.render?.renderTransitSummary?.(transitJson.snapshot, transitDateParts);
+            window.AdvancedApp.render?.renderTransitSummary?.(transitJson);
           } else if (advDom.summaryEl) {
             advDom.summaryEl.innerHTML = "<p>Unexpected response from transit endpoint – snapshot not found.</p>";
           }
@@ -552,7 +691,7 @@
           }
           const transitJson = await jsonResp.json();
           if (transitJson && transitJson.snapshot) {
-            window.AdvancedApp.render?.renderCombinedSummary?.(transitJson.snapshot, birthDateParts, transitDateParts);
+            window.AdvancedApp.render?.renderCombinedSummary?.(transitJson);
           } else if (advDom.summaryEl) {
             advDom.summaryEl.innerHTML = "<p>Unexpected response from transit endpoint – snapshot not found.</p>";
           }

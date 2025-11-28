@@ -105,6 +105,16 @@
       construction: "A–B–C all 120° apart forming a closed triangle.",
     },
     {
+      id: "kite",
+      name: "Kite",
+      planets: "4 planets",
+      aspects: ["trine", "opposition", "sextile"],
+      aspectsLabel: "Grand Trine + opposition + sextiles",
+      geometry: "Grand Trine with a fourth point opposing one trine point and sextile to the other two.",
+      orb: "Trines ~±6–8°, opposition ~±8–10°, sextiles ~±5–6°.",
+      construction: "A–B–C trines, with D opposite A and sextile B and C (kite spine and sides).",
+    },
+    {
       id: "grand_cross",
       name: "Grand Cross",
       planets: "4 planets",
@@ -227,6 +237,35 @@
           <circle cx="18" cy="64" r="6" fill="#a5f3fc" stroke="#22d3ee" stroke-width="1.6" />
           <circle cx="70" cy="64" r="6" fill="#a5f3fc" stroke="#22d3ee" stroke-width="1.6" />
           <path d="M30 42 Q44 48 58 42" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.3" stroke-dasharray="5 3" />
+        `
+      ),
+      kite: wrap(
+        "kite",
+        `
+          <linearGradient id="kite-spine" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stop-color="#22d3ee" />
+            <stop offset="100%" stop-color="#f472b6" />
+          </linearGradient>
+          <linearGradient id="kite-wing" x1="0%" y1="50%" x2="100%" y2="50%">
+            <stop offset="0%" stop-color="#a5f3fc" />
+            <stop offset="100%" stop-color="#c084fc" />
+          </linearGradient>
+        `,
+        `
+          <polygon points="44,10 70,40 44,76 18,40" fill="rgba(34,211,238,0.08)" stroke="url(#kite-wing)" stroke-width="2.4" stroke-linejoin="round" />
+          <line x1="44" y1="10" x2="44" y2="76" stroke="url(#kite-spine)" stroke-width="2.8" stroke-linecap="round" />
+          <line x1="18" y1="40" x2="70" y2="40" stroke="rgba(255,255,255,0.35)" stroke-width="1.4" stroke-dasharray="5 3" />
+          <line x1="18" y1="40" x2="44" y2="10" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
+          <line x1="18" y1="40" x2="44" y2="76" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
+          <line x1="70" y1="40" x2="44" y2="10" stroke="#c084fc" stroke-width="2" stroke-linecap="round" />
+          <line x1="70" y1="40" x2="44" y2="76" stroke="#c084fc" stroke-width="2" stroke-linecap="round" />
+          <g fill="#e0f2fe" stroke="#22d3ee" stroke-width="1.5">
+            <circle cx="44" cy="10" r="5.4" />
+            <circle cx="18" cy="40" r="4.8" />
+            <circle cx="70" cy="40" r="4.8" />
+            <circle cx="44" cy="76" r="5.4" />
+          </g>
+          <circle cx="44" cy="40" r="4.6" fill="#f472b6" stroke="#fb7185" stroke-width="1.6" opacity="0.9" />
         `
       ),
       grand_cross: wrap(
