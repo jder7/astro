@@ -23,9 +23,34 @@
   };
 
   const shared = window.AppShared || {};
-  const { SIGN_META, ELEMENT_ICON, QUALITY_ICON, POINTS_ICONS, ASPECTS,  emojiNumber, formatHouseLabel, formatHouseLabelShort, formatDateLabel, capitalise } = shared;
+  const {
+    SIGN_META,
+    ELEMENT_ICON,
+    QUALITY_ICON,
+    POINTS_ICONS,
+    computeAspects: computeAspectsShared,
+    MAJOR_ASPECT_ICON_MAP,
+    MAJOR_ASPECT_PATTERNS,
+    getMajorAspectIcon,
+    resolveMajorAspectPatterns,
+    emojiNumber,
+    formatHouseLabel,
+    formatHouseLabelShort,
+    formatDateLabel,
+    capitalise,
+  } = shared;
   const flags = (app.flags = { ...(app.flags || {}), skipSvg: true });
   console.info("[advanced] main init", { ns, skipSvg: flags.skipSvg });
+
+  const fallbackIcon = (id) => {
+    if (typeof getMajorAspectIcon === "function") {
+      const svg = getMajorAspectIcon(id);
+      if (svg) return svg;
+    }
+    if (MAJOR_ASPECT_ICON_MAP && MAJOR_ASPECT_ICON_MAP[id]) return MAJOR_ASPECT_ICON_MAP[id];
+    if (MAJOR_ASPECT_ICON_MAP && MAJOR_ASPECT_ICON_MAP.generic) return MAJOR_ASPECT_ICON_MAP.generic;
+    return `<svg viewBox="0 0 88 88" class="adv-pattern-svg" aria-hidden="true" role="img"><circle cx="44" cy="44" r="32" fill="rgba(56,189,248,0.12)" stroke="#38bdf8" stroke-width="2.2"/></svg>`;
+  };
 
   const pad = (v) => String(v).padStart(2, "0");
   const toDatetimeLocal = (date) => {
@@ -151,35 +176,6 @@
     );
   }
 
-  function classifyAspect(diff) {
-    for (const asp of ASPECTS) {
-      const delta = Math.abs(diff - asp.angle);
-      if (delta <= asp.orb) return { ...asp, orb: delta };
-    }
-    return null;
-  }
-
-  function computeAspects(points, activeKeys) {
-    const keys = activeKeys.length ? activeKeys : Object.keys(points);
-    const list = [];
-    const keySet = new Set(keys);
-    keys.forEach((baseKey, idx) => {
-      const base = points[baseKey];
-      if (!base || !Number.isFinite(base.abs_pos)) return;
-      for (let j = idx + 1; j < keys.length; j++) {
-        const otherKey = keys[j];
-        const other = points[otherKey];
-        if (!other || !Number.isFinite(other.abs_pos)) continue;
-        const diff = Math.abs(base.abs_pos - other.abs_pos) % 360;
-        const aspect = classifyAspect(diff > 180 ? 360 - diff : diff);
-        if (aspect) {
-          list.push({ baseKey, otherKey, aspect, base, other });
-        }
-      }
-    });
-    return list.sort((a, b) => a.aspect.orb - b.aspect.orb);
-  }
-
   function renderAspectMatrix(points, keys, aspects) {
     if (!keys.length || !aspects.length) return "";
     const norm = (a, b) => (a < b ? `${a}__${b}` : `${b}__${a}`);
@@ -225,6 +221,129 @@
         </table>
       </div>
     `;
+  }
+
+  function getPointLabel(points, key) {
+    const pt = points[key] || {};
+    return pt.name || capitalise(key);
+  }
+
+  function formatAspectHit(points, entry) {
+    const { baseKey, otherKey, aspect } = entry;
+    const baseLabel = getPointLabel(points, baseKey);
+    const otherLabel = getPointLabel(points, otherKey);
+    const icon = aspect.icon || "";
+    const orbLabel = Number.isFinite(aspect.orb) ? `${aspect.orb.toFixed(2)}°` : "";
+    return `${baseLabel} ${icon} ${otherLabel}${orbLabel ? ` (${orbLabel})` : ""}`;
+  }
+
+  function renderPatternCard(pattern, matches, points) {
+    const icon = fallbackIcon(pattern.id);
+    const matchCount = matches.length;
+    const matchList =
+      matchCount > 0
+        ? matches.map((entry) => `<li>${formatAspectHit(points, entry)}</li>`)
+            .join("")
+        : `<li class="adv-pattern-none">No ${pattern.aspectsLabel || "matching"} aspects found.</li>`;
+    const aspectsLabel = pattern.aspectsLabel || (pattern.aspects || []).map(capitalise).join(", ");
+    return `
+      <article class="adv-pattern-card">
+        <div class="adv-pattern-title-row">
+          <div class="adv-pattern-icon" aria-hidden="true">${icon}</div>
+          <div class="adv-pattern-title-stack">
+            <h4>${pattern.name}</h4>
+            <p class="adv-pattern-subtitle">${aspectsLabel}</p>
+          </div>
+          <span class="adv-pattern-pill">${pattern.planets}</span>
+        </div>
+        <div class="adv-pattern-aspects">
+          <ul class="adv-pattern-hit-list">${matchList}</ul>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderPatternList(aspects, points) {
+    const resolved = resolveMajorAspectPatterns(aspects, points, MAJOR_ASPECT_PATTERNS);
+    const cards = resolved
+      .map(({ pattern, matches }) => renderPatternCard(pattern, matches, points || {}))
+      .join("");
+    return `
+      <div class="adv-patterns">
+        <div class="adv-patterns-head">
+          <div>
+            <p class="adv-patterns-kicker">Major Ptolemaic Aspect Configurations</p>
+            <h3>Geometric patterns at a glance</h3>
+            <p class="adv-patterns-sub">Only the five Ptolemaic aspects (0°, 60°, 90°, 120°, 180°) stitched into their most common multi-planet shapes.</p>
+          </div>
+          <button type="button" class="adv-pattern-info-btn" data-target="#advPatternModal" aria-label="Show pattern descriptions">
+            i
+          </button>
+        </div>
+        <div class="adv-pattern-grid">${cards}</div>
+      </div>
+      ${renderPatternModal(MAJOR_ASPECT_PATTERNS)}
+    `;
+  }
+
+  function renderPatternModal(patterns) {
+    const items = (patterns || [])
+      .map(
+        (p) => `
+      <article class="adv-pattern-modal-card">
+        <div class="adv-pattern-icon" aria-hidden="true">${fallbackIcon(p.id)}</div>
+        <div class="adv-pattern-modal-title">
+          <h4>${p.name}</h4>
+          <span class="adv-pattern-pill">${p.planets}</span>
+        </div>
+        <p class="adv-pattern-overlay-geometry">${p.geometry}</p>
+        <dl class="adv-pattern-meta">
+          <div>
+            <dt>Orb guide</dt>
+            <dd>${p.orb}</dd>
+          </div>
+          <div>
+            <dt>Construction</dt>
+            <dd>${p.construction}</dd>
+          </div>
+        </dl>
+      </article>
+    `
+      )
+      .join("");
+    return `
+      <div class="adv-pattern-modal hidden" id="advPatternModal" role="dialog" aria-modal="true" aria-label="Major aspects descriptions">
+        <div class="adv-pattern-modal-backdrop" data-close-modal></div>
+        <div class="adv-pattern-modal-content">
+          <div class="adv-pattern-modal-header">
+            <div>
+              <p class="adv-patterns-kicker">Pattern guide</p>
+              <h3>Major aspect configurations</h3>
+            </div>
+            <button type="button" class="adv-pattern-close-btn" data-close-modal aria-label="Close pattern descriptions">✕</button>
+          </div>
+          <div class="adv-pattern-modal-body">
+            ${items}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function attachPatternModalHandlers() {
+    const modal = document.querySelector("#advPatternModal");
+    const openBtn = document.querySelector(".adv-pattern-info-btn");
+    if (!modal || !openBtn) return;
+    const backdrop = modal.querySelector(".adv-pattern-modal-backdrop");
+    const closeBtns = modal.querySelectorAll("[data-close-modal]");
+    const open = () => modal.classList.remove("hidden");
+    const close = () => modal.classList.add("hidden");
+    openBtn.addEventListener("click", open);
+    closeBtns.forEach((btn) => btn.addEventListener("click", close));
+    modal.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
+    });
+    if (backdrop) backdrop.addEventListener("click", close);
   }
 
   function renderAspectRow(entry) {
@@ -333,7 +452,7 @@
     const houseRows = Object.entries(houses)
       .map(([k, v]) => renderPointRowProxy(v, { labelOverride: formatHouseLabel(v.house || k) }))
       .join("");
-    const aspects = computeAspects(points, filteredPointKeys);
+    const aspects = computeAspectsShared(points, filteredPointKeys);
     const aspectKeySet = aspects.reduce((set, a) => {
       set.add(a.baseKey);
       set.add(a.otherKey);
@@ -342,8 +461,9 @@
     const matrixKeys = filteredPointKeys.filter((k) => aspectKeySet.has(k));
     const aspectRows = aspects.map(renderAspectRow).join("");
     const aspectMatrix = renderAspectMatrix(points, matrixKeys, aspects);
+    const patternList = renderPatternList(aspects, points);
     const aspectContent =
-      aspectMatrix + (aspectRows || "<p class=\"hint\">No aspects found for active points.</p>");
+      aspectMatrix + patternList + (aspectRows || "<p class=\"hint\">No aspects found for active points.</p>");
 
     const metaSource = source.birth || source.moment || source.first || source;
     const meta = renderMetaHeader(metaSource);
@@ -354,6 +474,7 @@
     ].join("");
 
     dom.summaryEl.innerHTML = `${meta}${sections}`;
+    attachPatternModalHandlers();
   }
 
   function registerHandleSubmit() {
