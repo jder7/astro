@@ -263,7 +263,7 @@
     `;
   }
 
-  function renderPatternList(aspects, points) {
+  function renderMajorAspectsList(aspects, points) {
     const resolved = resolveMajorAspectPatterns(aspects, points, MAJOR_ASPECT_PATTERNS);
     const cards = resolved
       .map(({ pattern, matches }) => renderPatternCard(pattern, matches, points || {}))
@@ -461,9 +461,9 @@
     const matrixKeys = filteredPointKeys.filter((k) => aspectKeySet.has(k));
     const aspectRows = aspects.map(renderAspectRow).join("");
     const aspectMatrix = renderAspectMatrix(points, matrixKeys, aspects);
-    const patternList = renderPatternList(aspects, points);
+    const majorAspectsList = renderMajorAspectsList(aspects, points);
     const aspectContent =
-      aspectMatrix + patternList + (aspectRows || "<p class=\"hint\">No aspects found for active points.</p>");
+      aspectMatrix + majorAspectsList + (aspectRows || "<p class=\"hint\">No aspects found for active points.</p>");
 
     const metaSource = source.birth || source.moment || source.first || source;
     const meta = renderMetaHeader(metaSource);

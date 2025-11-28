@@ -72,7 +72,8 @@
     pluto: "♇",
   };
 
-  const MAJOR_ASPECT_PATTERNS = [
+  //Ptolemaic
+  const PTOLEMAIC_MAJOR_ASPECT_PATTERNS = [
     {
       id: "stellium",
       name: "Stellium",
@@ -419,7 +420,7 @@
     return results.sort((a, b) => a.aspect.orb - b.aspect.orb);
   }
 
-  function resolveMajorAspectPatterns(aspects, points, patterns = MAJOR_ASPECT_PATTERNS) {
+  function resolveMajorAspectPatterns(aspects, points, patterns = PTOLEMAIC_MAJOR_ASPECT_PATTERNS) {
     const safeAspects = Array.isArray(aspects) ? aspects : [];
     const lower = (v) => (typeof v === "string" ? v.toLowerCase() : v);
     return (patterns || []).map((pattern) => {
@@ -441,7 +442,7 @@
     ASPECTS,
     ASPECT_ICON_MAP,
     POINTS_ICONS,
-    MAJOR_ASPECT_PATTERNS,
+    MAJOR_ASPECT_PATTERNS: PTOLEMAIC_MAJOR_ASPECT_PATTERNS,
     MAJOR_ASPECT_ICON_MAP,
     MOON_PHASES,
     emojiNumber,

@@ -114,6 +114,16 @@ PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
         construction="A–B–C all 120° apart forming a closed triangle.",
     ),
     PtolemaicAspectConfiguration(
+        id="kite",
+        name="Kite",
+        planets="4 planets",
+        aspects=("trine", "opposition", "sextile"),
+        aspects_label="Grand Trine + opposition + sextiles",
+        geometry="Grand Trine with a fourth point opposing one trine point and sextile to the other two.",
+        orb="Trines ~±6–8°, opposition ~±8–10°, sextiles ~±5–6°.",
+        construction="A–B–C trines, with D opposite A and sextile B and C (kite spine and sides).",
+    ),
+    PtolemaicAspectConfiguration(
         id="grand_cross",
         name="Grand Cross",
         planets="4 planets",
@@ -386,7 +396,60 @@ class PtolemaicAspectCalculator:
                         links=tuple(links),
                         structure={"triple": tuple(sorted(key_set))},
                     )
-                )
+            )
+        return matches
+
+    def _match_kite(self, keys: list[str], points: dict[str, dict], pair_map: dict) -> list[PtolemaicAspect]:
+        matches: list[PtolemaicAspect] = []
+        seen: set[frozenset[str]] = set()
+        config = next(p for p in PTOLEMAIC_PATTERNS if p.id == "kite")
+        for quad in combinations(keys, 4):
+            for anchor in quad:
+                for tail in quad:
+                    if tail == anchor:
+                        continue
+                    b_c = [k for k in quad if k not in {anchor, tail}]
+                    if len(b_c) != 2:
+                        continue
+                    b, c = b_c
+                    tr_ab = pair_map.get(tuple(sorted((anchor, b))))
+                    tr_ac = pair_map.get(tuple(sorted((anchor, c))))
+                    tr_bc = pair_map.get(tuple(sorted((b, c))))
+                    opp = pair_map.get(tuple(sorted((anchor, tail))))
+                    sx_tb = pair_map.get(tuple(sorted((tail, b))))
+                    sx_tc = pair_map.get(tuple(sorted((tail, c))))
+                    if not all(
+                        [
+                            tr_ab and tr_ab["type"] == "trine",
+                            tr_ac and tr_ac["type"] == "trine",
+                            tr_bc and tr_bc["type"] == "trine",
+                            opp and opp["type"] == "opposition",
+                            sx_tb and sx_tb["type"] == "sextile",
+                            sx_tc and sx_tc["type"] == "sextile",
+                        ]
+                    ):
+                        continue
+                    key_set = frozenset(quad)
+                    if key_set in seen:
+                        continue
+                    seen.add(key_set)
+                    links = [
+                        self._make_link(anchor, b, tr_ab),
+                        self._make_link(anchor, c, tr_ac),
+                        self._make_link(b, c, tr_bc),
+                        self._make_link(anchor, tail, opp),
+                        self._make_link(tail, b, sx_tb),
+                        self._make_link(tail, c, sx_tc),
+                    ]
+                    matches.append(
+                        PtolemaicAspect(
+                            configuration=config,
+                            points=tuple(sorted(key_set)),
+                            links=tuple(links),
+                            structure={"triangle": (anchor, b, c), "opposition": (anchor, tail)},
+                        )
+                    )
+                    break
         return matches
 
     def _match_grand_cross(self, keys: list[str], points: dict[str, dict], pair_map: dict) -> list[PtolemaicAspect]:
@@ -577,6 +640,7 @@ class PtolemaicAspectCalculator:
             self._match_stellium,
             self._match_t_square,
             self._match_grand_trine,
+            self._match_kite,
             self._match_grand_cross,
             self._match_grand_sextile,
             self._match_mystic_rectangle,

@@ -1852,1522 +1852,1878 @@
     ],
     "major_aspects": [
       {
-        "base_key": "true_north_lunar_node",
-        "other_key": "true_south_lunar_node",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0,
-        "angle_difference": 180,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Pis",
-          "position": 6.675865688033809,
-          "abs_pos": 336.6758656880338,
-          "house": "First_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Vir",
-          "position": 6.675865688033809,
-          "abs_pos": 156.6758656880338,
-          "house": "Seventh_House",
-          "retrograde": true
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "descendant",
+          "mean_lilith",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "descendant",
+              "true_south_lunar_node"
+            ],
+            "orb": 2.32,
+            "difference": 2.317449884974849
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "descendant",
+            "mean_lilith",
+            "true_south_lunar_node"
+          ]
         }
       },
       {
-        "base_key": "ascendant",
-        "other_key": "descendant",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0,
-        "angle_difference": 179.99999999999994,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Ascendant",
-          "sign": "Pis",
-          "position": 8.993315573008715,
-          "abs_pos": 338.9933155730087,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Vir",
-          "position": 8.993315573008658,
-          "abs_pos": 158.99331557300866,
-          "house": "Seventh_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "medium_coeli",
+          "mercury",
+          "sun"
+        ],
+        "links": [],
+        "structure": {
+          "cluster": [
+            "medium_coeli",
+            "mercury",
+            "sun"
+          ]
         }
       },
       {
-        "base_key": "medium_coeli",
-        "other_key": "imum_coeli",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0,
-        "angle_difference": 179.99999999999997,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Medium_Coeli",
-          "sign": "Sag",
-          "position": 7.034164995419502,
-          "abs_pos": 247.0341649954195,
-          "house": "Tenth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Gem",
-          "position": 7.034164995419474,
-          "abs_pos": 67.03416499541947,
-          "house": "Fourth_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "medium_coeli",
+          "moon",
+          "sun"
+        ],
+        "links": [],
+        "structure": {
+          "cluster": [
+            "medium_coeli",
+            "moon",
+            "sun"
+          ]
         }
       },
       {
-        "base_key": "mercury",
-        "other_key": "mean_lilith",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 0.15,
-        "angle_difference": 59.84893063502349,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 0.15,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Mercury",
-          "sign": "Sco",
-          "position": 26.352639547089694,
-          "abs_pos": 236.3526395470897,
-          "house": "Ninth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Mean_Lilith",
-          "sign": "Vir",
-          "position": 26.5037089120662,
-          "abs_pos": 176.5037089120662,
-          "house": "Seventh_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "medium_coeli",
+          "moon",
+          "pluto",
+          "sun"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "moon",
+              "pluto"
+            ],
+            "orb": 0.87,
+            "difference": 0.8730646211075168
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "medium_coeli",
+            "moon",
+            "pluto",
+            "sun"
+          ]
         }
       },
       {
-        "base_key": "pluto",
-        "other_key": "true_north_lunar_node",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 0.29,
-        "angle_difference": 59.70658206002969,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 0.29,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Pluto",
-          "sign": "Cap",
-          "position": 6.969283628004121,
-          "abs_pos": 276.9692836280041,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Pis",
-          "position": 6.675865688033809,
-          "abs_pos": 336.6758656880338,
-          "house": "First_House",
-          "retrograde": true
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "moon",
+          "pluto",
+          "venus"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "moon",
+              "pluto"
+            ],
+            "orb": 0.87,
+            "difference": 0.8730646211075168
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "moon",
+            "pluto",
+            "venus"
+          ]
         }
       },
       {
-        "base_key": "pluto",
-        "other_key": "true_south_lunar_node",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 0.29,
-        "angle_difference": 120.29341793997031,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 0.29,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Pluto",
-          "sign": "Cap",
-          "position": 6.969283628004121,
-          "abs_pos": 276.9692836280041,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Vir",
-          "position": 6.675865688033809,
-          "abs_pos": 156.6758656880338,
-          "house": "Seventh_House",
-          "retrograde": true
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "neptune",
+          "saturn",
+          "venus"
+        ],
+        "links": [],
+        "structure": {
+          "cluster": [
+            "neptune",
+            "saturn",
+            "venus"
+          ]
         }
       },
       {
-        "base_key": "true_north_lunar_node",
-        "other_key": "medium_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 0.36,
-        "angle_difference": 89.64170069261431,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 0.36,
-          "icon": "□"
-        },
-        "base": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Pis",
-          "position": 6.675865688033809,
-          "abs_pos": 336.6758656880338,
-          "house": "First_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Medium_Coeli",
-          "sign": "Sag",
-          "position": 7.034164995419502,
-          "abs_pos": 247.0341649954195,
-          "house": "Tenth_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "neptune",
+          "saturn",
+          "true_north_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "neptune",
+              "true_north_lunar_node"
+            ],
+            "orb": 3.48,
+            "difference": 3.481318969179256
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "neptune",
+            "saturn",
+            "true_north_lunar_node"
+          ]
         }
       },
       {
-        "base_key": "true_north_lunar_node",
-        "other_key": "imum_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 0.36,
-        "angle_difference": 90.35829930738566,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 0.36,
-          "icon": "□"
-        },
-        "base": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Pis",
-          "position": 6.675865688033809,
-          "abs_pos": 336.6758656880338,
-          "house": "First_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Gem",
-          "position": 7.034164995419474,
-          "abs_pos": 67.03416499541947,
-          "house": "Fourth_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "ascendant",
+          "neptune",
+          "saturn",
+          "true_north_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "ascendant",
+              "neptune"
+            ],
+            "orb": 5.8,
+            "difference": 5.7987688541541615
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "ascendant",
+              "true_north_lunar_node"
+            ],
+            "orb": 2.32,
+            "difference": 2.3174498849749057
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "neptune",
+              "true_north_lunar_node"
+            ],
+            "orb": 3.48,
+            "difference": 3.481318969179256
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "ascendant",
+            "neptune",
+            "saturn",
+            "true_north_lunar_node"
+          ]
         }
       },
       {
-        "base_key": "true_south_lunar_node",
-        "other_key": "medium_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 0.36,
-        "angle_difference": 90.35829930738569,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 0.36,
-          "icon": "□"
-        },
-        "base": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Vir",
-          "position": 6.675865688033809,
-          "abs_pos": 156.6758656880338,
-          "house": "Seventh_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Medium_Coeli",
-          "sign": "Sag",
-          "position": 7.034164995419502,
-          "abs_pos": 247.0341649954195,
-          "house": "Tenth_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "ascendant",
+          "chiron",
+          "neptune",
+          "true_north_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "ascendant",
+              "neptune"
+            ],
+            "orb": 5.8,
+            "difference": 5.7987688541541615
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "ascendant",
+              "true_north_lunar_node"
+            ],
+            "orb": 2.32,
+            "difference": 2.3174498849749057
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "neptune",
+              "true_north_lunar_node"
+            ],
+            "orb": 3.48,
+            "difference": 3.481318969179256
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "ascendant",
+            "chiron",
+            "neptune",
+            "true_north_lunar_node"
+          ]
         }
       },
       {
-        "base_key": "true_south_lunar_node",
-        "other_key": "imum_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 0.36,
-        "angle_difference": 89.64170069261434,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 0.36,
-          "icon": "□"
-        },
-        "base": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Vir",
-          "position": 6.675865688033809,
-          "abs_pos": 156.6758656880338,
-          "house": "Seventh_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Gem",
-          "position": 7.034164995419474,
-          "abs_pos": 67.03416499541947,
-          "house": "Fourth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "medium_coeli",
+          "neptune",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "neptune",
+              "true_south_lunar_node"
+            ],
+            "orb": 3.48,
+            "difference": 176.51868103082074
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 86.16038172343505
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738569
+          }
+        ],
+        "structure": {
+          "focal": "medium_coeli"
         }
       },
       {
-        "base_key": "moon",
-        "other_key": "true_north_lunar_node",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 0.58,
-        "angle_difference": 60.579646681137206,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 0.58,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Cap",
-          "position": 6.096219006896604,
-          "abs_pos": 276.0962190068966,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Pis",
-          "position": 6.675865688033809,
-          "abs_pos": 336.6758656880338,
-          "house": "First_House",
-          "retrograde": true
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "imum_coeli",
+          "neptune",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "neptune",
+              "true_south_lunar_node"
+            ],
+            "orb": 3.48,
+            "difference": 176.51868103082074
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 93.83961827656492
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261434
+          }
+        ],
+        "structure": {
+          "focal": "imum_coeli"
         }
       },
       {
-        "base_key": "moon",
-        "other_key": "true_south_lunar_node",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 0.58,
-        "angle_difference": 119.4203533188628,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 0.58,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Cap",
-          "position": 6.096219006896604,
-          "abs_pos": 276.0962190068966,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Vir",
-          "position": 6.675865688033809,
-          "abs_pos": 156.6758656880338,
-          "house": "Seventh_House",
-          "retrograde": true
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "descendant",
+          "medium_coeli",
+          "neptune"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "descendant",
+              "neptune"
+            ],
+            "orb": 5.8,
+            "difference": 174.2012311458459
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 86.16038172343505
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241084
+          }
+        ],
+        "structure": {
+          "focal": "medium_coeli"
         }
       },
       {
-        "base_key": "mars",
-        "other_key": "pluto",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0.69,
-        "angle_difference": 179.3128624719913,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0.69,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Mars",
-          "sign": "Can",
-          "position": 7.656421156012826,
-          "abs_pos": 97.65642115601283,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Pluto",
-          "sign": "Cap",
-          "position": 6.969283628004121,
-          "abs_pos": 276.9692836280041,
-          "house": "Eleventh_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "imum_coeli",
+          "medium_coeli",
+          "neptune"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 86.16038172343505
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 93.83961827656492
+          }
+        ],
+        "structure": {
+          "focal": "neptune"
         }
       },
       {
-        "base_key": "moon",
-        "other_key": "pluto",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 0.87,
-        "angle_difference": 0.8730646211075168,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 0.87,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Cap",
-          "position": 6.096219006896604,
-          "abs_pos": 276.0962190068966,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Pluto",
-          "sign": "Cap",
-          "position": 6.969283628004121,
-          "abs_pos": 276.9692836280041,
-          "house": "Eleventh_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "descendant",
+          "imum_coeli",
+          "neptune"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "descendant",
+              "neptune"
+            ],
+            "orb": 5.8,
+            "difference": 174.2012311458459
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 93.83961827656492
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758918
+          }
+        ],
+        "structure": {
+          "focal": "imum_coeli"
         }
       },
       {
-        "base_key": "mars",
-        "other_key": "true_north_lunar_node",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 0.98,
-        "angle_difference": 120.980555467979,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 0.98,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Mars",
-          "sign": "Can",
-          "position": 7.656421156012826,
-          "abs_pos": 97.65642115601283,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Pis",
-          "position": 6.675865688033809,
-          "abs_pos": 336.6758656880338,
-          "house": "First_House",
-          "retrograde": true
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "medium_coeli",
+          "true_north_lunar_node",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "true_north_lunar_node",
+              "true_south_lunar_node"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261431
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738569
+          }
+        ],
+        "structure": {
+          "focal": "medium_coeli"
         }
       },
       {
-        "base_key": "mars",
-        "other_key": "true_south_lunar_node",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 0.98,
-        "angle_difference": 59.019444532020984,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 0.98,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Mars",
-          "sign": "Can",
-          "position": 7.656421156012826,
-          "abs_pos": 97.65642115601283,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Vir",
-          "position": 6.675865688033809,
-          "abs_pos": 156.6758656880338,
-          "house": "Seventh_House",
-          "retrograde": true
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "imum_coeli",
+          "true_north_lunar_node",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "true_north_lunar_node",
+              "true_south_lunar_node"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738566
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261434
+          }
+        ],
+        "structure": {
+          "focal": "imum_coeli"
         }
       },
       {
-        "base_key": "mars",
-        "other_key": "ascendant",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 1.34,
-        "angle_difference": 118.6631055830041,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 1.34,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Mars",
-          "sign": "Can",
-          "position": 7.656421156012826,
-          "abs_pos": 97.65642115601283,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Ascendant",
-          "sign": "Pis",
-          "position": 8.993315573008715,
-          "abs_pos": 338.9933155730087,
-          "house": "First_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "descendant",
+          "medium_coeli",
+          "true_north_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "descendant",
+              "true_north_lunar_node"
+            ],
+            "orb": 2.32,
+            "difference": 177.68255011502515
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261431
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241084
+          }
+        ],
+        "structure": {
+          "focal": "medium_coeli"
         }
       },
       {
-        "base_key": "mars",
-        "other_key": "descendant",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 1.34,
-        "angle_difference": 61.33689441699583,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 1.34,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Mars",
-          "sign": "Can",
-          "position": 7.656421156012826,
-          "abs_pos": 97.65642115601283,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Vir",
-          "position": 8.993315573008658,
-          "abs_pos": 158.99331557300866,
-          "house": "Seventh_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "imum_coeli",
+          "medium_coeli",
+          "true_north_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261431
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738566
+          }
+        ],
+        "structure": {
+          "focal": "true_north_lunar_node"
         }
       },
       {
-        "base_key": "jupiter",
-        "other_key": "saturn",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 1.39,
-        "angle_difference": 88.60802296425197,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 1.39,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Jupiter",
-          "sign": "Tau",
-          "position": 19.05742108032411,
-          "abs_pos": 49.05742108032411,
-          "house": "Third_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Saturn",
-          "sign": "Aqu",
-          "position": 20.449398116072132,
-          "abs_pos": 320.44939811607213,
-          "house": "Twelfth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "descendant",
+          "imum_coeli",
+          "true_north_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "descendant",
+              "true_north_lunar_node"
+            ],
+            "orb": 2.32,
+            "difference": 177.68255011502515
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738566
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758918
+          }
+        ],
+        "structure": {
+          "focal": "imum_coeli"
         }
       },
       {
-        "base_key": "mercury",
-        "other_key": "chiron",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 1.46,
-        "angle_difference": 118.54153922691117,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 1.46,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Mercury",
-          "sign": "Sco",
-          "position": 26.352639547089694,
-          "abs_pos": 236.3526395470897,
-          "house": "Ninth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Chiron",
-          "sign": "Pis",
-          "position": 24.894178774000864,
-          "abs_pos": 354.89417877400086,
-          "house": "First_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "ascendant",
+          "medium_coeli",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "true_south_lunar_node"
+            ],
+            "orb": 2.32,
+            "difference": 177.6825501150251
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738569
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758921
+          }
+        ],
+        "structure": {
+          "focal": "medium_coeli"
         }
       },
       {
-        "base_key": "moon",
-        "other_key": "mars",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 1.56,
-        "angle_difference": 178.4397978508838,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 1.56,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Cap",
-          "position": 6.096219006896604,
-          "abs_pos": 276.0962190068966,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Mars",
-          "sign": "Can",
-          "position": 7.656421156012826,
-          "abs_pos": 97.65642115601283,
-          "house": "Fifth_House",
-          "retrograde": true
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "ascendant",
+          "imum_coeli",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "true_south_lunar_node"
+            ],
+            "orb": 2.32,
+            "difference": 177.6825501150251
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261434
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241076
+          }
+        ],
+        "structure": {
+          "focal": "imum_coeli"
         }
       },
       {
-        "base_key": "mean_lilith",
-        "other_key": "chiron",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 1.61,
-        "angle_difference": 178.39046986193466,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 1.61,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Mean_Lilith",
-          "sign": "Vir",
-          "position": 26.5037089120662,
-          "abs_pos": 176.5037089120662,
-          "house": "Seventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Chiron",
-          "sign": "Pis",
-          "position": 24.894178774000864,
-          "abs_pos": 354.89417877400086,
-          "house": "First_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "imum_coeli",
+          "medium_coeli",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738569
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261434
+          }
+        ],
+        "structure": {
+          "focal": "true_south_lunar_node"
         }
       },
       {
-        "base_key": "ascendant",
-        "other_key": "medium_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 1.96,
-        "angle_difference": 91.95915057758921,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 1.96,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Ascendant",
-          "sign": "Pis",
-          "position": 8.993315573008715,
-          "abs_pos": 338.9933155730087,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Medium_Coeli",
-          "sign": "Sag",
-          "position": 7.034164995419502,
-          "abs_pos": 247.0341649954195,
-          "house": "Tenth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "ascendant",
+          "descendant",
+          "medium_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "descendant"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999994
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758921
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241084
+          }
+        ],
+        "structure": {
+          "focal": "medium_coeli"
         }
       },
       {
-        "base_key": "ascendant",
-        "other_key": "imum_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 1.96,
-        "angle_difference": 88.04084942241076,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 1.96,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Ascendant",
-          "sign": "Pis",
-          "position": 8.993315573008715,
-          "abs_pos": 338.9933155730087,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Gem",
-          "position": 7.034164995419474,
-          "abs_pos": 67.03416499541947,
-          "house": "Fourth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "ascendant",
+          "imum_coeli",
+          "medium_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758921
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241076
+          }
+        ],
+        "structure": {
+          "focal": "ascendant"
         }
       },
       {
-        "base_key": "medium_coeli",
-        "other_key": "descendant",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 1.96,
-        "angle_difference": 88.04084942241084,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 1.96,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Medium_Coeli",
-          "sign": "Sag",
-          "position": 7.034164995419502,
-          "abs_pos": 247.0341649954195,
-          "house": "Tenth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Vir",
-          "position": 8.993315573008658,
-          "abs_pos": 158.99331557300866,
-          "house": "Seventh_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "ascendant",
+          "descendant",
+          "imum_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "descendant"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999994
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241076
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758918
+          }
+        ],
+        "structure": {
+          "focal": "imum_coeli"
         }
       },
       {
-        "base_key": "descendant",
-        "other_key": "imum_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 1.96,
-        "angle_difference": 91.95915057758918,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 1.96,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Descendant",
-          "sign": "Vir",
-          "position": 8.993315573008658,
-          "abs_pos": 158.99331557300866,
-          "house": "Seventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Gem",
-          "position": 7.034164995419474,
-          "abs_pos": 67.03416499541947,
-          "house": "Fourth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "descendant",
+          "imum_coeli",
+          "medium_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241084
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758918
+          }
+        ],
+        "structure": {
+          "focal": "descendant"
         }
       },
       {
-        "base_key": "pluto",
-        "other_key": "ascendant",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 2.02,
-        "angle_difference": 62.024031945004594,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 2.02,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Pluto",
-          "sign": "Cap",
-          "position": 6.969283628004121,
-          "abs_pos": 276.9692836280041,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Ascendant",
-          "sign": "Pis",
-          "position": 8.993315573008715,
-          "abs_pos": 338.9933155730087,
-          "house": "First_House",
-          "retrograde": false
+        "id": "grand_cross",
+        "name": "Grand Cross",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Oppositions + Squares",
+        "geometry": "Four points every 90°: two oppositions plus four squares.",
+        "orb": "Squares/oppositions typically ±8–10°.",
+        "construction": "A↔C and B↔D oppositions; each is square to its neighbors.",
+        "points": [
+          "imum_coeli",
+          "medium_coeli",
+          "neptune",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "neptune",
+              "true_south_lunar_node"
+            ],
+            "orb": 3.48,
+            "difference": 176.51868103082074
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 86.16038172343505
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 93.83961827656492
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738569
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261434
+          }
+        ],
+        "structure": {
+          "axes": [
+            [
+              "neptune",
+              "true_south_lunar_node"
+            ],
+            [
+              "medium_coeli",
+              "imum_coeli"
+            ]
+          ]
         }
       },
       {
-        "base_key": "pluto",
-        "other_key": "descendant",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 2.02,
-        "angle_difference": 117.97596805499546,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 2.02,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Pluto",
-          "sign": "Cap",
-          "position": 6.969283628004121,
-          "abs_pos": 276.9692836280041,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Vir",
-          "position": 8.993315573008658,
-          "abs_pos": 158.99331557300866,
-          "house": "Seventh_House",
-          "retrograde": false
+        "id": "grand_cross",
+        "name": "Grand Cross",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Oppositions + Squares",
+        "geometry": "Four points every 90°: two oppositions plus four squares.",
+        "orb": "Squares/oppositions typically ±8–10°.",
+        "construction": "A↔C and B↔D oppositions; each is square to its neighbors.",
+        "points": [
+          "descendant",
+          "imum_coeli",
+          "medium_coeli",
+          "neptune"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "descendant",
+              "neptune"
+            ],
+            "orb": 5.8,
+            "difference": 174.2012311458459
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 86.16038172343505
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "neptune"
+            ],
+            "orb": 3.84,
+            "difference": 93.83961827656492
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241084
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758918
+          }
+        ],
+        "structure": {
+          "axes": [
+            [
+              "neptune",
+              "descendant"
+            ],
+            [
+              "medium_coeli",
+              "imum_coeli"
+            ]
+          ]
         }
       },
       {
-        "base_key": "true_north_lunar_node",
-        "other_key": "ascendant",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 2.32,
-        "angle_difference": 2.3174498849749057,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 2.32,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Pis",
-          "position": 6.675865688033809,
-          "abs_pos": 336.6758656880338,
-          "house": "First_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Ascendant",
-          "sign": "Pis",
-          "position": 8.993315573008715,
-          "abs_pos": 338.9933155730087,
-          "house": "First_House",
-          "retrograde": false
+        "id": "grand_cross",
+        "name": "Grand Cross",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Oppositions + Squares",
+        "geometry": "Four points every 90°: two oppositions plus four squares.",
+        "orb": "Squares/oppositions typically ±8–10°.",
+        "construction": "A↔C and B↔D oppositions; each is square to its neighbors.",
+        "points": [
+          "imum_coeli",
+          "medium_coeli",
+          "true_north_lunar_node",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "true_north_lunar_node",
+              "true_south_lunar_node"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261431
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738566
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738569
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261434
+          }
+        ],
+        "structure": {
+          "axes": [
+            [
+              "true_north_lunar_node",
+              "true_south_lunar_node"
+            ],
+            [
+              "medium_coeli",
+              "imum_coeli"
+            ]
+          ]
         }
       },
       {
-        "base_key": "true_north_lunar_node",
-        "other_key": "descendant",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 2.32,
-        "angle_difference": 177.68255011502515,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 2.32,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Pis",
-          "position": 6.675865688033809,
-          "abs_pos": 336.6758656880338,
-          "house": "First_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Vir",
-          "position": 8.993315573008658,
-          "abs_pos": 158.99331557300866,
-          "house": "Seventh_House",
-          "retrograde": false
+        "id": "grand_cross",
+        "name": "Grand Cross",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Oppositions + Squares",
+        "geometry": "Four points every 90°: two oppositions plus four squares.",
+        "orb": "Squares/oppositions typically ±8–10°.",
+        "construction": "A↔C and B↔D oppositions; each is square to its neighbors.",
+        "points": [
+          "descendant",
+          "imum_coeli",
+          "medium_coeli",
+          "true_north_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "descendant",
+              "true_north_lunar_node"
+            ],
+            "orb": 2.32,
+            "difference": 177.68255011502515
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261431
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738566
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241084
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758918
+          }
+        ],
+        "structure": {
+          "axes": [
+            [
+              "true_north_lunar_node",
+              "descendant"
+            ],
+            [
+              "medium_coeli",
+              "imum_coeli"
+            ]
+          ]
         }
       },
       {
-        "base_key": "true_south_lunar_node",
-        "other_key": "ascendant",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 2.32,
-        "angle_difference": 177.6825501150251,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 2.32,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Vir",
-          "position": 6.675865688033809,
-          "abs_pos": 156.6758656880338,
-          "house": "Seventh_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Ascendant",
-          "sign": "Pis",
-          "position": 8.993315573008715,
-          "abs_pos": 338.9933155730087,
-          "house": "First_House",
-          "retrograde": false
+        "id": "grand_cross",
+        "name": "Grand Cross",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Oppositions + Squares",
+        "geometry": "Four points every 90°: two oppositions plus four squares.",
+        "orb": "Squares/oppositions typically ±8–10°.",
+        "construction": "A↔C and B↔D oppositions; each is square to its neighbors.",
+        "points": [
+          "ascendant",
+          "imum_coeli",
+          "medium_coeli",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "true_south_lunar_node"
+            ],
+            "orb": 2.32,
+            "difference": 177.6825501150251
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "medium_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 90.35829930738569
+          },
+          {
+            "type": "square",
+            "pair": [
+              "imum_coeli",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.36,
+            "difference": 89.64170069261434
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758921
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241076
+          }
+        ],
+        "structure": {
+          "axes": [
+            [
+              "true_south_lunar_node",
+              "ascendant"
+            ],
+            [
+              "medium_coeli",
+              "imum_coeli"
+            ]
+          ]
         }
       },
       {
-        "base_key": "true_south_lunar_node",
-        "other_key": "descendant",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 2.32,
-        "angle_difference": 2.317449884974849,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 2.32,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Vir",
-          "position": 6.675865688033809,
-          "abs_pos": 156.6758656880338,
-          "house": "Seventh_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Vir",
-          "position": 8.993315573008658,
-          "abs_pos": 158.99331557300866,
-          "house": "Seventh_House",
-          "retrograde": false
+        "id": "grand_cross",
+        "name": "Grand Cross",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Oppositions + Squares",
+        "geometry": "Four points every 90°: two oppositions plus four squares.",
+        "orb": "Squares/oppositions typically ±8–10°.",
+        "construction": "A↔C and B↔D oppositions; each is square to its neighbors.",
+        "points": [
+          "ascendant",
+          "descendant",
+          "imum_coeli",
+          "medium_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "descendant"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999994
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 179.99999999999997
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758921
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241076
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 88.04084942241084
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 1.96,
+            "difference": 91.95915057758918
+          }
+        ],
+        "structure": {
+          "axes": [
+            [
+              "ascendant",
+              "descendant"
+            ],
+            [
+              "medium_coeli",
+              "imum_coeli"
+            ]
+          ]
         }
       },
       {
-        "base_key": "moon",
-        "other_key": "neptune",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 2.9,
-        "angle_difference": 57.09832771195795,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 2.9,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Cap",
-          "position": 6.096219006896604,
-          "abs_pos": 276.0962190068966,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
+        "id": "mystic_rectangle",
+        "name": "Mystic Rectangle",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "trine",
+          "sextile"
+        ],
+        "aspects_label": "Oppositions, Trines, Sextiles",
+        "geometry": "Two oppositions stitched by trines and sextiles into a rectangle.",
+        "orb": "Oppositions ±8–10°; trines 6–8°; sextiles 5–6°.",
+        "construction": "A↔C and B↔D; A sextile D & trine B, C sextile B & trine D.",
+        "points": [
+          "mars",
+          "neptune",
+          "pluto",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "mars",
+              "pluto"
+            ],
+            "orb": 0.69,
+            "difference": 179.3128624719913
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "neptune",
+              "true_south_lunar_node"
+            ],
+            "orb": 3.48,
+            "difference": 176.51868103082074
+          },
+          {
+            "type": "trine",
+            "pair": [
+              "mars",
+              "neptune"
+            ],
+            "orb": 4.46,
+            "difference": 124.46187443715826
+          },
+          {
+            "type": "trine",
+            "pair": [
+              "pluto",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.29,
+            "difference": 120.29341793997031
+          },
+          {
+            "type": "sextile",
+            "pair": [
+              "neptune",
+              "pluto"
+            ],
+            "orb": 3.77,
+            "difference": 56.22526309085043
+          },
+          {
+            "type": "sextile",
+            "pair": [
+              "mars",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.98,
+            "difference": 59.019444532020984
+          }
+        ],
+        "structure": {
+          "oppositions": [
+            [
+              "mars",
+              "pluto"
+            ],
+            [
+              "neptune",
+              "true_south_lunar_node"
+            ]
+          ]
         }
       },
       {
-        "base_key": "moon",
-        "other_key": "ascendant",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 2.9,
-        "angle_difference": 62.89709656611211,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 2.9,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Cap",
-          "position": 6.096219006896604,
-          "abs_pos": 276.0962190068966,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Ascendant",
-          "sign": "Pis",
-          "position": 8.993315573008715,
-          "abs_pos": 338.9933155730087,
-          "house": "First_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "moon",
-        "other_key": "descendant",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 2.9,
-        "angle_difference": 117.10290343388795,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 2.9,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Cap",
-          "position": 6.096219006896604,
-          "abs_pos": 276.0962190068966,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Vir",
-          "position": 8.993315573008658,
-          "abs_pos": 158.99331557300866,
-          "house": "Seventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "venus",
-        "other_key": "medium_coeli",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 2.94,
-        "angle_difference": 57.060610142439,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 2.94,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Venus",
-          "sign": "Aqu",
-          "position": 4.094775137858505,
-          "abs_pos": 304.0947751378585,
-          "house": "Twelfth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Medium_Coeli",
-          "sign": "Sag",
-          "position": 7.034164995419502,
-          "abs_pos": 247.0341649954195,
-          "house": "Tenth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "venus",
-        "other_key": "imum_coeli",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 2.94,
-        "angle_difference": 122.93938985756097,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 2.94,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Venus",
-          "sign": "Aqu",
-          "position": 4.094775137858505,
-          "abs_pos": 304.0947751378585,
-          "house": "Twelfth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Gem",
-          "position": 7.034164995419474,
-          "abs_pos": 67.03416499541947,
-          "house": "Fourth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "sun",
-        "other_key": "saturn",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 3.28,
-        "angle_difference": 63.277890162793085,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 3.28,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Sun",
-          "sign": "Sag",
-          "position": 17.171507953279047,
-          "abs_pos": 257.17150795327905,
-          "house": "Tenth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Saturn",
-          "sign": "Aqu",
-          "position": 20.449398116072132,
-          "abs_pos": 320.44939811607213,
-          "house": "Twelfth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "neptune",
-        "other_key": "true_north_lunar_node",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 3.48,
-        "angle_difference": 3.481318969179256,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 3.48,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Pis",
-          "position": 6.675865688033809,
-          "abs_pos": 336.6758656880338,
-          "house": "First_House",
-          "retrograde": true
-        }
-      },
-      {
-        "base_key": "neptune",
-        "other_key": "true_south_lunar_node",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 3.48,
-        "angle_difference": 176.51868103082074,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 3.48,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Vir",
-          "position": 6.675865688033809,
-          "abs_pos": 156.6758656880338,
-          "house": "Seventh_House",
-          "retrograde": true
-        }
-      },
-      {
-        "base_key": "uranus",
-        "other_key": "neptune",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 3.68,
-        "angle_difference": 56.32058651087664,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 3.68,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Uranus",
-          "sign": "Ari",
-          "position": 29.515133229731173,
-          "abs_pos": 29.515133229731173,
-          "house": "Second_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "neptune",
-        "other_key": "pluto",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 3.77,
-        "angle_difference": 56.22526309085043,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 3.77,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Pluto",
-          "sign": "Cap",
-          "position": 6.969283628004121,
-          "abs_pos": 276.9692836280041,
-          "house": "Eleventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "neptune",
-        "other_key": "medium_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 3.84,
-        "angle_difference": 86.16038172343505,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 3.84,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Medium_Coeli",
-          "sign": "Sag",
-          "position": 7.034164995419502,
-          "abs_pos": 247.0341649954195,
-          "house": "Tenth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "neptune",
-        "other_key": "imum_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 3.84,
-        "angle_difference": 93.83961827656492,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 3.84,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Gem",
-          "position": 7.034164995419474,
-          "abs_pos": 67.03416499541947,
-          "house": "Fourth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "mars",
-        "other_key": "neptune",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 4.46,
-        "angle_difference": 124.46187443715826,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 4.46,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Mars",
-          "sign": "Can",
-          "position": 7.656421156012826,
-          "abs_pos": 97.65642115601283,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "venus",
-        "other_key": "uranus",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 4.58,
-        "angle_difference": 85.42035809187269,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 4.58,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Venus",
-          "sign": "Aqu",
-          "position": 4.094775137858505,
-          "abs_pos": 304.0947751378585,
-          "house": "Twelfth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Uranus",
-          "sign": "Ari",
-          "position": 29.515133229731173,
-          "abs_pos": 29.515133229731173,
-          "house": "Second_House",
-          "retrograde": true
-        }
-      },
-      {
-        "base_key": "neptune",
-        "other_key": "ascendant",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 5.8,
-        "angle_difference": 5.7987688541541615,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 5.8,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Ascendant",
-          "sign": "Pis",
-          "position": 8.993315573008715,
-          "abs_pos": 338.9933155730087,
-          "house": "First_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "neptune",
-        "other_key": "descendant",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 5.8,
-        "angle_difference": 174.2012311458459,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 5.8,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Pis",
-          "position": 3.1945467188545535,
-          "abs_pos": 333.19454671885455,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Vir",
-          "position": 8.993315573008658,
-          "abs_pos": 158.99331557300866,
-          "house": "Seventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "mercury",
-        "other_key": "saturn",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 5.9,
-        "angle_difference": 84.09675856898244,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 5.9,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Mercury",
-          "sign": "Sco",
-          "position": 26.352639547089694,
-          "abs_pos": 236.3526395470897,
-          "house": "Ninth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Saturn",
-          "sign": "Aqu",
-          "position": 20.449398116072132,
-          "abs_pos": 320.44939811607213,
-          "house": "Twelfth_House",
-          "retrograde": false
+        "id": "mystic_rectangle",
+        "name": "Mystic Rectangle",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "trine",
+          "sextile"
+        ],
+        "aspects_label": "Oppositions, Trines, Sextiles",
+        "geometry": "Two oppositions stitched by trines and sextiles into a rectangle.",
+        "orb": "Oppositions ±8–10°; trines 6–8°; sextiles 5–6°.",
+        "construction": "A↔C and B↔D; A sextile D & trine B, C sextile B & trine D.",
+        "points": [
+          "descendant",
+          "mars",
+          "neptune",
+          "pluto"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "mars",
+              "pluto"
+            ],
+            "orb": 0.69,
+            "difference": 179.3128624719913
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "descendant",
+              "neptune"
+            ],
+            "orb": 5.8,
+            "difference": 174.2012311458459
+          },
+          {
+            "type": "trine",
+            "pair": [
+              "mars",
+              "neptune"
+            ],
+            "orb": 4.46,
+            "difference": 124.46187443715826
+          },
+          {
+            "type": "trine",
+            "pair": [
+              "descendant",
+              "pluto"
+            ],
+            "orb": 2.02,
+            "difference": 117.97596805499546
+          },
+          {
+            "type": "sextile",
+            "pair": [
+              "neptune",
+              "pluto"
+            ],
+            "orb": 3.77,
+            "difference": 56.22526309085043
+          },
+          {
+            "type": "sextile",
+            "pair": [
+              "descendant",
+              "mars"
+            ],
+            "orb": 1.34,
+            "difference": 61.33689441699583
+          }
+        ],
+        "structure": {
+          "oppositions": [
+            [
+              "mars",
+              "pluto"
+            ],
+            [
+              "neptune",
+              "descendant"
+            ]
+          ]
         }
       }
     ],
@@ -4969,1243 +5325,901 @@
     ],
     "natal_major_aspects": [
       {
-        "base_key": "true_north_lunar_node",
-        "other_key": "true_south_lunar_node",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0,
-        "angle_difference": 180,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Cap",
-          "position": 13.727619192336192,
-          "abs_pos": 283.7276191923362,
-          "house": "Sixth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Can",
-          "position": 13.727619192336192,
-          "abs_pos": 103.72761919233619,
-          "house": "Twelfth_House",
-          "retrograde": true
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "chiron",
+          "jupiter",
+          "venus"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "chiron",
+              "jupiter"
+            ],
+            "orb": 3.3,
+            "difference": 3.3042707738972013
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "chiron",
+            "jupiter",
+            "venus"
+          ]
         }
       },
       {
-        "base_key": "ascendant",
-        "other_key": "descendant",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0,
-        "angle_difference": 180,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Ascendant",
-          "sign": "Leo",
-          "position": 19.186466628045707,
-          "abs_pos": 139.1864666280457,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Aqu",
-          "position": 19.186466628045707,
-          "abs_pos": 319.1864666280457,
-          "house": "Seventh_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "chiron",
+          "jupiter",
+          "sun",
+          "venus"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "chiron",
+              "jupiter"
+            ],
+            "orb": 3.3,
+            "difference": 3.3042707738972013
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "chiron",
+              "sun"
+            ],
+            "orb": 3.4,
+            "difference": 3.395999918415839
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "jupiter",
+              "sun"
+            ],
+            "orb": 0.09,
+            "difference": 0.0917291445186379
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "chiron",
+            "jupiter",
+            "sun",
+            "venus"
+          ]
         }
       },
       {
-        "base_key": "medium_coeli",
-        "other_key": "imum_coeli",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0,
-        "angle_difference": 180,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Medium_Coeli",
-          "sign": "Tau",
-          "position": 13.519893335938548,
-          "abs_pos": 43.51989333593855,
-          "house": "Tenth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Sco",
-          "position": 13.519893335938548,
-          "abs_pos": 223.51989333593855,
-          "house": "Fourth_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "chiron",
+          "jupiter",
+          "mercury",
+          "sun"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "chiron",
+              "jupiter"
+            ],
+            "orb": 3.3,
+            "difference": 3.3042707738972013
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "chiron",
+              "sun"
+            ],
+            "orb": 3.4,
+            "difference": 3.395999918415839
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "jupiter",
+              "sun"
+            ],
+            "orb": 0.09,
+            "difference": 0.0917291445186379
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "chiron",
+            "jupiter",
+            "mercury",
+            "sun"
+          ]
         }
       },
       {
-        "base_key": "sun",
-        "other_key": "jupiter",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 0.09,
-        "angle_difference": 0.0917291445186379,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 0.09,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "Sun",
-          "sign": "Gem",
-          "position": 28.97651032067307,
-          "abs_pos": 88.97651032067307,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Jupiter",
-          "sign": "Gem",
-          "position": 28.884781176154434,
-          "abs_pos": 88.88478117615443,
-          "house": "Eleventh_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "chiron",
+          "jupiter",
+          "mercury",
+          "sun",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "chiron",
+              "jupiter"
+            ],
+            "orb": 3.3,
+            "difference": 3.3042707738972013
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "chiron",
+              "sun"
+            ],
+            "orb": 3.4,
+            "difference": 3.395999918415839
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "jupiter",
+              "sun"
+            ],
+            "orb": 0.09,
+            "difference": 0.0917291445186379
+          },
+          {
+            "type": "conjunction",
+            "pair": [
+              "mercury",
+              "true_south_lunar_node"
+            ],
+            "orb": 0.86,
+            "difference": 0.8592016084740521
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "chiron",
+            "jupiter",
+            "mercury",
+            "sun",
+            "true_south_lunar_node"
+          ]
         }
       },
       {
-        "base_key": "neptune",
-        "other_key": "ascendant",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 0.11,
-        "angle_difference": 120.10663542237342,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 0.11,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Sag",
-          "position": 19.293102050419122,
-          "abs_pos": 259.2931020504191,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Ascendant",
-          "sign": "Leo",
-          "position": 19.186466628045707,
-          "abs_pos": 139.1864666280457,
-          "house": "First_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "imum_coeli",
+          "mean_lilith",
+          "pluto"
+        ],
+        "links": [],
+        "structure": {
+          "cluster": [
+            "imum_coeli",
+            "mean_lilith",
+            "pluto"
+          ]
         }
       },
       {
-        "base_key": "neptune",
-        "other_key": "descendant",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 0.11,
-        "angle_difference": 59.893364577626585,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 0.11,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Sag",
-          "position": 19.293102050419122,
-          "abs_pos": 259.2931020504191,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Aqu",
-          "position": 19.186466628045707,
-          "abs_pos": 319.1864666280457,
-          "house": "Seventh_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "neptune",
+          "saturn",
+          "uranus"
+        ],
+        "links": [
+          {
+            "type": "conjunction",
+            "pair": [
+              "neptune",
+              "uranus"
+            ],
+            "orb": 5.95,
+            "difference": 5.952746048425894
+          }
+        ],
+        "structure": {
+          "cluster": [
+            "neptune",
+            "saturn",
+            "uranus"
+          ]
         }
       },
       {
-        "base_key": "true_north_lunar_node",
-        "other_key": "medium_coeli",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 0.21,
-        "angle_difference": 119.79227414360236,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 0.21,
-          "icon": "△"
-        },
-        "base": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Cap",
-          "position": 13.727619192336192,
-          "abs_pos": 283.7276191923362,
-          "house": "Sixth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Medium_Coeli",
-          "sign": "Tau",
-          "position": 13.519893335938548,
-          "abs_pos": 43.51989333593855,
-          "house": "Tenth_House",
-          "retrograde": false
+        "id": "stellium",
+        "name": "Stellium",
+        "planets": "3+ planets",
+        "aspects": [
+          "conjunction"
+        ],
+        "aspects_label": "Conjunctions",
+        "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+        "orb": "Planets within ~5–10° of each other across the cluster.",
+        "construction": "Conjunction-series bundle occupying one tight sector.",
+        "points": [
+          "neptune",
+          "saturn",
+          "true_north_lunar_node"
+        ],
+        "links": [],
+        "structure": {
+          "cluster": [
+            "neptune",
+            "saturn",
+            "true_north_lunar_node"
+          ]
         }
       },
       {
-        "base_key": "true_north_lunar_node",
-        "other_key": "imum_coeli",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 0.21,
-        "angle_difference": 60.207725856397644,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 0.21,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Cap",
-          "position": 13.727619192336192,
-          "abs_pos": 283.7276191923362,
-          "house": "Sixth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Sco",
-          "position": 13.519893335938548,
-          "abs_pos": 223.51989333593855,
-          "house": "Fourth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "moon",
+          "saturn",
+          "sun"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "saturn",
+              "sun"
+            ],
+            "orb": 0.63,
+            "difference": 179.36583054007986
+          },
+          {
+            "type": "square",
+            "pair": [
+              "moon",
+              "sun"
+            ],
+            "orb": 2.07,
+            "difference": 92.06736818898185
+          },
+          {
+            "type": "square",
+            "pair": [
+              "moon",
+              "saturn"
+            ],
+            "orb": 1.43,
+            "difference": 88.5668012709383
+          }
+        ],
+        "structure": {
+          "focal": "moon"
         }
       },
       {
-        "base_key": "true_south_lunar_node",
-        "other_key": "medium_coeli",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 0.21,
-        "angle_difference": 60.207725856397644,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 0.21,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Can",
-          "position": 13.727619192336192,
-          "abs_pos": 103.72761919233619,
-          "house": "Twelfth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Medium_Coeli",
-          "sign": "Tau",
-          "position": 13.519893335938548,
-          "abs_pos": 43.51989333593855,
-          "house": "Tenth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "jupiter",
+          "moon",
+          "saturn"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "jupiter",
+              "saturn"
+            ],
+            "orb": 0.54,
+            "difference": 179.4575596845985
+          },
+          {
+            "type": "square",
+            "pair": [
+              "jupiter",
+              "moon"
+            ],
+            "orb": 1.98,
+            "difference": 91.97563904446321
+          },
+          {
+            "type": "square",
+            "pair": [
+              "moon",
+              "saturn"
+            ],
+            "orb": 1.43,
+            "difference": 88.5668012709383
+          }
+        ],
+        "structure": {
+          "focal": "moon"
         }
       },
       {
-        "base_key": "true_south_lunar_node",
-        "other_key": "imum_coeli",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 0.21,
-        "angle_difference": 119.79227414360236,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 0.21,
-          "icon": "△"
-        },
-        "base": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Can",
-          "position": 13.727619192336192,
-          "abs_pos": 103.72761919233619,
-          "house": "Twelfth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Sco",
-          "position": 13.519893335938548,
-          "abs_pos": 223.51989333593855,
-          "house": "Fourth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "chiron",
+          "moon",
+          "saturn"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "chiron",
+              "saturn"
+            ],
+            "orb": 2.76,
+            "difference": 177.2381695415043
+          },
+          {
+            "type": "square",
+            "pair": [
+              "moon",
+              "saturn"
+            ],
+            "orb": 1.43,
+            "difference": 88.5668012709383
+          },
+          {
+            "type": "square",
+            "pair": [
+              "chiron",
+              "moon"
+            ],
+            "orb": 1.33,
+            "difference": 88.671368270566
+          }
+        ],
+        "structure": {
+          "focal": "moon"
         }
       },
       {
-        "base_key": "jupiter",
-        "other_key": "saturn",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0.54,
-        "angle_difference": 179.4575596845985,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0.54,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Jupiter",
-          "sign": "Gem",
-          "position": 28.884781176154434,
-          "abs_pos": 88.88478117615443,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Saturn",
-          "sign": "Sag",
-          "position": 28.342340860752927,
-          "abs_pos": 268.3423408607529,
-          "house": "Fifth_House",
-          "retrograde": true
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "mars",
+          "mercury",
+          "true_north_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "mercury",
+              "true_north_lunar_node"
+            ],
+            "orb": 0.86,
+            "difference": 179.14079839152595
+          },
+          {
+            "type": "square",
+            "pair": [
+              "mars",
+              "mercury"
+            ],
+            "orb": 4.66,
+            "difference": 94.65711303615184
+          },
+          {
+            "type": "square",
+            "pair": [
+              "mars",
+              "true_north_lunar_node"
+            ],
+            "orb": 5.52,
+            "difference": 84.48368535537412
+          }
+        ],
+        "structure": {
+          "focal": "mars"
         }
       },
       {
-        "base_key": "sun",
-        "other_key": "saturn",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0.63,
-        "angle_difference": 179.36583054007986,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0.63,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Sun",
-          "sign": "Gem",
-          "position": 28.97651032067307,
-          "abs_pos": 88.97651032067307,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Saturn",
-          "sign": "Sag",
-          "position": 28.342340860752927,
-          "abs_pos": 268.3423408607529,
-          "house": "Fifth_House",
-          "retrograde": true
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "mars",
+          "true_north_lunar_node",
+          "true_south_lunar_node"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "true_north_lunar_node",
+              "true_south_lunar_node"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "square",
+            "pair": [
+              "mars",
+              "true_north_lunar_node"
+            ],
+            "orb": 5.52,
+            "difference": 84.48368535537412
+          },
+          {
+            "type": "square",
+            "pair": [
+              "mars",
+              "true_south_lunar_node"
+            ],
+            "orb": 5.52,
+            "difference": 95.5163146446259
+          }
+        ],
+        "structure": {
+          "focal": "mars"
         }
       },
       {
-        "base_key": "mercury",
-        "other_key": "medium_coeli",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 0.65,
-        "angle_difference": 59.34852424792359,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 0.65,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Mercury",
-          "sign": "Can",
-          "position": 12.86841758386214,
-          "abs_pos": 102.86841758386214,
-          "house": "Twelfth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Medium_Coeli",
-          "sign": "Tau",
-          "position": 13.519893335938548,
-          "abs_pos": 43.51989333593855,
-          "house": "Tenth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "ascendant",
+          "descendant",
+          "medium_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "descendant"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "medium_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 95.66657329210716
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 84.33342670789284
+          }
+        ],
+        "structure": {
+          "focal": "medium_coeli"
         }
       },
       {
-        "base_key": "mercury",
-        "other_key": "imum_coeli",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 0.65,
-        "angle_difference": 120.65147575207641,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 0.65,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Mercury",
-          "sign": "Can",
-          "position": 12.86841758386214,
-          "abs_pos": 102.86841758386214,
-          "house": "Twelfth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Sco",
-          "position": 13.519893335938548,
-          "abs_pos": 223.51989333593855,
-          "house": "Fourth_House",
-          "retrograde": false
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "ascendant",
+          "imum_coeli",
+          "medium_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "medium_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 95.66657329210716
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "imum_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 84.33342670789284
+          }
+        ],
+        "structure": {
+          "focal": "ascendant"
         }
       },
       {
-        "base_key": "mercury",
-        "other_key": "true_north_lunar_node",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 0.86,
-        "angle_difference": 179.14079839152595,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 0.86,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Mercury",
-          "sign": "Can",
-          "position": 12.86841758386214,
-          "abs_pos": 102.86841758386214,
-          "house": "Twelfth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Cap",
-          "position": 13.727619192336192,
-          "abs_pos": 283.7276191923362,
-          "house": "Sixth_House",
-          "retrograde": true
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "ascendant",
+          "descendant",
+          "imum_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "descendant"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "imum_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 84.33342670789284
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 95.66657329210716
+          }
+        ],
+        "structure": {
+          "focal": "imum_coeli"
         }
       },
       {
-        "base_key": "mercury",
-        "other_key": "true_south_lunar_node",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 0.86,
-        "angle_difference": 0.8592016084740521,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 0.86,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "Mercury",
-          "sign": "Can",
-          "position": 12.86841758386214,
-          "abs_pos": 102.86841758386214,
-          "house": "Twelfth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Can",
-          "position": 13.727619192336192,
-          "abs_pos": 103.72761919233619,
-          "house": "Twelfth_House",
-          "retrograde": true
+        "id": "t_square",
+        "name": "T-Square",
+        "planets": "3 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Opposition + Squares",
+        "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+        "orb": "Squares/opposition typically ±8–10°.",
+        "construction": "A ↔ B opposition with C square to both (C = focal).",
+        "points": [
+          "descendant",
+          "imum_coeli",
+          "medium_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 84.33342670789284
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 95.66657329210716
+          }
+        ],
+        "structure": {
+          "focal": "descendant"
         }
       },
       {
-        "base_key": "moon",
-        "other_key": "chiron",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 1.33,
-        "angle_difference": 88.671368270566,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 1.33,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Pis",
-          "position": 26.909142131691226,
-          "abs_pos": 356.9091421316912,
-          "house": "Eighth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Chiron",
-          "sign": "Gem",
-          "position": 25.580510402257232,
-          "abs_pos": 85.58051040225723,
-          "house": "Eleventh_House",
-          "retrograde": false
+        "id": "grand_cross",
+        "name": "Grand Cross",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "square"
+        ],
+        "aspects_label": "Oppositions + Squares",
+        "geometry": "Four points every 90°: two oppositions plus four squares.",
+        "orb": "Squares/oppositions typically ±8–10°.",
+        "construction": "A↔C and B↔D oppositions; each is square to its neighbors.",
+        "points": [
+          "ascendant",
+          "descendant",
+          "imum_coeli",
+          "medium_coeli"
+        ],
+        "links": [
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "descendant"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "imum_coeli",
+              "medium_coeli"
+            ],
+            "orb": 0,
+            "difference": 180
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "medium_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 95.66657329210716
+          },
+          {
+            "type": "square",
+            "pair": [
+              "ascendant",
+              "imum_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 84.33342670789284
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "medium_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 84.33342670789284
+          },
+          {
+            "type": "square",
+            "pair": [
+              "descendant",
+              "imum_coeli"
+            ],
+            "orb": 5.67,
+            "difference": 95.66657329210716
+          }
+        ],
+        "structure": {
+          "axes": [
+            [
+              "ascendant",
+              "descendant"
+            ],
+            [
+              "medium_coeli",
+              "imum_coeli"
+            ]
+          ]
         }
       },
       {
-        "base_key": "moon",
-        "other_key": "saturn",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 1.43,
-        "angle_difference": 88.5668012709383,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 1.43,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Pis",
-          "position": 26.909142131691226,
-          "abs_pos": 356.9091421316912,
-          "house": "Eighth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Saturn",
-          "sign": "Sag",
-          "position": 28.342340860752927,
-          "abs_pos": 268.3423408607529,
-          "house": "Fifth_House",
-          "retrograde": true
-        }
-      },
-      {
-        "base_key": "moon",
-        "other_key": "jupiter",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 1.98,
-        "angle_difference": 91.97563904446321,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 1.98,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Pis",
-          "position": 26.909142131691226,
-          "abs_pos": 356.9091421316912,
-          "house": "Eighth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Jupiter",
-          "sign": "Gem",
-          "position": 28.884781176154434,
-          "abs_pos": 88.88478117615443,
-          "house": "Eleventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "sun",
-        "other_key": "moon",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 2.07,
-        "angle_difference": 92.06736818898185,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 2.07,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Sun",
-          "sign": "Gem",
-          "position": 28.97651032067307,
-          "abs_pos": 88.97651032067307,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Moon",
-          "sign": "Pis",
-          "position": 26.909142131691226,
-          "abs_pos": 356.9091421316912,
-          "house": "Eighth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "neptune",
-        "other_key": "pluto",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 2.08,
-        "angle_difference": 57.924655883998724,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 2.08,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Neptune",
-          "sign": "Sag",
-          "position": 19.293102050419122,
-          "abs_pos": 259.2931020504191,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Pluto",
-          "sign": "Lib",
-          "position": 21.368446166420398,
-          "abs_pos": 201.3684461664204,
-          "house": "Third_House",
-          "retrograde": true
-        }
-      },
-      {
-        "base_key": "pluto",
-        "other_key": "ascendant",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 2.18,
-        "angle_difference": 62.18197953837469,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 2.18,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Pluto",
-          "sign": "Lib",
-          "position": 21.368446166420398,
-          "abs_pos": 201.3684461664204,
-          "house": "Third_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Ascendant",
-          "sign": "Leo",
-          "position": 19.186466628045707,
-          "abs_pos": 139.1864666280457,
-          "house": "First_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "pluto",
-        "other_key": "descendant",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 2.18,
-        "angle_difference": 117.81802046162531,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 2.18,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Pluto",
-          "sign": "Lib",
-          "position": 21.368446166420398,
-          "abs_pos": 201.3684461664204,
-          "house": "Third_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Aqu",
-          "position": 19.186466628045707,
-          "abs_pos": 319.1864666280457,
-          "house": "Seventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "saturn",
-        "other_key": "chiron",
-        "aspect_type": "opposition",
-        "angle": 180,
-        "orb": 2.76,
-        "angle_difference": 177.2381695415043,
-        "icon": "☍",
-        "aspect": {
-          "name": "opposition",
-          "angle": 180,
-          "orb": 2.76,
-          "icon": "☍"
-        },
-        "base": {
-          "name": "Saturn",
-          "sign": "Sag",
-          "position": 28.342340860752927,
-          "abs_pos": 268.3423408607529,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Chiron",
-          "sign": "Gem",
-          "position": 25.580510402257232,
-          "abs_pos": 85.58051040225723,
-          "house": "Eleventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "jupiter",
-        "other_key": "chiron",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 3.3,
-        "angle_difference": 3.3042707738972013,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 3.3,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "Jupiter",
-          "sign": "Gem",
-          "position": 28.884781176154434,
-          "abs_pos": 88.88478117615443,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Chiron",
-          "sign": "Gem",
-          "position": 25.580510402257232,
-          "abs_pos": 85.58051040225723,
-          "house": "Eleventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "sun",
-        "other_key": "chiron",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 3.4,
-        "angle_difference": 3.395999918415839,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 3.4,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "Sun",
-          "sign": "Gem",
-          "position": 28.97651032067307,
-          "abs_pos": 88.97651032067307,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Chiron",
-          "sign": "Gem",
-          "position": 25.580510402257232,
-          "abs_pos": 85.58051040225723,
-          "house": "Eleventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "moon",
-        "other_key": "venus",
-        "aspect_type": "sextile",
-        "angle": 60,
-        "orb": 3.7,
-        "angle_difference": 63.69570943942273,
-        "icon": "✺",
-        "aspect": {
-          "name": "sextile",
-          "angle": 60,
-          "orb": 3.7,
-          "icon": "✺"
-        },
-        "base": {
-          "name": "Moon",
-          "sign": "Pis",
-          "position": 26.909142131691226,
-          "abs_pos": 356.9091421316912,
-          "house": "Eighth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Venus",
-          "sign": "Gem",
-          "position": 0.6048515711139544,
-          "abs_pos": 60.604851571113954,
-          "house": "Eleventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "pluto",
-        "other_key": "chiron",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 4.21,
-        "angle_difference": 115.78793576416317,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 4.21,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Pluto",
-          "sign": "Lib",
-          "position": 21.368446166420398,
-          "abs_pos": 201.3684461664204,
-          "house": "Third_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Chiron",
-          "sign": "Gem",
-          "position": 25.580510402257232,
-          "abs_pos": 85.58051040225723,
-          "house": "Eleventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "mercury",
-        "other_key": "mars",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 4.66,
-        "angle_difference": 94.65711303615184,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 4.66,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Mercury",
-          "sign": "Can",
-          "position": 12.86841758386214,
-          "abs_pos": 102.86841758386214,
-          "house": "Twelfth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Mars",
-          "sign": "Ari",
-          "position": 8.211304547710302,
-          "abs_pos": 8.211304547710302,
-          "house": "Ninth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "mars",
-        "other_key": "uranus",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 5.13,
-        "angle_difference": 114.87094854571708,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 5.13,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Mars",
-          "sign": "Ari",
-          "position": 8.211304547710302,
-          "abs_pos": 8.211304547710302,
-          "house": "Ninth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Uranus",
-          "sign": "Sag",
-          "position": 13.340356001993229,
-          "abs_pos": 253.34035600199323,
-          "house": "Fifth_House",
-          "retrograde": true
-        }
-      },
-      {
-        "base_key": "mars",
-        "other_key": "true_north_lunar_node",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 5.52,
-        "angle_difference": 84.48368535537412,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 5.52,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Mars",
-          "sign": "Ari",
-          "position": 8.211304547710302,
-          "abs_pos": 8.211304547710302,
-          "house": "Ninth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_North_Lunar_Node",
-          "sign": "Cap",
-          "position": 13.727619192336192,
-          "abs_pos": 283.7276191923362,
-          "house": "Sixth_House",
-          "retrograde": true
-        }
-      },
-      {
-        "base_key": "mars",
-        "other_key": "true_south_lunar_node",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 5.52,
-        "angle_difference": 95.5163146446259,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 5.52,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Mars",
-          "sign": "Ari",
-          "position": 8.211304547710302,
-          "abs_pos": 8.211304547710302,
-          "house": "Ninth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "True_South_Lunar_Node",
-          "sign": "Can",
-          "position": 13.727619192336192,
-          "abs_pos": 103.72761919233619,
-          "house": "Twelfth_House",
-          "retrograde": true
-        }
-      },
-      {
-        "base_key": "ascendant",
-        "other_key": "medium_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 5.67,
-        "angle_difference": 95.66657329210716,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 5.67,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Ascendant",
-          "sign": "Leo",
-          "position": 19.186466628045707,
-          "abs_pos": 139.1864666280457,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Medium_Coeli",
-          "sign": "Tau",
-          "position": 13.519893335938548,
-          "abs_pos": 43.51989333593855,
-          "house": "Tenth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "ascendant",
-        "other_key": "imum_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 5.67,
-        "angle_difference": 84.33342670789284,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 5.67,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Ascendant",
-          "sign": "Leo",
-          "position": 19.186466628045707,
-          "abs_pos": 139.1864666280457,
-          "house": "First_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Sco",
-          "position": 13.519893335938548,
-          "abs_pos": 223.51989333593855,
-          "house": "Fourth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "medium_coeli",
-        "other_key": "descendant",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 5.67,
-        "angle_difference": 84.33342670789284,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 5.67,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Medium_Coeli",
-          "sign": "Tau",
-          "position": 13.519893335938548,
-          "abs_pos": 43.51989333593855,
-          "house": "Tenth_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Descendant",
-          "sign": "Aqu",
-          "position": 19.186466628045707,
-          "abs_pos": 319.1864666280457,
-          "house": "Seventh_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "descendant",
-        "other_key": "imum_coeli",
-        "aspect_type": "square",
-        "angle": 90,
-        "orb": 5.67,
-        "angle_difference": 95.66657329210716,
-        "icon": "□",
-        "aspect": {
-          "name": "square",
-          "angle": 90,
-          "orb": 5.67,
-          "icon": "□"
-        },
-        "base": {
-          "name": "Descendant",
-          "sign": "Aqu",
-          "position": 19.186466628045707,
-          "abs_pos": 319.1864666280457,
-          "house": "Seventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Imum_Coeli",
-          "sign": "Sco",
-          "position": 13.519893335938548,
-          "abs_pos": 223.51989333593855,
-          "house": "Fourth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "sun",
-        "other_key": "mean_lilith",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 5.69,
-        "angle_difference": 125.68525614708958,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 5.69,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Sun",
-          "sign": "Gem",
-          "position": 28.97651032067307,
-          "abs_pos": 88.97651032067307,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Mean_Lilith",
-          "sign": "Sco",
-          "position": 4.6617664677626465,
-          "abs_pos": 214.66176646776265,
-          "house": "Fourth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "jupiter",
-        "other_key": "mean_lilith",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 5.78,
-        "angle_difference": 125.77698529160821,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 5.78,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Jupiter",
-          "sign": "Gem",
-          "position": 28.884781176154434,
-          "abs_pos": 88.88478117615443,
-          "house": "Eleventh_House",
-          "retrograde": false
-        },
-        "other": {
-          "name": "Mean_Lilith",
-          "sign": "Sco",
-          "position": 4.6617664677626465,
-          "abs_pos": 214.66176646776265,
-          "house": "Fourth_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "uranus",
-        "other_key": "ascendant",
-        "aspect_type": "trine",
-        "angle": 120,
-        "orb": 5.85,
-        "angle_difference": 114.15388937394752,
-        "icon": "△",
-        "aspect": {
-          "name": "trine",
-          "angle": 120,
-          "orb": 5.85,
-          "icon": "△"
-        },
-        "base": {
-          "name": "Uranus",
-          "sign": "Sag",
-          "position": 13.340356001993229,
-          "abs_pos": 253.34035600199323,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Ascendant",
-          "sign": "Leo",
-          "position": 19.186466628045707,
-          "abs_pos": 139.1864666280457,
-          "house": "First_House",
-          "retrograde": false
-        }
-      },
-      {
-        "base_key": "uranus",
-        "other_key": "neptune",
-        "aspect_type": "conjunction",
-        "angle": 0,
-        "orb": 5.95,
-        "angle_difference": 5.952746048425894,
-        "icon": "◎",
-        "aspect": {
-          "name": "conjunction",
-          "angle": 0,
-          "orb": 5.95,
-          "icon": "◎"
-        },
-        "base": {
-          "name": "Uranus",
-          "sign": "Sag",
-          "position": 13.340356001993229,
-          "abs_pos": 253.34035600199323,
-          "house": "Fifth_House",
-          "retrograde": true
-        },
-        "other": {
-          "name": "Neptune",
-          "sign": "Sag",
-          "position": 19.293102050419122,
-          "abs_pos": 259.2931020504191,
-          "house": "Fifth_House",
-          "retrograde": true
+        "id": "trapeze",
+        "name": "Trapeze / Cradle",
+        "planets": "4 planets",
+        "aspects": [
+          "opposition",
+          "sextile"
+        ],
+        "aspects_label": "Opposition + Sextiles",
+        "geometry": "Three sextiles in a row with an opposition across the open ends.",
+        "orb": "Sextiles ±5–6°; opposition ±8–10°.",
+        "construction": "A sextile B sextile C sextile D, with A↔D in opposition.",
+        "points": [
+          "ascendant",
+          "pluto",
+          "neptune",
+          "descendant"
+        ],
+        "links": [
+          {
+            "type": "sextile",
+            "pair": [
+              "ascendant",
+              "pluto"
+            ],
+            "orb": 2.18,
+            "difference": 62.18197953837469
+          },
+          {
+            "type": "sextile",
+            "pair": [
+              "neptune",
+              "pluto"
+            ],
+            "orb": 2.08,
+            "difference": 57.924655883998724
+          },
+          {
+            "type": "sextile",
+            "pair": [
+              "descendant",
+              "neptune"
+            ],
+            "orb": 0.11,
+            "difference": 59.893364577626585
+          },
+          {
+            "type": "opposition",
+            "pair": [
+              "ascendant",
+              "descendant"
+            ],
+            "orb": 0,
+            "difference": 180
+          }
+        ],
+        "structure": {
+          "chain": [
+            "ascendant",
+            "pluto",
+            "neptune",
+            "descendant"
+          ]
         }
       }
     ]
