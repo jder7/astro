@@ -25,6 +25,7 @@ import cairosvg  # type: ignore
 from reportlab.platypus.doctemplate import LayoutError  # type: ignore
 from reportlab.lib.utils import ImageReader  # type: ignore
 
+from aspects.ptolemaic import compute_major_aspects
 from enums import RangeGranularity, ZodiacType, ReportKind, Mode
 from schemas import BirthData, ChartConfig, ReportRequest
 
@@ -200,6 +201,18 @@ def house_display(name: Optional[str]) -> str:
             rest = "House"
         return f"{ordinal} {rest}".strip()
     return base
+
+
+def compute_normal_aspects(subject) -> list[dict]:
+    """
+    Compute standard aspects using Kerykeion's AspectsFactory for a subject model.
+    """
+    try:
+        aspects_model = AspectsFactory.natal_aspects(subject)
+        aspects_dump = aspects_model.model_dump(mode="json")
+        return extract_aspect_rows(aspects_dump)
+    except Exception:
+        return []
 
 
 def extract_points_table(subject_data: dict) -> list[dict]:

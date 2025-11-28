@@ -6,7 +6,13 @@ from schemas import (
     TransitSnapshot,
     BirthData,
 )
-from utils import build_subject, ensure_config, to_local_datetime
+from utils import (
+    build_subject,
+    compute_major_aspects,
+    compute_normal_aspects,
+    ensure_config,
+    to_local_datetime,
+)
 
 router = APIRouter(tags=["transit"])
 
@@ -44,17 +50,27 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
 
     transit_subject = build_subject(moment_birth, cfg)
     transit_dict = transit_subject.model_dump(mode="json")
+    transit_aspects = compute_normal_aspects(transit_subject)
+    transit_major_aspects = compute_major_aspects(transit_dict, active_points=cfg.active_points)
 
     natal_dict = None
+    natal_aspects = None
+    natal_major_aspects = None
     if payload.birth is not None:
         natal_subject = build_subject(payload.birth, cfg)
         natal_dict = natal_subject.model_dump(mode="json")
+        natal_aspects = compute_normal_aspects(natal_subject)
+        natal_major_aspects = compute_major_aspects(natal_dict, active_points=cfg.active_points)
 
     timestamp = to_local_datetime(moment_birth)
 
     snapshot = TransitSnapshot(
         timestamp=timestamp,
         subject=transit_dict,
+        aspects=transit_aspects,
+        major_aspects=transit_major_aspects,
         natal_subject=natal_dict,
+        natal_aspects=natal_aspects,
+        natal_major_aspects=natal_major_aspects,
     )
     return TransitResponse(snapshot=snapshot)

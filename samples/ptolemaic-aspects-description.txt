@@ -1,0 +1,46 @@
+Major Ptolemaic Aspect Configurations
+Below is a catalog of the principal multi-planet aspect patterns formed using only the five Ptolemaic aspects (0°, 60°, 90°, 120°, 180°). For each pattern, we give its name, number of planets, geometric construction, typical aspect orbs, and a basic description of its shape (without interpretation).
+• Stellium
+Planets involved: 3 or more
+Geometry: Three or more planets all tightly clustered (usually within one zodiac sign or 30° span) so that most are in conjunction with each other 1 2 . In effect each pair of planets forms a conjunction aspect.
+Orb: The planets are typically within a few degrees of each other (often within ~5–10° each) to count as a continuous cluster. No fixed orb, but the group must lie in roughly the same 30° segment 2 . Construction: A stellium is simply a group of planets all occupying the same sign or house sector. Geometrically it is a tight conjunction-series: every planet is within conjunction orb of the others, forming a bundle of overlapping 0° aspects 1 2 .
+• T‐Square
+Planets involved: 3 (sometimes more)
+Geometry: Two planets in opposition (180° apart) with a third planet square (90°) to each of them
+3 . This forms a “T” shape: e.g. planets A and B are opposite, and planet C is 90° from both A and B. Orb: Each square or opposition is typically allowed a standard orb (roughly ±8–10° for squares/ oppositions) and conjunction orb (often larger) if used, but all three aspects should be near exact within normal aspect orbs 4 .
+Construction: A T‐Square consists of one pair of planets opposite each other, with a third planet at a right angle to both. In practice: (Planet A opp Planet B) and (Planet C sq Planet A and Planet C sq Planet B) 3 . (The “focal” planet is the one making the two squares.)
+• Grand Trine
+Planets involved: 3
+Geometry: Three planets all mutually 120° apart, forming an equilateral triangle. Each pair of planets is in a trine aspect (120°) 5 .
+Orb: Each trine aspect typically has an orb of about ±6–8° (especially ±7°) 4 . All three trines should be near exact to form the triangle.
+Construction: The pattern is exactly three trine aspects linking three planets (A–B–C) such that A–B = 120°, B–C = 120°, and C–A = 120° 5 . Geometrically this is an equilateral triangle inscribed in the chart wheel.
+1
+• Grand Cross (Grand Square)
+Planets involved: 4
+Geometry: Four planets at roughly 90° intervals (i.e. two pairs of opposition) so that each planet is square (90°) to two others and opposite (180°) one other 6 . Equivalently, two T‐Squares sharing the “spine” axes.
+Orb: Typical orbs are ±8–10° for the oppositions and squares 4 . All four aspects (two oppositions and four squares) should be near exact.
+Construction: Label the planets A, B, C, D around the circle: A opp C and B opp D, with A sq B, B sq C, C sq D, and D sq A. In other words, planets occupy four equally spaced points on the wheel (every 90°), making two oppositions and four interlocking squares 6 . This encloses a “cross” or square shape on the chart.
+• Grand Sextile (Star of David)
+Planets involved: 6 (often presented as two interlaced triangles)
+Geometry: Six planets arranged in alternately 60° and 120° separations so that they form two interlocking Grand Trines connected by sextiles 7 . In ideal form, the six planets are evenly spaced at 60° intervals, creating a six-pointed star (hexagram).
+Orb: Each of the six sextile aspects typically has an orb ~±5–6°, and the six trines ~±6–8° 4 . All should be nearly exact.
+Construction: Two sets of three planets each form equilateral triangles (Grand Trines), and corresponding vertices of the two triangles are 60° apart. Equivalently: planets A–B–C form a trine- trine-trine, and D–E–F form another; plus each vertex of one triangle is sextile to two vertices of the other triangle. This yields 6 trines and 6 sextiles (plus 3 oppositions if fully symmetrical) in a hexagram (“Star of David”) pattern 7 .
+• Mystic Rectangle (Rectangle)
+Planets involved: 4
+Geometry: Two pairs of planets in opposition (A opp C, B opp D) with the oppositions linked by two trines and two sextiles. Specifically: A trine B and A sextile D; C trine D and C sextile B (or vice versa)
+8 . The shape is a rectangle inscribed in the wheel.
+Orb: Typical orbs for each aspect (trine 6–8°, sextile 5–6°, opposition 8–10°) apply 4 . All four planets are part of exactly 2 oppositions, 2 trines, and 2 sextiles.
+Construction: There are four planets A, B, C, D. A is opposite C, and B is opposite D. Additionally, A is sextile to D and trine to B, while C is sextile to B and trine to D 8 . This yields the two oppositions, two sextiles, and two trines that “stitch” the four points into a rectangle. (It’s like a Grand Cross without squares, replaced by a mix of trines and sextiles.)
+• Trapeze (Cradle)
+Planets involved: 4
+Geometry: Four planets in a long chain: A‐B‐C‐D. A‐B, B‐C, and C‐D are all sextiles (60°), and A and D are opposite (180°) 9 . Graphically, this forms a trapezoid or “cradle” shape: three consecutive sextiles capped by an opposition.
+2
+
+Orb: As usual, sextiles ≈±5–6° and oppositions ≈±8–10° 4 . The chain of three sextiles should be close in orb, and the ends roughly opposite.
+Construction: Label planets A–D around the circle so that A sextile B, B sextile C, C sextile D, and A opposite D 9 . There are three sextile aspects in a row linking four planets, plus the far ends are in opposition. In effect it’s like an extended T‐Square missing one leg (forming a sort of T with a long “base” of two sextiles in addition to the opposition).
+Orb ranges: (General guideline) Ptolemaic aspects often use orbs of about ±6–10°, tighter for fast planets. For example, sextiles ≈±5–6°, trines ≈±7–8°, squares/oppositions ≈±8–10° 4 . In all the above patterns, each constituent aspect must fall within its allowable orb for the figure to count.
+Each pattern above is defined purely by geometric relationships among the planetary longitudes (the aspect angles). The descriptions given focus only on that construction (which planets are at 0°, 60°, 90°, 120°, or 180° from each other) and do not delve into interpretive meanings.
+Sources: Authoritative astrology references on aspect patterns and configurations 3 8 9 6 2 (excluding any minor aspects or non‐Ptolemaic aspects as requested).
+1 2 Major Aspect Configurations in Astrology | AstrologyTV https://astrology.tv/understanding-the-patterns-in-your-life-an-overview-of-major-aspect-configurations-in-astrology/
+3 5 6 7 8 9 Aspect Patterns in an Astrology Chart | Cafe Astrology .com https://cafeastrology.com/articles/aspectpatterns.html
+4 A Guide to Ptolemaic Aspects. As promised in a prior post, I’m making... | by Leigh Beckett | Medium https://mirallabinxjinx.medium.com/a-guide-to-ptolemaic-aspects-1298157bb5f6

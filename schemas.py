@@ -140,6 +140,90 @@ class ChartConfig(BaseModel):
     )
 
 
+class AspectPointSummary(BaseModel):
+    """
+    Lightweight summary for a chart point used in aspect computation.
+    """
+
+    name: Optional[str] = Field(default=None, description="Display name of the point.")
+    sign: Optional[str] = Field(default=None, description="Three-letter sign code.")
+    position: Optional[float] = Field(default=None, description="Position within the sign (0-30 degrees).")
+    abs_pos: Optional[float] = Field(default=None, description="Absolute ecliptic position (0-360 degrees).")
+    house: Optional[str] = Field(default=None, description="House label when available.")
+    retrograde: Optional[bool] = Field(default=None, description="Retrograde flag for the point.")
+
+
+class AspectMeta(BaseModel):
+    """
+    Aspect metadata following the Ptolemaic major aspects.
+    """
+
+    name: str = Field(..., description="Aspect name (conjunction, sextile, square, trine, opposition).")
+    angle: float = Field(..., description="Exact aspect angle in degrees.")
+    orb: float = Field(..., description="Orb difference from the exact angle.")
+    icon: Optional[str] = Field(default=None, description="Aspect glyph/icon.")
+
+
+class MajorAspectEntry(BaseModel):
+    """
+    Single aspect hit between two active points.
+    """
+
+    base_key: str = Field(..., description="Normalized key for the base/left point (lowercase).")
+    other_key: str = Field(..., description="Normalized key for the other/right point (lowercase).")
+    aspect_type: str = Field(..., description="Aspect type label.")
+    angle: float = Field(..., description="Exact aspect angle in degrees.")
+    orb: float = Field(..., description="Orb difference from the exact angle (degrees).")
+    angle_difference: float = Field(..., description="Normalized angular distance between the two points (0-180).")
+    icon: Optional[str] = Field(default=None, description="Aspect glyph/icon.")
+    aspect: AspectMeta = Field(..., description="Aspect metadata including glyph and orb.")
+    base: AspectPointSummary = Field(..., description="Summary of the base/left chart point.")
+    other: AspectPointSummary = Field(..., description="Summary of the other/right chart point.")
+
+
+class PtolemaicAspectLink(BaseModel):
+    """
+    Link (edge) within a Ptolemaic pattern.
+    """
+
+    type: str = Field(..., description="Aspect type between the two points.")
+    pair: list[str] = Field(..., description="Ordered pair of point keys involved in the link.")
+    orb: float = Field(..., description="Orb difference for this link.")
+    difference: float = Field(..., description="Angular difference in degrees.")
+
+
+class PtolemaicPatternAspect(BaseModel):
+    """
+    Serialized high-level Ptolemaic configuration (e.g., grand trine, grand cross).
+    """
+
+    id: str = Field(..., description="Pattern identifier, e.g., grand_trine.")
+    name: str = Field(..., description="Pattern display name.")
+    planets: str = Field(..., description="Human label of planet count, e.g., '3 planets'.")
+    aspects: list[str] = Field(..., description="Aspect types involved in the pattern.")
+    aspects_label: str = Field(..., description="Label summarizing the aspect mix.")
+    geometry: str = Field(..., description="Short description of the geometric layout.")
+    orb: str = Field(..., description="Typical orb allowances description.")
+    construction: str = Field(..., description="How the pattern is constructed.")
+    points: list[str] = Field(..., description="Ordered point keys participating in the pattern.")
+    links: list[PtolemaicAspectLink] = Field(..., description="Edges between points with aspect metadata.")
+    structure: dict = Field(default_factory=dict, description="Optional structure hints (axes, triples, chains, etc.).")
+
+
+class NormalAspectEntry(BaseModel):
+    """
+    Normal aspect entry as returned by Kerykeion, lightly normalized.
+    """
+
+    left: str = Field(..., description="Label for the first point.")
+    aspect: str = Field(..., description="Aspect label/name.")
+    right: str = Field(..., description="Label for the second point.")
+    orb: Optional[str] = Field(default=None, description="Formatted orb label when available.")
+    orb_value: Optional[float] = Field(default=None, description="Orb value in degrees when parsable.")
+    movement: Optional[str] = Field(default=None, description="Applying/separating/fixed when present.")
+    raw: dict = Field(default_factory=dict, description="Raw aspect payload from Kerykeion.")
+
+
 class NatalRequest(BaseModel):
     """
     Request payload for a natal chart computation.
@@ -166,6 +250,14 @@ class NatalResponse(BaseModel):
     subject: dict = Field(
         ...,
         description="Raw AstrologicalSubject model from Kerykeion serialized as JSON.",
+    )
+    aspects: List[NormalAspectEntry] = Field(
+        ...,
+        description="Standard aspects returned by Kerykeion.",
+    )
+    major_aspects: List[PtolemaicPatternAspect] = Field(
+        ...,
+        description="High-level Ptolemaic configurations computed from the subject.",
     )
 
 
@@ -311,9 +403,25 @@ class TransitSnapshot(BaseModel):
         ...,
         description="Transit subject (sky at this moment) as JSON.",
     )
+    aspects: List[NormalAspectEntry] = Field(
+        default_factory=list,
+        description="Standard aspects returned by Kerykeion for the transit subject.",
+    )
+    major_aspects: List[PtolemaicPatternAspect] = Field(
+        default_factory=list,
+        description="High-level Ptolemaic configurations computed for the transit subject.",
+    )
     natal_subject: Optional[dict] = Field(
         default=None,
         description="Optional natal subject JSON, when a birth chart was provided.",
+    )
+    natal_aspects: Optional[List[NormalAspectEntry]] = Field(
+        default=None,
+        description="Standard aspects returned by Kerykeion for the natal subject when provided.",
+    )
+    natal_major_aspects: Optional[List[PtolemaicPatternAspect]] = Field(
+        default=None,
+        description="High-level Ptolemaic configurations for the natal subject when provided.",
     )
 
 
