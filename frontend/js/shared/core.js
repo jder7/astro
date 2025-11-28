@@ -459,6 +459,21 @@
     return results.sort((a, b) => a.aspect.orb - b.aspect.orb);
   }
 
+  function normalizePointKey(key) {
+    return String(key || "").replace(/\s+/g, "_").replace(/-+/g, "_").toLowerCase();
+  }
+
+  function resolveActivePointKeys(points = {}, activePoints = []) {
+    const normalized = new Set((activePoints || []).map(normalizePointKey).filter(Boolean));
+    const entries = Object.keys(points || {});
+    if (!normalized.size) return entries;
+    return entries.filter((key) => {
+      const pt = points[key] || {};
+      const aliases = [key, pt.name].filter(Boolean).map(normalizePointKey);
+      return aliases.some((alias) => normalized.has(alias));
+    });
+  }
+
   function resolveMajorAspectPatterns(aspects, points, patterns = PTOLEMAIC_MAJOR_ASPECT_PATTERNS) {
     const safeAspects = Array.isArray(aspects) ? aspects : [];
     const lower = (v) => (typeof v === "string" ? v.toLowerCase() : v);
@@ -488,6 +503,8 @@
     toOrdinal: toOrdinalWithSuffix,
     classifyAspect,
     computeAspects,
+    normalizePointKey,
+    resolveActivePointKeys,
     resolveMajorAspectPatterns,
     getMajorAspectIcon,
     formatHouseLabel,

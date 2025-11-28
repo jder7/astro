@@ -30,6 +30,8 @@
     POINTS_ICONS,
     ASPECT_ICON_MAP,
     computeAspects: computeAspectsShared,
+    resolveActivePointKeys,
+    normalizePointKey,
     MAJOR_ASPECT_ICON_MAP,
     MAJOR_ASPECT_PATTERNS,
     getMajorAspectIcon,
@@ -176,6 +178,32 @@
     );
   }
 
+  function normalizeAspectRows(aspectList, points) {
+    const rows = [];
+    (aspectList || []).forEach((a) => {
+      const baseKey = normalizePointKey(
+        a.base_key || a.baseKey || a.left || a.first_point || a.first || a.point1 || a.planet1 || a.p1_name || a.p1
+      );
+      const otherKey = normalizePointKey(
+        a.other_key || a.otherKey || a.right || a.second_point || a.second || a.point2 || a.planet2 || a.p2_name || a.p2
+      );
+      const type = (a.aspect_type || a.aspect || a.type || a.name || "").toLowerCase();
+      if (!baseKey || !otherKey || !type) return;
+      rows.push({
+        baseKey,
+        otherKey,
+        aspect: {
+          name: type,
+          icon: ASPECT_ICON_MAP[type] || "✶",
+          orb: typeof a.orb_value === "number" ? a.orb_value : Number.parseFloat(a.orb) || null,
+        },
+        base: points?.[baseKey],
+        other: points?.[otherKey],
+      });
+    });
+    return rows;
+  }
+
   function extractMajorAspects(payload) {
     if (!payload) return [];
     if (Array.isArray(payload.major_aspects)) return payload.major_aspects;
@@ -242,10 +270,11 @@
     if (!key) return "";
     const pt = points[key] || {};
     const label = pt.name || capitalise(key.replace(/_/g, " "));
-    const sign = pt.sign || "";
+    const signShortName = pt.sign || "";
+    const signIcon = (SIGN_META[pt.sign]?.icon || signShortName).trim();
     const pos = Number.isFinite(pt.position) ? `${pt.position.toFixed(2)}°` : "";
     const icon = POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "✶";
-    return `${icon} ${label}${sign ? ` ${sign}` : ""}${pos ? ` @ ${pos}` : ""}`;
+    return `${icon} ${label}${signIcon ? ` ${signIcon}` : ""}${pos ? ` @ ${pos}` : ""}`;
   }
 
   function formatPointGroup(list, points) {
@@ -346,9 +375,7 @@
     const detailRenderer = PATTERN_RENDERERS[pattern.id] || PATTERN_RENDERERS.default;
     const detailLines = detailRenderer(pattern, points || {});
     const linkLines = renderPatternLinks(pattern, points || {});
-    const orbLine = pattern.orb ? `<li><strong>Orb guide</strong>: ${pattern.orb}</li>` : "";
     const lines = [...detailLines, ...linkLines];
-    if (orbLine) lines.push(orbLine);
     const list =
       lines.length > 0
         ? `<ul class="adv-pattern-hit-list">${lines.join("")}</ul>`
@@ -365,8 +392,44 @@
           </div>
           <span class="adv-pattern-pill">${pattern.planets || ""}</span>
         </div>
+        <div class="adv-pattern-aspects">${list}</div>
+      </article>
+    `;
+  }
+
+  function renderPatternGroupCard(patterns, points) {
+    if (!patterns || !patterns.length) return "";
+    const primary = patterns[0];
+    const icon = fallbackIcon(primary.id);
+    const aspectsLabel =
+      primary.aspects_label || primary.aspectsLabel || (primary.aspects || []).map(capitalise).join(", ");
+    const geometry = primary.geometry ? `<p class="adv-pattern-sub">${primary.geometry}</p>` : "";
+    const body = patterns
+      .map((pattern, idx) => {
+        const detailRenderer = PATTERN_RENDERERS[pattern.id] || PATTERN_RENDERERS.default;
+        const detailLines = detailRenderer(pattern, points || {});
+        const linkLines = renderPatternLinks(pattern, points || {});
+        const lines = [...detailLines, ...linkLines];
+        const list =
+          lines.length > 0
+            ? `<ul class="adv-pattern-hit-list">${lines.join("")}</ul>`
+            : `<p class="adv-pattern-none">No structural links found for this pattern.</p>`;
+        return `<div class="adv-pattern-instance-block">${list}</div>`;
+      })
+      .join("");
+    return `
+      <article class="adv-pattern-card">
+        <div class="adv-pattern-title-row">
+          <div class="adv-pattern-icon" aria-hidden="true">${icon}</div>
+          <div class="adv-pattern-title-stack">
+            <h4>${primary.name || capitalise(primary.id || "Pattern")}</h4>
+            <p class="adv-pattern-subtitle">${aspectsLabel}</p>
+            ${geometry}
+          </div>
+          <span class="adv-pattern-pill">${primary.planets || ""}</span>
+        </div>
         <div class="adv-pattern-aspects">
-          ${list}
+          ${body}
         </div>
       </article>
     `;
@@ -376,11 +439,31 @@
     if (!Array.isArray(patterns) || patterns.length === 0) return "";
     const headerTitle = title || "Major Ptolemaic Aspect Configurations";
     const headerSubtitle = subtitle || "Geometric patterns detected in the response payload.";
-    const cards = patterns.map((pattern) => renderPatternCard(pattern, points || {})).join("");
     const modal = includeModal ? renderPatternModal(MAJOR_ASPECT_PATTERNS) : "";
     const infoBtn = includeModal
       ? `<button type="button" class="adv-pattern-info-btn" data-target="#advPatternModal" aria-label="Show pattern descriptions">i</button>`
       : "";
+
+    // Group by pattern type and sort groups by max unique point count (desc).
+    const grouped = patterns.reduce((acc, p) => {
+      const key = p.id || p.name || "pattern";
+      acc[key] = acc[key] || [];
+      acc[key].push(p);
+      return acc;
+    }, {});
+    const sortedGroups = Object.values(grouped).sort((a, b) => {
+      const maxA = Math.max(...a.map((p) => (p.points || []).length || 0), 0);
+      const maxB = Math.max(...b.map((p) => (p.points || []).length || 0), 0);
+      return maxB - maxA;
+    });
+
+    const cards = sortedGroups
+      .map((group) => {
+        const label = group[0]?.name || capitalise((group[0]?.id || "Pattern").replace(/_/g, " "));
+        return `<div class="adv-pattern-type"><h4>${label}</h4>${renderPatternGroupCard(group, points || {})}</div>`;
+      })
+      .join("");
+
     return `
       <div class="adv-patterns">
         <div class="adv-patterns-head">
@@ -391,7 +474,7 @@
           </div>
           ${infoBtn}
         </div>
-        <div class="adv-pattern-grid">${cards}</div>
+        <div class="adv-pattern-list">${cards}</div>
       </div>
       ${modal}
     `;
@@ -516,7 +599,7 @@
 
   function renderMetaHeader(data) {
     if (!dom.summaryEl) return;
-    const title = data.title || "Chart";
+    const title = data.title || data.name || "Chart";
     const city = data.city ? `${data.city}${data.nation ? `, ${data.nation}` : ""}` : "";
     const dateInfo = formatDateLabel(data);
     const tz = dateInfo.tzShort || "";
@@ -540,25 +623,24 @@
 
   function renderStructured(kind, payload) {
     if (!dom.summaryEl) return;
-    const source = payload?.subject || payload?.snapshot || payload?.data || payload;
+    const source = payload?.snapshot || payload?.subject || payload?.data || payload;
+    const chart = source?.subject || source;
     if (!source || typeof source !== "object") {
       dom.summaryEl.innerHTML = "<p class=\"hint\">No data returned.</p>";
       console.warn("[advanced] renderStructured payload missing", { kind, payload });
       return;
     }
 
-    const { points, houses } = collectPoints(source);
+    const { points, houses } = collectPoints(chart);
     const natalSource = payload?.natal_subject || payload?.snapshot?.natal_subject;
     const natalCollected = natalSource ? collectPoints(natalSource) : { points: {}, houses: {} };
     const natalPoints = natalCollected.points || {};
     const ns = "AdvancedApp";
     const cfg =
       (window[ns]?.config?.getConfigFromInputs?.() || window[ns]?.constants?.DEFAULT_CONFIG) || {};
-    const sourceActive = Array.isArray(source.active_points) ? source.active_points : [];
+    const sourceActive = Array.isArray(chart.active_points) ? chart.active_points : [];
     const activePoints = (Array.isArray(cfg.active_points) ? cfg.active_points : sourceActive).filter(Boolean);
-    const filteredPointKeys = activePoints.length
-      ? Object.keys(points).filter((k) => activePoints.includes(k))
-      : Object.keys(points);
+    const filteredPointKeys = resolveActivePointKeys(points, activePoints);
 
     const pointRows = filteredPointKeys
       .map((k) => renderPointRowProxy(points[k], { labelOverride: points[k]?.name || k }))
@@ -566,7 +648,11 @@
     const houseRows = Object.entries(houses)
       .map(([k, v]) => renderPointRowProxy(v, { labelOverride: formatHouseLabel(v.house || k) }))
       .join("");
-    const aspects = computeAspectsShared(points, filteredPointKeys);
+    let aspects = computeAspectsShared(points, filteredPointKeys);
+    if (!aspects.length) {
+      const payloadAspects = chart.aspects || source.aspects || payload?.aspects || [];
+      aspects = normalizeAspectRows(payloadAspects, points);
+    }
     const aspectKeySet = aspects.reduce((set, a) => {
       set.add(a.baseKey);
       set.add(a.otherKey);
@@ -604,7 +690,15 @@
     const aspectContent =
       aspectMatrix + majorAspectsList + (aspectRows || "<p class=\"hint\">No aspects found for active points.</p>");
 
-    const metaSource = source.birth || source.moment || source.first || source;
+    const metaSource =
+      chart.birth ||
+      chart.moment ||
+      source.birth ||
+      source.moment ||
+      source.first ||
+      payload?.birth ||
+      payload?.moment ||
+      chart;
     const meta = renderMetaHeader(metaSource);
     const sections = [
       renderSection("Aspects", aspectContent, true),
