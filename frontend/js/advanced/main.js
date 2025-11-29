@@ -54,6 +54,9 @@
     return `<svg viewBox="0 0 88 88" class="adv-pattern-svg" aria-hidden="true" role="img"><circle cx="44" cy="44" r="32" fill="rgba(56,189,248,0.12)" stroke="#38bdf8" stroke-width="2.2"/></svg>`;
   };
 
+  const wrapPointIcon = (icon) => `<span class="adv-point-icon">${icon}</span>`;
+  const wrapMajorAspectIcon = (icon) => `<span class="adv-major-aspect-icon">${icon}</span>`;
+
   const pad = (v) => String(v).padStart(2, "0");
   const toDatetimeLocal = (date) => {
     if (!(date instanceof Date)) return "";
@@ -132,9 +135,9 @@
 
   function formatPointRow(point, { labelOverride } = {}) {
     if (!point) return "";
-    const pointIcon = point.point_type === "House" 
-    ? formatHouseLabelShort(point.name) || "🏠" 
-    : POINTS_ICONS[point.name.toLowerCase()] || "✶";
+    const pointIcon = point.point_type === "House"
+      ? wrapPointIcon(formatHouseLabelShort(point.name) || "🏠")
+      : wrapPointIcon(POINTS_ICONS[(point.name || "").toLowerCase()] || "✶");
     const signMeta = SIGN_META[point.sign] || { name: point.sign || "—", icon: point.emoji || "?" };
     const element = point.element || "";
     const quality = point.quality || "";
@@ -232,7 +235,7 @@
     });
     const iconFor = (key) => {
       const pt = points[key] || {};
-      return POINTS_ICONS[(pt.name || "").toLowerCase()] || "✶";
+      return wrapPointIcon(POINTS_ICONS[(pt.name || "").toLowerCase()] || "✶");
     };
     const rows = keys
       .map((rowKey, rowIdx) => {
@@ -273,14 +276,14 @@
     const signShortName = pt.sign || "";
     const signIcon = (SIGN_META[pt.sign]?.icon || signShortName).trim();
     const pos = Number.isFinite(pt.position) ? `${pt.position.toFixed(2)}°` : "";
-    const icon = POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "✶";
+    const icon = wrapPointIcon(POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "✶");
     return `${icon} ${label}${signIcon ? ` ${signIcon}` : ""}${pos ? ` @ ${pos}` : ""}`;
   }
 
   function formatPointInlineShort(points, key) {
     if (!key) return "";
     const pt = points[key] || {};
-    const icon = POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "✶";
+    const icon = wrapPointIcon(POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "✶");
     return `${icon}`;
   }
 
@@ -295,8 +298,8 @@
     const orbLabel = Number.isFinite(link.orb) ? `${link.orb.toFixed(2)}°` : "";
     const left = formatPointInlineShort(points, leftKey);
     const right = formatPointInlineShort(points, rightKey);
-    const aspectLabel = link.type ? capitalise(link.type) : "Aspect";
-    return `${left} ${aspectIcon} ${aspectLabel} ${right}${orbLabel ? ` (orb ${orbLabel})` : ""}`;
+    const icon = wrapMajorAspectIcon(aspectIcon);
+    return `${left} ${icon} ${right}${orbLabel ? ` (orb ${orbLabel})` : ""}`;
   }
 
   const PATTERN_RENDERERS = {
@@ -373,7 +376,7 @@
     const linksLine = links
       .map((link) => formatLinkLine(link, points))
       .filter(Boolean)
-      .join(" — ")
+      .join(" — ");
     return `<li><strong>Links</strong>: ${linksLine}</li>`;
   }
 
@@ -558,8 +561,8 @@
     const aspectName = capitalise(aspect.name || "Aspect");
     const aspectIcon = aspect.icon || "✶";
     const aspectAngle = Number.isFinite(aspect.angle) ? `${aspect.angle}°` : "";
-    const baseIcon = POINTS_ICONS[(base.name || "").toLowerCase()] || "✶";
-    const otherIcon = POINTS_ICONS[(other.name || "").toLowerCase()] || "✶";
+    const baseIcon = wrapPointIcon(POINTS_ICONS[(base.name || "").toLowerCase()] || "✶");
+    const otherIcon = wrapPointIcon(POINTS_ICONS[(other.name || "").toLowerCase()] || "✶");
     return `
       <div class="adv-row adv-row-aspect">
         <div class="adv-aspect-grid">

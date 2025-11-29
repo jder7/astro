@@ -429,8 +429,9 @@ a {
 }
 
 .adv-matrix-diag {
-  background: #0d152a;
-  font-weight: 700;
+  background: #1c3676;
+    font-weight: 700;
+    font-size: larger;
 }
 
 .adv-matrix-orb {
@@ -738,6 +739,21 @@ a {
 
 .adv-label {
   font-size: 0.95rem;
+}
+
+.adv-point-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #7dd3fc;
+  font-weight: 700;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.adv-major-aspect-icon {
+  color: #ff9800;
+  font-weight: 800;
 }
 
 .adv-chip {
