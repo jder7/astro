@@ -81,6 +81,10 @@ PTOLEMAIC_ASPECTS: tuple[NormalAspect, ...] = (
     NormalAspect("opposition", 180.0, 6.0, "☍"),
 )
 
+STELLIUM_CLUSTER_WINDOW = 30.0
+STELLIUM_CONJUNCTION_ORB = 10.0
+KITE_SEXTILE_EXTRA_ORB = 1.0
+
 
 PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
     PtolemaicAspectConfiguration(
@@ -173,6 +177,7 @@ class PtolemaicAspectCalculator:
 
     def __init__(self, aspects: Optional[Sequence[NormalAspect]] = None) -> None:
         self.aspects = tuple(aspects or PTOLEMAIC_ASPECTS)
+        self._aspect_by_name = {a.name: a for a in self.aspects}
 
     @staticmethod
     def _normalize_key(key: str) -> str:
@@ -233,6 +238,37 @@ class PtolemaicAspectCalculator:
                     "icon": aspect_def.icon,
                 }
         return aspects
+
+    def _get_aspect_info(
+        self,
+        a: str,
+        b: str,
+        aspect_name: str,
+        points: dict[str, dict],
+        pair_map: dict[tuple[str, str], dict],
+        extra_orb: float = 0.0,
+    ) -> Optional[dict]:
+        """
+        Retrieve an aspect definition for a pair, optionally allowing a small orb extension.
+        """
+        pair = tuple(sorted((a, b)))
+        info = pair_map.get(pair)
+        if info and info["type"] == aspect_name:
+            return info
+        aspect_def = self._aspect_by_name.get(aspect_name)
+        if not aspect_def:
+            return None
+        diff = self._angular_diff(points[a]["abs_pos"], points[b]["abs_pos"])
+        delta = abs(diff - aspect_def.angle)
+        if delta <= aspect_def.orb + extra_orb:
+            return {
+                "type": aspect_def.name,
+                "angle": aspect_def.angle,
+                "orb": round(float(delta), 2),
+                "difference": diff,
+                "icon": aspect_def.icon,
+            }
+        return None
 
     @staticmethod
     def _point_summary(point: dict) -> dict:
@@ -305,12 +341,13 @@ class PtolemaicAspectCalculator:
     def _match_stellium(self, keys: list[str], points: dict[str, dict], pair_map: dict) -> list[PtolemaicAspect]:
         matches: list[PtolemaicAspect] = []
         seen: set[frozenset[str]] = set()
+        extra_conj = max(0.0, STELLIUM_CONJUNCTION_ORB - self._aspect_by_name["conjunction"].orb)
         # Use sorted angles with wrap-around to find clusters within ~30°
         ordered = sorted([(k, points[k]["abs_pos"]) for k in keys], key=lambda kv: kv[1])
         extended = ordered + [(k, pos + 360.0) for k, pos in ordered]
         start = 0
         for end in range(len(extended)):
-            while extended[end][1] - extended[start][1] > 30.0:
+            while extended[end][1] - extended[start][1] > STELLIUM_CLUSTER_WINDOW:
                 start += 1
             window = extended[start : end + 1]
             unique_keys = {k for k, _ in window}
@@ -322,8 +359,8 @@ class PtolemaicAspectCalculator:
             seen.add(key_set)
             links: list[AspectLink] = []
             for a, b in combinations(sorted(unique_keys), 2):
-                info = pair_map.get(tuple(sorted((a, b))))
-                if info and info["type"] == "conjunction":
+                info = self._get_aspect_info(a, b, "conjunction", points, pair_map, extra_orb=extra_conj)
+                if info:
                     links.append(self._make_link(a, b, info))
             matches.append(
                 PtolemaicAspect(
@@ -403,6 +440,7 @@ class PtolemaicAspectCalculator:
         matches: list[PtolemaicAspect] = []
         seen: set[frozenset[str]] = set()
         config = next(p for p in PTOLEMAIC_PATTERNS if p.id == "kite")
+        extra_sextile = max(0.0, KITE_SEXTILE_EXTRA_ORB)
         for quad in combinations(keys, 4):
             for anchor in quad:
                 for tail in quad:
@@ -412,12 +450,12 @@ class PtolemaicAspectCalculator:
                     if len(b_c) != 2:
                         continue
                     b, c = b_c
-                    tr_ab = pair_map.get(tuple(sorted((anchor, b))))
-                    tr_ac = pair_map.get(tuple(sorted((anchor, c))))
-                    tr_bc = pair_map.get(tuple(sorted((b, c))))
-                    opp = pair_map.get(tuple(sorted((anchor, tail))))
-                    sx_tb = pair_map.get(tuple(sorted((tail, b))))
-                    sx_tc = pair_map.get(tuple(sorted((tail, c))))
+                    tr_ab = self._get_aspect_info(anchor, b, "trine", points, pair_map)
+                    tr_ac = self._get_aspect_info(anchor, c, "trine", points, pair_map)
+                    tr_bc = self._get_aspect_info(b, c, "trine", points, pair_map)
+                    opp = self._get_aspect_info(anchor, tail, "opposition", points, pair_map)
+                    sx_tb = self._get_aspect_info(tail, b, "sextile", points, pair_map, extra_orb=extra_sextile)
+                    sx_tc = self._get_aspect_info(tail, c, "sextile", points, pair_map, extra_orb=extra_sextile)
                     if not all(
                         [
                             tr_ab and tr_ab["type"] == "trine",
