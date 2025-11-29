@@ -1,9 +1,13 @@
 from pathlib import Path
 
-from fastapi import FastAPI
+import secrets
+import os
+
+from fastapi import FastAPI,Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from endpoints.health import router as health_router
 from endpoints.natal import router as natal_router
@@ -16,6 +20,28 @@ from endpoints.relationship import router as relationship_router
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 
+
+security = HTTPBasic()
+
+# 🔐 Credentials
+DEMO_USERNAME = os.getenv("DEMO_USERNAME", "demo")
+DEMO_PASSWORD = os.getenv("DEMO_PASSWORD", "demo1234")
+
+
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+    # Use compare_digest to avoid timing attacks
+    correct_username = secrets.compare_digest(credentials.username, DEMO_USERNAME)
+    correct_password = secrets.compare_digest(credentials.password, DEMO_PASSWORD)
+
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    return credentials.username
+
 app = FastAPI(
     title="Astro API",
     version="0.4.0",
@@ -25,6 +51,7 @@ app = FastAPI(
         "- A small web UI at `/home` for generating natal SVG charts.\n"
         "- Static assets served from `/static`."
     ),
+    dependencies=[Depends(get_current_username)],
 )
 
 # CORS – permissive for development / simple cloud deployments.
