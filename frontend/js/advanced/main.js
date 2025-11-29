@@ -277,6 +277,13 @@
     return `${icon} ${label}${signIcon ? ` ${signIcon}` : ""}${pos ? ` @ ${pos}` : ""}`;
   }
 
+  function formatPointInlineShort(points, key) {
+    if (!key) return "";
+    const pt = points[key] || {};
+    const icon = POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "✶";
+    return `${icon}`;
+  }
+
   function formatPointGroup(list, points) {
     return (list || []).map((key) => formatPointInline(points, key)).filter(Boolean).join(" · ");
   }
@@ -286,8 +293,8 @@
     const [leftKey, rightKey] = link.pair;
     const aspectIcon = ASPECT_ICON_MAP[link.type] || link.icon || "✶";
     const orbLabel = Number.isFinite(link.orb) ? `${link.orb.toFixed(2)}°` : "";
-    const left = formatPointInline(points, leftKey);
-    const right = formatPointInline(points, rightKey);
+    const left = formatPointInlineShort(points, leftKey);
+    const right = formatPointInlineShort(points, rightKey);
     const aspectLabel = link.type ? capitalise(link.type) : "Aspect";
     return `${left} ${aspectIcon} ${aspectLabel} ${right}${orbLabel ? ` (orb ${orbLabel})` : ""}`;
   }
@@ -363,10 +370,11 @@
 
   function renderPatternLinks(pattern, points) {
     const links = Array.isArray(pattern.links) ? pattern.links : [];
-    return links
+    const linksLine = links
       .map((link) => formatLinkLine(link, points))
       .filter(Boolean)
-      .map((text) => `<li>${text}</li>`);
+      .join(" — ")
+    return `<li><strong>Links</strong>: ${linksLine}</li>`;
   }
 
   function renderPatternCard(pattern, points) {

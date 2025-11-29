@@ -1,0 +1,18 @@
+{
+    "perspective": "Topocentric",
+    "zodiac_type": "Sidereal",
+    "sidereal_mode": "KRISHNAMURTI",
+    "house_system": "P",
+    "theme": "dark",
+    "active_points": [
+        "sun",
+        "moon",
+        "mercury",
+        "venus",
+        "mars",
+        "jupiter",
+        "saturn",
+        "ascendant",
+        "uranus"
+    ]
+}

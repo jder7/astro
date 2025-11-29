@@ -1,0 +1,56 @@
+{
+    "mode": "transit",
+    "natal": {
+        "name": "Some Person",
+        "year": 1909,
+        "month": 9,
+        "day": 19,
+        "hour": 12,
+        "minute": 55,
+        "lat": 46.805,
+        "lng": 21.6499,
+        "tz_str": "Europe/Bucharest",
+        "city": "Salonta",
+        "nation": "RO"
+    },
+    "transit": {
+        "year": 2025,
+        "month": 11,
+        "day": 28,
+        "hour": 19,
+        "minute": 57,
+        "lat": 46.5804,
+        "lng": 21.9735,
+        "tz_str": "Europe/Bucharest",
+        "city": "Tinca",
+        "nation": "RO"
+    },
+    "relationship": {
+        "first": {
+            "name": "Person A",
+            "year": 1990,
+            "month": 1,
+            "day": 1,
+            "hour": 12,
+            "minute": 0,
+            "lat": 52.3702,
+            "lng": 4.8952,
+            "tz_str": "Europe/Amsterdam",
+            "city": "Amsterdam",
+            "nation": "NL"
+        },
+        "second": {
+            "name": "Person B",
+            "year": 1992,
+            "month": 2,
+            "day": 2,
+            "hour": 14,
+            "minute": 0,
+            "lat": 40.7128,
+            "lng": -74.006,
+            "tz_str": "America/New_York",
+            "city": "New York",
+            "nation": "US"
+        }
+    }
+}

@@ -67,7 +67,7 @@
     mars: "♂️",
     jupiter: "♃",
     saturn: "♄",
-    uranus: "⛢",
+    uranus: "♅",
     neptune: "♆",
     pluto: "♇",
   };

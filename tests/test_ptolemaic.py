@@ -242,6 +242,42 @@ class TestPtolemaicPatterns(unittest.TestCase):
         ids = {m.configuration.id for m in compute_ptolemaic_patterns(subject_off, active_points=subject_off["active_points"])}
         self.assertNotIn("trapeze", ids)
 
+    def test_sample_transit_patterns(self):
+        import json
+        from pathlib import Path
+
+        sample = json.loads(Path("samples/transit-result.json").read_text())
+        config = json.loads(Path("samples/transit-config-input.json").read_text())
+        subject = sample["snapshot"]["subject"]
+        active = config.get("active_points", [])
+        patterns = compute_ptolemaic_patterns(subject, active_points=active)
+        ids = {p.configuration.id for p in patterns}
+        self.assertIn("kite", ids, "Sample transit should include a kite pattern")
+
+        kite_targets = [
+            p for p in patterns if p.configuration.id == "kite" and set(p.points) == {"uranus", "saturn", "venus", "jupiter"}
+        ]
+        self.assertTrue(kite_targets, "Expected a kite spanning Uranus-Saturn-Venus-Jupiter")
+        kite_pairs = {tuple(sorted(link.pair)) for link in kite_targets[0].links if link.type == "opposition"}
+        self.assertTrue(
+            any(set(pair) == {"uranus", "venus"} or set(pair) == {"uranus", "jupiter"} for pair in kite_pairs),
+            "Kite should include an opposition involving Uranus",
+        )
+
+        stellia = [p for p in patterns if p.configuration.id == "stellium"]
+        self.assertTrue(stellia, "Sample transit should include stellia")
+        def link_pairs(stellium):
+            return {tuple(sorted(link.pair)) for link in stellium.links}
+
+        cluster_links = [
+            p
+            for p in stellia
+            if set(p.points) >= {"mercury", "sun", "venus"}
+            and ("mercury", "venus") in link_pairs(p)
+            and ("sun", "venus") in link_pairs(p)
+        ]
+        self.assertTrue(cluster_links, "Mercury/Sun/Venus stellium should expose both conjunction links")
+
 
 if __name__ == "__main__":
     unittest.main()
