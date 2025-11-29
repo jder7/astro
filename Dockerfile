@@ -1,13 +1,17 @@
-# Simpler and less error-prone than Alpine+venv
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system deps if you ever need them (optional)
-# RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
+# 🔧 System deps for pycairo (and other compiled libs)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    pkg-config \
+    libcairo2-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
+# 🐍 Install Python deps
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
