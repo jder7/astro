@@ -1,27 +1,17 @@
-# Build stage
-FROM python:3.11-alpine AS builder
+# Simpler and less error-prone than Alpine+venv
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Optional: system deps if you need them
-# RUN apk add --no-cache build-base
+# Install system deps if you ever need them (optional)
+# RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN python -m venv /venv \
-    && . /venv/bin/activate \
-    && pip install --no-cache-dir -r requirements.txt
 
-# Runtime stage
-FROM python:3.11-alpine AS runner
-WORKDIR /app
-
-# Copy virtualenv and app code
-COPY --from=builder /venv /venv
-ENV PATH=/venv/bin:$PATH
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# FastAPI will listen on 8000 inside the container
 EXPOSE 8000
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
