@@ -754,6 +754,9 @@ a {
 .adv-major-aspect-icon {
   color: #ff9800;
   font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .adv-chip {

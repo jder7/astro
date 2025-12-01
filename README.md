@@ -16,40 +16,6 @@ bundled with a tiny frontend to generate natal SVG charts.
 
 ---
 
-## Project layout
-
-```text
-astro/
-  app.py               # FastAPI app, router wiring, static/frontend integration
-  enums.py             # Perspective, ZodiacType, SiderealMode, HouseSystem, Theme, etc.
-  schemas.py           # Pydantic models (requests & responses)
-  utils.py             # Shared helpers (subjects, ranges, SVG rendering, reports)
-  endpoints/
-    __init__.py
-    health.py          # GET /api/health
-    natal.py           # POST /api/natal
-    natal_svg.py       # POST /api/svg/natal
-    transit.py         # POST /api/transit
-    transit_range.py   # POST /api/transit-range
-    transit_svg.py     # POST /api/svg/transit
-    report.py          # POST /api/report
-    relationship.py    # POST /api/relationship
-    synastry_svg.py    # POST /api/svg/synastry
-  frontend/
-    home.html          # Home page – natal SVG generator UI
-    js/
-      home.js          # Frontend logic (calls /api/svg/natal)
-    css/
-      home.css         # Simple styling for home.html
-  docs/
-    ENDPOINTS.md       # Short endpoint reference (linked below)
-  samples/
-    natal.json         # example natal response
-    transit-range.json # example transit-range response
-  requirements.txt
-  README.md
-```
-
 The FastAPI app is defined in `app.py` and served as `app:app`.
 
 ---
@@ -74,107 +40,23 @@ Then open:
 - Swagger:   <http://127.0.0.1:8000/docs>
 - ReDoc:     <http://127.0.0.1:8000/redoc>
 
-Static assets (JS and CSS) are served from:
-
-- `/static/js/home.js`
-- `/static/css/home.css`
-
 ---
 
-## Configuration model
+## Docker build & run
 
-Most endpoints accept a nested `config` object of type `ChartConfig`:
+Build the image (from the repo root):
 
-```jsonc
-{
-  "perspective": "TOPOCENTRIC",       // enum Perspective
-  "zodiac_type": "SIDEREAL",          // enum ZodiacType ("TROPIC" or "SIDEREAL")
-  "sidereal_mode": "KRISHNAMURTI",    // enum SiderealMode (for sidereal only)
-  "house_system": "WHOLE_SIGN",       // enum HouseSystem (default Whole Sign / "W")
-  "theme": "classic"                  // enum Theme (SVG visual style)
-}
+```bash
+docker build -t astro-app .
 ```
 
-Defaults (when `config` is omitted) are:
+Run the container, exposing the FastAPI server on port 8000:
 
-- `perspective` → `TOPOCENTRIC`
-- `zodiac_type` → `SIDEREAL`
-- `sidereal_mode` → `KRISHNAMURTI`
-- `house_system` → `WHOLE_SIGN`
-- `theme` → `classic`
-
-### Themes
-
-Themes are passed directly to Kerykeion’s `ChartDrawer(theme=...)` and control
-the SVG appearance:
-
-- `classic` (default)
-- `dark`
-- `dark-high-contrast`
-- `light`
-- `strawberry`
-- `black-and-white`
-
----
-
-## Birth / event data
-
-Astrological inputs are based on `BirthData` with sensible defaults so Swagger
-is always pre-filled:
-
-```jsonc
-{
-  "name": "Subject",
-  "year": 1990,
-  "month": 1,
-  "day": 1,
-  "hour": 12,
-  "minute": 0,
-  "lng": 4.8952,
-  "lat": 52.3702,
-  "tz_str": "Europe/Amsterdam",
-  "city": "Amsterdam",
-  "nation": "NL"
-}
+```bash
+docker run --rm -p 8000:8000 astro-app
 ```
 
-For **transits**, the API uses a lighter `TransitMomentInput` that omits the
-`name` field entirely – you only provide date, time, and location.
-
----
-
-## Web app home page
-
-The home page at `/home` (also reachable from `/`) is a small single page app:
-
-- Built with plain HTML + JS + CSS in `frontend/`.
-- Sends a `POST` to `/api/svg/natal` with a JSON payload:
-
-  ```jsonc
-  {
-    "birth": {
-      "name": "Subject",
-      "year": 1990,
-      "month": 1,
-      "day": 1,
-      "hour": 12,
-      "minute": 0,
-      "lng": 4.8952,
-      "lat": 52.3702,
-      "tz_str": "Europe/Amsterdam",
-      "city": "Amsterdam",
-      "nation": "NL"
-    },
-    "config": {
-      "theme": "classic"
-    }
-  }
-  ```
-
-- Injects the returned SVG from `/api/svg/natal` directly into the page.
-
-You can extend `frontend/js/home.js` to expose more configuration fields
-(perspective, zodiac type, house system, etc.) if desired.
+Then visit <http://127.0.0.1:8000/home>. Swagger and ReDoc are available at `/docs` and `/redoc` as usual.
 
 ---
 

@@ -212,6 +212,24 @@ body {
   color: #f8fafc;
 }
 
+.home-point-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #7dd3fc;
+  font-weight: 700;
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.home-aspect-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff9800;
+  font-weight: 800;
+}
+
 .summary-content ul {
   margin: 0.35rem 0 0;
   padding-left: 1.2rem;

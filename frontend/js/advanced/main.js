@@ -251,7 +251,8 @@
             const note = hit.name ? ` — ${capitalise(hit.name)}` : "";
             const colName = points[colKey]?.name || colKey;
             if (colIdx < rowIdx) {
-              return `<td class="adv-matrix-cell" title="${rowPt.name || rowKey} × ${colName}${note}">${hit.icon || "✶"}</td>`;
+              const icon = wrapMajorAspectIcon(hit.icon || "✶");
+              return `<td class="adv-matrix-cell" title="${rowPt.name || rowKey} × ${colName}${note}">${icon}</td>`;
             }
             const orbLabel = Number.isFinite(hit.orb) ? hit.orb.toFixed(2) : "";
             return `<td class="adv-matrix-cell adv-matrix-orb" title="${rowPt.name || rowKey} × ${colName}${note}">${orbLabel}</td>`;
@@ -559,7 +560,7 @@
     const otherPos = Number.isFinite(other.position) ? `${other.position.toFixed(2)}°` : "—";
     const orbLabel = Number.isFinite(aspect.orb) ? `${aspect.orb.toFixed(2)}°` : "—";
     const aspectName = capitalise(aspect.name || "Aspect");
-    const aspectIcon = aspect.icon || "✶";
+    const aspectIcon = wrapMajorAspectIcon(aspect.icon || "✶");
     const aspectAngle = Number.isFinite(aspect.angle) ? `${aspect.angle}°` : "";
     const baseIcon = wrapPointIcon(POINTS_ICONS[(base.name || "").toLowerCase()] || "✶");
     const otherIcon = wrapPointIcon(POINTS_ICONS[(other.name || "").toLowerCase()] || "✶");

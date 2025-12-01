@@ -107,18 +107,20 @@
   }
 
   function formatPointLabel(key, point, options = {}) {
+    const wrapPointIcon = (icon) => `<span class="home-point-icon">${icon}</span>`;
+    const keyLower = (key || "").toLowerCase();
     const baseNameMap = {
       sun: "Sun",
       moon: "Moon",
       ascendant: "Ascendant",
     };
-    const label = baseNameMap[key] || point.name || key;
+    const label = baseNameMap[keyLower] || point.name || key;
     const deg = typeof point.position === "number" ? point.position.toFixed(2) : "?";
     const sign = point.sign || "";
     const prefix = options.prefix ? `${options.prefix} ` : "";
-    const icon = POINTS_ICONS[key] || "✶";
-    const parts = [`${icon} ${prefix}${label} ${sign} ${deg}°`];
-    return parts.join(" ");
+    const text = [prefix ? `${prefix}${label}` : label, sign, `${deg}°`].filter(Boolean).join(" ");
+    const iconChar = POINTS_ICONS[keyLower] || "✶";
+    return `${wrapPointIcon(iconChar)} ${text}`.trim();
   }
 
   function formatAspectLabel(subject, aspect, options = {}) {
@@ -127,17 +129,26 @@
     const otherPoint = points[aspect.other];
     if (!basePoint || !otherPoint) return null;
 
-    const baseLabel = formatPointLabel(aspect.base, basePoint, { prefix: options.basePrefix });
-    const otherLabel = formatPointLabel(aspect.other, otherPoint, { prefix: options.otherPrefix });
+    const wrapPointIcon = (icon) => `<span class="home-point-icon">${icon}</span>`;
+    const wrapAspectIcon = (icon) => `<span class="home-aspect-icon">${icon}</span>`;
+    const getLabelText = (key, point, prefix) => {
+      const baseNameMap = { sun: "Sun", moon: "Moon", ascendant: "Ascendant" };
+      const keyLower = (key || "").toLowerCase();
+      const label = baseNameMap[keyLower] || point.name || key;
+      const deg = typeof point.position === "number" ? point.position.toFixed(2) : "?";
+      const sign = point.sign || "";
+      const pre = prefix ? `${prefix} ` : "";
+      return [pre ? `${pre}${label}` : label, sign, `${deg}°`].filter(Boolean).join(" ");
+    };
+
+    const baseLabel = getLabelText(aspect.base, basePoint, options.basePrefix);
+    const otherLabel = getLabelText(aspect.other, otherPoint, options.otherPrefix);
     const orbText = aspect.orb.toFixed(2);
-    const typeIcon = ASPECT_ICON[aspect.type] || "✦";
+    const typeIcon = wrapAspectIcon(ASPECT_ICON[aspect.type] || "✦");
+    const baseIcon = wrapPointIcon(POINTS_ICONS[(aspect.base || "").toLowerCase()] || "✶");
+    const otherIcon = wrapPointIcon(POINTS_ICONS[(aspect.other || "").toLowerCase()] || "✶");
 
-    const [baseIcon, ...baseRest] = baseLabel.split(" ");
-    const [otherIcon, ...otherRest] = otherLabel.split(" ");
-    const baseText = baseRest.join(" ") || baseLabel;
-    const otherText = otherRest.join(" ") || otherLabel;
-
-    return `${baseIcon} ${baseText} in ${typeIcon} ${aspect.type} with ${otherIcon} ${otherText} - Orb ${orbText}°`;
+    return `${baseIcon} ${baseLabel} in ${typeIcon} ${aspect.type} with ${otherIcon} ${otherLabel} - Orb ${orbText}°`;
   }
 
   function getLunationInfo(parts) {
@@ -481,7 +492,7 @@
       .map((a) => {
         const baseLabel = formatPointLabel(a.baseKey, { position: a.position1 || 0, sign: a.sign1 || "" });
         const otherLabel = formatPointLabel(a.otherKey, { position: a.position2 || 0, sign: a.sign2 || "" });
-        const typeIcon = ASPECT_ICON[a.type] || "✦";
+        const typeIcon = `<span class="home-aspect-icon">${ASPECT_ICON[a.type] || "✦"}</span>`;
         const orbText = Number.isFinite(a.orb) ? a.orb.toFixed(2) : "?";
         return `<li>${typeIcon} ${baseLabel} ${a.type || ""} ${otherLabel} (orb ${orbText}°)</li>`;
       })

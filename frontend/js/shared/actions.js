@@ -8,6 +8,13 @@
 
   init();
 
+  const buildPayloadFromFormSafe = (mode) => {
+    if (payloads && typeof payloads.buildPayloadFromForm === "function") {
+      return payloads.buildPayloadFromForm(mode);
+    }
+    throw new Error("Payload builder not available for this page.");
+  };
+
   function bindSubmit() {
     if (!dom.form) return;
     if (typeof App.handleSubmit === "function") {
@@ -31,7 +38,7 @@
     const target = dom.reportContent || dom.reportContainer;
     if (!target) return;
     const mode = utils.getSelectedMode() || "natal";
-    const { payload } = buildPayloadFromForm(mode);
+    const { payload } = buildPayloadFromFormSafe(mode);
     const baseBirth =
       payload.birth ||
       (payload.moment
@@ -135,7 +142,7 @@
 
   async function downloadReportPdf() {
     const mode = utils.getSelectedMode();
-    const { payload } = buildPayloadFromForm(mode);
+    const { payload } = buildPayloadFromFormSafe(mode);
     const baseBirth =
       payload.birth ||
       (payload.moment
@@ -189,7 +196,7 @@
   async function handleDownloadPdf() {
     utils.setStatus("");
     const mode = utils.getSelectedMode();
-    const { payload, config: cfg, transitDateParts } = buildPayloadFromForm(mode);
+    const { payload, config: cfg, transitDateParts } = buildPayloadFromFormSafe(mode);
 
     if (!runtime.hasChart) {
       utils.setStatus("Generate a chart first to download PDF.", true);

@@ -8,6 +8,12 @@ All JSON / SVG endpoints are mounted under the `/api` prefix.
 
 ---
 
+## Major aspect configurations
+
+Responses can include detected Ptolemaic multi-planet patterns (`major_aspects`, `natal_major_aspects`). Shapes, orb guides, and construction notes are documented in [`docs/ptolemaic-aspects-description.md`](./ptolemaic-aspects-description.md).
+
+---
+
 ## Shared models (simplified)
 
 ### `BirthData`
@@ -111,6 +117,8 @@ Compute a **natal chart configuration**.
   - `config`: `ChartConfig` (optional)
 - **Response**: `NatalResponse`
   - `subject`: raw Kerykeion `AstrologicalSubject` as JSON.
+  - `aspects`: point-to-point aspect list.
+  - `major_aspects`: Ptolemaic pattern matches (see [major aspect docs](./ptolemaic-aspects-description.md)).
 
 ---
 
@@ -137,6 +145,10 @@ Compute a **transit snapshot** at a specific moment.
     - `timestamp`: local datetime of snapshot.
     - `subject`: transit subject JSON.
     - `natal_subject` *(optional)*: natal subject JSON (if `birth` provided).
+    - `aspects`: point-to-point aspects for the transit sky.
+    - `major_aspects`: Ptolemaic patterns found in the transit sky.
+    - `natal_aspects` *(optional)*: aspects for the provided natal chart.
+    - `natal_major_aspects` *(optional)*: Ptolemaic patterns for the natal chart.
 
 ---
 
@@ -164,7 +176,7 @@ Compute a **sequence of transit snapshots** between two datetimes.
   - `birth` *(optional)*: `BirthData`.
   - `config`: `ChartConfig` (optional).
 - **Response**: `TransitRangeResponse`
-  - `snapshots`: list of `TransitSnapshot` (same structure as `/api/transit`).
+  - `snapshots`: list of `TransitSnapshot` (same structure as `/api/transit`, including `major_aspects` and optional `natal_major_aspects`).
 
 ---
 
