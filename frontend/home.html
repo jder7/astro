@@ -67,9 +67,24 @@
       </header>
 
       <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-12">
+        <div class="sm:hidden flex justify-end mb-4">
+          <button
+            type="button"
+            id="inputPanelToggle"
+            data-input-panel-toggle
+            aria-controls="inputPanel"
+            aria-expanded="true"
+            class="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800/80 text-slate-100 shadow-sm hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          >
+            <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 12h14M5 16h14" />
+            </svg>
+            <span data-toggle-label>Hide inputs</span>
+          </button>
+        </div>
         <div class="grid lg:grid-cols-3 gap-6">
           <section class="lg:col-span-1">
-            <div class="flowbite-card h-full">
+            <div class="flowbite-card h-full" id="inputPanel" data-input-panel>
                 <div class="flex items-center justify-between mb-4">
                   <div>
                     <p class="text-sm text-cyan-200/80 font-semibold">Chart input</p>

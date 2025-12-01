@@ -17,6 +17,8 @@
     configPanel: document.getElementById("configPanel"),
     configToggle: document.getElementById("configToggle"),
     configClose: document.getElementById("configClose"),
+    inputPanel: document.querySelector("[data-input-panel]"),
+    inputPanelToggle: document.querySelector("[data-input-panel-toggle]"),
     downloadBtn: document.getElementById("downloadPdfBtn"),
     zoomBtn: document.getElementById("zoomBtn"),
     svgModal: document.getElementById("svgModal"),
@@ -1369,6 +1371,36 @@
     });
   }
 
+  function initInputPanelToggle() {
+    const panel = dom.inputPanel || document.querySelector("[data-input-panel]");
+    const toggle = dom.inputPanelToggle || document.querySelector("[data-input-panel-toggle]");
+    if (!panel || !toggle) return;
+
+    const label = toggle.querySelector("[data-toggle-label]");
+    const setState = (open) => {
+      panel.classList.toggle("hidden", !open);
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      if (label) label.textContent = open ? "Hide inputs" : "Show inputs";
+    };
+
+    const mq = window.matchMedia("(min-width: 640px)");
+    const handleMq = (event) => {
+      if (event.matches) setState(true);
+    };
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", handleMq);
+    } else if (typeof mq.addListener === "function") {
+      mq.addListener(handleMq);
+    }
+
+    toggle.addEventListener("click", () => {
+      const isOpen = !panel.classList.contains("hidden");
+      setState(!isOpen);
+    });
+
+    setState(true);
+  }
+
   App.dom = dom;
   App.constants = constants;
   App.runtime = runtime;
@@ -1394,4 +1426,5 @@
   initDatetimeModal();
   initLocationModal();
   initNavMenu();
+  initInputPanelToggle();
 })();
