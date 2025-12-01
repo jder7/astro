@@ -8,6 +8,7 @@ from schemas import (
 )
 from utils import (
     build_subject,
+    compute_ascendant_day_range,
     compute_major_aspects,
     compute_normal_aspects,
     ensure_config,
@@ -63,6 +64,28 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
         natal_major_aspects = compute_major_aspects(natal_dict, active_points=cfg.active_points)
 
     timestamp = to_local_datetime(moment_birth)
+    ascendant_day_range = []
+    if payload.ascendant_range_enabled:
+        ascendant_day_range.append(
+            compute_ascendant_day_range(
+                moment_birth,
+                cfg,
+                timestamp,
+                identifier="transit",
+                label="Transit",
+            )
+        )
+        if payload.birth is not None:
+            natal_anchor = to_local_datetime(payload.birth)
+            ascendant_day_range.append(
+                compute_ascendant_day_range(
+                    payload.birth,
+                    cfg,
+                    natal_anchor,
+                    identifier="natal",
+                    label=payload.birth.name or "Natal",
+                )
+            )
 
     snapshot = TransitSnapshot(
         timestamp=timestamp,
@@ -72,5 +95,6 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
         natal_subject=natal_dict,
         natal_aspects=natal_aspects,
         natal_major_aspects=natal_major_aspects,
+        ascendant_day_range=ascendant_day_range,
     )
-    return TransitResponse(snapshot=snapshot)
+    return TransitResponse(snapshot=snapshot, ascendant_day_range=ascendant_day_range)

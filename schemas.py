@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field, ConfigDict
 
 from enums import (
     HouseSystem,
@@ -139,6 +139,80 @@ class ChartConfig(BaseModel):
         description="Chart points to include (passed to Kerykeion).",
     )
 
+class AscendantRangeEntry(BaseModel):
+    """
+    Single ascendant sample within a +/-12 hour window.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    timestamp: datetime = Field(
+        ...,
+        description="Timestamp (tz-aware) corresponding to this ascendant position.",
+    )
+    sign: Optional[str] = Field(
+        default=None,
+        description="Three-letter sign code, e.g. 'Ari', 'Tau'.",
+    )
+    sign_num: Optional[int] = Field(
+        default=None,
+        description="One-based sign index (Aries=1, Pisces=12).",
+    )
+    element: Optional[str] = Field(
+        default=None,
+        description="Element for the ascendant at this hour (Fire, Earth, Air, Water).",
+    )
+    quality: Optional[str] = Field(
+        default=None,
+        description="Quality for the ascendant at this hour (Cardinal, Fixed, Mutable).",
+    )
+    position: Optional[float] = Field(
+        default=None,
+        description="Degree within the sign (0-30).",
+    )
+    abs_pos: Optional[float] = Field(
+        default=None,
+        description="Absolute ecliptic position (0-360).",
+    )
+    emoji: Optional[str] = Field(
+        default=None,
+        description="Sign glyph when available.",
+    )
+    decan: Optional[int] = Field(
+        default=None,
+        description="Decan index (1-3) derived from the position.",
+    )
+    orb: Optional[float] = Field(
+        default=None,
+        description="Degree distance into the sign (same as `position`, exposed for display).",
+    )
+
+
+class AscendantDayRange(BaseModel):
+    """
+    Hourly ascendant distribution centered on the requested datetime (+/- 12h).
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str = Field(
+        ...,
+        description="Stable identifier for the range (e.g. 'natal', 'transit', 'first', 'second').",
+    )
+    label: Optional[str] = Field(
+        default=None,
+        description="Display label for this ascendant range.",
+    )
+    anchor: datetime = Field(
+        ...,
+        description="Center datetime used to build the +/-12h window.",
+    )
+    entries: List[AscendantRangeEntry] = Field(
+        default_factory=list,
+        alias="entries",
+        description="Hourly ascendant samples across the window.",
+    )
+
 
 class AspectPointSummary(BaseModel):
     """
@@ -229,6 +303,12 @@ class NatalRequest(BaseModel):
     Request payload for a natal chart computation.
     """
 
+    ascendant_range_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("ascendantRangeEnabled", "ascendant_range_enabled"),
+        serialization_alias="ascendantRangeEnabled",
+        description="When true, include a +/-12h hourly ascendant sweep around the provided datetime.",
+    )
     birth: BirthData = Field(
         default_factory=BirthData,
         description="Birth data used to compute the natal chart. Pre-filled with example values.",
@@ -247,6 +327,11 @@ class NatalResponse(BaseModel):
     Structured natal chart response.
     """
 
+    ascendant_day_range: List[AscendantDayRange] = Field(
+        default_factory=list,
+        serialization_alias="ascendantDayRange",
+        description="Hourly ascendant sweep around the requested birth datetime when enabled.",
+    )
     subject: dict = Field(
         ...,
         description="Raw AstrologicalSubject model from Kerykeion serialized as JSON.",
@@ -376,6 +461,12 @@ class TransitMomentRequest(BaseModel):
     Transit snapshot for a single moment, optionally relative to a birth chart.
     """
 
+    ascendant_range_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("ascendantRangeEnabled", "ascendant_range_enabled"),
+        serialization_alias="ascendantRangeEnabled",
+        description="When true, include hourly ascendant data around the requested moment (and natal when provided).",
+    )
     moment: TransitMomentInput = Field(
         default_factory=TransitMomentInput,
         description="Moment/location used as the transit snapshot.",
@@ -395,6 +486,11 @@ class TransitSnapshot(BaseModel):
     Single snapshot within a transit sequence.
     """
 
+    ascendant_day_range: List[AscendantDayRange] = Field(
+        default_factory=list,
+        serialization_alias="ascendantDayRange",
+        description="Hourly ascendant sweep(s) for this snapshot when enabled.",
+    )
     timestamp: datetime = Field(
         ...,
         description="Local datetime (with timezone) corresponding to this transit snapshot.",
@@ -430,6 +526,11 @@ class TransitResponse(BaseModel):
     Response for the /transit endpoint.
     """
 
+    ascendant_day_range: List[AscendantDayRange] = Field(
+        default_factory=list,
+        serialization_alias="ascendantDayRange",
+        description="Hourly ascendant sweeps around the requested moment (plus natal when provided).",
+    )
     snapshot: TransitSnapshot
 
 
@@ -441,6 +542,12 @@ class TransitRangeRequest(BaseModel):
     and timezone are taken from `moment` for the entire range.
     """
 
+    ascendant_range_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("ascendantRangeEnabled", "ascendant_range_enabled"),
+        serialization_alias="ascendantRangeEnabled",
+        description="When true, include an ascendant +/-12h sweep around the start moment (and natal when provided).",
+    )
     moment: TransitMomentInput = Field(
         default_factory=TransitMomentInput,
         description="Start moment (date/time/location).",
@@ -469,6 +576,11 @@ class TransitRangeResponse(BaseModel):
     Response for the /transit-range endpoint.
     """
 
+    ascendant_day_range: List[AscendantDayRange] = Field(
+        default_factory=list,
+        serialization_alias="ascendantDayRange",
+        description="Ascendant sweeps around the start moment (and natal when provided) when enabled.",
+    )
     snapshots: List[TransitSnapshot]
 
 
@@ -560,6 +672,12 @@ class RelationshipRequest(BaseModel):
     Request payload for a relationship / aspects evaluation between two charts.
     """
 
+    ascendant_range_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("ascendantRangeEnabled", "ascendant_range_enabled"),
+        serialization_alias="ascendantRangeEnabled",
+        description="When true, include ascendant +/-12h sweeps for both partners.",
+    )
     first: BirthData = Field(
         default_factory=BirthData,
         description="First subject birth data.",
@@ -579,6 +697,11 @@ class RelationshipResponse(BaseModel):
     Dual chart aspects between two subjects.
     """
 
+    ascendant_day_range: List[AscendantDayRange] = Field(
+        default_factory=list,
+        serialization_alias="ascendantDayRange",
+        description="Ascendant sweeps for both partners when enabled.",
+    )
     first_subject: dict = Field(
         ...,
         description="First AstrologicalSubject JSON dump.",

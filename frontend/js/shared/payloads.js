@@ -5,6 +5,7 @@
 
   const { config } = App;
   const { getConfigFromInputs } = config;
+  const ascendantRangeEnabled = !!(App.flags && App.flags.ascendantRangeEnabled);
 
   function getValue(id) {
     const el = document.getElementById(id);
@@ -105,6 +106,7 @@
     if (mode === "natal") {
       return {
         payload: {
+          ascendantRangeEnabled,
           birth,
           config: normalizedConfig,
         },
@@ -117,6 +119,7 @@
     if (mode === "transit") {
       return {
         payload: {
+          ascendantRangeEnabled,
           moment,
           birth: null,
           config: normalizedConfig,
@@ -130,6 +133,7 @@
     if (mode === "natal_transit") {
       return {
         payload: {
+          ascendantRangeEnabled,
           moment,
           birth,
           config: normalizedConfig,
@@ -164,6 +168,7 @@
 
       return {
         payload: {
+          ascendantRangeEnabled,
           birth: null,
           moment: null,
           first,
@@ -178,6 +183,7 @@
 
     return {
       payload: {
+        ascendantRangeEnabled,
         birth: null,
         moment,
         config: normalizedConfig,
@@ -190,6 +196,7 @@
 
   function buildRelationshipPayload() {
     return {
+      ascendantRangeEnabled,
       first: buildRelationshipPartner("first", {
         name: "Partner A",
         date: "1990-01-01",

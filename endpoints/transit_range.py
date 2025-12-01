@@ -12,6 +12,7 @@ from utils import (
     ensure_config,
     build_subject,
     build_subject_for_moment,
+    compute_ascendant_day_range,
     compute_major_aspects,
     compute_normal_aspects,
     to_local_datetime,
@@ -66,6 +67,28 @@ async def transit_range(payload: TransitRangeRequest) -> TransitRangeResponse:
 
     start_dt = to_local_datetime(start_birth)
     end_dt = to_local_datetime(end_birth)
+    ascendant_day_range = []
+    if payload.ascendant_range_enabled:
+        ascendant_day_range.append(
+            compute_ascendant_day_range(
+                start_birth,
+                cfg,
+                start_dt,
+                identifier="transit",
+                label="Transit",
+            )
+        )
+        if payload.birth is not None:
+            natal_anchor = to_local_datetime(payload.birth)
+            ascendant_day_range.append(
+                compute_ascendant_day_range(
+                    payload.birth,
+                    cfg,
+                    natal_anchor,
+                    identifier="natal",
+                    label=payload.birth.name or "Natal",
+                )
+            )
 
     snapshots: List[TransitSnapshot] = []
     natal_dict_cached = None
@@ -103,4 +126,4 @@ async def transit_range(payload: TransitRangeRequest) -> TransitRangeResponse:
         )
         snapshots.append(snapshot)
 
-    return TransitRangeResponse(snapshots=snapshots)
+    return TransitRangeResponse(snapshots=snapshots, ascendant_day_range=ascendant_day_range)
