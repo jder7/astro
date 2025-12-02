@@ -105,6 +105,13 @@
     return `rgba(${rgb}, ${alpha})`;
   };
 
+  const getOrbDegrees = (entry) => {
+    if (!entry) return null;
+    if (typeof entry.orb === "number") return entry.orb;
+    if (typeof entry.position === "number") return entry.position;
+    return null;
+  };
+
   function normalizeAscendantRanges(payload) {
     if (!payload) return [];
     const rangesRaw = [];
@@ -323,22 +330,14 @@
       ctx.save();
       ctx.translate(cx, cy);
 
-      let lastSignKey = null;
-      let lastSignEnd = null;
-
-      const bucketEntries = new Map();
-      range.entries.forEach((e) => {
-        const h = Math.floor(((e.displayHour || 0) % 24 + 24) % 24);
-        if (!bucketEntries.has(h)) bucketEntries.set(h, e);
-      });
+      // Map each displayed hour to the closest ascendant entry.
       const entryForHour = (target) => {
-        const h = ((target % 24) + 24) % 24;
-        if (bucketEntries.has(h)) return bucketEntries.get(h);
+        const hVal = wrapHourToWindow(target);
         let best = null;
         let bestDiff = Number.POSITIVE_INFINITY;
         range.entries.forEach((e) => {
-          const eh = ((e.displayHour || 0) % 24 + 24) % 24;
-          const diff = Math.abs(eh - h);
+          const eh = wrapHourToWindow(e.displayHour || 0);
+          const diff = Math.abs(eh - hVal);
           if (diff < bestDiff) {
             best = e;
             bestDiff = diff;
@@ -346,89 +345,163 @@
         });
         return best;
       };
+      const slotEntries = displayedHours.map((h) => entryForHour(h));
 
-      for (let i = 0; i < displayedHours.length; i++) {
-        const hour = displayedHours[i];
-        const nextHour = displayedHours[(i + 1) % displayedHours.length];
-        const entry = entryForHour(hour);
-        const nextEntry = entryForHour(nextHour);
-        if (!entry || !nextEntry) continue;
-        const isActive = Math.round((activeHour ?? 0)) % 24 === hour;
+      const wrap = (val) => ((val % 24) + 24) % 24;
+      const hourToAngle = (hour) => {
+        const rel = ((hour - baseStart + 24) % 24) % 12;
+        return -Math.PI / 2 + rel * ASC_CLOCK_STEP;
+      };
 
-        const start = boundaries[i];
-        const end = boundaries[i + 1];
-        let splitAngle = null;
-        if (entry.sign !== nextEntry.sign) {
-          const orbA = typeof entry.orb === "number" ? entry.orb : entry.position || 0;
-          const orbB = typeof nextEntry.orb === "number" ? nextEntry.orb : nextEntry.position || 0;
-          const rem = Math.max(0.01, 30 - orbA);
-          const denom = rem + Math.max(0.01, orbB);
-          const fraction = Math.min(1, Math.max(0, rem / denom));
-          splitAngle = start + (end - start) * fraction;
+      // Sort entries by timestamp/displayHour to detect cusps.
+      const sortedEntries = [...range.entries].sort((a, b) => {
+        const ta = a.timestamp ? a.timestamp.getTime() : 0;
+        const tb = b.timestamp ? b.timestamp.getTime() : 0;
+        return ta - tb;
+      });
+
+      const segments = [];
+      for (let i = 0; i < sortedEntries.length; i++) {
+        const a = sortedEntries[i];
+        const b = sortedEntries[(i + 1) % sortedEntries.length];
+        const startHour = wrap(a.displayHour || 0);
+        let endHour = wrap(b.displayHour || 0);
+        let cuspHour = null;
+
+        if (a.sign !== b.sign && a.timestamp instanceof Date && b.timestamp instanceof Date) {
+          const t1 = a.timestamp.getTime();
+          const t2 = b.timestamp.getTime();
+          const dt = t2 - t1 || 1;
+          const abs1 = typeof a.abs_pos === "number" ? a.abs_pos : null;
+        const abs2 = typeof b.abs_pos === "number" ? b.abs_pos : null;
+        if (abs1 !== null && abs2 !== null) {
+          const deltaAbs = ((abs2 - abs1 + 540) % 360) - 180;
+          const v = deltaAbs / dt || 0.0001;
+          const cuspDeg = Math.ceil(abs1 / 30) * 30;
+          const timeToCusp = (cuspDeg - abs1) / v;
+          const frac = timeToCusp / dt;
+          const fracClamped = frac >= 0 && frac <= 1 ? frac : 0.5;
+          const cuspMs = t1 + dt * fracClamped;
+          const cuspDate = new Date(cuspMs);
+          cuspHour = wrap(cuspDate.getHours() + cuspDate.getMinutes() / 60);
+          
+          // TODO: remove debug
+          if (true) {
+            console.log("[asc-clock] cusp", {
+              from: a.sign,
+              to: b.sign,
+              t1,
+              t2,
+              abs1,
+              abs2,
+              deltaAbs,
+              v,
+              cuspDeg,
+              cuspHour,
+            });
+          }
         }
+      }
 
-        const drawSlice = (sliceStart, sliceEnd, srcEntry) => {
-          ctx.beginPath();
-          ctx.arc(0, 0, outerR, sliceStart, sliceEnd);
-          ctx.arc(0, 0, innerR, sliceEnd, sliceStart, true);
-          ctx.closePath();
-          ctx.fillStyle = elementFill(srcEntry.element, isDual ? 0.28 : 0.34);
-          ctx.strokeStyle = elementStroke(srcEntry.element, 0.45);
-          ctx.lineWidth = 1.5;
-          ctx.fill();
-          ctx.stroke();
+      const end = endHour <= startHour ? endHour + 24 : endHour;
+      const cusp = cuspHour !== null ? (cuspHour <= startHour ? cuspHour + 24 : cuspHour) : null;
 
-          const decanStep = (sliceEnd - sliceStart) / 3;
-          ctx.strokeStyle = "rgba(255,255,255,0.25)";
-          ctx.lineWidth = 1;
-          for (let j = 1; j <= 2; j++) {
-            const a = sliceStart + decanStep * j;
-            const x1 = Math.cos(a) * innerR;
-            const y1 = Math.sin(a) * innerR;
-            const x2 = Math.cos(a) * outerR;
-            const y2 = Math.sin(a) * outerR;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-          }
-          const signKey = srcEntry.sign || srcEntry.name || srcEntry.emoji;
-          const contiguous =
-            signKey === lastSignKey && lastSignEnd !== null && Math.abs(sliceStart - lastSignEnd) < 1e-4;
-          if (!contiguous) {
-            const mid = sliceStart + (sliceEnd - sliceStart) * 0.18;
-            const signMeta = SIGN_META[srcEntry.sign] || {};
-            const glyph = signMeta.icon || srcEntry.emoji || "?";
-            const tx = Math.cos(mid) * outerR * 0.92;
-            const ty = Math.sin(mid) * outerR * 0.92;
-            ctx.fillStyle = "#e8f4ff";
-            ctx.font = `${Math.max(12, radius * 0.06)}px "Space Grotesk", "Inter", system-ui`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(glyph, tx, ty);
-          }
-          lastSignKey = signKey;
-          lastSignEnd = sliceEnd;
-        };
-
-        if (splitAngle) {
-          drawSlice(start, splitAngle, entry);
-          drawSlice(splitAngle, end, nextEntry);
-          // dotted sign switch line
-          ctx.save();
-          ctx.setLineDash([4, 4]);
-          const startR = ringConfig === rings[0] ? innerR : innerR;
-          const endR = ringConfig === rings[0] ? outerR * 1.12 : Math.min(outerMostR * 1.02, outerR * 1.08);
-          ctx.strokeStyle = "#9ca3af";
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.moveTo(Math.cos(splitAngle) * startR, Math.sin(splitAngle) * startR);
-          ctx.lineTo(Math.cos(splitAngle) * endR, Math.sin(splitAngle) * endR);
-          ctx.stroke();
-          ctx.restore();
+        if (cusp !== null && cusp > startHour && cusp < end) {
+          segments.push({ sign: a.sign, startHour, endHour: cusp, entry: a });
+          segments.push({ sign: b.sign, startHour: cusp, endHour: end, entry: b });
         } else {
-          drawSlice(start, end, entry);
+          segments.push({ sign: a.sign, startHour, endHour: end, entry: a });
         }
+      }
+
+      // Clamp to the current 12h window.
+      const windowStart = baseStart;
+      const windowEnd = baseStart + 12;
+      const renderSegments = [];
+      segments.forEach((seg) => {
+        let start = seg.startHour;
+        let end = seg.endHour;
+        while (end <= start) end += 24;
+        while (start < windowEnd) {
+          const segStart = Math.max(start, windowStart);
+          const segEnd = Math.min(end, windowEnd);
+          if (segEnd > segStart) {
+            renderSegments.push({
+              sign: seg.sign,
+              startAngle: hourToAngle(segStart),
+              endAngle: hourToAngle(segEnd),
+              startHourRaw: segStart,
+              endHourRaw: segEnd,
+              entry: seg.entry,
+            });
+          }
+          start += 24;
+          end += 24;
+        }
+      });
+
+      // Fix gaps/overflows at window edges.
+      renderSegments.sort((a, b) => a.startHourRaw - b.startHourRaw);
+      if (renderSegments.length) {
+        const first = renderSegments[0];
+        const last = renderSegments[renderSegments.length - 1];
+        if (first.startHourRaw > windowStart) {
+          first.startHourRaw = windowStart;
+          first.startAngle = hourToAngle(windowStart);
+        }
+        if (last.endHourRaw < windowEnd) {
+          last.endHourRaw = windowEnd;
+          last.endAngle = hourToAngle(windowEnd);
+        }
+        if (last.endHourRaw > windowEnd) {
+          last.endHourRaw = windowEnd;
+          last.endAngle = hourToAngle(windowEnd);
+        }
+      }
+
+      renderSegments.forEach((seg) => {
+        const sliceStart = seg.startAngle;
+        const sliceEnd = seg.endAngle;
+        const srcEntry = seg.entry;
+        const isActive =
+          Math.round((activeHour ?? 0)) % 24 >= wrap(seg.startHourRaw || 0) &&
+          Math.round((activeHour ?? 0)) % 24 < wrap(seg.endHourRaw || seg.startHourRaw || 0);
+
+        ctx.beginPath();
+        ctx.arc(0, 0, outerR, sliceStart, sliceEnd);
+        ctx.arc(0, 0, innerR, sliceEnd, sliceStart, true);
+        ctx.closePath();
+        ctx.fillStyle = elementFill(srcEntry.element, isDual ? 0.28 : 0.34);
+        ctx.strokeStyle = elementStroke(srcEntry.element, 0.45);
+        ctx.lineWidth = 1.5;
+        ctx.fill();
+        ctx.stroke();
+
+        const decanStep = (sliceEnd - sliceStart) / 3;
+        ctx.strokeStyle = "rgba(255,255,255,0.25)";
+        ctx.lineWidth = 1;
+        for (let j = 1; j <= 2; j++) {
+          const a = sliceStart + decanStep * j;
+          const x1 = Math.cos(a) * innerR;
+          const y1 = Math.sin(a) * innerR;
+          const x2 = Math.cos(a) * outerR;
+          const y2 = Math.sin(a) * outerR;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        }
+
+        const signMeta = SIGN_META[srcEntry.sign] || {};
+        const glyph = signMeta.icon || srcEntry.emoji || "?";
+        const mid = sliceStart + (sliceEnd - sliceStart) * 0.2;
+        const tx = Math.cos(mid) * outerR * 0.92;
+        const ty = Math.sin(mid) * outerR * 0.92;
+        ctx.fillStyle = "#e8f4ff";
+        ctx.font = `${Math.max(12, radius * 0.06)}px "Space Grotesk", "Inter", system-ui`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(glyph, tx, ty);
 
         if (isActive) {
           const outerHighlightR = outerR * 1.01;
@@ -436,21 +509,19 @@
           ctx.save();
           ctx.lineCap = "round";
           ctx.globalAlpha = 0.95;
-          // Colored outline (outer)
           ctx.beginPath();
-          ctx.arc(0, 0, outerHighlightR, start + 0.002, end - 0.002);
+          ctx.arc(0, 0, outerHighlightR, sliceStart + 0.002, sliceEnd - 0.002);
           ctx.strokeStyle = ACTIVE_SEGMENT_COLOR;
           ctx.lineWidth = 4.5;
           ctx.stroke();
-          // Inner black outline
           ctx.beginPath();
-          ctx.arc(0, 0, innerHighlightR, start + 0.002, end - 0.002);
+          ctx.arc(0, 0, innerHighlightR, sliceStart + 0.002, sliceEnd - 0.002);
           ctx.strokeStyle = "#000";
           ctx.lineWidth = 3.5;
           ctx.stroke();
           ctx.restore();
         }
-      }
+      });
 
       if (ringConfig === rings[0]) {
         // Hour ticks + labels
@@ -471,7 +542,9 @@
           ctx.font = `${Math.max(11, radius * 0.04)}px "Space Grotesk", "Inter", system-ui`;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText(String(displayedHours[i] % 24), Math.cos(a) * labelR, Math.sin(a) * labelR);
+          const rawLabel = displayedHours[i] % 24;
+          const labelVal = rawLabel === 0 ? 12 : baseStart === 12 && rawLabel === 12 ? 24 : rawLabel;
+          ctx.fillText(String(labelVal), Math.cos(a) * labelR, Math.sin(a) * labelR);
         }
       }
 
