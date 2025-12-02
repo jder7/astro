@@ -36,6 +36,7 @@
     siderealRow: document.getElementById("siderealRow"),
     birthDatetimeDisplay: document.getElementById("birthDatetimeDisplay"),
     transitDatetimeDisplay: document.getElementById("transitDatetimeDisplay"),
+    transitNowInline: document.getElementById("transitNowInline"),
     firstDatetimeDisplay: document.getElementById("firstDatetimeDisplay"),
     secondDatetimeDisplay: document.getElementById("secondDatetimeDisplay"),
     datetimeModal: document.getElementById("datetime-modal"),
@@ -1401,6 +1402,15 @@
     setState(true);
   }
 
+  function initInlineNowButtons() {
+    if (dom.transitNowInline) {
+      dom.transitNowInline.addEventListener("click", () => {
+        runtime.hasLoadedState = false;
+        setTransitNow();
+      });
+    }
+  }
+
   App.dom = dom;
   App.constants = constants;
   App.runtime = runtime;
@@ -1427,4 +1437,5 @@
   initLocationModal();
   initNavMenu();
   initInputPanelToggle();
+  initInlineNowButtons();
 })();

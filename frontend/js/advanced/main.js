@@ -402,7 +402,7 @@
             const tx = Math.cos(mid) * outerR * 0.92;
             const ty = Math.sin(mid) * outerR * 0.92;
             ctx.fillStyle = "#e8f4ff";
-            ctx.font = `${Math.max(12, radius * 0.045)}px "Space Grotesk", "Inter", system-ui`;
+            ctx.font = `${Math.max(12, radius * 0.06)}px "Space Grotesk", "Inter", system-ui`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(glyph, tx, ty);
@@ -889,6 +889,61 @@
     `;
   }
 
+  let advTableId = 0;
+  function renderSortableTable(headers, rows) {
+    if (!rows.length) return "";
+    const tableId = `adv-table-${++advTableId}`;
+    const head = headers
+      .map(
+        (h) => `<th scope="col" data-sort="${h.key}" aria-label="Sort by ${h.label}">${h.label}</th>`
+      )
+      .join("");
+    const body = rows
+      .map(
+        (row) => `<tr ${Object.entries(row.sortAttrs || {})
+          .map(([k, v]) => `data-${k}="${v}"`)
+          .join(" ")}>
+          ${row.cells.join("")}
+        </tr>`
+      )
+      .join("");
+    return `
+      <table class="adv-table adv-sortable" data-table-id="${tableId}">
+        <thead><tr>${head}</tr></thead>
+        <tbody>${body}</tbody>
+      </table>
+    `;
+  }
+
+  function enableSortableTables(root) {
+    const tables = root.querySelectorAll(".adv-sortable");
+    tables.forEach((table) => {
+      const headers = table.querySelectorAll("th[data-sort]");
+      headers.forEach((th) => {
+        th.addEventListener("click", () => {
+          const key = th.getAttribute("data-sort");
+          const tbody = table.querySelector("tbody");
+          if (!tbody) return;
+          const rows = Array.from(tbody.querySelectorAll("tr"));
+          const currentDir = th.getAttribute("data-dir") === "asc" ? "desc" : "asc";
+          headers.forEach((hdr) => hdr.removeAttribute("data-dir"));
+          th.setAttribute("data-dir", currentDir);
+          rows.sort((a, b) => {
+            const av = a.getAttribute(`data-sort-${key}`) || "";
+            const bv = b.getAttribute(`data-sort-${key}`) || "";
+            const na = parseFloat(av);
+            const nb = parseFloat(bv);
+            const isNum = Number.isFinite(na) && Number.isFinite(nb);
+            const res = isNum ? na - nb : av.localeCompare(bv);
+            return currentDir === "asc" ? res : -res;
+          });
+          tbody.innerHTML = "";
+          rows.forEach((r) => tbody.appendChild(r));
+        });
+      });
+    });
+  }
+
   function formatPointInline(points, key) {
     if (!key) return "";
     const pt = points[key] || {};
@@ -1219,6 +1274,76 @@
     `;
   }
 
+  function renderAspectTable(aspects) {
+    if (!aspects.length) return "";
+    const headers = [
+      { key: "base", label: "Base" },
+      { key: "aspect", label: "Aspect" },
+      { key: "other", label: "Other" },
+      { key: "orb", label: "Orb" },
+    ];
+    const rows = aspects.map((row) => {
+      const baseSign = SIGN_META[row.base?.sign] || { name: row.base?.sign || "", icon: row.base?.emoji || "" };
+      const otherSign = SIGN_META[row.other?.sign] || { name: row.other?.sign || "", icon: row.other?.emoji || "" };
+      const orbVal = Number.isFinite(row.aspect?.orb) ? row.aspect.orb.toFixed(2) : "";
+      return {
+        sortAttrs: {
+          "sort-base": row.base?.name || row.baseKey || "",
+          "sort-aspect": row.aspect?.name || "",
+          "sort-other": row.other?.name || row.otherKey || "",
+          "sort-orb": orbVal || "",
+        },
+        cells: [
+          `<td>${wrapPointIcon(POINTS_ICONS[(row.base?.name || row.baseKey || "").toLowerCase()] || "✶")} ${row.base?.name || row.baseKey}</td>`,
+          `<td>${wrapMajorAspectIcon(row.aspect?.icon || "✶")} ${capitalise(row.aspect?.name || "")}</td>`,
+          `<td>${wrapPointIcon(POINTS_ICONS[(row.other?.name || row.otherKey || "").toLowerCase()] || "✶")} ${row.other?.name || row.otherKey}</td>`,
+          `<td>${orbVal ? `${orbVal}°` : "—"}</td>`,
+        ],
+      };
+    });
+    return renderSortableTable(headers, rows);
+  }
+
+  function renderPointsTable(keys, points) {
+    if (!keys.length) return "";
+    const headers = [
+      { key: "point", label: "Point" },
+      { key: "sign", label: "Sign" },
+      { key: "pos", label: "Position" },
+      { key: "house", label: "House" },
+      { key: "element", label: "Element" },
+      { key: "quality", label: "Quality" },
+      { key: "retro", label: "Retrograde" },
+    ];
+    const rows = keys.map((k) => {
+      const pt = points[k] || {};
+      const signMeta = SIGN_META[pt.sign] || { name: pt.sign || "", icon: pt.emoji || "" };
+      const pos = Number.isFinite(pt.position) ? pt.position.toFixed(2) : "";
+      const retro = pt.retrograde ? "Yes" : "No";
+      return {
+        sortAttrs: {
+          "sort-point": pt.name || k,
+          "sort-sign": signMeta.name,
+          "sort-pos": pos,
+          "sort-house": pt.house || "",
+          "sort-element": pt.element || "",
+          "sort-quality": pt.quality || "",
+          "sort-retro": retro,
+        },
+        cells: [
+          `<td>${wrapPointIcon(POINTS_ICONS[(pt.name || k || "").toLowerCase()] || "✶")} ${pt.name || k}</td>`,
+          `<td>${signMeta.icon || ""} ${signMeta.name}</td>`,
+          `<td>${pos ? `${pos}°` : "—"}</td>`,
+          `<td>${pt.house || "—"}</td>`,
+          `<td>${ELEMENT_ICON[pt.element] || ""} ${pt.element || "—"}</td>`,
+          `<td>${QUALITY_ICON[pt.quality] || ""} ${pt.quality || "—"}</td>`,
+          `<td>${retro}</td>`,
+        ],
+      };
+    });
+    return renderSortableTable(headers, rows);
+  }
+
   function renderSection(title, inner, open = true) {
     return `
       <details class="adv-accordion"${open ? " open" : ""}>
@@ -1292,6 +1417,7 @@
     const matrixKeys = filteredPointKeys.filter((k) => aspectKeySet.has(k));
     const aspectRows = aspects.map(renderAspectRow).join("");
     const aspectMatrix = renderAspectMatrix(points, matrixKeys, aspects);
+    const aspectTable = renderAspectTable(aspects);
     const majorAspects = extractMajorAspects(payload);
     const natalMajorAspects = extractNatalMajorAspects(payload);
     const majorBlocks = [];
@@ -1342,16 +1468,18 @@
     const aspectContent =
       aspectMatrix +
       majorAspectsList +
-      (aspectRows || "<p class=\"hint\">No aspects found for active points.</p>");
+      (aspectTable || aspectRows || "<p class=\"hint\">No aspects found for active points.</p>");
 
     const meta = renderMetaHeader(metaSource);
+    const pointsTable = renderPointsTable(filteredPointKeys, points);
     const sections = [
       renderSection("Aspects", aspectContent, true),
-      renderSection("Points", pointRows || "<p class=\"hint\">No points returned.</p>", false),
+      renderSection("Points", pointsTable || pointRows || "<p class=\"hint\">No points returned.</p>", false),
       renderSection("Houses", houseRows || "<p class=\"hint\">No houses returned.</p>", false),
     ].join("");
 
     dom.summaryEl.innerHTML = `${meta}${sections}`;
+    enableSortableTables(dom.summaryEl);
     if (dom.ascClockContainer) {
       if (!ascendantRanges.length) {
         dom.ascClockContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the ascendant clock and hourly breakdown.</p>";

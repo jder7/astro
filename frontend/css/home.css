@@ -81,6 +81,12 @@ body {
   transform: translateY(-1px);
 }
 
+.modal-safe-area {
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding-bottom: calc(env(safe-area-inset-bottom, 24px) + 24px);
+}
+
 .mode-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));

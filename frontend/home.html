@@ -320,16 +320,27 @@
                     <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-[0.2em]">Transit moment</h3>
                     <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-amber-200 border border-slate-700">Outer wheel</span>
                   </div>
-                  <div class="flex items-center justify-between gap-3">
-                    <div>
-                      <p class="text-xs uppercase tracking-[0.25em] text-cyan-200/80 font-semibold">Date &amp; time</p>
-                      <p class="text-sm text-slate-300">Transit moment</p>
-                    </div>
-                    <button
-                      type="button"
-                      data-datetime-target="transit"
-                      data-modal-target="datetime-modal"
-                      data-modal-toggle="datetime-modal"
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.25em] text-cyan-200/80 font-semibold">Date &amp; time</p>
+                  <p class="text-sm text-slate-300">Transit moment</p>
+                </div>
+                <button
+                  type="button"
+                  id="transitNowInline"
+                  class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-slate-100 shadow-sm hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                >
+                  <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+                  Now
+                </button>
+                <button
+                  type="button"
+                  data-datetime-target="transit"
+                  data-modal-target="datetime-modal"
+                  data-modal-toggle="datetime-modal"
                       class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     >
                       <span id="transitDatetimeDisplay" class="whitespace-nowrap">2025-01-01 · 12:00</span>
@@ -627,15 +638,15 @@
         </div>
       </footer>
     </div>
-    <div
-      id="datetime-modal"
-      tabindex="-1"
-      aria-hidden="true"
-      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
-    >
-      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" data-modal-hide="datetime-modal"></div>
-      <div class="relative w-full max-w-lg">
-        <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
+  <div
+    id="datetime-modal"
+    tabindex="-1"
+    aria-hidden="true"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+  >
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" data-modal-hide="datetime-modal"></div>
+    <div class="relative w-full max-w-lg">
+      <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-xl modal-safe-area">
           <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
             <div>
               <p class="text-[11px] uppercase tracking-[0.22em] text-cyan-200/70 font-semibold">Date &amp; time</p>
@@ -755,15 +766,15 @@
         </div>
       </div>
     </div>
-    <div
-      id="location-modal"
-      tabindex="-1"
-      aria-hidden="true"
-      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
-    >
-      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" data-modal-hide="location-modal"></div>
-      <div class="relative w-full max-w-lg">
-        <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
+  <div
+    id="location-modal"
+    tabindex="-1"
+    aria-hidden="true"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+  >
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" data-modal-hide="location-modal"></div>
+    <div class="relative w-full max-w-lg">
+      <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-xl modal-safe-area">
           <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
             <div>
               <p class="text-[11px] uppercase tracking-[0.22em] text-cyan-200/70 font-semibold">Location</p>
