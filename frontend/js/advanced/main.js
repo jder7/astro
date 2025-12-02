@@ -384,22 +384,6 @@
           const cuspMs = t1 + dt * fracClamped;
           const cuspDate = new Date(cuspMs);
           cuspHour = wrap(cuspDate.getHours() + cuspDate.getMinutes() / 60);
-          
-          // TODO: remove debug
-          if (true) {
-            console.log("[asc-clock] cusp", {
-              from: a.sign,
-              to: b.sign,
-              t1,
-              t2,
-              abs1,
-              abs2,
-              deltaAbs,
-              v,
-              cuspDeg,
-              cuspHour,
-            });
-          }
         }
       }
 
@@ -459,7 +443,38 @@
         }
       }
 
+      // Merge contiguous segments of the same sign so labels render only once at the start.
+      const mergedSegments = [];
       renderSegments.forEach((seg) => {
+        const prev = mergedSegments[mergedSegments.length - 1];
+        if (prev && prev.sign === seg.sign && Math.abs(seg.startAngle - prev.endAngle) < 1e-4) {
+          prev.endAngle = seg.endAngle;
+          prev.endHourRaw = seg.endHourRaw;
+        } else {
+          mergedSegments.push({ ...seg });
+        }
+      });
+
+      const highlightHour = ((Math.round(activeHour ?? 0) % 24) + 24) % 24;
+      const highlightStart = hourToAngle(highlightHour);
+      let highlightEnd = hourToAngle((highlightHour + 1) % 24);
+      if (highlightEnd <= highlightStart) highlightEnd += Math.PI * 2;
+
+      // Hour boundary guides for clearer segmentation.
+      ctx.save();
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.65;
+      displayedHours.forEach((_, idx) => {
+        const ang = boundaries[idx];
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(ang) * innerR, Math.sin(ang) * innerR);
+        ctx.lineTo(Math.cos(ang) * outerR, Math.sin(ang) * outerR);
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      mergedSegments.forEach((seg) => {
         const sliceStart = seg.startAngle;
         const sliceEnd = seg.endAngle;
         const srcEntry = seg.entry;
@@ -476,6 +491,21 @@
         ctx.lineWidth = 1.5;
         ctx.fill();
         ctx.stroke();
+
+        // Sign boundary line and glyph near the start of the segment.
+        const isOuterRing = ringConfig === rings[0];
+        const outerRingInnerR = radius * (rings[0]?.inner || ringConfig.inner);
+        const lineStartR = innerR;
+        const lineEndR = isOuterRing ? outerR + radius * 0.06 : Math.max(lineStartR, outerRingInnerR);
+        ctx.save();
+        ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = elementStroke(srcEntry.element, 0.6);
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(sliceStart) * lineStartR, Math.sin(sliceStart) * lineStartR);
+        ctx.lineTo(Math.cos(sliceStart) * lineEndR, Math.sin(sliceStart) * lineEndR);
+        ctx.stroke();
+        ctx.restore();
 
         const decanStep = (sliceEnd - sliceStart) / 3;
         ctx.strokeStyle = "rgba(255,255,255,0.25)";
@@ -494,9 +524,11 @@
 
         const signMeta = SIGN_META[srcEntry.sign] || {};
         const glyph = signMeta.icon || srcEntry.emoji || "?";
-        const mid = sliceStart + (sliceEnd - sliceStart) * 0.2;
-        const tx = Math.cos(mid) * outerR * 0.92;
-        const ty = Math.sin(mid) * outerR * 0.92;
+        const labelR = isOuterRing
+          ? Math.max(innerR * 0.95, outerR - radius * 0.04)
+          : Math.max(innerR + radius * 0.03, outerR - radius * 0.05);
+        const tx = Math.cos(sliceStart) * labelR;
+        const ty = Math.sin(sliceStart) * labelR;
         ctx.fillStyle = "#e8f4ff";
         ctx.font = `${Math.max(12, radius * 0.06)}px "Space Grotesk", "Inter", system-ui`;
         ctx.textAlign = "center";
@@ -510,12 +542,12 @@
           ctx.lineCap = "round";
           ctx.globalAlpha = 0.95;
           ctx.beginPath();
-          ctx.arc(0, 0, outerHighlightR, sliceStart + 0.002, sliceEnd - 0.002);
+          ctx.arc(0, 0, outerHighlightR, highlightStart + 0.002, highlightEnd - 0.002);
           ctx.strokeStyle = ACTIVE_SEGMENT_COLOR;
           ctx.lineWidth = 4.5;
           ctx.stroke();
           ctx.beginPath();
-          ctx.arc(0, 0, innerHighlightR, sliceStart + 0.002, sliceEnd - 0.002);
+          ctx.arc(0, 0, innerHighlightR, highlightStart + 0.002, highlightEnd - 0.002);
           ctx.strokeStyle = "#000";
           ctx.lineWidth = 3.5;
           ctx.stroke();
