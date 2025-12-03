@@ -844,6 +844,16 @@
         }
       });
 
+      // Outline ring boundary in range color for consistency with pill accents.
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, outerR * 1.008, 0, Math.PI * 2);
+      ctx.strokeStyle = ringConfig.handColor || ACTIVE_SEGMENT_COLOR;
+      ctx.lineWidth = 15;
+      ctx.globalAlpha = 0.5;
+      ctx.stroke();
+      ctx.restore();
+
       if (ringIdx === 0) {
         ctx.strokeStyle = "rgba(255,255,255,0.16)";
         ctx.lineWidth = 1;
@@ -1418,6 +1428,16 @@
           };
         }
       });
+
+      // Outline ring boundary in range color for consistency with pill accents.
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, outerR * 1.008, 0, Math.PI * 2);
+      ctx.strokeStyle = ringConfig.handColor || ACTIVE_SEGMENT_COLOR;
+      ctx.lineWidth = 15;
+      ctx.globalAlpha = 0.5;
+      ctx.stroke();
+      ctx.restore();
 
       // day ticks
       ctx.strokeStyle = "rgba(255,255,255,0.18)";
