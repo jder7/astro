@@ -27,7 +27,7 @@ from reportlab.lib.utils import ImageReader  # type: ignore
 
 from aspects.ptolemaic import compute_major_aspects
 from enums import RangeGranularity, ZodiacType, ReportKind, Mode, HouseSystem
-from schemas import AscendantDayRange, AscendantRangeEntry, BirthData, ChartConfig, ReportRequest
+from schemas import BirthData, ChartConfig, ReportRequest
 
 
 def ensure_config(config: Optional[ChartConfig]) -> ChartConfig:
@@ -329,66 +329,6 @@ def iter_range_datetimes(
             current = add_months(current, 1)
     else:
         raise ValueError(f"Unsupported granularity: {granularity}")
-
-
-def _compute_decan(position: Optional[float]) -> Optional[int]:
-    """Return decan index (1-3) from a degree position within the sign."""
-    if position is None:
-        return None
-    try:
-        decan = int(position // 10) + 1
-        return max(1, min(3, decan))
-    except Exception:
-        return None
-
-
-def _normalize_range_id(value: Optional[str], fallback: str) -> str:
-    base = (value or "").strip().lower()
-    if not base:
-        base = fallback
-    base = re.sub(r"[^a-z0-9]+", "_", base)
-    base = base.strip("_") or fallback
-    return base
-
-
-def compute_ascendant_day_range(
-    base: BirthData,
-    config: Optional[ChartConfig],
-    anchor: datetime,
-    identifier: str,
-    label: Optional[str] = None,
-) -> AscendantDayRange:
-    """
-    Build a +/-12 hour hourly sweep of the ascendant for the given base data.
-    """
-    cfg = ensure_config(config)
-    entries: list[AscendantRangeEntry] = []
-    for hours in range(-12, 13):
-        dt = anchor + timedelta(hours=hours)
-        subject = build_subject_for_moment(base, dt, cfg)
-        asc = subject.model_dump(mode="json").get("ascendant", {}) if subject else {}
-        pos = asc.get("position")
-        entries.append(
-            AscendantRangeEntry(
-                timestamp=dt,
-                sign=asc.get("sign"),
-                sign_num=asc.get("sign_num"),
-                element=asc.get("element"),
-                quality=asc.get("quality"),
-                position=pos,
-                abs_pos=asc.get("abs_pos"),
-                emoji=asc.get("emoji"),
-                decan=_compute_decan(pos),
-                orb=pos,
-            )
-        )
-    range_id = _normalize_range_id(identifier, "ascendant")
-    return AscendantDayRange(
-        id=range_id,
-        label=label or identifier.title(),
-        anchor=anchor,
-        entries=entries,
-    )
 
 
 def render_svg_to_string(drawer: ChartDrawer, filename_prefix: str = "chart") -> str:

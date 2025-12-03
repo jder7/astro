@@ -2,22 +2,9 @@ from typing import List
 
 from fastapi import APIRouter
 
-from schemas import (
-    TransitRangeRequest,
-    TransitRangeResponse,
-    TransitSnapshot,
-    BirthData,
-)
-from utils import (
-    ensure_config,
-    build_subject,
-    build_subject_for_moment,
-    compute_ascendant_day_range,
-    compute_major_aspects,
-    compute_normal_aspects,
-    to_local_datetime,
-    iter_range_datetimes,
-)
+from schemas import TransitRangeRequest, TransitRangeResponse, TransitSnapshot, BirthData
+from aspects.ascendant_range import compute_ascendant_day_range
+from utils import ensure_config, build_subject, build_subject_for_moment, compute_major_aspects, compute_normal_aspects, to_local_datetime, iter_range_datetimes
 
 router = APIRouter(tags=["transit"])
 

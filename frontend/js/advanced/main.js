@@ -78,7 +78,6 @@
   const ACTIVE_SEGMENT_COLOR = "#0ea5e9";
   const PRIMARY_HAND_COLOR = "#38bdf8";
   const SECONDARY_HAND_COLOR = "#34d399";
-  const ASC_CLOCK_STEP = (Math.PI * 2) / 12;
   const HOUR_MS = 60 * 60 * 1000;
   let ascClockCounter = 0;
 
@@ -89,14 +88,6 @@
     return `${n}th`;
   };
 
-  const normalizeOffset = (offset) => {
-    let value = offset;
-    while (value > 12) value -= 24;
-    while (value < -12) value += 24;
-    return value;
-  };
-
-  const angleForHour = (hour) => -Math.PI / 2 + (((hour % 12) + 12) % 12) * ASC_CLOCK_STEP;
   const elementFill = (element, alpha = 0.32) => {
     const rgb = ELEMENT_RGB[element] || ELEMENT_RGB.Default;
     return `rgba(${rgb}, ${alpha})`;
@@ -106,11 +97,18 @@
     return `rgba(${rgb}, ${alpha})`;
   };
 
-  const getOrbDegrees = (entry) => {
-    if (!entry) return null;
-    if (typeof entry.orb === "number") return entry.orb;
-    if (typeof entry.position === "number") return entry.position;
-    return null;
+  const computeAscProgress = (entry, targetTs) => {
+    const start = safeDate(entry?.start || entry?.timestamp);
+    const end = safeDate(entry?.end);
+    if (!(start && end && end > start)) return { orb: null, decan: null };
+    const baseMs = start.getTime();
+    const endMs = end.getTime();
+    const t = targetTs instanceof Date && Number.isFinite(targetTs.getTime()) ? targetTs.getTime() : baseMs;
+    const clamped = Math.min(Math.max(t, baseMs), endMs);
+    const ratio = (clamped - baseMs) / (endMs - baseMs);
+    const orb = Math.min(30, Math.max(0, ratio * 30));
+    const decan = Math.max(1, Math.min(3, Math.floor(orb / 10) + 1));
+    return { orb, decan };
   };
 
   function normalizeAscendantRanges(payload) {
@@ -132,44 +130,56 @@
       seen.add(id);
 
       const anchorRaw = range.anchor || range.anchor_timestamp || range.anchorTimestamp;
-      const anchor = anchorRaw ? new Date(anchorRaw) : null;
-      const hasAnchor = anchor instanceof Date && Number.isFinite(anchor.getTime());
-      const entries = Array.isArray(range.entries) ? range.entries : [];
+      const anchorCandidate = anchorRaw ? new Date(anchorRaw) : null;
+      const entriesRaw = Array.isArray(range.entries) ? range.entries : [];
 
-      const normalizedEntries = entries
-        .map((entry, entryIdx) => {
-          const tsRaw = entry.timestamp || entry.time || entry.date || null;
-          const ts = tsRaw ? new Date(tsRaw) : null;
-          const rawOffset = hasAnchor && ts instanceof Date
-            ? (ts.getTime() - anchor.getTime()) / (1000 * 60 * 60)
-            : entry.offset_hours ?? entry.offsetHours ?? entryIdx - 12;
-          const offsetFromAnchor = Number.isFinite(Number(rawOffset)) ? Number(rawOffset) : entryIdx - 12;
-          const orb = typeof entry.orb === "number" ? entry.orb : (typeof entry.position === "number" ? entry.position : null);
-          const decan = entry.decan || (typeof orb === "number" ? Math.max(1, Math.min(3, Math.floor(orb / 10) + 1)) : null);
+      const normalizedEntries = entriesRaw
+        .map((entry) => {
+          const startRaw =
+            entry.start ||
+            entry.start_timestamp ||
+            entry.startTimestamp ||
+            entry.timestamp ||
+            entry.time ||
+            entry.date ||
+            null;
+          const endRaw = entry.end || entry.end_timestamp || entry.endTimestamp || entry.finish || entry.until || entry.to || null;
+          const start = startRaw ? new Date(startRaw) : null;
+          const end = endRaw ? new Date(endRaw) : null;
+          const hasStart = start instanceof Date && Number.isFinite(start.getTime());
+          if (!hasStart) return null;
+          const hasEnd = end instanceof Date && Number.isFinite(end.getTime());
+          const resolvedEnd = hasEnd ? end : new Date(start.getTime() + 2 * HOUR_MS);
           return {
             ...entry,
-            timestamp: ts,
-            offsetHours: normalizeOffset(offsetFromAnchor),
-            orb,
-            decan,
+            timestamp: start,
+            start,
+            end: resolvedEnd,
           };
         })
-        .sort((a, b) => a.offsetHours - b.offsetHours);
+        .filter(Boolean)
+        .sort((a, b) => a.start - b.start);
 
-      const anchorDate = hasAnchor
-        ? anchor
-        : normalizedEntries.find((e) => Math.abs(e.offsetHours) < 0.25)?.timestamp || normalizedEntries[0]?.timestamp || new Date();
+      const anchorDate =
+        anchorCandidate instanceof Date && Number.isFinite(anchorCandidate.getTime())
+          ? anchorCandidate
+          : normalizedEntries[0]?.start || new Date();
       const anchorHour = anchorDate instanceof Date ? (anchorDate.getHours() + anchorDate.getMinutes() / 60) % 24 : 0;
 
-      const withDisplayHours = normalizedEntries.map((entry) => {
-        const fallbackHour = (anchorHour + entry.offsetHours + 24) % 24;
-        const tsHour =
-          entry.timestamp instanceof Date
-            ? (entry.timestamp.getHours() + entry.timestamp.getMinutes() / 60) % 24
-            : fallbackHour;
+      const withOffsets = normalizedEntries.map((entry, entryIdx) => {
+        const offsetHours =
+          anchorDate instanceof Date && entry.start instanceof Date
+            ? (entry.start.getTime() - anchorDate.getTime()) / HOUR_MS
+            : entry.offset_hours ?? entry.offsetHours ?? entryIdx * 2;
+        const endOffset =
+          anchorDate instanceof Date && entry.end instanceof Date
+            ? (entry.end.getTime() - anchorDate.getTime()) / HOUR_MS
+            : offsetHours + 2;
         return {
           ...entry,
-          displayHour: ((tsHour % 24) + 24) % 24,
+          offsetHours,
+          endOffset,
+          displayHour: ((offsetHours % 24) + 24) % 24,
         };
       });
 
@@ -178,7 +188,7 @@
         label: range.label || id,
         anchor: anchorDate,
         anchorHour,
-        entries: withDisplayHours,
+        entries: withOffsets,
       });
     });
     return normalized;
@@ -196,249 +206,65 @@
 
   const safeDate = (value) => (value instanceof Date && Number.isFinite(value.getTime()) ? value : null);
 
-  function resolveAscTimestamp(entry, anchor) {
-    const ts = safeDate(entry?.timestamp);
-    if (ts) return ts;
-    if (!anchor) return null;
-    const offset = Number.isFinite(entry?.offsetHours) ? entry.offsetHours : null;
-    if (offset === null) return null;
-    return new Date(anchor.getTime() + offset * HOUR_MS);
-  }
-
   function computeSignSegments(range, windowStart, windowEnd) {
     if (!range || !Array.isArray(range.entries)) return [];
-    const dbgTag = "[asc-clock]";
-    const fmt = (d) => (d instanceof Date && Number.isFinite(d.getTime()) ? d.toISOString() : "—");
-    const anchor = safeDate(range.anchor);
+    const startMs = windowStart?.getTime();
+    const endMs = windowEnd?.getTime();
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) return [];
+
     const entries = range.entries
-      .map((entry, idx) => {
-        const ts = resolveAscTimestamp(entry, anchor);
-        return {
-          entry,
-          ts,
-          phi: getOrbDegrees(entry),
-          sign: entry.sign,
-          idx,
-        };
-      })
-      .filter((item) => item.sign && safeDate(item.ts));
-
-    if (!entries.length) return [];
-
-    entries.sort((a, b) => a.ts - b.ts);
-    console.info(dbgTag, "entries", range.id || range.label || "", entries.length);
-
-    // Group by sequential sign in time order.
-    const groups = [];
-    entries.forEach((item) => {
-      const prev = groups[groups.length - 1];
-      if (prev && prev.sign === item.sign) {
-        prev.items.push(item);
-      } else {
-        groups.push({ sign: item.sign, items: [item], start: null, end: null });
-      }
-    });
-
-    // Compute start/end for groups with 2 or 3 entries.
-    groups.forEach((group) => {
-      const n = group.items.length;
-      if (n < 2) return;
-      const first = group.items[0];
-      const ref = n >= 3 ? group.items[2] : group.items[1];
-      if (typeof first.phi !== "number" || typeof ref.phi !== "number") return;
-      const deltaPhi = ref.phi - first.phi;
-      if (!deltaPhi || deltaPhi <= 0) return;
-      const deltaHours = (ref.ts.getTime() - first.ts.getTime()) / HOUR_MS;
-      if (!Number.isFinite(deltaHours) || deltaHours <= 0) return;
-      const alpha = deltaHours / deltaPhi;
-      const startMs = first.ts.getTime() - alpha * first.phi * HOUR_MS;
-      const endMs = ref.ts.getTime() + alpha * (30 - ref.phi) * HOUR_MS;
-      if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) return;
-      group.start = new Date(startMs);
-      group.end = new Date(endMs);
-    });
-
-    const isKnown = (g) => safeDate(g.start) && safeDate(g.end);
-    const findKnownLeft = (idx) => {
-      for (let i = idx - 1; i >= 0; i--) {
-        if (isKnown(groups[i])) return i;
-      }
-      return -1;
-    };
-    const findKnownRight = (idx) => {
-      for (let i = idx + 1; i < groups.length; i++) {
-        if (isKnown(groups[i])) return i;
-      }
-      return -1;
-    };
-
-    // Allocate intervals for chains of 1-entry groups using neighbors.
-    let idx = 0;
-    while (idx < groups.length) {
-      if (isKnown(groups[idx])) {
-        idx += 1;
-        continue;
-      }
-      const chainStart = idx;
-      while (idx < groups.length && !isKnown(groups[idx])) idx += 1;
-      const chainEnd = idx - 1;
-      const leftIdx = findKnownLeft(chainStart);
-      const rightIdx = findKnownRight(chainEnd);
-      const chainLen = chainEnd - chainStart + 1;
-      if (leftIdx !== -1 && rightIdx !== -1) {
-        const leftEnd = groups[leftIdx].end;
-        const rightStart = groups[rightIdx].start;
-        const missingCount = rightIdx - leftIdx - 1;
-        const totalMs = rightStart.getTime() - leftEnd.getTime();
-        if (missingCount > 0 && totalMs > 0) {
-          const step = totalMs / (missingCount + 1);
-          const base = leftEnd.getTime();
-          groups[leftIdx].end = new Date(base + step);
-          for (let k = 0; k < missingCount; k++) {
-            const start = new Date(base + step * (k + 1));
-            const end = new Date(base + step * (k + 2));
-            const target = groups[leftIdx + 1 + k];
-            target.start = start;
-            target.end = end;
-          }
-          const rightBoundary = new Date(base + step * (missingCount + 1));
-          groups[rightIdx].start = rightBoundary;
-        }
-      } else if (leftIdx === -1 && rightIdx !== -1) {
-        // Chain at the very start: spread from windowStart to the first known.
-        const leftBoundary = windowStart;
-        const rightStart = groups[rightIdx].start;
-        const spanMs = rightStart.getTime() - leftBoundary.getTime();
-        if (spanMs > 0) {
-          const step = spanMs / (chainLen + 1);
-          for (let k = 0; k < chainLen; k++) {
-            const start = new Date(leftBoundary.getTime() + step * k);
-            const end = new Date(leftBoundary.getTime() + step * (k + 1));
-            groups[chainStart + k].start = start;
-            groups[chainStart + k].end = end;
-          }
-          groups[rightIdx].start = new Date(leftBoundary.getTime() + step * chainLen);
-        }
-      } else if (leftIdx !== -1 && rightIdx === -1) {
-        // Chain at the end: spread from the last known to windowEnd.
-        const leftEnd = groups[leftIdx].end;
-        const rightBoundary = windowEnd;
-        const spanMs = rightBoundary.getTime() - leftEnd.getTime();
-        if (spanMs > 0) {
-          const step = spanMs / (chainLen + 1);
-          groups[leftIdx].end = new Date(leftEnd.getTime() + step);
-          for (let k = 0; k < chainLen; k++) {
-            const start = new Date(leftEnd.getTime() + step * (k + 1));
-            const end = new Date(leftEnd.getTime() + step * (k + 2));
-            groups[chainStart + k].start = start;
-            groups[chainStart + k].end = end;
-          }
-        }
-      } else {
-        console.warn(dbgTag, "orphan chain with no anchors", { chainStart, chainEnd, sign: groups[chainStart]?.sign });
-      }
-    }
-
-    // Continuity fix: median boundary between consecutive intervals.
-    const finalized = groups.filter(isKnown).sort((a, b) => a.start - b.start);
-    for (let i = 0; i < finalized.length - 1; i++) {
-      const a = finalized[i];
-      const b = finalized[i + 1];
-      const boundary = new Date((a.end.getTime() + b.start.getTime()) / 2);
-      a.end = boundary;
-      b.start = boundary;
-    }
-
-    // Clip to the selected 12h window and map to a renderable structure.
-    let segments = finalized
-      .map((group) => {
-        if (group.end <= group.start) return null;
-        const startMs = Math.max(group.start.getTime(), windowStart.getTime());
-        const endMs = Math.min(group.end.getTime(), windowEnd.getTime());
-        if (endMs <= startMs) return null;
-        return {
-          sign: group.sign,
-          start: new Date(startMs),
-          end: new Date(endMs),
-          entry: group.items[0]?.entry || group.items[0],
-        };
+      .map((entry) => {
+        const start = safeDate(entry.start || entry.timestamp);
+        const end = safeDate(entry.end);
+        if (!(start && end && end > start)) return null;
+        return { ...entry, start, end };
       })
       .filter(Boolean)
       .sort((a, b) => a.start - b.start);
 
-    // Anchor guarantee: if the anchor hour lies in the window, enforce that hour to be the anchor sign.
-    const anchorEntry =
-      range.entries.find((e) => Math.abs(e.offsetHours || 0) < 0.25) || range.entries.find((e) => e.anchor === true);
-    const anchorTs = resolveAscTimestamp(anchorEntry, anchor);
-    if (anchorEntry && anchorTs && anchorTs >= windowStart && anchorTs <= windowEnd) {
-      const anchorSign = anchorEntry.sign;
-      const hourStart = new Date(Math.floor(anchorTs.getTime() / HOUR_MS) * HOUR_MS);
-      const hourEnd = new Date(hourStart.getTime() + HOUR_MS);
-      const clipStart = new Date(Math.max(hourStart.getTime(), windowStart.getTime()));
-      const clipEnd = new Date(Math.min(hourEnd.getTime(), windowEnd.getTime()));
-      if (clipEnd > clipStart && anchorSign) {
-        const overlaps = (seg) => !(seg.end <= clipStart || seg.start >= clipEnd);
-        const hasAnchor = segments.some((s) => overlaps(s) && s.sign === anchorSign);
-        if (!hasAnchor) {
-          segments = segments
-            .map((s) => {
-              if (!overlaps(s)) return s;
-              const parts = [];
-              if (s.start < clipStart) parts.push({ ...s, end: clipStart });
-              if (s.end > clipEnd) parts.push({ ...s, start: clipEnd });
-              return parts;
-            })
-            .flat()
-            .filter(Boolean);
-          segments.push({ sign: anchorSign, start: clipStart, end: clipEnd, entry: anchorEntry });
-          segments.sort((a, b) => a.start - b.start);
-        }
-      }
-    }
-
-    if (!segments.length) {
-      console.warn(dbgTag, "no segments after clipping", {
-        id: range.id || range.label || "",
-        windowStart: fmt(windowStart),
-        windowEnd: fmt(windowEnd),
-      });
-    } else {
-      console.info(
-        dbgTag,
-        "segments",
-        range.id || range.label || "",
-        segments.map((s) => `${s.sign} ${fmt(s.start)} -> ${fmt(s.end)}`)
-      );
-    }
-    return segments;
+    return entries
+      .map((entry) => {
+        const clippedStart = Math.max(entry.start.getTime(), startMs);
+        const clippedEnd = Math.min(entry.end.getTime(), endMs);
+        if (clippedEnd <= clippedStart) return null;
+        return {
+          sign: entry.sign,
+          start: new Date(clippedStart),
+          end: new Date(clippedEnd),
+          entry,
+        };
+      })
+      .filter(Boolean);
   }
 
   function renderAscendantCenter(ranges, hours, centerEl, handColors = [], showLabels) {
     if (!centerEl) return;
     const parts = ranges.map((range) => {
-      if (!range.entries.length) return null;
-      const targetHour = Array.isArray(hours) ? hours[ranges.indexOf(range)] ?? hours[0] ?? 0 : hours ?? 0;
-      let best = range.entries[0];
-      const hourDist = (a, b) => {
-        const d = ((a - b + 12) % 24) - 12;
-        return Math.abs(d);
-      };
-      let bestDiff = hourDist(best.displayHour || 0, targetHour);
-      range.entries.forEach((entry) => {
-        const diff = hourDist(entry.displayHour || 0, targetHour);
-        if (diff < bestDiff) {
-          best = entry;
-          bestDiff = diff;
+      if (!range.entries.length || !range.anchor) return null;
+      const rangeIdx = ranges.indexOf(range);
+      const targetHour = Array.isArray(hours) ? hours[rangeIdx] ?? hours[0] ?? 0 : hours ?? 0;
+      const targetTs = new Date(range.anchor.getTime() + targetHour * HOUR_MS);
+
+      const pickEntry = () => {
+        for (let i = 0; i < range.entries.length; i++) {
+          const entry = range.entries[i];
+          const start = safeDate(entry.start || entry.timestamp);
+          const end = safeDate(entry.end);
+          if (start && end && targetTs >= start && targetTs < end) return entry;
         }
-      });
+        return range.entries[0];
+      };
+
+      const best = pickEntry();
       const signMeta = SIGN_META[best.sign] || { name: best.sign || "—", icon: best.emoji || "?" };
-      const orbText = typeof best.orb === "number" ? `${best.orb.toFixed(2)}°` : "—";
-      const decanText = best.decan ? `${formatOrdinal(best.decan)} Dec.` : "—";
+      const { orb, decan } = computeAscProgress(best, targetTs);
+      const orbText = typeof orb === "number" ? `${orb.toFixed(2)}°` : "—";
+      const decanText = decan ? `${formatOrdinal(decan)} Dec.` : "—";
       const qualityIcon = QUALITY_ICON[best.quality] || "";
       const qualityText = best.quality || "—";
       const tone = elementStroke(best.element || "Default", 0.6);
-      const handColor = handColors[ranges.indexOf(range)] || tone;
-      const timeLabel = formatClockTime(best, targetHour);
+      const handColor = handColors[rangeIdx] || tone;
+      const timeLabel = formatClockTime({ timestamp: targetTs }, targetHour);
 
       const label = showLabels ? `<span class="adv-asc-label">${range.label || range.id}</span>` : "";
       return `
@@ -471,45 +297,24 @@
     const canvas = document.getElementById(ids.canvasId);
     const playBtn = document.getElementById(ids.playId);
     const centerEl = document.getElementById(ids.centerId);
+    const bodyEl = document.getElementById(ids.bodyId);
+    const range12Btn = document.getElementById(ids.range12Id);
+    const range24Btn = document.getElementById(ids.range24Id);
     if (!canvas || !centerEl) return;
 
     if (window.AdvancedApp && typeof window.AdvancedApp._cleanupAscClock === "function") {
       try {
         window.AdvancedApp._cleanupAscClock();
-      } catch (err) {
-      }
+      } catch (err) {}
     }
 
     const ctx = canvas.getContext("2d");
     const isDual = ranges.length > 1;
-    const hourStep = ASC_CLOCK_STEP;
-
-    const ringContexts = ranges.map((range, idx) => {
-      const anchorHour = typeof range.anchorHour === "number" ? ((range.anchorHour % 24) + 24) % 24 : 0;
-      const baseStart = anchorHour >= 12 ? 12 : 0;
-      const wrapHour = (hour) => {
-        let h = hour;
-        if (baseStart === 12) {
-          while (h < 12) h += 12;
-          while (h >= 24) h -= 12;
-        } else {
-          while (h >= 12) h -= 12;
-          while (h < 0) h += 12;
-        }
-        return h;
-      };
-      return {
-        idx,
-        baseStart,
-        displayedHours: Array.from({ length: 12 }, (_, i) => baseStart + i),
-        boundaries: Array.from({ length: 13 }, (_, i) => -Math.PI / 2 + i * hourStep),
-        wrapHour,
-      };
-    });
-    const primaryCtx = ringContexts[0];
-    const hourIndexForAngle = (angle) => {
-      const raw = Math.round(((angle + Math.PI / 2) / hourStep) % 12);
-      return (raw + 12) % 12;
+    const wrapOffset = (offset, windowHours) => {
+      let value = offset;
+      while (value >= windowHours) value -= windowHours;
+      while (value < 0) value += windowHours;
+      return value;
     };
     const rings = isDual
       ? [
@@ -518,21 +323,37 @@
         ]
       : [{ outer: 0.9, inner: 0.58, hand: 0.9, handColor: PRIMARY_HAND_COLOR }];
 
-    const initialHour =
-      ranges[0]?.anchorHour ??
-      (ranges[0]?.entries?.find((e) => Math.abs(e.offsetHours) < 0.25)?.displayHour ??
-        ranges[0]?.entries?.[0]?.displayHour ??
-        0);
     const state = {
-      hours: ranges.map((r, idx) => {
-        const ctxInfo = ringContexts[idx] || primaryCtx;
-        const anchor = typeof r.anchorHour === "number" ? r.anchorHour : initialHour;
-        const wrapped = ctxInfo.wrapHour(anchor);
-        if (ctxInfo.displayedHours.includes(Math.floor(wrapped))) return wrapped;
-        return ctxInfo.displayedHours[0];
-      }),
+      offsets: ranges.map(() => 0),
       playing: false,
       lastTick: performance.now(),
+      windowHours: range24Btn && range24Btn.getAttribute("aria-pressed") === "true" ? 24 : 12,
+    };
+
+    const hourStep = () => (Math.PI * 2) / state.windowHours;
+
+    const windowForRange = (range) => {
+      const anchor = safeDate(range.anchor) || safeDate(range.entries?.[0]?.start) || new Date();
+      const start = anchor;
+      const end = new Date(start.getTime() + state.windowHours * HOUR_MS);
+      return { anchor, start, end };
+    };
+
+    const angleForOffset = (offset) => -Math.PI / 2 + wrapOffset(offset, state.windowHours) * hourStep();
+
+    const resetOffsets = () => {
+      state.offsets = ranges.map((range) => {
+        const window = windowForRange(range);
+        const anchorHour = typeof range.anchorHour === "number" ? range.anchorHour : window.start.getHours() + window.start.getMinutes() / 60;
+        const startHour = window.start.getHours() + window.start.getMinutes() / 60;
+        return wrapOffset(anchorHour - startHour, state.windowHours);
+      });
+    };
+
+    const applyLayout = () => {
+      if (!bodyEl) return;
+      const isStacked = isDual || window.innerWidth < 768;
+      bodyEl.classList.toggle("adv-asc-body--stacked", isStacked);
     };
 
     const resize = () => {
@@ -546,10 +367,11 @@
       canvas.style.height = `${target}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       draw();
+      applyLayout();
     };
 
-    const drawRing = (range, ringConfig, ringCtx, activeHour) => {
-      if (!range.entries.length) return;
+    const drawRing = (range, ringConfig, ringIdx, activeOffset) => {
+      if (!range.entries.length) return { handColor: ringConfig.handColor };
       const { width, height } = canvas;
       const w = width / (window.devicePixelRatio || 1);
       const h = height / (window.devicePixelRatio || 1);
@@ -558,31 +380,25 @@
       const radius = Math.min(w, h) / 2;
       const outerR = radius * ringConfig.outer;
       const innerR = radius * ringConfig.inner;
-      const { baseStart, displayedHours, boundaries, wrapHour } = ringCtx;
+      const boundaries = Array.from({ length: state.windowHours + 1 }, (_, i) => -Math.PI / 2 + i * hourStep());
+      const rangeWindow = windowForRange(range);
 
       ctx.save();
       ctx.translate(cx, cy);
 
-      const anchorDate =
-        safeDate(range.anchor) ||
-        safeDate(range.entries.find((e) => safeDate(e.timestamp))?.timestamp) ||
-        new Date();
-      const windowStartDate = new Date(anchorDate);
-      windowStartDate.setHours(baseStart, 0, 0, 0);
-      const windowEndDate = new Date(windowStartDate.getTime() + 12 * HOUR_MS);
       const angleForTime = (date) => {
-        const frac = (date.getTime() - windowStartDate.getTime()) / (12 * HOUR_MS);
+        const spanMs = state.windowHours * HOUR_MS;
+        const frac = (date.getTime() - rangeWindow.start.getTime()) / spanMs;
         return -Math.PI / 2 + frac * Math.PI * 2;
       };
 
-      const renderSegments = computeSignSegments(range, windowStartDate, windowEndDate).map((seg) => {
+      const renderSegments = computeSignSegments(range, rangeWindow.start, rangeWindow.end).map((seg) => {
         const startAngle = angleForTime(seg.start);
         let endAngle = angleForTime(seg.end);
         if (endAngle <= startAngle) endAngle += Math.PI * 2;
         return { ...seg, startAngle, endAngle };
       });
 
-      // Merge contiguous segments of the same sign so labels render only once at the start.
       const mergedSegments = [];
       renderSegments.forEach((seg) => {
         const prev = mergedSegments[mergedSegments.length - 1];
@@ -594,15 +410,13 @@
         }
       });
 
-      const normalizedHour = wrapHour(activeHour ?? baseStart);
-      const activeOffset = ((normalizedHour - baseStart + 12) % 12);
-      const activeTime = new Date(windowStartDate.getTime() + activeOffset * HOUR_MS);
-      const highlightStart = angleForTime(activeTime);
-      let highlightEnd = angleForTime(new Date(activeTime.getTime() + HOUR_MS));
+      const normalizedOffset = wrapOffset(activeOffset ?? 0, state.windowHours);
+      const activeTime = new Date(rangeWindow.start.getTime() + normalizedOffset * HOUR_MS);
+      const highlightStart = angleForOffset(normalizedOffset);
+      let highlightEnd = angleForOffset(normalizedOffset + 1);
       if (highlightEnd <= highlightStart) highlightEnd += Math.PI * 2;
 
-      // Hour boundary guides for clearer segmentation.
-      if (ringCtx.idx === 0) {
+      if (ringIdx === 0) {
         ctx.save();
         ctx.strokeStyle = "#000";
         ctx.lineWidth = 1;
@@ -616,6 +430,7 @@
         ctx.restore();
       }
 
+      let currentSignHighlighter = null;
       mergedSegments.forEach((seg) => {
         const sliceStart = seg.startAngle;
         const sliceEnd = seg.endAngle;
@@ -632,7 +447,6 @@
         ctx.fill();
         ctx.stroke();
 
-        // Sign boundary line and glyph near the start of the segment.
         const isOuterRing = ringConfig === rings[0];
         const outerRingInnerR = radius * (rings[0]?.inner || ringConfig.inner);
         const lineStartR = innerR;
@@ -664,7 +478,7 @@
 
         const signMeta = SIGN_META[srcEntry.sign] || {};
         const glyph = signMeta.icon || srcEntry.emoji || "?";
-        const decanCenter = sliceStart + (sliceEnd - sliceStart) / 6; // middle of 1st decan
+        const decanCenter = sliceStart + (sliceEnd - sliceStart) / 6;
         const labelR = innerR + (outerR - innerR) * (isOuterRing ? 0.45 : 0.43);
         const tx = Math.cos(decanCenter) * labelR;
         const ty = Math.sin(decanCenter) * labelR;
@@ -675,31 +489,19 @@
         ctx.fillText(glyph, tx, ty);
 
         if (isActive) {
-          const outerHighlightR = outerR * 1.01;
-          const innerHighlightR = outerR * 0.99;
-          ctx.save();
-          ctx.lineCap = "round";
-          ctx.globalAlpha = 0.95;
-          ctx.beginPath();
-          ctx.arc(0, 0, outerHighlightR, highlightStart + 0.002, highlightEnd - 0.002);
-          ctx.strokeStyle = ACTIVE_SEGMENT_COLOR;
-          ctx.lineWidth = 4.5;
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(0, 0, innerHighlightR, highlightStart + 0.002, highlightEnd - 0.002);
-          ctx.strokeStyle = "#000";
-          ctx.lineWidth = 3.5;
-          ctx.stroke();
-          ctx.restore();
+          currentSignHighlighter = {
+            startAngle: sliceStart,
+            endAngle: sliceEnd,
+            color: elementStroke(srcEntry.element, 0.9),
+          };
         }
       });
 
-      if (ringCtx.idx === 0) {
-        // Hour ticks + labels
+      if (ringIdx === 0) {
         ctx.strokeStyle = "rgba(255,255,255,0.16)";
         ctx.lineWidth = 1;
         const tickOuter = outerR * 1.015;
-        for (let i = 0; i < displayedHours.length; i++) {
+        for (let i = 0; i < state.windowHours; i++) {
           const a = boundaries[i];
           const r1 = outerR * 0.97;
           const r2 = tickOuter;
@@ -713,32 +515,52 @@
           ctx.font = `${Math.max(11, radius * 0.04)}px "Space Grotesk", "Inter", system-ui`;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          const rawLabel = displayedHours[i] % 24;
-          const labelVal = rawLabel === 0 ? 12 : baseStart === 12 && rawLabel === 12 ? 24 : rawLabel;
-          ctx.fillText(String(labelVal), Math.cos(a) * labelR, Math.sin(a) * labelR);
+          const labelDate = new Date(rangeWindow.start.getTime() + i * HOUR_MS);
+          const mins = labelDate.getMinutes();
+          const labelVal = mins ? `${pad(labelDate.getHours())}:${pad(mins)}` : `${pad(labelDate.getHours())}`;
+          ctx.fillText(labelVal, Math.cos(a) * labelR, Math.sin(a) * labelR);
         }
       }
 
-      // Inner ring hour labels if its window differs from the primary.
-      const primaryBase = primaryCtx?.baseStart ?? baseStart;
-      if (ringCtx.idx > 0 && baseStart !== primaryBase) {
+      if (ringIdx === 1 && isDual) {
         ctx.fillStyle = "rgba(255,255,255,0.7)";
         ctx.font = `${Math.max(10, radius * 0.035)}px "Space Grotesk", "Inter", system-ui`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        const labelR = innerR * 0.9;
-        for (let i = 0; i < displayedHours.length; i++) {
+        const innerLabelR = innerR * 0.88;
+        for (let i = 0; i < state.windowHours; i++) {
           const a = boundaries[i];
-          const rawLabel = displayedHours[i] % 24;
-          const labelVal = rawLabel === 0 ? 12 : baseStart === 12 && rawLabel === 12 ? 24 : rawLabel;
-          ctx.fillText(String(labelVal), Math.cos(a) * labelR, Math.sin(a) * labelR);
+          const labelDate = new Date(rangeWindow.start.getTime() + i * HOUR_MS);
+          const mins = labelDate.getMinutes();
+          const labelVal = `${pad(labelDate.getHours())}:${pad(mins)}`;
+          ctx.fillText(labelVal, Math.cos(a) * innerLabelR, Math.sin(a) * innerLabelR);
         }
       }
 
+      if (currentSignHighlighter) {
+        const outerHighlightR = outerR * 1.01;
+        const innerHighlightR = outerR * 0.99;
+        ctx.save();
+        ctx.lineCap = "round";
+        ctx.globalAlpha = 0.95;
+        ctx.beginPath();
+        ctx.arc(0, 0, outerHighlightR, currentSignHighlighter.startAngle + 0.002, currentSignHighlighter.endAngle - 0.002);
+        ctx.strokeStyle = currentSignHighlighter.color;
+        ctx.lineWidth = 4.5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, innerHighlightR, currentSignHighlighter.startAngle + 0.002, currentSignHighlighter.endAngle - 0.002);
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+
       ctx.restore();
+      return { handColor: currentSignHighlighter?.color || ringConfig.handColor };
     };
 
-    const drawHands = () => {
+    const drawHands = (activeColors) => {
       const { width, height } = canvas;
       const w = width / (window.devicePixelRatio || 1);
       const h = height / (window.devicePixelRatio || 1);
@@ -747,14 +569,12 @@
       const radius = Math.min(w, h) / 2;
       ranges.forEach((range, idx) => {
         const handCfg = rings[idx] || rings[0];
-        const ctxInfo = ringContexts[idx] || primaryCtx;
-        const hour = ((state.hours[idx] ?? state.hours[0] ?? ctxInfo.baseStart) % 24 + 24) % 24;
-        const relHour = ((hour - ctxInfo.baseStart + 24) % 24) % 12;
-        const angle = angleForHour(relHour);
+        const offset = wrapOffset(state.offsets[idx] ?? state.offsets[0] ?? 0, state.windowHours);
+        const angle = angleForOffset(offset);
         const handR = radius * handCfg.hand;
         ctx.save();
         ctx.translate(cx, cy);
-        ctx.strokeStyle = handCfg.handColor;
+        ctx.strokeStyle = activeColors[idx] || handCfg.handColor;
         ctx.lineWidth = 3;
         ctx.lineCap = "round";
         ctx.beginPath();
@@ -763,7 +583,7 @@
         ctx.stroke();
         ctx.restore();
       });
-      renderAscendantCenter(ranges, state.hours, centerEl, rings.map((r) => r.handColor));
+      renderAscendantCenter(ranges, state.offsets, centerEl, rings.map((r) => r.handColor), isDual);
     };
 
     const draw = () => {
@@ -772,22 +592,19 @@
       const h = height / (window.devicePixelRatio || 1);
       ctx.clearRect(0, 0, w, h);
 
-      ranges.forEach((range, idx) => {
-        const ctxInfo = ringContexts[idx] || primaryCtx;
-        const hour = ((state.hours[idx] ?? state.hours[0] ?? ctxInfo.baseStart) % 24 + 24) % 24;
-        drawRing(range, rings[idx] || rings[0], ctxInfo, hour);
+      const activeColors = ranges.map((range, idx) => {
+        const offset = wrapOffset(state.offsets[idx] ?? state.offsets[0] ?? 0, state.windowHours);
+        const result = drawRing(range, rings[idx] || rings[0], idx, offset);
+        return result?.handColor || (rings[idx] || rings[0]).handColor;
       });
-      drawHands();
+      drawHands(activeColors);
     };
 
     const tick = (ts) => {
       if (!state.playing) return;
       const delta = (ts - state.lastTick) / 1000;
       state.lastTick = ts;
-      state.hours = state.hours.map((h, idx) => {
-        const ctxInfo = ringContexts[idx] || primaryCtx;
-        return ctxInfo.wrapHour(h + delta); // 1 hour per second
-      });
+      state.offsets = state.offsets.map((h) => wrapOffset(h + delta, state.windowHours));
       draw();
       requestAnimationFrame(tick);
     };
@@ -798,20 +615,18 @@
       const x = (event.clientX - rect.left) * scale - canvas.width / 2;
       const y = (event.clientY - rect.top) * scale - canvas.height / 2;
       const angle = Math.atan2(y, x);
-      const rawIdx = Math.round((angle + Math.PI / 2) / hourStep);
-      const idx = ((rawIdx % 12) + 12) % 12;
+      const rawOffset = (angle + Math.PI / 2) / hourStep();
+      const snapped = Math.round(rawOffset);
       if (isDual) {
         const r = Math.sqrt(x * x + y * y);
         const radius = Math.min(canvas.width, canvas.height) / 2;
         const radial = r / radius;
         const ringIdx = radial > (rings[0].inner + rings[0].outer) / 2 ? 0 : 1;
-        const ctxInfo = ringContexts[ringIdx] || primaryCtx;
-        const normalized = ctxInfo.wrapHour(ctxInfo.baseStart + idx);
-        state.hours[ringIdx] = normalized;
+        const normalized = wrapOffset(snapped, state.windowHours);
+        state.offsets[ringIdx] = normalized;
       } else {
-        const ctxInfo = primaryCtx;
-        const normalized = ctxInfo.wrapHour(ctxInfo.baseStart + idx);
-        state.hours = [normalized];
+        const normalized = wrapOffset(snapped, state.windowHours);
+        state.offsets = [normalized];
       }
       state.playing = false;
       if (playBtn) {
@@ -823,6 +638,10 @@
     };
 
     const togglePlay = () => {
+      if (!ranges.length) {
+        state.playing = false;
+        return;
+      }
       state.playing = !state.playing;
       state.lastTick = performance.now();
       if (playBtn) {
@@ -836,11 +655,30 @@
       }
     };
 
-    resize();
-    renderAscendantCenter(ranges, state.hours, centerEl, rings.map((r) => r.handColor), isDual);
+    const setWindowHours = (hours) => {
+      if (hours !== 12 && hours !== 24) return;
+      state.windowHours = hours;
+      resetOffsets();
+      if (range12Btn) range12Btn.setAttribute("aria-pressed", hours === 12 ? "true" : "false");
+      if (range24Btn) range24Btn.setAttribute("aria-pressed", hours === 24 ? "true" : "false");
+      resize();
+      renderAscendantCenter(ranges, state.offsets, centerEl, rings.map((r) => r.handColor), isDual);
+    };
 
+    resetOffsets();
+    resize();
+    renderAscendantCenter(ranges, state.offsets, centerEl, rings.map((r) => r.handColor), isDual);
+
+    const onRange12 = () => setWindowHours(12);
+    const onRange24 = () => setWindowHours(24);
     if (playBtn) {
       playBtn.addEventListener("click", togglePlay);
+    }
+    if (range12Btn) {
+      range12Btn.addEventListener("click", onRange12);
+    }
+    if (range24Btn) {
+      range24Btn.addEventListener("click", onRange24);
     }
     window.addEventListener("resize", resize);
     canvas.addEventListener("click", setOffsetFromClick);
@@ -849,17 +687,21 @@
         window.removeEventListener("resize", resize);
         if (playBtn) playBtn.removeEventListener("click", togglePlay);
         canvas.removeEventListener("click", setOffsetFromClick);
+        if (range12Btn) range12Btn.removeEventListener("click", onRange12);
+        if (range24Btn) range24Btn.removeEventListener("click", onRange24);
       };
     }
     draw();
   }
-
   function buildAscendantClockBlock(ascendantRanges, metaSource) {
     if (!ascendantRanges.length) return { html: "", ids: null };
     const clockId = `asc-clock-${++ascClockCounter}`;
     const canvasId = `${clockId}-canvas`;
     const playId = `${clockId}-play`;
     const centerId = `${clockId}-center`;
+    const range12Id = `${clockId}-12h`;
+    const range24Id = `${clockId}-24h`;
+    const bodyId = `${clockId}-body`;
     const dateInfo = formatDateLabel(metaSource || {});
     const dateLabel = dateInfo.label ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}` : "Requested datetime";
     const legend = ascendantRanges
@@ -874,7 +716,7 @@
         <div class="adv-asc-head">
           <div>
             <p class="adv-asc-kicker">Ascendant clock</p>
-            <p class="adv-asc-sub">±12h around ${dateLabel}</p>
+            <p class="adv-asc-sub">Forward from ${dateLabel}</p>
           </div>
           <div class="adv-asc-actions">
             <button type="button" class="adv-asc-play" id="${playId}" aria-pressed="false">
@@ -883,10 +725,12 @@
               </svg>
               <span>Play</span>
             </button>
+            <button type="button" class="adv-asc-toggle" id="${range12Id}" aria-pressed="true">Next 12h</button>
+            <button type="button" class="adv-asc-toggle" id="${range24Id}" aria-pressed="false">Next 24h</button>
           </div>
         </div>
         <div class="adv-asc-legend">${legend}</div>
-        <div class="adv-asc-body">
+        <div class="adv-asc-body" id="${bodyId}">
           <div class="adv-asc-canvas-wrap">
             <canvas id="${canvasId}" class="adv-asc-canvas" aria-label="Ascendant clock"></canvas>
           </div>
@@ -894,22 +738,32 @@
         </div>
       </div>
     `;
-    return { html, ids: { canvasId, playId, centerId } };
+    return { html, ids: { canvasId, playId, centerId, range12Id, range24Id, bodyId } };
   }
 
   function buildAscendantTables(ranges) {
     if (!ranges.length) return "";
+    const formatTime = (ts) => {
+      if (!(ts instanceof Date) || !Number.isFinite(ts.getTime())) return "—";
+      return `${pad(ts.getHours())}:${pad(ts.getMinutes())}`;
+    };
     const renderRow = (entry) => {
       const signMeta = SIGN_META[entry.sign] || { name: entry.sign || "—", icon: entry.emoji || "" };
-      const orbText = typeof entry.orb === "number" ? `${entry.orb.toFixed(2)}°` : "—";
       const qualityIcon = QUALITY_ICON[entry.quality] || "";
       const elementIcon = ELEMENT_ICON[entry.element] || "";
       const swatchColor = elementFill(entry.element, 1).replace("rgba(", "rgb(").replace(/,\s*1\)$/, ")");
+      const start = entry.start || entry.timestamp;
+      const end = entry.end;
+      const durationHours =
+        start instanceof Date && end instanceof Date
+          ? ((end.getTime() - start.getTime()) / HOUR_MS).toFixed(2)
+          : "—";
       return `
         <tr>
-          <td>${pad(Math.round(entry.displayHour) % 24)}:00</td>
+          <td>${formatTime(start)}</td>
+          <td>${formatTime(end)}</td>
           <td>${signMeta.icon || ""} ${signMeta.name}</td>
-          <td>${orbText}</td>
+          <td>${durationHours}</td>
           <td>${qualityIcon ? `${qualityIcon} ` : ""}${entry.quality || "—"}</td>
           <td><span class="adv-asc-color-swatch" style="background:${swatchColor}"></span>${elementIcon ? `${elementIcon} ` : ""}${entry.element || "—"}</td>
         </tr>
@@ -918,22 +772,16 @@
 
     const tables = ranges.map((range, idx) => {
       const handColor = idx === 0 ? PRIMARY_HAND_COLOR : SECONDARY_HAND_COLOR;
-      const startHour = Math.round(range.anchorHour ?? range.entries?.[0]?.displayHour ?? 0);
-      const hours = Array.from({ length: 12 }, (_, i) => (startHour + i) % 24);
-      const rows = hours
-        .map((hour) => {
-          const match = range.entries.find((e) => Math.round(e.displayHour) % 24 === hour);
-          return match ? renderRow(match) : "";
-        })
-        .join("");
+      const rows = range.entries.map(renderRow).join("");
       return `
         <table class="adv-asc-table">
           <caption style="color:${handColor}">${range.label || range.id}</caption>
           <thead>
             <tr>
-              <th>Time</th>
+              <th>Start</th>
+              <th>End</th>
               <th>Sign</th>
-              <th>Orb</th>
+              <th>Duration (h)</th>
               <th>Quality</th>
               <th>Element</th>
             </tr>

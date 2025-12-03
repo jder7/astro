@@ -1,12 +1,8 @@
 from fastapi import APIRouter
 
 from schemas import RelationshipRequest, RelationshipResponse
-from utils import (
-    compute_ascendant_day_range,
-    compute_dual_chart_aspects,
-    ensure_config,
-    to_local_datetime,
-)
+from aspects.ascendant_range import compute_ascendant_day_range
+from utils import compute_dual_chart_aspects, ensure_config, to_local_datetime
 
 router = APIRouter(tags=["relationship"])
 

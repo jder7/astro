@@ -1,14 +1,8 @@
 from fastapi import APIRouter
 
 from schemas import NatalRequest, NatalResponse
-from utils import (
-    build_subject,
-    compute_ascendant_day_range,
-    compute_major_aspects,
-    compute_normal_aspects,
-    ensure_config,
-    to_local_datetime,
-)
+from aspects.ascendant_range import compute_ascendant_day_range
+from utils import build_subject, compute_major_aspects, compute_normal_aspects, ensure_config, to_local_datetime
 
 router = APIRouter(tags=["natal"])
 

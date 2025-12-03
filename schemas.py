@@ -141,56 +141,29 @@ class ChartConfig(BaseModel):
 
 class AscendantRangeEntry(BaseModel):
     """
-    Single ascendant sample within a +/-12 hour window.
+    Ascendant sign interval with explicit start and end timestamps.
     """
 
     model_config = ConfigDict(populate_by_name=True)
 
     timestamp: datetime = Field(
         ...,
-        description="Timestamp (tz-aware) corresponding to this ascendant position.",
+        description="Start of the sign interval (orb 0) in tz-aware datetime.",
     )
-    sign: Optional[str] = Field(
-        default=None,
-        description="Three-letter sign code, e.g. 'Ari', 'Tau'.",
+    end: datetime = Field(
+        ...,
+        description="Timestamp (tz-aware) when the ascendant leaves this sign (start of the next sign).",
     )
-    sign_num: Optional[int] = Field(
-        default=None,
-        description="One-based sign index (Aries=1, Pisces=12).",
-    )
-    element: Optional[str] = Field(
-        default=None,
-        description="Element for the ascendant at this hour (Fire, Earth, Air, Water).",
-    )
-    quality: Optional[str] = Field(
-        default=None,
-        description="Quality for the ascendant at this hour (Cardinal, Fixed, Mutable).",
-    )
-    position: Optional[float] = Field(
-        default=None,
-        description="Degree within the sign (0-30).",
-    )
-    abs_pos: Optional[float] = Field(
-        default=None,
-        description="Absolute ecliptic position (0-360).",
-    )
-    emoji: Optional[str] = Field(
-        default=None,
-        description="Sign glyph when available.",
-    )
-    decan: Optional[int] = Field(
-        default=None,
-        description="Decan index (1-3) derived from the position.",
-    )
-    orb: Optional[float] = Field(
-        default=None,
-        description="Degree distance into the sign (same as `position`, exposed for display).",
-    )
+    sign: Optional[str] = Field(default=None, description="Three-letter sign code, e.g. 'Ari', 'Tau'.")
+    sign_num: Optional[int] = Field(default=None, description="One-based sign index (Aries=1, Pisces=12).")
+    element: Optional[str] = Field(default=None, description="Element for the ascendant at this hour (Fire, Earth, Air, Water).")
+    quality: Optional[str] = Field(default=None, description="Quality for the ascendant at this hour (Cardinal, Fixed, Mutable).")
+    emoji: Optional[str] = Field(default=None, description="Sign glyph when available.")
 
 
 class AscendantDayRange(BaseModel):
     """
-    Hourly ascendant distribution centered on the requested datetime (+/- 12h).
+    Ascendant sweep starting at the requested datetime and moving forward in time.
     """
 
     model_config = ConfigDict(populate_by_name=True)
@@ -205,7 +178,7 @@ class AscendantDayRange(BaseModel):
     )
     anchor: datetime = Field(
         ...,
-        description="Center datetime used to build the +/-12h window.",
+        description="Anchor datetime used as the start of the window.",
     )
     entries: List[AscendantRangeEntry] = Field(
         default_factory=list,
