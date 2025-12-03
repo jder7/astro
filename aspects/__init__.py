@@ -11,3 +11,4 @@ from .ptolemaic import (  # noqa: F401
     serialize_ptolemaic_aspects,
 )
 from .ascendant_range import AscendantRangeCalculator, compute_ascendant_day_range  # noqa: F401
+from .moon_range import MoonRangeCalculator, compute_moon_month_range  # noqa: F401

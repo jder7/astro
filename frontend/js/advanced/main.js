@@ -24,6 +24,9 @@
     ascClockContainer: document.getElementById("ascClockContainer"),
     ascClockBody: document.getElementById("ascClockBody"),
     ascClockCollapse: document.getElementById("ascClockCollapse"),
+    moonClockContainer: document.getElementById("moonClockContainer"),
+    moonClockBody: document.getElementById("moonClockBody"),
+    moonClockCollapse: document.getElementById("moonClockCollapse"),
   };
 
   const shared = window.AppShared || {};
@@ -84,6 +87,8 @@
   const SECONDARY_HAND_COLOR = "#34d399";
   const HOUR_MS = 60 * 60 * 1000;
   let ascClockCounter = 0;
+  const DAY_MS = 24 * HOUR_MS;
+  let moonClockCounter = 0;
 
   const formatOrdinal = (n) => {
     if (n === 1) return "1st";
@@ -102,6 +107,20 @@
   };
 
   const computeAscProgress = (entry, targetTs) => {
+    const start = safeDate(entry?.start || entry?.timestamp);
+    const end = safeDate(entry?.end);
+    if (!(start && end && end > start)) return { orb: null, decan: null };
+    const baseMs = start.getTime();
+    const endMs = end.getTime();
+    const t = targetTs instanceof Date && Number.isFinite(targetTs.getTime()) ? targetTs.getTime() : baseMs;
+    const clamped = Math.min(Math.max(t, baseMs), endMs);
+    const ratio = (clamped - baseMs) / (endMs - baseMs);
+    const orb = Math.min(30, Math.max(0, ratio * 30));
+    const decan = Math.max(1, Math.min(3, Math.floor(orb / 10) + 1));
+    return { orb, decan };
+  };
+
+  const computeMoonProgress = (entry, targetTs) => {
     const start = safeDate(entry?.start || entry?.timestamp);
     const end = safeDate(entry?.end);
     if (!(start && end && end > start)) return { orb: null, decan: null };
@@ -201,26 +220,66 @@
     };
   }
 
-  function renderSummaryPanel(points, ascendantRanges, metaSource, formatTimeFn, isDual) {
-    if (!ascendantRanges.length) return "";
-    const anchor = safeDate(ascendantRanges[0]?.anchor) || safeDate(metaSource?.timestamp) || new Date();
+  function buildMoonSummary(range, formatTimeFn) {
+    if (!range || !Array.isArray(range.entries) || !range.entries.length) return null;
+    const anchor = safeDate(range.anchor) || safeDate(range.entries[0].start) || new Date();
+    const current =
+      range.entries.find((e) => {
+        const start = safeDate(e.start || e.timestamp);
+        const end = safeDate(e.end);
+        return start && end && anchor >= start && anchor < end;
+      }) || range.entries[0];
+
+    const currentProgress = computeMoonProgress(current, anchor);
+    const idx = range.entries.indexOf(current);
+    const nextEntry = idx !== -1 && range.entries[idx + 1] ? range.entries[idx + 1] : null;
+    const nextSign = nextEntry?.sign || null;
+    const nextTime =
+      nextEntry?.start && nextEntry.start instanceof Date && Number.isFinite(nextEntry.start.getTime())
+        ? formatTimeFn(nextEntry.start)
+        : "—";
+
+    return {
+      anchor,
+      current,
+      orb: currentProgress.orb,
+      decan: currentProgress.decan,
+      nextSign,
+      nextTime,
+      nextStart: nextEntry?.start || null,
+    };
+  }
+
+  function renderSummaryPanel(points, ascendantRanges, moonRanges, metaSource, formatTimeFn, isDual) {
+    if (!ascendantRanges.length && !moonRanges.length) return "";
+    const ascMap = new Map();
+    const moonMap = new Map();
+    ascendantRanges.forEach((r, idx) => ascMap.set(r.id || r.label || `asc-${idx}`, r));
+    moonRanges.forEach((r, idx) => moonMap.set(r.id || r.label || `moon-${idx}`, r));
+    const cardIds = ascendantRanges.map((r, idx) => r.id || r.label || `range-${idx}`);
+    moonRanges.forEach((r, idx) => {
+      const id = r.id || r.label || `moon-${idx}`;
+      if (!cardIds.includes(id)) cardIds.push(id);
+    });
+    const anchor = safeDate(ascendantRanges[0]?.anchor) || safeDate(moonRanges[0]?.anchor) || safeDate(metaSource?.timestamp) || new Date();
     const dateInfo = formatDateLabel(metaSource || {});
     const dateLabel = dateInfo.label ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}` : "Requested datetime";
     const dayIdx = anchor instanceof Date && Number.isFinite(anchor.getTime()) ? anchor.getDay() : new Date().getDay();
     const dayRulerKey = CHALDEAN_DAY_RULERS?.[dayIdx] || null;
     const dayRulerPt = dayRulerKey ? pickPoint(points, dayRulerKey) : null;
-    const weekdayLabel =
-      anchor instanceof Date && Number.isFinite(anchor.getTime())
-        ? anchor.toLocaleDateString("en-GB", { weekday: "long" })
-        : formatDateLabel(metaSource || {}).weekday || "";
     const dayRulerName = dayRulerKey ? capitalise(dayRulerKey) : "—";
     const dayRulerIcon = dayRulerKey ? POINTS_ICONS[dayRulerKey] || "" : "";
 
     const sunPt = pickPoint(points, "sun");
     const moonPt = pickPoint(points, "moon");
 
-    const cards = ascendantRanges.map((range) => {
-      const ascSummary = buildAscSummary(range, formatTimeFn);
+    const cards = cardIds.map((cardId) => {
+      const ascRange = ascMap.get(cardId) || null;
+      const moonRange = moonMap.get(cardId) || (!ascRange && moonRanges.length === 1 ? moonRanges[0] : null);
+      const range = ascRange || moonRange;
+      if (!range) return "";
+
+      const ascSummary = ascRange ? buildAscSummary(ascRange, formatTimeFn) : null;
       const ascData = ascSummary
         ? {
             ...summarizePoint(ascSummary.current),
@@ -230,7 +289,20 @@
         : null;
       const dayData = dayRulerPt ? summarizePoint(dayRulerPt) : null;
       const sunData = sunPt ? summarizePoint(sunPt) : null;
-      const moonData = moonPt ? summarizePoint(moonPt) : null;
+      const moonSummary = moonRange ? buildMoonSummary(moonRange, formatDateTimeShort) : null;
+      const moonPointData = moonPt ? summarizePoint(moonPt) : null;
+      const moonCurrent = moonSummary?.current || null;
+      const moonData =
+        moonCurrent || moonPointData
+          ? {
+              sign: moonCurrent?.sign || moonPointData?.sign,
+              quality: moonCurrent?.quality || moonPointData?.quality,
+              element: moonCurrent?.element || moonPointData?.element,
+              emoji: moonCurrent?.emoji || moonPointData?.emoji,
+              orb: typeof moonSummary?.orb === "number" ? moonSummary.orb : moonPointData?.orb,
+              decan: typeof moonSummary?.decan === "number" ? moonSummary.decan : moonPointData?.decan,
+            }
+          : null;
       const moonIllumVal = computeMoonIllumination(points);
       const lunation = getLunationInfo({
         year: metaSource?.year || metaSource?.moment?.year || metaSource?.birth?.year || anchor.getFullYear(),
@@ -252,6 +324,14 @@
           ? `Next ${SIGN_META[ascSummary.nextSign]?.name || ascSummary.nextSign} at ${ascSummary.nextTime}`
           : "";
 
+      const moonNext =
+        moonSummary && moonSummary.nextSign
+          ? `Next ${SIGN_META[moonSummary.nextSign]?.name || moonSummary.nextSign} at ${moonSummary.nextTime}`
+          : "";
+      const moonExtras = [moonNext, `Illumination ${moonIllum}${lunation && lunation.name ? ` · ${lunation.name}` : ""}`]
+        .filter(Boolean)
+        .join(" · ");
+
       return `
         <div class="adv-summary-card">
           <div class="adv-summary-head">
@@ -259,20 +339,11 @@
               <p class="adv-asc-kicker">Day Ruler · ${dayRulerName} ${dayRulerIcon}</p>
               <p class="adv-asc-sub">${dateLabel}</p>
             </div>
-            <span class="adv-asc-pill">${range.label || range.id || "Ascendant"}</span>
+            <span class="adv-asc-pill">${range.label || range.id || "Range"}</span>
           </div>
           <div class="adv-summary-grid">
             ${sunData ? formatSummaryRow("Sun", POINTS_ICONS.sun, sunData) : ""}
-            ${
-              moonData
-                ? formatSummaryRow(
-                    "Moon",
-                    POINTS_ICONS.moon,
-                    moonData,
-                    `Illumination ${moonIllum}${lunation && lunation.name ? ` · ${lunation.name}` : ""}`
-                  )
-                : ""
-            }
+            ${moonData ? formatSummaryRow("Moon", POINTS_ICONS.moon, moonData, moonExtras) : ""}
             ${dayData ? formatSummaryRow(dayRulerName || "Day Ruler", POINTS_ICONS[dayRulerKey] || "☉", dayData) : ""}
             ${
               ascData
@@ -376,6 +447,85 @@
     return normalized;
   }
 
+  function normalizeMoonRanges(payload) {
+    if (!payload) return [];
+    const rangesRaw = [];
+    const pushRanges = (val) => {
+      if (Array.isArray(val)) rangesRaw.push(...val);
+    };
+    pushRanges(payload.moon_month_range || payload.moonMonthRange);
+    pushRanges(payload.snapshot?.moon_month_range || payload.snapshot?.moonMonthRange);
+    pushRanges(payload.subject?.moon_month_range || payload.subject?.moonMonthRange);
+
+    const seen = new Set();
+    const normalized = [];
+    rangesRaw.forEach((range, idx) => {
+      if (!range || typeof range !== "object") return;
+      const id = String(range.id || range.label || `range-${idx}`);
+      if (seen.has(id)) return;
+      seen.add(id);
+
+      const anchorRaw = range.anchor || range.anchor_timestamp || range.anchorTimestamp;
+      const anchorCandidate = anchorRaw ? new Date(anchorRaw) : null;
+      const entriesRaw = Array.isArray(range.entries) ? range.entries : [];
+
+      const normalizedEntries = entriesRaw
+        .map((entry) => {
+          const startRaw =
+            entry.start ||
+            entry.start_timestamp ||
+            entry.startTimestamp ||
+            entry.timestamp ||
+            entry.time ||
+            entry.date ||
+            null;
+          const endRaw = entry.end || entry.end_timestamp || entry.endTimestamp || entry.finish || entry.until || entry.to || null;
+          const start = startRaw ? new Date(startRaw) : null;
+          const end = endRaw ? new Date(endRaw) : null;
+          const hasStart = start instanceof Date && Number.isFinite(start.getTime());
+          if (!hasStart) return null;
+          const hasEnd = end instanceof Date && Number.isFinite(end.getTime());
+          const resolvedEnd = hasEnd ? end : new Date(start.getTime() + 2 * DAY_MS);
+          return {
+            ...entry,
+            start,
+            end: resolvedEnd,
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.start - b.start);
+
+      const anchorDate =
+        anchorCandidate instanceof Date && Number.isFinite(anchorCandidate.getTime())
+          ? anchorCandidate
+          : normalizedEntries[0]?.start || new Date();
+
+      const withOffsets = normalizedEntries.map((entry, entryIdx) => {
+        const offsetHours =
+          anchorDate instanceof Date && entry.start instanceof Date
+            ? (entry.start.getTime() - anchorDate.getTime()) / HOUR_MS
+            : entry.offset_hours ?? entry.offsetHours ?? entryIdx * 48;
+        const endOffset =
+          anchorDate instanceof Date && entry.end instanceof Date
+            ? (entry.end.getTime() - anchorDate.getTime()) / HOUR_MS
+            : offsetHours + 48;
+        return {
+          ...entry,
+          offsetHours,
+          endOffset,
+        };
+      });
+
+      normalized.push({
+        id,
+        label: range.label || id,
+        anchor: anchorDate,
+        entries: withOffsets,
+      });
+    });
+    return normalized;
+  }
+
   function formatClockTime(entry, fallbackHour) {
     if (entry && entry.timestamp instanceof Date && Number.isFinite(entry.timestamp.getTime())) {
       const h = entry.timestamp.getHours();
@@ -389,6 +539,15 @@
   const formatTimeSimple = (date) => {
     if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return "—";
     return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
+  const formatDateTimeShort = (date) => {
+    if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return "—";
+    try {
+      return date.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    } catch (err) {
+      return `${date.getMonth() + 1}/${date.getDate()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
   };
 
   const safeDate = (value) => (value instanceof Date && Number.isFinite(value.getTime()) ? value : null);
@@ -429,6 +588,7 @@
     const parts = ranges.map((range) => {
       if (!range.entries.length || !range.anchor) return null;
       const rangeIdx = ranges.indexOf(range);
+      const bandLabel = ranges.length > 1 ? `<span class="adv-asc-label">${rangeIdx === 0 ? "Outer:" : "Inner:"}</span>` : "";
       const targetHour = Array.isArray(hours) ? hours[rangeIdx] ?? hours[0] ?? 0 : hours ?? 0;
       const targetTs = new Date(range.anchor.getTime() + targetHour * HOUR_MS);
 
@@ -459,7 +619,7 @@
           <div class="adv-asc-glyph">${signMeta.icon || "↗"}</div>
           <div class="adv-asc-active-meta">
             <div class="adv-asc-active-title">
-              ${label}
+              ${bandLabel}${label}
               <span class="adv-asc-sign" style="color:${handColor}">${signMeta.name}</span>
               <span class="adv-asc-meta-inline">${decanText} · Orb ${orbText}</span>
             </div>
@@ -979,6 +1139,538 @@
     });
 
     return `<div class="adv-asc-table-grid">${tables.join("")}</div>`;
+  }
+
+  function renderMoonCenter(ranges, offsets, centerEl, handColors = [], showLabels = false, windowDays = 14) {
+    if (!centerEl) return;
+    const parts = ranges
+      .map((range, idx) => {
+        if (!range.entries.length || !range.anchor) return null;
+        const targetOffset = Array.isArray(offsets) ? offsets[idx] ?? offsets[0] ?? 0 : offsets || 0;
+        const targetTs = new Date(range.anchor.getTime() + targetOffset * HOUR_MS);
+        const pickEntry = () => {
+          for (let i = 0; i < range.entries.length; i++) {
+            const entry = range.entries[i];
+            const start = safeDate(entry.start || entry.timestamp);
+            const end = safeDate(entry.end);
+            if (start && end && targetTs >= start && targetTs < end) return entry;
+          }
+          return range.entries[0];
+        };
+        const best = pickEntry();
+        const signMeta = SIGN_META[best.sign] || { name: best.sign || "—", icon: best.emoji || "☾" };
+        const { orb, decan } = computeMoonProgress(best, targetTs);
+        const qualityIcon = QUALITY_ICON[best.quality] || "";
+        const tone = elementStroke(best.element || "Default", 0.6);
+        const handColor = handColors[idx] || tone;
+        const timeLabel = formatDateTimeShort(targetTs);
+
+        const label = showLabels ? `<span class="adv-asc-label">${range.label || range.id}</span>` : "";
+        const bandLabel = ranges.length > 1 ? `<span class="adv-asc-label">${idx === 0 ? "Outer:" : "Inner:"}</span>` : "";
+        return `
+          <div class="adv-asc-active-row adv-moon-active" style="--asc-accent:${tone}">
+            <div class="adv-asc-glyph">${signMeta.icon || "☾"}</div>
+            <div class="adv-asc-active-meta">
+              <div class="adv-asc-active-title">
+                ${bandLabel}${label}
+                <span class="adv-asc-sign" style="color:${handColor}">${signMeta.name}</span>
+                <span class="adv-asc-meta-inline">${decan ? `${formatOrdinal(decan)} Dec.` : "—"} · Orb ${typeof orb === "number" ? orb.toFixed(2) : "—"}°</span>
+              </div>
+              <div class="adv-asc-active-stats">
+                <span>${timeLabel}</span>
+                <span>${qualityIcon ? `${qualityIcon} ` : ""}${best.quality || "—"} ${ELEMENT_ICON[best.element] || ""}</span>
+                <span>Window ${windowDays}d</span>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .filter(Boolean);
+
+    centerEl.innerHTML = `
+      <div class="adv-asc-center-card adv-moon-center">
+        ${parts.join("")}
+      </div>
+    `;
+  }
+
+  function buildMoonClockBlock(moonRanges, metaSource) {
+    if (!moonRanges.length) return { html: "", ids: null };
+    const clockId = `moon-clock-${++moonClockCounter}`;
+    const canvasId = `${clockId}-canvas`;
+    const centerId = `${clockId}-center`;
+    const playId = `${clockId}-play`;
+    const range14Id = `${clockId}-14d`;
+    const range28Id = `${clockId}-28d`;
+    const bodyId = `${clockId}-body`;
+    const dateInfo = formatDateLabel(metaSource || {});
+    const dateLabel = dateInfo.label ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}` : "Requested datetime";
+    const legend = moonRanges
+      .map((r, idx) => {
+        const tagColor = idx === 0 ? PRIMARY_HAND_COLOR : SECONDARY_HAND_COLOR;
+        return `<span class="adv-asc-pill" style="--asc-pill:${tagColor}">${r.label || r.id}</span>`;
+      })
+      .join("");
+
+    const html = `
+      <div class="adv-asc-card adv-moon-card" data-moon-clock="${clockId}">
+        <div class="adv-asc-head">
+          <div>
+            <p class="adv-asc-kicker">Moon clock</p>
+            <p class="adv-asc-sub">Forward from ${dateLabel}</p>
+          </div>
+          <div class="adv-asc-actions">
+            <button type="button" class="adv-asc-play" id="${playId}" aria-pressed="false">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <span>Play</span>
+            </button>
+            <button type="button" class="adv-asc-toggle" id="${range14Id}" aria-pressed="true">Next 2w</button>
+            <button type="button" class="adv-asc-toggle" id="${range28Id}" aria-pressed="false">Next 4w</button>
+          </div>
+        </div>
+        <div class="adv-asc-legend">${legend}</div>
+        <div class="adv-asc-body adv-asc-body--stacked" id="${bodyId}">
+          <div class="adv-asc-canvas-wrap">
+            <canvas id="${canvasId}" class="adv-asc-canvas" aria-label="Moon clock"></canvas>
+          </div>
+          <div id="${centerId}" class="adv-asc-center"></div>
+        </div>
+      </div>
+    `;
+    return { html, ids: { canvasId, centerId, playId, range14Id, range28Id, bodyId } };
+  }
+
+  function initMoonClock(ranges, ids) {
+    if (!ranges.length || !ids) return;
+    const canvas = document.getElementById(ids.canvasId);
+    const playBtn = document.getElementById(ids.playId);
+    const centerEl = document.getElementById(ids.centerId);
+    const range14Btn = document.getElementById(ids.range14Id);
+    const range28Btn = document.getElementById(ids.range28Id);
+    if (!canvas || !centerEl) return;
+
+    if (window.AdvancedApp && typeof window.AdvancedApp._cleanupMoonClock === "function") {
+      try {
+        window.AdvancedApp._cleanupMoonClock();
+      } catch (err) {}
+    }
+
+    const ctx = canvas.getContext("2d");
+    const isDual = ranges.length > 1;
+    const wrapOffset = (offset, windowHours) => {
+      let value = offset;
+      while (value >= windowHours) value -= windowHours;
+      while (value < 0) value += windowHours;
+      return value;
+    };
+    const rings = isDual
+      ? [
+          { outer: 0.9, inner: 0.6, hand: 0.9, handColor: PRIMARY_HAND_COLOR, width: 7 },
+          { outer: 0.52, inner: 0.28, hand: 0.48, handColor: SECONDARY_HAND_COLOR, width: 6 },
+        ]
+      : [{ outer: 0.9, inner: 0.6, hand: 0.88, handColor: PRIMARY_HAND_COLOR, width: 8 }];
+
+    const state = {
+      offsets: ranges.map(() => 0),
+      playing: false,
+      lastTick: performance.now(),
+      windowDays: range28Btn && range28Btn.getAttribute("aria-pressed") === "true" ? 28 : 14,
+    };
+
+    const windowHours = () => state.windowDays * 24;
+    const hourStep = () => (Math.PI * 2) / windowHours();
+
+    const windowForRange = (range) => {
+      const anchor = safeDate(range.anchor) || safeDate(range.entries?.[0]?.start) || new Date();
+      const start = anchor;
+      const end = new Date(start.getTime() + windowHours() * HOUR_MS);
+      return { anchor, start, end };
+    };
+
+    const angleForOffset = (offset) => -Math.PI / 2 + wrapOffset(offset, windowHours()) * hourStep();
+
+    const resetOffsets = () => {
+      state.offsets = ranges.map((range) => {
+        const window = windowForRange(range);
+        return wrapOffset(0, windowHours());
+      });
+    };
+
+    const applyLayout = () => {
+      if (!ids.bodyId) return;
+      const bodyEl = document.getElementById(ids.bodyId);
+      if (bodyEl) {
+        const isStacked = isDual || window.innerWidth < 768;
+        bodyEl.classList.toggle("adv-asc-body--stacked", isStacked);
+      }
+    };
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      const baseSize = parent ? parent.clientWidth : canvas.getBoundingClientRect().width;
+      const target = Math.max(280, baseSize || 360);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = target * dpr;
+      canvas.height = target * dpr;
+      canvas.style.width = "100%";
+      canvas.style.height = `${target}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+      applyLayout();
+    };
+
+    const drawRing = (range, ringConfig, ringIdx, activeOffset) => {
+      if (!range.entries.length) return { handColor: ringConfig.handColor };
+      const { width, height } = canvas;
+      const w = width / (window.devicePixelRatio || 1);
+      const h = height / (window.devicePixelRatio || 1);
+      const cx = w / 2;
+      const cy = h / 2;
+      const radius = Math.min(w, h) / 2;
+      const outerR = radius * ringConfig.outer;
+      const innerR = radius * ringConfig.inner;
+      const boundaries = Array.from({ length: state.windowDays + 1 }, (_, i) => angleForOffset(i * 24));
+      const rangeWindow = windowForRange(range);
+
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      const angleForTime = (date) => {
+        const spanMs = windowHours() * HOUR_MS;
+        const frac = (date.getTime() - rangeWindow.start.getTime()) / spanMs;
+        return -Math.PI / 2 + frac * Math.PI * 2;
+      };
+
+      const renderSegments = computeSignSegments(range, rangeWindow.start, rangeWindow.end).map((seg) => {
+        const startAngle = angleForTime(seg.start);
+        let endAngle = angleForTime(seg.end);
+        if (endAngle <= startAngle) endAngle += Math.PI * 2;
+        return { ...seg, startAngle, endAngle };
+      });
+
+      const mergedSegments = [];
+      renderSegments.forEach((seg) => {
+        const prev = mergedSegments[mergedSegments.length - 1];
+        if (prev && prev.sign === seg.sign && Math.abs(seg.startAngle - prev.endAngle) < 1e-4) {
+          prev.endAngle = seg.endAngle;
+          prev.end = seg.end;
+        } else {
+          mergedSegments.push({ ...seg });
+        }
+      });
+
+      const normalizedOffset = wrapOffset(activeOffset ?? 0, windowHours());
+      const activeTime = new Date(rangeWindow.start.getTime() + normalizedOffset * HOUR_MS);
+      const highlightStart = angleForOffset(normalizedOffset);
+      let highlightEnd = angleForOffset(normalizedOffset + 1);
+      if (highlightEnd <= highlightStart) highlightEnd += Math.PI * 2;
+
+      if (ringIdx === 0) {
+        ctx.save();
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.65;
+        boundaries.forEach((ang) => {
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(ang) * innerR, Math.sin(ang) * innerR);
+          ctx.lineTo(Math.cos(ang) * outerR, Math.sin(ang) * outerR);
+          ctx.stroke();
+        });
+        ctx.restore();
+      }
+
+      let currentSignHighlighter = null;
+      mergedSegments.forEach((seg) => {
+        const sliceStart = seg.startAngle;
+        const sliceEnd = seg.endAngle;
+        const srcEntry = seg.entry;
+        const isActive = activeTime >= seg.start && activeTime < seg.end;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, outerR, sliceStart, sliceEnd);
+        ctx.arc(0, 0, innerR, sliceEnd, sliceStart, true);
+        ctx.closePath();
+        ctx.fillStyle = elementFill(srcEntry.element, isDual ? 0.24 : 0.3);
+        ctx.strokeStyle = elementStroke(srcEntry.element, 0.5);
+        ctx.lineWidth = 1.5;
+        ctx.fill();
+        ctx.stroke();
+
+        const signMeta = SIGN_META[srcEntry.sign] || {};
+        const glyph = signMeta.icon || srcEntry.emoji || "?";
+        const decanCenter = sliceStart + (sliceEnd - sliceStart) / 6;
+        const labelR = innerR + (outerR - innerR) * 0.45;
+        const tx = Math.cos(decanCenter) * labelR;
+        const ty = Math.sin(decanCenter) * labelR;
+        ctx.fillStyle = "#e8f4ff";
+        ctx.font = `${Math.max(12, radius * 0.06)}px "Space Grotesk", "Inter", system-ui`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(glyph, tx, ty);
+
+        if (isActive) {
+          currentSignHighlighter = {
+            startAngle: sliceStart,
+            endAngle: sliceEnd,
+            color: elementStroke(srcEntry.element, 0.9),
+          };
+        }
+      });
+
+      // day ticks
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.lineWidth = 1;
+      const tickOuter = outerR * 1.02;
+      for (let i = 0; i < state.windowDays; i++) {
+        const a = angleForOffset(i * 24);
+        const r1 = outerR * 0.96;
+        const r2 = tickOuter;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * r1, Math.sin(a) * r1);
+        ctx.lineTo(Math.cos(a) * r2, Math.sin(a) * r2);
+        ctx.stroke();
+
+        const labelR = ringIdx === 0 ? outerR * 1.08 : innerR * 0.95;
+        const labelDate = new Date(rangeWindow.start.getTime() + i * DAY_MS);
+        const labelVal = `${labelDate.getMonth() + 1}/${pad(labelDate.getDate())}`;
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = `${Math.max(9, radius * 0.035)}px "Space Grotesk", "Inter", system-ui`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(labelVal, Math.cos(a) * labelR, Math.sin(a) * labelR);
+      }
+
+      if (currentSignHighlighter) {
+        const outerHighlightR = outerR * 1.01;
+        const innerHighlightR = outerR * 0.99;
+        ctx.save();
+        ctx.lineCap = "round";
+        ctx.globalAlpha = 0.95;
+        ctx.beginPath();
+        ctx.arc(0, 0, outerHighlightR, currentSignHighlighter.startAngle + 0.002, currentSignHighlighter.endAngle - 0.002);
+        ctx.strokeStyle = currentSignHighlighter.color;
+        ctx.lineWidth = 4.5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, innerHighlightR, currentSignHighlighter.startAngle + 0.002, currentSignHighlighter.endAngle - 0.002);
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.restore();
+      return { handColor: currentSignHighlighter?.color || ringConfig.handColor };
+    };
+
+    const drawHands = (activeColors) => {
+      const { width, height } = canvas;
+      const w = width / (window.devicePixelRatio || 1);
+      const h = height / (window.devicePixelRatio || 1);
+      const cx = w / 2;
+      const cy = h / 2;
+      const radius = Math.min(w, h) / 2;
+      ranges.forEach((range, idx) => {
+        const handCfg = rings[idx] || rings[0];
+        const offset = wrapOffset(state.offsets[idx] ?? state.offsets[0] ?? 0, windowHours());
+        const angle = angleForOffset(offset);
+        const handR = radius * handCfg.hand;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.strokeStyle = activeColors[idx] || handCfg.handColor;
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(angle) * handR, Math.sin(angle) * handR);
+        ctx.stroke();
+        ctx.restore();
+      });
+      renderMoonCenter(
+        ranges,
+        state.offsets,
+        centerEl,
+        rings.map((r) => r.handColor),
+        true,
+        state.windowDays
+      );
+    };
+
+    const draw = () => {
+      const { width, height } = canvas;
+      const w = width / (window.devicePixelRatio || 1);
+      const h = height / (window.devicePixelRatio || 1);
+      ctx.clearRect(0, 0, w, h);
+
+      const activeColors = ranges.map((range, idx) => {
+        const offset = wrapOffset(state.offsets[idx] ?? state.offsets[0] ?? 0, windowHours());
+        const result = drawRing(range, rings[idx] || rings[0], idx, offset);
+        return result?.handColor || (rings[idx] || rings[0]).handColor;
+      });
+      drawHands(activeColors);
+    };
+
+    const tick = (ts) => {
+      if (!state.playing) return;
+      const delta = (ts - state.lastTick) / 1000;
+      state.lastTick = ts;
+      const windowHrs = windowHours();
+      state.offsets = state.offsets.map((h) => wrapOffset(h + delta, windowHrs));
+      draw();
+      requestAnimationFrame(tick);
+    };
+
+    const setOffsetFromClick = (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const scale = canvas.width / rect.width;
+      const x = (event.clientX - rect.left) * scale - canvas.width / 2;
+      const y = (event.clientY - rect.top) * scale - canvas.height / 2;
+      const angle = Math.atan2(y, x);
+      const rawOffset = (angle + Math.PI / 2) / hourStep();
+      const snapped = Math.round(rawOffset);
+      if (isDual) {
+        const r = Math.sqrt(x * x + y * y);
+        const radius = Math.min(canvas.width, canvas.height) / 2;
+        const radial = r / radius;
+        const ringIdx = radial > (rings[0].inner + rings[0].outer) / 2 ? 0 : 1;
+        const normalized = wrapOffset(snapped, windowHours());
+        state.offsets[ringIdx] = normalized;
+      } else {
+        const normalized = wrapOffset(snapped, windowHours());
+        state.offsets = [normalized];
+      }
+      state.playing = false;
+      if (playBtn) {
+        playBtn.setAttribute("aria-pressed", "false");
+        playBtn.innerHTML =
+          '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v14l11-7z" /></svg><span>Play</span>';
+      }
+      draw();
+    };
+
+    const togglePlay = () => {
+      if (!ranges.length) {
+        state.playing = false;
+        return;
+      }
+      state.playing = !state.playing;
+      state.lastTick = performance.now();
+      if (playBtn) {
+        playBtn.setAttribute("aria-pressed", state.playing ? "true" : "false");
+        playBtn.innerHTML = state.playing
+          ? '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6h2v12h-2zM12 12h2v6h-2z"/></svg><span>Pause</span>'
+          : '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v14l11-7z" /></svg><span>Play</span>';
+      }
+      if (state.playing) {
+        requestAnimationFrame(tick);
+      }
+    };
+
+    const setWindowDays = (days) => {
+      if (days !== 14 && days !== 28) return;
+      state.windowDays = days;
+      resetOffsets();
+      if (range14Btn) range14Btn.setAttribute("aria-pressed", days === 14 ? "true" : "false");
+      if (range28Btn) range28Btn.setAttribute("aria-pressed", days === 28 ? "true" : "false");
+      resize();
+      renderMoonCenter(ranges, state.offsets, centerEl, rings.map((r) => r.handColor), isDual, state.windowDays);
+    };
+
+    const onRange14 = () => setWindowDays(14);
+    const onRange28 = () => setWindowDays(28);
+    if (playBtn) playBtn.addEventListener("click", togglePlay);
+    if (range14Btn) range14Btn.addEventListener("click", onRange14);
+    if (range28Btn) range28Btn.addEventListener("click", onRange28);
+    window.addEventListener("resize", resize);
+    canvas.addEventListener("click", setOffsetFromClick);
+
+    if (window.AdvancedApp) {
+      window.AdvancedApp._cleanupMoonClock = () => {
+        window.removeEventListener("resize", resize);
+        if (playBtn) playBtn.removeEventListener("click", togglePlay);
+        canvas.removeEventListener("click", setOffsetFromClick);
+        if (range14Btn) range14Btn.removeEventListener("click", onRange14);
+        if (range28Btn) range28Btn.removeEventListener("click", onRange28);
+      };
+    }
+
+    resetOffsets();
+    resize();
+    renderMoonCenter(ranges, state.offsets, centerEl, rings.map((r) => r.handColor), isDual, state.windowDays);
+    draw();
+  }
+
+  function buildMoonTables(ranges) {
+    if (!ranges.length) return "";
+    const formatDateTime = (ts) => {
+      if (!(ts instanceof Date) || !Number.isFinite(ts.getTime())) return "—";
+      return ts.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    };
+    const renderRow = (entry) => {
+      const start = entry.start || entry.timestamp;
+      const end = entry.end;
+      const signMeta = SIGN_META[entry.sign] || { name: entry.sign || "—", icon: entry.emoji || "☾" };
+      const qualityIcon = QUALITY_ICON[entry.quality] || "";
+      const elementIcon = ELEMENT_ICON[entry.element] || "";
+      const swatchColor = elementFill(entry.element, 1).replace("rgba(", "rgb(").replace(/,\s*1\)$/, ")");
+      const durationHours =
+        start instanceof Date && end instanceof Date
+          ? (end.getTime() - start.getTime()) / HOUR_MS
+          : null;
+      const durationLabel =
+        durationHours !== null ? `${(durationHours / 24).toFixed(2)}d (${durationHours.toFixed(1)}h)` : "—";
+      const phase =
+        start instanceof Date
+          ? getLunationInfo({
+              year: start.getFullYear(),
+              month: start.getMonth() + 1,
+              day: start.getDate(),
+              hour: start.getHours(),
+              minute: start.getMinutes(),
+            })
+          : null;
+      const illum = phase ? Math.round((phase.illumination ?? phase.fraction) * 100) : null;
+      const phaseLabel = phase ? `${phase.icon || ""} ${phase.name}` : "—";
+      return `
+        <tr>
+          <td>${formatDateTime(start)}</td>
+          <td>${formatDateTime(end)}</td>
+          <td>${signMeta.icon || ""} ${signMeta.name}</td>
+          <td>${durationLabel}</td>
+          <td>${illum !== null ? `${illum}%` : "—"}</td>
+          <td>${phaseLabel}</td>
+          <td>${qualityIcon ? `${qualityIcon} ` : ""}${entry.quality || "—"}</td>
+          <td><span class="adv-asc-color-swatch" style="background:${swatchColor}"></span>${elementIcon ? `${elementIcon} ` : ""}${entry.element || "—"}</td>
+        </tr>
+      `;
+    };
+
+    const tables = ranges.map((range, idx) => {
+      const handColor = idx === 0 ? PRIMARY_HAND_COLOR : SECONDARY_HAND_COLOR;
+      const rows = (range.entries || []).map(renderRow).join("");
+      return `
+        <table class="adv-moon-table">
+          <caption style="color:${handColor}">${range.label || range.id}</caption>
+          <thead>
+            <tr>
+              <th>Start</th>
+              <th>End</th>
+              <th>Sign</th>
+              <th>Duration</th>
+              <th>Illum.</th>
+              <th>Phase</th>
+              <th>Quality</th>
+              <th>Element</th>
+            </tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="8">No data</td></tr>'}</tbody>
+        </table>
+      `;
+    });
+
+    return `<div class="adv-asc-table-grid adv-moon-table-grid">${tables.join("")}</div>`;
   }
 
   const getDefaultRange = () => {
@@ -1756,8 +2448,9 @@
       payload?.moment ||
       chart;
     const ascendantRanges = normalizeAscendantRanges(payload);
+    const moonRanges = normalizeMoonRanges(payload);
+    const priority = ["transit", "second", "first", "natal"];
     if (ascendantRanges.length > 1) {
-      const priority = ["transit", "second", "first", "natal"];
       ascendantRanges.sort((a, b) => {
         const ai = priority.indexOf((a.id || "").toLowerCase());
         const bi = priority.indexOf((b.id || "").toLowerCase());
@@ -1766,7 +2459,17 @@
         return aval - bval;
       });
     }
+    if (moonRanges.length > 1) {
+      moonRanges.sort((a, b) => {
+        const ai = priority.indexOf((a.id || "").toLowerCase());
+        const bi = priority.indexOf((b.id || "").toLowerCase());
+        const aval = ai === -1 ? 99 : ai;
+        const bval = bi === -1 ? 99 : bi;
+        return aval - bval;
+      });
+    }
     const clockBlock = buildAscendantClockBlock(ascendantRanges, metaSource);
+    const moonClockBlock = buildMoonClockBlock(moonRanges, metaSource);
     const aspectContent =
       aspectMatrix +
       majorAspectsList +
@@ -1782,11 +2485,12 @@
 
     dom.summaryEl.innerHTML = `${meta}${sections}`;
     enableSortableTables(dom.summaryEl);
+    const hasDual = ascendantRanges.length > 1 || moonRanges.length > 1;
     if (dom.ascSummaryContainer) {
-      if (!ascendantRanges.length) {
-        dom.ascSummaryContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the ascendant summary.</p>";
+      if (!ascendantRanges.length && !moonRanges.length) {
+        dom.ascSummaryContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the summary.</p>";
       } else {
-        const summaries = renderSummaryPanel(points, ascendantRanges, metaSource, formatTimeSimple, ascendantRanges.length > 1);
+        const summaries = renderSummaryPanel(points, ascendantRanges, moonRanges, metaSource, formatTimeSimple, hasDual);
         dom.ascSummaryContainer.innerHTML = summaries || "<p class=\"hint\">No summary available.</p>";
       }
     }
@@ -1798,6 +2502,16 @@
         const tables = buildAscendantTables(ascendantRanges);
         dom.ascClockContainer.innerHTML = `${clockBlock.html}${tables}`;
         initAscendantClock(ascendantRanges, clockBlock.ids);
+      }
+    }
+
+    if (dom.moonClockContainer) {
+      if (!moonRanges.length) {
+        dom.moonClockContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the lunar clock and sign breakdown.</p>";
+      } else {
+        const tables = buildMoonTables(moonRanges);
+        dom.moonClockContainer.innerHTML = `${moonClockBlock.html}${tables}`;
+        initMoonClock(moonRanges, moonClockBlock.ids);
       }
     }
     attachPatternModalHandlers();
@@ -1945,6 +2659,17 @@
         dom.ascClockCollapse.setAttribute("aria-expanded", isHidden ? "false" : "true");
         dom.ascClockCollapse.setAttribute("aria-label", isHidden ? "Expand ascendant panel" : "Collapse ascendant panel");
         dom.ascClockCollapse.innerHTML = isHidden
+          ? '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>'
+          : '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 15l6-6 6 6"/></svg>';
+      });
+    }
+
+    if (dom.moonClockCollapse && dom.moonClockBody) {
+      dom.moonClockCollapse.addEventListener("click", () => {
+        const isHidden = dom.moonClockBody.classList.toggle("hidden");
+        dom.moonClockCollapse.setAttribute("aria-expanded", isHidden ? "false" : "true");
+        dom.moonClockCollapse.setAttribute("aria-label", isHidden ? "Expand Moon panel" : "Collapse Moon panel");
+        dom.moonClockCollapse.innerHTML = isHidden
           ? '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>'
           : '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 15l6-6 6 6"/></svg>';
       });

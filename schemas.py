@@ -187,6 +187,56 @@ class AscendantDayRange(BaseModel):
     )
 
 
+class MoonRangeEntry(BaseModel):
+    """
+    Lunar sign interval with explicit start/end timestamps.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    start: datetime = Field(
+        ...,
+        validation_alias=AliasChoices("start", "timestamp"),
+        serialization_alias="start",
+        description="Start of the lunar sign interval (rounded to the hour).",
+    )
+    end: datetime = Field(
+        ...,
+        description="Timestamp (tz-aware) when the Moon leaves this sign (start of the next sign).",
+    )
+    sign: Optional[str] = Field(default=None, description="Three-letter sign code, e.g. 'Ari', 'Tau'.")
+    sign_num: Optional[int] = Field(default=None, description="One-based sign index (Aries=1, Pisces=12).")
+    element: Optional[str] = Field(default=None, description="Element for the Moon at this interval (Fire, Earth, Air, Water).")
+    quality: Optional[str] = Field(default=None, description="Quality for the Moon at this interval (Cardinal, Fixed, Mutable).")
+    emoji: Optional[str] = Field(default=None, description="Sign glyph when available.")
+
+
+class MoonMonthRange(BaseModel):
+    """
+    Month-long lunar sweep starting at the requested datetime.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str = Field(
+        ...,
+        description="Stable identifier for the range (e.g. 'natal', 'transit', 'first', 'second').",
+    )
+    label: Optional[str] = Field(
+        default=None,
+        description="Display label for this Moon range.",
+    )
+    anchor: datetime = Field(
+        ...,
+        description="Anchor datetime used as the start of the window.",
+    )
+    entries: List[MoonRangeEntry] = Field(
+        default_factory=list,
+        alias="entries",
+        description="Lunar sign entries across the window.",
+    )
+
+
 class AspectPointSummary(BaseModel):
     """
     Lightweight summary for a chart point used in aspect computation.
@@ -282,6 +332,12 @@ class NatalRequest(BaseModel):
         serialization_alias="ascendantRangeEnabled",
         description="When true, include a +/-12h hourly ascendant sweep around the provided datetime.",
     )
+    moon_range_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("moonRangeEnabled", "moon_range_enabled"),
+        serialization_alias="moonRangeEnabled",
+        description="When true, include a month-long Moon sign sweep around the provided datetime.",
+    )
     birth: BirthData = Field(
         default_factory=BirthData,
         description="Birth data used to compute the natal chart. Pre-filled with example values.",
@@ -304,6 +360,11 @@ class NatalResponse(BaseModel):
         default_factory=list,
         serialization_alias="ascendantDayRange",
         description="Hourly ascendant sweep around the requested birth datetime when enabled.",
+    )
+    moon_month_range: List[MoonMonthRange] = Field(
+        default_factory=list,
+        serialization_alias="moonMonthRange",
+        description="Moon sign sweep around the requested birth datetime when enabled.",
     )
     subject: dict = Field(
         ...,
@@ -440,6 +501,12 @@ class TransitMomentRequest(BaseModel):
         serialization_alias="ascendantRangeEnabled",
         description="When true, include hourly ascendant data around the requested moment (and natal when provided).",
     )
+    moon_range_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("moonRangeEnabled", "moon_range_enabled"),
+        serialization_alias="moonRangeEnabled",
+        description="When true, include a month-long Moon sign sweep for the requested moment (and natal when provided).",
+    )
     moment: TransitMomentInput = Field(
         default_factory=TransitMomentInput,
         description="Moment/location used as the transit snapshot.",
@@ -463,6 +530,11 @@ class TransitSnapshot(BaseModel):
         default_factory=list,
         serialization_alias="ascendantDayRange",
         description="Hourly ascendant sweep(s) for this snapshot when enabled.",
+    )
+    moon_month_range: List[MoonMonthRange] = Field(
+        default_factory=list,
+        serialization_alias="moonMonthRange",
+        description="Moon sign sweep(s) for this snapshot when enabled.",
     )
     timestamp: datetime = Field(
         ...,
@@ -504,6 +576,11 @@ class TransitResponse(BaseModel):
         serialization_alias="ascendantDayRange",
         description="Hourly ascendant sweeps around the requested moment (plus natal when provided).",
     )
+    moon_month_range: List[MoonMonthRange] = Field(
+        default_factory=list,
+        serialization_alias="moonMonthRange",
+        description="Moon sign sweeps around the requested moment (plus natal when provided) when enabled.",
+    )
     snapshot: TransitSnapshot
 
 
@@ -520,6 +597,12 @@ class TransitRangeRequest(BaseModel):
         validation_alias=AliasChoices("ascendantRangeEnabled", "ascendant_range_enabled"),
         serialization_alias="ascendantRangeEnabled",
         description="When true, include an ascendant +/-12h sweep around the start moment (and natal when provided).",
+    )
+    moon_range_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("moonRangeEnabled", "moon_range_enabled"),
+        serialization_alias="moonRangeEnabled",
+        description="When true, include a month-long Moon sign sweep around the start moment (and natal when provided).",
     )
     moment: TransitMomentInput = Field(
         default_factory=TransitMomentInput,
@@ -553,6 +636,11 @@ class TransitRangeResponse(BaseModel):
         default_factory=list,
         serialization_alias="ascendantDayRange",
         description="Ascendant sweeps around the start moment (and natal when provided) when enabled.",
+    )
+    moon_month_range: List[MoonMonthRange] = Field(
+        default_factory=list,
+        serialization_alias="moonMonthRange",
+        description="Moon sign sweeps around the start moment (and natal when provided) when enabled.",
     )
     snapshots: List[TransitSnapshot]
 
@@ -651,6 +739,12 @@ class RelationshipRequest(BaseModel):
         serialization_alias="ascendantRangeEnabled",
         description="When true, include ascendant +/-12h sweeps for both partners.",
     )
+    moon_range_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("moonRangeEnabled", "moon_range_enabled"),
+        serialization_alias="moonRangeEnabled",
+        description="When true, include month-long Moon sign sweeps for both partners.",
+    )
     first: BirthData = Field(
         default_factory=BirthData,
         description="First subject birth data.",
@@ -674,6 +768,11 @@ class RelationshipResponse(BaseModel):
         default_factory=list,
         serialization_alias="ascendantDayRange",
         description="Ascendant sweeps for both partners when enabled.",
+    )
+    moon_month_range: List[MoonMonthRange] = Field(
+        default_factory=list,
+        serialization_alias="moonMonthRange",
+        description="Moon sign sweeps for both partners when enabled.",
     )
     first_subject: dict = Field(
         ...,

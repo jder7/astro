@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from schemas import TransitMomentRequest, TransitResponse, TransitSnapshot, BirthData
 from aspects.ascendant_range import compute_ascendant_day_range
+from aspects.moon_range import compute_moon_month_range
 from utils import build_subject, compute_major_aspects, compute_normal_aspects, ensure_config, to_local_datetime
 
 router = APIRouter(tags=["transit"])
@@ -54,6 +55,7 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
 
     timestamp = to_local_datetime(moment_birth)
     ascendant_day_range = []
+    moon_month_range = []
     if payload.ascendant_range_enabled:
         ascendant_day_range.append(
             compute_ascendant_day_range(
@@ -75,6 +77,27 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
                     label=payload.birth.name or "Natal",
                 )
             )
+    if payload.moon_range_enabled:
+        moon_month_range.append(
+            compute_moon_month_range(
+                moment_birth,
+                cfg,
+                timestamp,
+                identifier="transit",
+                label="Transit",
+            )
+        )
+        if payload.birth is not None:
+            natal_anchor = to_local_datetime(payload.birth)
+            moon_month_range.append(
+                compute_moon_month_range(
+                    payload.birth,
+                    cfg,
+                    natal_anchor,
+                    identifier="natal",
+                    label=payload.birth.name or "Natal",
+                )
+            )
 
     snapshot = TransitSnapshot(
         timestamp=timestamp,
@@ -85,5 +108,10 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
         natal_aspects=natal_aspects,
         natal_major_aspects=natal_major_aspects,
         ascendant_day_range=ascendant_day_range,
+        moon_month_range=moon_month_range,
     )
-    return TransitResponse(snapshot=snapshot, ascendant_day_range=ascendant_day_range)
+    return TransitResponse(
+        snapshot=snapshot,
+        ascendant_day_range=ascendant_day_range,
+        moon_month_range=moon_month_range,
+    )

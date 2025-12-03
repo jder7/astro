@@ -6,6 +6,13 @@
   const { config } = App;
   const { getConfigFromInputs } = config;
   const ascendantRangeEnabled = !!(App.flags && App.flags.ascendantRangeEnabled);
+  const moonRangeEnabled = !!(App.flags && App.flags.moonRangeEnabled);
+
+  console.info(`[${ns}] range flags`, {
+    ascendantRangeEnabled,
+    moonRangeEnabled,
+    flags: App.flags || {},
+  });
 
   function getValue(id) {
     const el = document.getElementById(id);
@@ -107,6 +114,7 @@
       return {
         payload: {
           ascendantRangeEnabled,
+          moonRangeEnabled,
           birth,
           config: normalizedConfig,
         },
@@ -120,6 +128,7 @@
       return {
         payload: {
           ascendantRangeEnabled,
+          moonRangeEnabled,
           moment,
           birth: null,
           config: normalizedConfig,
@@ -134,6 +143,7 @@
       return {
         payload: {
           ascendantRangeEnabled,
+          moonRangeEnabled,
           moment,
           birth,
           config: normalizedConfig,
@@ -169,6 +179,7 @@
       return {
         payload: {
           ascendantRangeEnabled,
+          moonRangeEnabled,
           birth: null,
           moment: null,
           first,
@@ -184,6 +195,7 @@
     return {
       payload: {
         ascendantRangeEnabled,
+        moonRangeEnabled,
         birth: null,
         moment,
         config: normalizedConfig,
@@ -197,6 +209,7 @@
   function buildRelationshipPayload() {
     return {
       ascendantRangeEnabled,
+      moonRangeEnabled,
       first: buildRelationshipPartner("first", {
         name: "Partner A",
         date: "1990-01-01",

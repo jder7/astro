@@ -11,7 +11,7 @@
     <script>
       window.AppNamespace = "AdvancedApp";
       window.AdvancedApp = window.AdvancedApp || {};
-      window.AdvancedApp.flags = { ...(window.AdvancedApp.flags || {}), skipSvg: true, ascendantRangeEnabled: true };
+      window.AdvancedApp.flags = { ...(window.AdvancedApp.flags || {}), skipSvg: true, ascendantRangeEnabled: true, moonRangeEnabled: true };
     </script>
     <link rel="stylesheet" href="/static/css/advanced/style.css" />
   </head>
@@ -534,6 +534,32 @@
               <div id="ascClockBody">
                 <div id="ascClockContainer" class="summary-content">
                   <p class="hint">Generate a chart to see the ascendant clock and hourly breakdown.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flowbite-card">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <p class="text-sm text-cyan-200/80 font-semibold">Moon</p>
+                  <h2 class="text-xl font-semibold text-white">Cycle &amp; Range</h2>
+                </div>
+                <button
+                  type="button"
+                  id="moonClockCollapse"
+                  class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-cyan-400 hover:shadow-cyan-500/25 transition"
+                  aria-expanded="true"
+                  aria-controls="moonClockBody"
+                  aria-label="Collapse Moon panel"
+                >
+                  <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
+              <div id="moonClockBody">
+                <div id="moonClockContainer" class="summary-content">
+                  <p class="hint">Generate a chart to see the lunar clock, next sign, and month-long breakdown.</p>
                 </div>
               </div>
             </div>
