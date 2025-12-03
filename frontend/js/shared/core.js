@@ -58,6 +58,17 @@
     opposition: "☍",
   };
 
+  // Chaldean planetary day rulers (0 = Sunday).
+  const CHALDEAN_DAY_RULERS = {
+    0: "sun",
+    1: "moon",
+    2: "mars",
+    3: "mercury",
+    4: "jupiter",
+    5: "venus",
+    6: "saturn",
+  };
+
   const POINTS_ICONS = {
     sun: "☉",
     moon: "☾",
@@ -406,6 +417,44 @@
     return clean || "House";
   }
 
+  function computeIlluminationFromAbsPos(sunPos, moonPos) {
+    const sunDeg = Number(sunPos);
+    const moonDeg = Number(moonPos);
+    if (!Number.isFinite(sunDeg) || !Number.isFinite(moonDeg)) return null;
+    const deg = Math.abs(((moonDeg - sunDeg) % 360 + 360) % 360);
+    const rad = (deg * Math.PI) / 180;
+    const illum = ((1 - Math.cos(rad)) / 2) * 100;
+    return Number.isFinite(illum) ? illum : null;
+  }
+
+  function getLunationInfo(parts) {
+    if (!parts) return null;
+    const { year, month, day, hour = 0, minute = 0 } = parts;
+    if ([year, month, day].some((n) => !Number.isFinite(n))) return null;
+
+    const synodic = 29.530588853;
+    const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14);
+    const target = Date.UTC(year, (month || 1) - 1, day || 1, hour || 0, minute || 0);
+    const daysSince = (target - knownNewMoon) / 86400000;
+    const normalized = ((daysSince % synodic) + synodic) % synodic;
+    const fraction = normalized / synodic;
+    const illumination = 0.5 * (1 - Math.cos((normalized / 29.53) * 2 * Math.PI));
+
+    const idx = Math.floor((fraction * 8 + 0.5)) % 8;
+    const phase = MOON_PHASES[idx];
+    if (!phase) return null;
+    const age = normalized;
+
+    return {
+      name: phase.name,
+      icon: phase.icon,
+      fraction,
+      illumination,
+      age,
+      cycle: `${age.toFixed(1)} / 29.5 days`,
+    };
+  }
+
   function formatDateLabel(obj) {
     if (!obj) return { label: "—", weekday: "", tzShort: "" };
     const iso = obj.iso_formatted_local_datetime || obj.iso_formatted_utc_datetime;
@@ -511,5 +560,8 @@
     formatHouseLabelShort,
     formatDateLabel,
     capitalise,
+    CHALDEAN_DAY_RULERS,
+    computeIlluminationFromAbsPos,
+    getLunationInfo,
   };
 })();

@@ -20,6 +20,7 @@
     summaryEl: document.getElementById("summaryContent"),
     apiCollapseBtn: document.getElementById("apiCollapseBtn"),
     apiResponseBody: document.getElementById("apiResponseBody"),
+    ascSummaryContainer: document.getElementById("ascSummaryContainer"),
     ascClockContainer: document.getElementById("ascClockContainer"),
     ascClockBody: document.getElementById("ascClockBody"),
     ascClockCollapse: document.getElementById("ascClockCollapse"),
@@ -43,6 +44,9 @@
     formatHouseLabelShort,
     formatDateLabel,
     capitalise,
+    CHALDEAN_DAY_RULERS,
+    computeIlluminationFromAbsPos,
+    getLunationInfo,
   } = shared;
   const flags = (app.flags = { ...(app.flags || {}), skipSvg: true });
   console.info("[advanced] main init", { ns, skipSvg: flags.skipSvg });
@@ -110,6 +114,184 @@
     const decan = Math.max(1, Math.min(3, Math.floor(orb / 10) + 1));
     return { orb, decan };
   };
+
+  const computeDecan = (position) => {
+    if (!Number.isFinite(position)) return null;
+    return Math.max(1, Math.min(3, Math.floor(position / 10) + 1));
+  };
+
+  const computeMoonIllumination = (points) => {
+    const moon = points?.moon;
+    const sun = points?.sun;
+    if (typeof moon?.illumination_percentage === "number") return moon.illumination_percentage;
+    if (typeof moon?.illumination === "number") return moon.illumination;
+    if (typeof moon?.illumination_percentage === "string") return moon.illumination_percentage;
+    if (typeof moon?.illumination === "string") return moon.illumination;
+    const sunPos = typeof sun?.abs_pos === "number" ? sun.abs_pos : null;
+    const moonPos = typeof moon?.abs_pos === "number" ? moon.abs_pos : null;
+    if (sunPos === null || moonPos === null) return null;
+    return computeIlluminationFromAbsPos(sunPos, moonPos);
+  };
+
+  const pickPoint = (points, key) => {
+    const target = normalizePointKey(key);
+    return (
+      Object.entries(points || {}).find(([k]) => normalizePointKey(k) === target)?.[1] ||
+      points?.[key] ||
+      null
+    );
+  };
+
+  const summarizePoint = (point) => {
+    const pos = typeof point?.position === "number" ? point.position : typeof point?.orb === "number" ? point.orb : null;
+    return {
+      sign: point?.sign || null,
+      quality: point?.quality || null,
+      element: point?.element || null,
+      orb: pos,
+      decan: computeDecan(pos),
+      emoji: point?.emoji,
+    };
+  };
+
+  const formatSummaryRow = (label, icon, data, extras = "") => {
+    const signMeta = SIGN_META[data.sign] || { name: data.sign || "—", icon: data.emoji || "" };
+    const orbText = Number.isFinite(data.orb) ? `${data.orb.toFixed(2)}°` : "—";
+    const decanText = data.decan ? `${formatOrdinal(data.decan)} Dec.` : "—";
+    const elementIcon = ELEMENT_ICON[data.element] || "";
+    const qualityIcon = QUALITY_ICON[data.quality] || "";
+    return `
+      <div class="adv-summary-row">
+        <div class="adv-summary-label">${icon || ""}<span>${label}</span></div>
+        <div class="adv-summary-values">
+          <span>${signMeta.icon || ""} ${signMeta.name}</span>
+          <span>${decanText}</span>
+          <span>${orbText}</span>
+          <span>${qualityIcon ? `${qualityIcon} ` : ""}${data.quality || "—"}</span>
+          <span>${elementIcon ? `${elementIcon} ` : ""}${data.element || "—"}</span>
+          ${extras ? `<span class="adv-summary-extra">${extras}</span>` : ""}
+        </div>
+      </div>
+    `;
+  };
+
+  function buildAscSummary(range, formatTimeFn) {
+    if (!range || !Array.isArray(range.entries) || !range.entries.length) return null;
+    const anchor = safeDate(range.anchor) || safeDate(range.entries[0].start) || new Date();
+    const current =
+      range.entries.find((e) => {
+        const start = safeDate(e.start || e.timestamp);
+        const end = safeDate(e.end);
+        return start && end && anchor >= start && anchor < end;
+      }) || range.entries[0];
+    const currentProgress = computeAscProgress(current, anchor);
+    const idx = range.entries.indexOf(current);
+    const nextEntry = idx !== -1 && range.entries[idx + 1] ? range.entries[idx + 1] : null;
+    const nextSign = nextEntry?.sign || null;
+    const nextTime =
+      nextEntry?.start && nextEntry.start instanceof Date && Number.isFinite(nextEntry.start.getTime())
+        ? formatTimeFn(nextEntry.start)
+        : "—";
+    return {
+      current,
+      orb: currentProgress.orb,
+      decan: currentProgress.decan,
+      nextSign,
+      nextTime,
+    };
+  }
+
+  function renderSummaryPanel(points, ascendantRanges, metaSource, formatTimeFn, isDual) {
+    if (!ascendantRanges.length) return "";
+    const anchor = safeDate(ascendantRanges[0]?.anchor) || safeDate(metaSource?.timestamp) || new Date();
+    const dateInfo = formatDateLabel(metaSource || {});
+    const dateLabel = dateInfo.label ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}` : "Requested datetime";
+    const dayIdx = anchor instanceof Date && Number.isFinite(anchor.getTime()) ? anchor.getDay() : new Date().getDay();
+    const dayRulerKey = CHALDEAN_DAY_RULERS?.[dayIdx] || null;
+    const dayRulerPt = dayRulerKey ? pickPoint(points, dayRulerKey) : null;
+    const weekdayLabel =
+      anchor instanceof Date && Number.isFinite(anchor.getTime())
+        ? anchor.toLocaleDateString("en-GB", { weekday: "long" })
+        : formatDateLabel(metaSource || {}).weekday || "";
+    const dayRulerName = dayRulerKey ? capitalise(dayRulerKey) : "—";
+    const dayRulerIcon = dayRulerKey ? POINTS_ICONS[dayRulerKey] || "" : "";
+
+    const sunPt = pickPoint(points, "sun");
+    const moonPt = pickPoint(points, "moon");
+
+    const cards = ascendantRanges.map((range) => {
+      const ascSummary = buildAscSummary(range, formatTimeFn);
+      const ascData = ascSummary
+        ? {
+            ...summarizePoint(ascSummary.current),
+            orb: ascSummary.orb,
+            decan: ascSummary.decan,
+          }
+        : null;
+      const dayData = dayRulerPt ? summarizePoint(dayRulerPt) : null;
+      const sunData = sunPt ? summarizePoint(sunPt) : null;
+      const moonData = moonPt ? summarizePoint(moonPt) : null;
+      const moonIllumVal = computeMoonIllumination(points);
+      const lunation = getLunationInfo({
+        year: metaSource?.year || metaSource?.moment?.year || metaSource?.birth?.year || anchor.getFullYear(),
+        month: metaSource?.month || metaSource?.moment?.month || metaSource?.birth?.month || anchor.getMonth() + 1,
+        day: metaSource?.day || metaSource?.moment?.day || metaSource?.birth?.day || anchor.getDate(),
+        hour: metaSource?.hour || metaSource?.moment?.hour || metaSource?.birth?.hour || anchor.getHours(),
+        minute: metaSource?.minute || metaSource?.moment?.minute || metaSource?.birth?.minute || anchor.getMinutes(),
+      });
+      const moonIllumRaw =
+        typeof moonIllumVal === "number"
+          ? `${moonIllumVal.toFixed(1)}%`
+          : typeof moonIllumVal === "string"
+            ? moonIllumVal
+            : "";
+      const moonIllum = moonIllumRaw || "—";
+
+      const nextInfo =
+        ascSummary && ascSummary.nextSign
+          ? `Next ${SIGN_META[ascSummary.nextSign]?.name || ascSummary.nextSign} at ${ascSummary.nextTime}`
+          : "";
+
+      return `
+        <div class="adv-summary-card">
+          <div class="adv-summary-head">
+            <div>
+              <p class="adv-asc-kicker">Day Ruler · ${dayRulerName} ${dayRulerIcon}</p>
+              <p class="adv-asc-sub">${dateLabel}</p>
+            </div>
+            <span class="adv-asc-pill">${range.label || range.id || "Ascendant"}</span>
+          </div>
+          <div class="adv-summary-grid">
+            ${sunData ? formatSummaryRow("Sun", POINTS_ICONS.sun, sunData) : ""}
+            ${
+              moonData
+                ? formatSummaryRow(
+                    "Moon",
+                    POINTS_ICONS.moon,
+                    moonData,
+                    `Illumination ${moonIllum}${lunation && lunation.name ? ` · ${lunation.name}` : ""}`
+                  )
+                : ""
+            }
+            ${dayData ? formatSummaryRow(dayRulerName || "Day Ruler", POINTS_ICONS[dayRulerKey] || "☉", dayData) : ""}
+            ${
+              ascData
+                ? formatSummaryRow(
+                    "Asc",
+                    POINTS_ICONS.ascendant,
+                    ascData,
+                    nextInfo ? nextInfo : ""
+                  )
+                : ""
+            }
+          </div>
+        </div>
+      `;
+    });
+
+    const wrapClass = isDual ? "adv-summary-wrap adv-summary-wrap--stacked" : "adv-summary-wrap";
+    return `<div class="${wrapClass}">${cards.join("")}</div>`;
+  }
 
   function normalizeAscendantRanges(payload) {
     if (!payload) return [];
@@ -203,6 +385,11 @@
     const h = Math.round(((fallbackHour % 24) + 24) % 24);
     return `${pad(h)}:00`;
   }
+
+  const formatTimeSimple = (date) => {
+    if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return "—";
+    return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
 
   const safeDate = (value) => (value instanceof Date && Number.isFinite(value.getTime()) ? value : null);
 
@@ -1595,6 +1782,15 @@
 
     dom.summaryEl.innerHTML = `${meta}${sections}`;
     enableSortableTables(dom.summaryEl);
+    if (dom.ascSummaryContainer) {
+      if (!ascendantRanges.length) {
+        dom.ascSummaryContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the ascendant summary.</p>";
+      } else {
+        const summaries = renderSummaryPanel(points, ascendantRanges, metaSource, formatTimeSimple, ascendantRanges.length > 1);
+        dom.ascSummaryContainer.innerHTML = summaries || "<p class=\"hint\">No summary available.</p>";
+      }
+    }
+
     if (dom.ascClockContainer) {
       if (!ascendantRanges.length) {
         dom.ascClockContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the ascendant clock and hourly breakdown.</p>";
