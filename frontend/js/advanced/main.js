@@ -106,6 +106,27 @@
     return `rgba(${rgb}, ${alpha})`;
   };
 
+  const toRgba = (color, alpha = 1) => {
+    const fallback = `rgba(56, 189, 248, ${alpha})`;
+    if (typeof color !== "string") return fallback;
+    const hex = color.replace("#", "");
+    const parts = hex.length === 3 ? hex.split("").map((c) => c + c) : hex.match(/.{1,2}/g);
+    if (!parts || parts.length < 3) return fallback;
+    const ints = parts.slice(0, 3).map((p) => parseInt(p, 16));
+    if (ints.some((n) => !Number.isFinite(n))) return fallback;
+    const [r, g, b] = ints;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
+  const buildRingGradient = (ctx, color, innerR, outerR) => {
+    const gradient = ctx.createRadialGradient(0, 0, innerR * 0.96, 0, 0, outerR * 1.08);
+    gradient.addColorStop(0, toRgba(color, 0));
+    gradient.addColorStop(0.55, toRgba(color, 0.2));
+    gradient.addColorStop(0.78, toRgba(color, 0.85));
+    gradient.addColorStop(1, toRgba(color, 0));
+    return gradient;
+  };
+
   const computeAscProgress = (entry, targetTs) => {
     const start = safeDate(entry?.start || entry?.timestamp);
     const end = safeDate(entry?.end);
@@ -848,9 +869,9 @@
       ctx.save();
       ctx.beginPath();
       ctx.arc(0, 0, outerR * 1.008, 0, Math.PI * 2);
-      ctx.strokeStyle = ringConfig.handColor || ACTIVE_SEGMENT_COLOR;
+      const boundaryColor = ringConfig.handColor || ACTIVE_SEGMENT_COLOR;
+      ctx.strokeStyle = buildRingGradient(ctx, boundaryColor, innerR, outerR);
       ctx.lineWidth = 15;
-      ctx.globalAlpha = 0.5;
       ctx.stroke();
       ctx.restore();
 
@@ -1433,9 +1454,9 @@
       ctx.save();
       ctx.beginPath();
       ctx.arc(0, 0, outerR * 1.008, 0, Math.PI * 2);
-      ctx.strokeStyle = ringConfig.handColor || ACTIVE_SEGMENT_COLOR;
+      const boundaryColor = ringConfig.handColor || ACTIVE_SEGMENT_COLOR;
+      ctx.strokeStyle = buildRingGradient(ctx, boundaryColor, innerR, outerR);
       ctx.lineWidth = 15;
-      ctx.globalAlpha = 0.5;
       ctx.stroke();
       ctx.restore();
 
