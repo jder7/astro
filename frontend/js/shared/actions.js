@@ -18,10 +18,8 @@
   function bindSubmit() {
     if (!dom.form) return;
     if (typeof App.handleSubmit === "function") {
-      console.info("[actions] binding submit handler for namespace", ns);
       dom.form.addEventListener("submit", (event) => App.handleSubmit(event));
     } else {
-      console.warn("[actions] no submit handler defined for namespace", ns);
       dom.form.addEventListener("submit", (event) => {
         event.preventDefault();
         utils.setStatus("No submit handler defined for this page.", true);
@@ -30,7 +28,6 @@
   }
 
   if (typeof App.registerHandleSubmit === "function") {
-    console.info("[actions] registerHandleSubmit hook found for namespace", ns);
     App.registerHandleSubmit();
   }
 

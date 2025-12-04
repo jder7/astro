@@ -8,12 +8,6 @@
   const ascendantRangeEnabled = !!(App.flags && App.flags.ascendantRangeEnabled);
   const moonRangeEnabled = !!(App.flags && App.flags.moonRangeEnabled);
 
-  console.info(`[${ns}] range flags`, {
-    ascendantRangeEnabled,
-    moonRangeEnabled,
-    flags: App.flags || {},
-  });
-
   function getValue(id) {
     const el = document.getElementById(id);
     return el ? el.value : "";

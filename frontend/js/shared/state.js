@@ -28,7 +28,23 @@
   }
 
   function getDefaultApiState() {
-    return { svgs: {}, summaries: {}, reports: {} };
+    return { svgs: {}, summaries: {}, reports: {}, responses: {} };
+  }
+
+  function clearRenderedOutputs() {
+    if (utils && typeof utils.clearSummary === "function") {
+      utils.clearSummary();
+    }
+    if (utils && typeof utils.clearChart === "function") {
+      utils.clearChart();
+    }
+    if (utils && typeof utils.clearReport === "function") {
+      utils.clearReport();
+    }
+    if (dom.ascSummaryContainer) dom.ascSummaryContainer.innerHTML = "";
+    if (dom.ascClockContainer) dom.ascClockContainer.innerHTML = "";
+    if (dom.moonClockContainer) dom.moonClockContainer.innerHTML = "";
+    runtime.hasChart = false;
   }
 
   function saveFormState(mode, payload) {
@@ -54,6 +70,7 @@
       next.svgs = next.svgs && typeof next.svgs === "object" ? next.svgs : {};
       next.summaries = next.summaries && typeof next.summaries === "object" ? next.summaries : {};
       next.reports = next.reports && typeof next.reports === "object" ? next.reports : {};
+      next.responses = next.responses && typeof next.responses === "object" ? next.responses : {};
       if (data.svg || data.summary) {
         next.svgs[mode] = { svg: data.svg || "", summary: data.summary || "" };
       }
@@ -68,10 +85,14 @@
       } else if (data.report) {
         next.reports[mode] = data.report;
       }
+      if (data.response) {
+        next.responses[mode] = data.response;
+      }
       localStorage.setItem(STORAGE_API, JSON.stringify(next));
       runtime.storedSvgs = next.svgs || {};
       runtime.storedSummaries = next.summaries || {};
       runtime.storedReports = next.reports || {};
+      runtime.storedResponses = next.responses || {};
       runtime.hasLoadedState = true;
     } catch (err) {
     }
@@ -111,17 +132,34 @@
   function restoreSavedPreview(mode) {
     const saved = runtime.storedSvgs[mode];
     if (saved && saved.svg && dom.chartContainer) {
+      clearRenderedOutputs();
       dom.chartContainer.innerHTML = saved.svg;
       if (dom.summaryEl) {
         dom.summaryEl.innerHTML = saved.summary || "";
       }
       runtime.hasChart = true;
     } else {
-      utils.clearSummary();
-      utils.clearChart();
+      clearRenderedOutputs();
     }
     restoreSavedReport(mode);
     utils.updateDownloadState();
+  }
+
+  function renderStoredApiResponse(mode) {
+    if (!mode || !runtime.storedResponses || !App.render) return false;
+    const stored = runtime.storedResponses[mode];
+    const hasStoredData = stored && (typeof stored !== "object" || Object.keys(stored).length > 0);
+    if (!hasStoredData || typeof App.render.renderStoredResponse !== "function") return false;
+    try {
+      App.render.renderStoredResponse(mode, stored);
+      runtime.hasChart = true;
+      if (utils && typeof utils.updateDownloadState === "function") {
+        utils.updateDownloadState();
+      }
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
   function loadSavedState() {
@@ -186,11 +224,14 @@
       runtime.storedSvgs = apiState.svgs && typeof apiState.svgs === "object" ? apiState.svgs : {};
       runtime.storedSummaries = apiState.summaries && typeof apiState.summaries === "object" ? apiState.summaries : {};
       runtime.storedReports = apiState.reports && typeof apiState.reports === "object" ? apiState.reports : {};
+      runtime.storedResponses =
+        apiState.responses && typeof apiState.responses === "object" ? apiState.responses : {};
       const hasSavedApi =
         hasApiState &&
         (Object.keys(runtime.storedSvgs).length ||
           Object.keys(runtime.storedSummaries).length ||
-          Object.keys(runtime.storedReports).length);
+          Object.keys(runtime.storedReports).length ||
+          Object.keys(runtime.storedResponses).length);
       runtime.hasLoadedState = hasInputState || hasSavedApi;
       if (App.utils && typeof App.utils.syncLocationRuntimeFromDom === "function") {
         App.utils.syncLocationRuntimeFromDom();
@@ -229,7 +270,12 @@
       utils.setTransitNow();
     }
     restoreSavedModeState(mode);
-    restoreSavedPreview(mode);
+    const renderedFromStored = renderStoredApiResponse(mode);
+    if (renderedFromStored) {
+      restoreSavedReport(mode);
+    } else {
+      restoreSavedPreview(mode);
+    }
     if (App.utils && typeof App.utils.refreshDateTimeBadges === "function") {
       App.utils.refreshDateTimeBadges();
     }
@@ -258,13 +304,11 @@
     try {
       localStorage.removeItem(STORAGE_INPUT);
       localStorage.removeItem(STORAGE_API);
-      utils.clearSummary();
-      utils.clearChart();
-      utils.clearReport();
+      clearRenderedOutputs();
       runtime.storedSvgs = {};
       runtime.storedSummaries = {};
       runtime.storedReports = {};
-      runtime.hasChart = false;
+      runtime.storedResponses = {};
       runtime.hasLoadedState = false;
       if (App.runtime) {
         App.runtime.locationValues = {};
@@ -347,6 +391,7 @@
     saveApiData,
     restoreSavedPreview,
     restoreSavedReport,
+    renderStoredApiResponse,
     loadSavedState,
     clearSavedState,
     updateModeVisibility,

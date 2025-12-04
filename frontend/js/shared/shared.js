@@ -107,6 +107,7 @@
     storedSvgs: {},
     storedSummaries: {},
     storedReports: {},
+    storedResponses: {},
     locationValues: {},
   };
 
@@ -1372,21 +1373,33 @@
     });
   }
 
-  function initInputPanelToggle() {
+  const getInputPanelElements = () => {
     const panel = dom.inputPanel || document.querySelector("[data-input-panel]");
     const toggle = dom.inputPanelToggle || document.querySelector("[data-input-panel-toggle]");
-    if (!panel || !toggle) return;
+    return { panel, toggle, label: toggle ? toggle.querySelector("[data-toggle-label]") : null };
+  };
 
-    const label = toggle.querySelector("[data-toggle-label]");
-    const setState = (open) => {
-      panel.classList.toggle("hidden", !open);
-      toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      if (label) label.textContent = open ? "Hide inputs" : "Show inputs";
-    };
+  const setInputPanelState = (open) => {
+    const { panel, toggle, label } = getInputPanelElements();
+    if (!panel || !toggle) return;
+    panel.classList.toggle("hidden", !open);
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    if (label) label.textContent = open ? "Hide inputs" : "Show inputs";
+  };
+
+  const hideInputPanelOnMobile = () => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    if (mq.matches) return;
+    setInputPanelState(false);
+  };
+
+  function initInputPanelToggle() {
+    const { panel, toggle } = getInputPanelElements();
+    if (!panel || !toggle) return;
 
     const mq = window.matchMedia("(min-width: 640px)");
     const handleMq = (event) => {
-      if (event.matches) setState(true);
+      if (event.matches) setInputPanelState(true);
     };
     if (typeof mq.addEventListener === "function") {
       mq.addEventListener("change", handleMq);
@@ -1396,10 +1409,10 @@
 
     toggle.addEventListener("click", () => {
       const isOpen = !panel.classList.contains("hidden");
-      setState(!isOpen);
+      setInputPanelState(!isOpen);
     });
 
-    setState(true);
+    setInputPanelState(true);
   }
 
   function initInlineNowButtons() {
@@ -1431,6 +1444,8 @@
     syncLocationRuntimeFromDom,
     setDetectedTimezoneLabel,
     persistFormState,
+    hideInputPanelOnMobile,
+    setInputPanelState,
   };
 
   initDatetimeModal();

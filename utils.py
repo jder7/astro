@@ -101,6 +101,9 @@ def build_subject(birth: BirthData, config: Optional[ChartConfig]):
     kwargs["perspective_type"] = cfg.perspective.value
     kwargs["houses_system_identifier"] = cfg.house_system.value
 
+    # Keep a copy of the original inputs for debugging in case Kerykeion raises.
+    original_kwargs = dict(kwargs)
+
     try:
         subject = AstrologicalSubjectFactory.from_birth_data(**kwargs)
     except ValueError as err:
@@ -115,7 +118,12 @@ def build_subject(birth: BirthData, config: Optional[ChartConfig]):
             safe_cfg.house_system = HouseSystem.WHOLE_SIGN
             kwargs["houses_system_identifier"] = safe_cfg.house_system.value
             subject = AstrologicalSubjectFactory.from_birth_data(**kwargs)
-            print("[build_subject] house calculation failed; fell back to Whole Sign houses.", err)
+            debug_input = {
+                "birth": birth.model_dump(),
+                "config": cfg.model_dump(),
+                "kwargs": original_kwargs,
+            }
+            print("[build_subject] house calculation failed; fell back to Whole Sign houses.", err, "input:", debug_input)
         else:
             raise
 

@@ -63,11 +63,15 @@ class BirthData(BaseModel):
     )
     lng: float = Field(
         4.8952,
+        ge=-180.0,
+        le=180.0,
         description="Longitude in decimal degrees (East positive, West negative). Default: Amsterdam, NL.",
         examples=[4.8952],
     )
     lat: float = Field(
         52.3702,
+        ge=-90.0,
+        le=90.0,
         description="Latitude in decimal degrees (North positive, South negative). Default: Amsterdam, NL.",
         examples=[52.3702],
     )

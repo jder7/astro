@@ -55,6 +55,7 @@
         dom.chartContainer.innerHTML = svgText;
         runtime.hasChart = true;
         utils.updateDownloadState();
+        if (utils.hideInputPanelOnMobile) utils.hideInputPanelOnMobile();
         utils.setStatus("Natal chart generated.");
         saveFormState(mode, payload);
         saveApiData(mode, { svg: svgText, summary: dom.summaryEl ? dom.summaryEl.innerHTML : "" });
@@ -88,6 +89,7 @@
         dom.chartContainer.innerHTML = svgText;
         runtime.hasChart = true;
         utils.updateDownloadState();
+        if (utils.hideInputPanelOnMobile) utils.hideInputPanelOnMobile();
         utils.setStatus("Transit chart generated.");
         saveFormState(mode, payload);
         saveApiData(mode, { svg: svgText, summary: dom.summaryEl ? dom.summaryEl.innerHTML : "" });
@@ -121,6 +123,7 @@
         dom.chartContainer.innerHTML = svgText;
         runtime.hasChart = true;
         utils.updateDownloadState();
+        if (utils.hideInputPanelOnMobile) utils.hideInputPanelOnMobile();
         utils.setStatus("Natal + Transit chart generated.");
         saveFormState(mode, payload);
         saveApiData(mode, { svg: svgText, summary: dom.summaryEl ? dom.summaryEl.innerHTML : "" });
@@ -154,6 +157,7 @@
         dom.chartContainer.innerHTML = svgText;
         runtime.hasChart = true;
         utils.updateDownloadState();
+        if (utils.hideInputPanelOnMobile) utils.hideInputPanelOnMobile();
         utils.setStatus("Relationship chart generated.");
         saveFormState(mode, { ...payload, ...synPayload });
         saveApiData(mode, { svg: svgText, summary: dom.summaryEl ? dom.summaryEl.innerHTML : "" });

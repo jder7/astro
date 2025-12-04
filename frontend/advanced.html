@@ -19,33 +19,33 @@
     <div class="bg-[radial-gradient(circle_at_10%_20%,rgba(56,189,248,0.15),transparent_25%),radial-gradient(circle_at_90%_10%,rgba(129,140,248,0.15),transparent_25%),radial-gradient(circle_at_50%_75%,rgba(14,165,233,0.12),transparent_30%)]">
       <header class="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-8">
         <div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between relative">
+          <a
+            class="home-link absolute right-0 top-0 sm:relative sm:right-auto sm:top-auto"
+            href="/"
+            aria-label="Back to home"
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12L12 4l9 8" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10" />
+            </svg>
+          </a>
           <div class="flex flex-col gap-2 max-w-3xl">
             <p class="text-sm uppercase tracking-[0.4em] text-cyan-200/70 font-semibold">Astrology Toolkit</p>
-            <h1 class="font-display text-3xl sm:text-4xl leading-tight">Research</h1>
+            <h1 class="font-display text-3xl sm:text-4xl leading-tight">Advanced Workbench</h1>
             <p class="text-slate-300">
-              This view reuses the chart input logic—config, datetime/location modals, persistence, and saved state—so you can reuse the input data.
+              Iterate on charts with pro controls, reusable inputs, and richer breakdowns for ascendant and lunar cycles—built for deep dives and rapid comparisons.
             </p>
           </div>
           <div class="flex items-center gap-3 sm:self-start">
             <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-slate-800/70 border border-slate-700 text-xs font-semibold tracking-wide text-cyan-200">
               Advanced
             </span>
-            <a
-              class="inline-flex items-center justify-center w-12 h-12 rounded-2xl border border-slate-800 bg-slate-900/80 text-slate-100 hover:border-cyan-400 hover:text-white shadow-lg transition"
-              href="/"
-              aria-label="Back to home"
-            >
-              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12L12 4l9 8" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10" />
-              </svg>
-            </a>
           </div>
         </div>
       </header>
 
       <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-12">
-        <div class="sm:hidden flex justify-end mb-4">
+        <div class="sm:hidden flex justify-center mb-4">
           <button
             type="button"
             id="inputPanelToggle"
@@ -522,7 +522,7 @@
                   type="button"
                   id="ascClockCollapse"
                   class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-cyan-400 hover:shadow-cyan-500/25 transition"
-                  aria-expanded="true"
+                  aria-expanded="false"
                   aria-controls="ascClockBody"
                   aria-label="Collapse ascendant panel"
                 >
@@ -531,7 +531,7 @@
                   </svg>
                 </button>
               </div>
-              <div id="ascClockBody">
+              <div id="ascClockBody" class="hidden">
                 <div id="ascClockContainer" class="summary-content">
                   <p class="hint">Generate a chart to see the ascendant clock and hourly breakdown.</p>
                 </div>
@@ -548,7 +548,7 @@
                   type="button"
                   id="moonClockCollapse"
                   class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-cyan-400 hover:shadow-cyan-500/25 transition"
-                  aria-expanded="true"
+                  aria-expanded="false"
                   aria-controls="moonClockBody"
                   aria-label="Collapse Moon panel"
                 >
@@ -557,7 +557,7 @@
                   </svg>
                 </button>
               </div>
-              <div id="moonClockBody">
+              <div id="moonClockBody" class="hidden">
                 <div id="moonClockContainer" class="summary-content">
                   <p class="hint">Generate a chart to see the lunar clock, next sign, and month-long breakdown.</p>
                 </div>

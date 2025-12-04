@@ -52,7 +52,6 @@
     getLunationInfo,
   } = shared;
   const flags = (app.flags = { ...(app.flags || {}), skipSvg: true });
-  console.info("[advanced] main init", { ns, skipSvg: flags.skipSvg });
 
   const fallbackIcon = (id) => {
     if (typeof getMajorAspectIcon === "function") {
@@ -117,6 +116,8 @@
     const [r, g, b] = ints;
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
+
+  const normalizeRangeId = (value) => (typeof value === "string" ? value.toLowerCase() : null);
 
   const buildRingGradient = (ctx, color, innerR, outerR) => {
     const gradient = ctx.createRadialGradient(0, 0, innerR * 0.96, 0, 0, outerR * 1.08);
@@ -215,6 +216,65 @@
     `;
   };
 
+  const formatPointPlacement = (points, key) => {
+    const normKey = normalizePointKey(key);
+    const pt = (points && (points[normKey] || points[key])) || {};
+    const pointIcon = POINTS_ICONS[(pt.name || normKey || "").toLowerCase()];
+    const pointLabel = pt.name || capitalise((normKey || key || "").replace(/_/g, " "));
+    const body = pointIcon || pt.emoji || pointLabel || key || "—";
+    const signGlyph = SIGN_META[pt.sign]?.icon || pt.sign || "";
+    const posVal =
+      typeof pt.position === "number"
+        ? pt.position
+        : typeof pt.abs_pos === "number"
+          ? pt.abs_pos
+          : typeof pt.orb === "number"
+            ? pt.orb
+            : null;
+    const pos = Number.isFinite(posVal) ? `${posVal.toFixed(2)}°` : "";
+    const signPart = signGlyph ? ` in ${signGlyph}` : pt.sign ? ` in ${pt.sign}` : "";
+    const posPart = pos ? ` @ ${pos}` : "";
+    return `${body}${signPart}${posPart}`;
+  };
+
+  const renderMajorAspectSummary = (patterns, points) => {
+    if (!Array.isArray(patterns) || !patterns.length) return "";
+    const collectKeys = (structure) => {
+      const acc = [];
+      const pushVal = (val) => {
+        if (Array.isArray(val)) {
+          val.forEach(pushVal);
+        } else if (typeof val === "string") {
+          acc.push(val);
+        }
+      };
+      Object.values(structure || {}).forEach(pushVal);
+      return acc;
+    };
+    const lines = patterns
+      .map((pattern) => {
+        const keys = Array.isArray(pattern.points) && pattern.points.length ? pattern.points : collectKeys(pattern.structure);
+        const uniq = [];
+        keys.forEach((k) => {
+          const nk = normalizePointKey(k);
+          if (nk && !uniq.includes(nk)) uniq.push(nk);
+        });
+        const placements = uniq.map((k) => formatPointPlacement(points, k)).filter(Boolean).join(" · ");
+        if (!placements) return "";
+        const icon = wrapMajorAspectIcon(fallbackIcon(pattern.id));
+        const label =
+          pattern.name ||
+          pattern.geometry ||
+          pattern.aspects_label ||
+          pattern.aspectsLabel ||
+          capitalise((pattern.id || "Pattern").replace(/_/g, " "));
+        return `<div class="adv-summary-major-line">${icon} ${label}: ${placements}</div>`;
+      })
+      .filter(Boolean)
+      .join("");
+    return lines;
+  };
+
   function buildAscSummary(range, formatTimeFn) {
     if (!range || !Array.isArray(range.entries) || !range.entries.length) return null;
     const anchor = safeDate(range.anchor) || safeDate(range.entries[0].start) || new Date();
@@ -271,8 +331,33 @@
     };
   }
 
-  function renderSummaryPanel(points, ascendantRanges, moonRanges, metaSource, formatTimeFn, isDual) {
+  function renderSummaryPanel(
+    points,
+    ascendantRanges,
+    moonRanges,
+    metaSource,
+    formatTimeFn,
+    isDual,
+    majorAspects = [],
+    pointsByRange = {},
+    metaByRange = {}
+  ) {
     if (!ascendantRanges.length && !moonRanges.length) return "";
+    const normalizedPointSets = { ...(pointsByRange || {}) };
+    const normalizedMeta = { ...(metaByRange || {}) };
+    const defaultPoints = points || {};
+    const getPointsForRange = (id) => {
+      const key = normalizeRangeId(id);
+      if (key && normalizedPointSets[key]) return normalizedPointSets[key];
+      if (id && normalizedPointSets[id]) return normalizedPointSets[id];
+      return normalizedPointSets.default || defaultPoints;
+    };
+    const getMetaForRange = (id) => {
+      const key = normalizeRangeId(id);
+      if (key && normalizedMeta[key]) return normalizedMeta[key];
+      if (id && normalizedMeta[id]) return normalizedMeta[id];
+      return metaSource || {};
+    };
     const ascMap = new Map();
     const moonMap = new Map();
     ascendantRanges.forEach((r, idx) => ascMap.set(r.id || r.label || `asc-${idx}`, r));
@@ -283,22 +368,27 @@
       if (!cardIds.includes(id)) cardIds.push(id);
     });
     const anchor = safeDate(ascendantRanges[0]?.anchor) || safeDate(moonRanges[0]?.anchor) || safeDate(metaSource?.timestamp) || new Date();
-    const dateInfo = formatDateLabel(metaSource || {});
-    const dateLabel = dateInfo.label ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}` : "Requested datetime";
-    const dayIdx = anchor instanceof Date && Number.isFinite(anchor.getTime()) ? anchor.getDay() : new Date().getDay();
-    const dayRulerKey = CHALDEAN_DAY_RULERS?.[dayIdx] || null;
-    const dayRulerPt = dayRulerKey ? pickPoint(points, dayRulerKey) : null;
-    const dayRulerName = dayRulerKey ? capitalise(dayRulerKey) : "—";
-    const dayRulerIcon = dayRulerKey ? POINTS_ICONS[dayRulerKey] || "" : "";
+    const majorAspectLines = renderMajorAspectSummary(majorAspects, defaultPoints);
 
-    const sunPt = pickPoint(points, "sun");
-    const moonPt = pickPoint(points, "moon");
-
-    const cards = cardIds.map((cardId) => {
+    const cards = cardIds.map((cardId, idx) => {
       const ascRange = ascMap.get(cardId) || null;
       const moonRange = moonMap.get(cardId) || (!ascRange && moonRanges.length === 1 ? moonRanges[0] : null);
       const range = ascRange || moonRange;
       if (!range) return "";
+      const rangePoints = getPointsForRange(range.id || cardId);
+      const rangeMeta = getMetaForRange(range.id || cardId) || {};
+      const rangeAnchor = safeDate(range.anchor) || anchor;
+      const dayIdx = rangeAnchor instanceof Date && Number.isFinite(rangeAnchor.getTime()) ? rangeAnchor.getDay() : new Date().getDay();
+      const dayRulerKey = CHALDEAN_DAY_RULERS?.[dayIdx] || null;
+      const dayRulerName = dayRulerKey ? capitalise(dayRulerKey) : "—";
+      const dayRulerIcon = dayRulerKey ? POINTS_ICONS[dayRulerKey] || "" : "";
+      const dateInfo = formatDateLabel(rangeMeta);
+      const baseLabel =
+        dateInfo.label && dateInfo.label !== "—"
+          ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}`
+          : "";
+      const formattedAnchor = rangeAnchor ? formatDateTimeShort(rangeAnchor) : "";
+      const dateLabel = baseLabel || formattedAnchor || "Requested datetime";
 
       const ascSummary = ascRange ? buildAscSummary(ascRange, formatTimeFn) : null;
       const ascData = ascSummary
@@ -308,9 +398,12 @@
             decan: ascSummary.decan,
           }
         : null;
+      const dayRulerPt = dayRulerKey ? pickPoint(rangePoints, dayRulerKey) : null;
       const dayData = dayRulerPt ? summarizePoint(dayRulerPt) : null;
+      const sunPt = pickPoint(rangePoints, "sun");
       const sunData = sunPt ? summarizePoint(sunPt) : null;
       const moonSummary = moonRange ? buildMoonSummary(moonRange, formatDateTimeShort) : null;
+      const moonPt = pickPoint(rangePoints, "moon");
       const moonPointData = moonPt ? summarizePoint(moonPt) : null;
       const moonCurrent = moonSummary?.current || null;
       const moonData =
@@ -324,7 +417,7 @@
               decan: typeof moonSummary?.decan === "number" ? moonSummary.decan : moonPointData?.decan,
             }
           : null;
-      const moonIllumVal = computeMoonIllumination(points);
+      const moonIllumVal = computeMoonIllumination(rangePoints);
       const lunation = getLunationInfo({
         year: metaSource?.year || metaSource?.moment?.year || metaSource?.birth?.year || anchor.getFullYear(),
         month: metaSource?.month || metaSource?.moment?.month || metaSource?.birth?.month || anchor.getMonth() + 1,
@@ -352,6 +445,16 @@
       const moonExtras = [moonNext, `Illumination ${moonIllum}${lunation && lunation.name ? ` · ${lunation.name}` : ""}`]
         .filter(Boolean)
         .join(" · ");
+      const aspectsBlock =
+        idx === 0 && majorAspectLines
+          ? `<div class="adv-summary-major-card">
+              <div class="adv-summary-major-title">
+                ${wrapMajorAspectIcon(fallbackIcon("generic"))}
+                <span>Major aspects</span>
+              </div>
+              <div class="adv-summary-major">${majorAspectLines}</div>
+            </div>`
+          : "";
 
       return `
         <div class="adv-summary-card">
@@ -377,9 +480,10 @@
                 : ""
             }
           </div>
+          ${aspectsBlock}
         </div>
       `;
-    });
+    }).filter(Boolean);
 
     const wrapClass = isDual ? "adv-summary-wrap adv-summary-wrap--stacked" : "adv-summary-wrap";
     return `<div class="${wrapClass}">${cards.join("")}</div>`;
@@ -1141,9 +1245,9 @@
           <td>${formatTime(start)}</td>
           <td>${formatTime(end)}</td>
           <td>${signMeta.icon || ""} ${signMeta.name}</td>
-          <td>${durationHours}</td>
-          <td>${qualityIcon ? `${qualityIcon} ` : ""}${entry.quality || "—"}</td>
           <td><span class="adv-asc-color-swatch" style="background:${swatchColor}"></span>${elementIcon ? `${elementIcon} ` : ""}${entry.element || "—"}</td>
+          <td>${qualityIcon ? `${qualityIcon} ` : ""}${entry.quality || "—"}</td>
+          <td>${durationHours === "—" ? "—" : `${durationHours}h`}</td>
         </tr>
       `;
     };
@@ -1159,9 +1263,9 @@
               <th>Start</th>
               <th>End</th>
               <th>Sign</th>
-              <th>Duration (h)</th>
-              <th>Quality</th>
               <th>Element</th>
+              <th>Quality</th>
+              <th>Duration</th>
             </tr>
           </thead>
           <tbody>${rows || '<tr><td colspan="5">No data</td></tr>'}</tbody>
@@ -1647,7 +1751,13 @@
     if (!ranges.length) return "";
     const formatDateTime = (ts) => {
       if (!(ts instanceof Date) || !Number.isFinite(ts.getTime())) return "—";
-      return ts.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+      return ts.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
     };
     const renderRow = (entry) => {
       const start = entry.start || entry.timestamp;
@@ -1679,11 +1789,11 @@
           <td>${formatDateTime(start)}</td>
           <td>${formatDateTime(end)}</td>
           <td>${signMeta.icon || ""} ${signMeta.name}</td>
-          <td>${durationLabel}</td>
           <td>${illum !== null ? `${illum}%` : "—"}</td>
           <td>${phaseLabel}</td>
-          <td>${qualityIcon ? `${qualityIcon} ` : ""}${entry.quality || "—"}</td>
           <td><span class="adv-asc-color-swatch" style="background:${swatchColor}"></span>${elementIcon ? `${elementIcon} ` : ""}${entry.element || "—"}</td>
+          <td>${qualityIcon ? `${qualityIcon} ` : ""}${entry.quality || "—"}</td>
+          <td>${durationLabel}</td>
         </tr>
       `;
     };
@@ -1699,11 +1809,11 @@
               <th>Start</th>
               <th>End</th>
               <th>Sign</th>
-              <th>Duration</th>
               <th>Illum.</th>
               <th>Phase</th>
-              <th>Quality</th>
               <th>Element</th>
+              <th>Quality</th>
+              <th>Duration</th>
             </tr>
           </thead>
           <tbody>${rows || '<tr><td colspan="8">No data</td></tr>'}</tbody>
@@ -2418,7 +2528,6 @@
     const chart = source?.subject || source;
     if (!source || typeof source !== "object") {
       dom.summaryEl.innerHTML = "<p class=\"hint\">No data returned.</p>";
-      console.warn("[advanced] renderStructured payload missing", { kind, payload });
       return;
     }
 
@@ -2479,7 +2588,24 @@
       );
     }
     const majorAspectsList = majorBlocks.join("");
+    const metaByRangeId = {};
+    const addMetaForRange = (id, subjectData) => {
+      const key = normalizeRangeId(id);
+      if (!key || !subjectData) return;
+      metaByRangeId[key] = subjectData;
+    };
+    addMetaForRange("transit", payload?.snapshot?.subject);
+    addMetaForRange("natal", payload?.snapshot?.natal_subject);
+    if (!payload?.snapshot) {
+      addMetaForRange("natal", payload?.subject);
+    }
+    addMetaForRange("first", payload?.first_subject);
+    addMetaForRange("second", payload?.second_subject);
     const metaSource =
+      metaByRangeId.transit ||
+      metaByRangeId.natal ||
+      metaByRangeId.first ||
+      metaByRangeId.second ||
       chart.birth ||
       chart.moment ||
       source.birth ||
@@ -2509,6 +2635,35 @@
         return aval - bval;
       });
     }
+    const pointsByRangeId = {};
+    const addPointsForRange = (id, subjectData) => {
+      const key = normalizeRangeId(id);
+      if (!key || !subjectData) return;
+      const collected = collectPoints(subjectData).points || {};
+      if (Object.keys(collected).length === 0) return;
+      pointsByRangeId[key] = collected;
+    };
+    addPointsForRange("transit", payload?.snapshot?.subject);
+    addPointsForRange("natal", payload?.snapshot?.natal_subject);
+    if (!payload?.snapshot) {
+      addPointsForRange("natal", payload?.subject);
+    }
+    addPointsForRange("first", payload?.first_subject);
+    addPointsForRange("second", payload?.second_subject);
+    ascendantRanges.forEach((range) => {
+      const key = normalizeRangeId(range.id || range.label);
+      if (key && !pointsByRangeId[key]) {
+        addPointsForRange(key, chart);
+      }
+    });
+    moonRanges.forEach((range) => {
+      const key = normalizeRangeId(range.id || range.label);
+      if (key && !pointsByRangeId[key]) {
+        addPointsForRange(key, chart);
+      }
+    });
+    pointsByRangeId.default = points;
+    metaByRangeId.default = metaSource;
     const clockBlock = buildAscendantClockBlock(ascendantRanges, metaSource);
     const moonClockBlock = buildMoonClockBlock(moonRanges, metaSource);
     const aspectContent =
@@ -2531,7 +2686,17 @@
       if (!ascendantRanges.length && !moonRanges.length) {
         dom.ascSummaryContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the summary.</p>";
       } else {
-        const summaries = renderSummaryPanel(points, ascendantRanges, moonRanges, metaSource, formatTimeSimple, hasDual);
+        const summaries = renderSummaryPanel(
+          points,
+          ascendantRanges,
+          moonRanges,
+          metaSource,
+          formatTimeSimple,
+          hasDual,
+          majorAspects,
+          pointsByRangeId,
+          metaByRangeId
+        );
         dom.ascSummaryContainer.innerHTML = summaries || "<p class=\"hint\">No summary available.</p>";
       }
     }
@@ -2558,13 +2723,18 @@
     attachPatternModalHandlers();
   }
 
+  function persistApiState(mode, payload, advState, advDom) {
+    const summaryHtml = advDom.summaryEl ? advDom.summaryEl.innerHTML : "";
+    advState.saveApiData(mode, { summary: summaryHtml, response: payload });
+  }
+
   function registerHandleSubmit() {
     const appCtx = (window.AdvancedApp = window.AdvancedApp || {});
     appCtx.handleSubmit = async function handleSubmit(event) {
       event.preventDefault();
       const { dom: advDom, utils: advUtils, payloads: advPayloads, state: advState } = window.AdvancedApp || {};
       if (!advDom || !advUtils || !advPayloads || !advState) {
-        console.warn("[advanced] missing app pieces for submit", { hasDom: !!advDom, hasUtils: !!advUtils, hasPayloads: !!advPayloads, hasState: !!advState });
+        advUtils?.setStatus?.("Cannot submit: app is still loading required modules.", true);
         return;
       }
 
@@ -2601,7 +2771,8 @@
           }
           advUtils.setStatus?.("Natal response loaded.");
           advState.saveFormState(mode, payload);
-          advState.saveApiData(mode, { summary: advDom.summaryEl ? advDom.summaryEl.innerHTML : "" });
+          persistApiState(mode, natalJson, advState, advDom);
+          advUtils.hideInputPanelOnMobile?.();
         } else if (mode === "transit") {
           const jsonResp = await fetch("/api/transit", {
             method: "POST",
@@ -2620,7 +2791,8 @@
           }
           advUtils.setStatus?.("Transit response loaded.");
           advState.saveFormState(mode, payload);
-          advState.saveApiData(mode, { summary: advDom.summaryEl ? advDom.summaryEl.innerHTML : "" });
+          persistApiState(mode, transitJson, advState, advDom);
+          advUtils.hideInputPanelOnMobile?.();
         } else if (mode === "natal_transit") {
           const jsonResp = await fetch("/api/transit", {
             method: "POST",
@@ -2639,7 +2811,8 @@
           }
           advUtils.setStatus?.("Combined response loaded.");
           advState.saveFormState(mode, payload);
-          advState.saveApiData(mode, { summary: advDom.summaryEl ? advDom.summaryEl.innerHTML : "" });
+          persistApiState(mode, transitJson, advState, advDom);
+          advUtils.hideInputPanelOnMobile?.();
         } else {
           const synPayload = advPayloads.buildRelationshipPayload();
           const jsonResp = await fetch("/api/relationship", {
@@ -2655,14 +2828,14 @@
           window.AdvancedApp.render?.renderRelationshipSummary?.(relJson);
           advUtils.setStatus?.("Relationship response loaded.");
           advState.saveFormState(mode, { ...payload, ...synPayload });
-          advState.saveApiData(mode, { summary: advDom.summaryEl ? advDom.summaryEl.innerHTML : "" });
+          persistApiState(mode, relJson, advState, advDom);
+          advUtils.hideInputPanelOnMobile?.();
         }
       } catch (err) {
         advUtils.setStatus?.(err.message || "An error occurred while generating the chart.", true);
-        console.error("[advanced] submit failed", err);
         if (advDom.summaryEl && !advDom.summaryEl.innerHTML) {
           advDom.summaryEl.innerHTML =
-            "<p>Could not generate summary due to an error. Check the console for details.</p>";
+            "<p>Could not generate summary due to an error.</p>";
         }
       } finally {
         if (advDom.generateBtn) {
@@ -2674,6 +2847,24 @@
     };
   }
 
+  function renderStoredResponse(mode, payload) {
+    if (!payload || !window.AdvancedApp || !window.AdvancedApp.render) return;
+    const renderers = window.AdvancedApp.render;
+    const selectedMode = mode || (window.AdvancedApp.utils?.getSelectedMode?.() || "natal");
+    if (selectedMode === "transit") {
+      renderers.renderTransitSummary?.(payload);
+    } else if (selectedMode === "natal_transit") {
+      renderers.renderCombinedSummary?.(payload);
+    } else if (selectedMode === "relationship") {
+      renderers.renderRelationshipSummary?.(payload);
+    } else {
+      renderers.renderNatalSummary?.(payload);
+    }
+    if (window.AdvancedApp.utils && typeof window.AdvancedApp.utils.setStatus === "function") {
+      window.AdvancedApp.utils.setStatus("Restored last saved result.");
+    }
+  }
+
   function overrideRenderers() {
     const app = window.AdvancedApp || {};
     if (!app.render) return;
@@ -2681,6 +2872,7 @@
     app.render.renderTransitSummary = (snapshot) => renderStructured("transit", snapshot);
     app.render.renderCombinedSummary = (snapshot) => renderStructured("combined", snapshot);
     app.render.renderRelationshipSummary = (data) => renderStructured("relationship", data);
+    app.render.renderStoredResponse = (mode, payload) => renderStoredResponse(mode, payload);
   }
 
   function reveal() {
@@ -2694,25 +2886,42 @@
     const range = loadRange();
     applyRange(range);
 
+    const triggerCanvasResize = () => {
+      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    };
+
+    const setCollapseState = (btn, body, expandLabel, collapseLabel) => {
+      const isHidden = body.classList.contains("hidden");
+      const iconCollapsed =
+        '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6"/></svg>';
+      const iconExpanded =
+        '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>';
+      btn.setAttribute("aria-expanded", isHidden ? "false" : "true");
+      btn.setAttribute("aria-label", isHidden ? expandLabel : collapseLabel);
+      btn.innerHTML = isHidden ? iconCollapsed : iconExpanded;
+    };
+
     if (dom.ascClockCollapse && dom.ascClockBody) {
+      dom.ascClockBody.classList.add("hidden");
+      setCollapseState(dom.ascClockCollapse, dom.ascClockBody, "Expand ascendant panel", "Collapse ascendant panel");
       dom.ascClockCollapse.addEventListener("click", () => {
-        const isHidden = dom.ascClockBody.classList.toggle("hidden");
-        dom.ascClockCollapse.setAttribute("aria-expanded", isHidden ? "false" : "true");
-        dom.ascClockCollapse.setAttribute("aria-label", isHidden ? "Expand ascendant panel" : "Collapse ascendant panel");
-        dom.ascClockCollapse.innerHTML = isHidden
-          ? '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>'
-          : '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 15l6-6 6 6"/></svg>';
+        dom.ascClockBody.classList.toggle("hidden");
+        setCollapseState(dom.ascClockCollapse, dom.ascClockBody, "Expand ascendant panel", "Collapse ascendant panel");
+        if (!dom.ascClockBody.classList.contains("hidden")) {
+          triggerCanvasResize();
+        }
       });
     }
 
     if (dom.moonClockCollapse && dom.moonClockBody) {
+      dom.moonClockBody.classList.add("hidden");
+      setCollapseState(dom.moonClockCollapse, dom.moonClockBody, "Expand Moon panel", "Collapse Moon panel");
       dom.moonClockCollapse.addEventListener("click", () => {
-        const isHidden = dom.moonClockBody.classList.toggle("hidden");
-        dom.moonClockCollapse.setAttribute("aria-expanded", isHidden ? "false" : "true");
-        dom.moonClockCollapse.setAttribute("aria-label", isHidden ? "Expand Moon panel" : "Collapse Moon panel");
-        dom.moonClockCollapse.innerHTML = isHidden
-          ? '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>'
-          : '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 15l6-6 6 6"/></svg>';
+        dom.moonClockBody.classList.toggle("hidden");
+        setCollapseState(dom.moonClockCollapse, dom.moonClockBody, "Expand Moon panel", "Collapse Moon panel");
+        if (!dom.moonClockBody.classList.contains("hidden")) {
+          triggerCanvasResize();
+        }
       });
     }
 
