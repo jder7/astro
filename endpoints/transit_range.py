@@ -108,8 +108,8 @@ async def transit_range(payload: TransitRangeRequest) -> TransitRangeResponse:
     for dt in iter_range_datetimes(start_dt, end_dt, payload.granularity):
         moment_subject = build_subject_for_moment(start_birth, dt, cfg)
         moment_dict = moment_subject.model_dump(mode="json")
-        moment_aspects = compute_normal_aspects(moment_subject)
-        moment_major_aspects = compute_major_aspects(moment_dict, active_points=cfg.active_points)
+        moment_aspects = compute_normal_aspects(moment_subject) if payload.include_aspects else []
+        moment_major_aspects = compute_major_aspects(moment_dict, active_points=cfg.active_points) if payload.include_aspects else []
 
         natal_dict = None
         natal_aspects = None
@@ -119,8 +119,10 @@ async def transit_range(payload: TransitRangeRequest) -> TransitRangeResponse:
             if natal_dict_cached is None:
                 natal_subject = build_subject(payload.birth, cfg)
                 natal_dict_cached = natal_subject.model_dump(mode="json")
-                natal_aspects_cached = compute_normal_aspects(natal_subject)
-                natal_major_aspects_cached = compute_major_aspects(natal_dict_cached, active_points=cfg.active_points)
+                natal_aspects_cached = compute_normal_aspects(natal_subject) if payload.include_aspects else []
+                natal_major_aspects_cached = (
+                    compute_major_aspects(natal_dict_cached, active_points=cfg.active_points) if payload.include_aspects else []
+                )
             natal_dict = natal_dict_cached
             natal_aspects = natal_aspects_cached
             natal_major_aspects = natal_major_aspects_cached

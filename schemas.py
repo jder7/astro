@@ -629,6 +629,12 @@ class TransitRangeRequest(BaseModel):
         default_factory=ChartConfig,
         description="Chart configuration shared across all snapshots.",
     )
+    include_aspects: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("includeAspects", "include_aspects"),
+        serialization_alias="includeAspects",
+        description="When true, compute and include standard aspects and major aspect configurations for each snapshot (and natal when provided).",
+    )
 
 
 class TransitRangeResponse(BaseModel):
