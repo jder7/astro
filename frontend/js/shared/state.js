@@ -260,11 +260,28 @@
     const showBirth = mode !== "transit" && mode !== "relationship";
     const showTransit = mode !== "natal" && mode !== "relationship";
     const relationshipSection = document.getElementById("relationshipSection");
+    const rangePanel = document.getElementById("rangePanel");
+    const rangeInputs = Array.from(document.querySelectorAll("[data-range-input]"));
+    const rangeButton = document.getElementById("advancedVisualizeBtn");
+    const rangeToggle = document.getElementById("rangeAspectsToggle");
+    const rangeBanner = document.getElementById("rangeDisabledBanner");
+    const allowRange = mode === "transit" || mode === "natal_transit";
 
     if (dom.birthSection) dom.birthSection.style.display = showBirth ? "" : "none";
     if (dom.transitSection) dom.transitSection.style.display = showTransit ? "" : "none";
     if (relationshipSection) relationshipSection.style.display = mode === "relationship" ? "" : "none";
     if (dom.nameRow) dom.nameRow.style.display = mode === "transit" ? "none" : "";
+    if (rangePanel) rangePanel.classList.toggle("range-panel-disabled", !allowRange);
+    rangeInputs.forEach((input) => {
+      input.disabled = !allowRange;
+      input.classList.toggle("opacity-60", !allowRange);
+    });
+    if (rangeButton) rangeButton.disabled = !allowRange;
+    if (rangeToggle) {
+      rangeToggle.disabled = !allowRange;
+      rangeToggle.setAttribute("aria-disabled", allowRange ? "false" : "true");
+    }
+    if (rangeBanner) rangeBanner.classList.toggle("hidden", allowRange);
 
     if (showTransit && mode !== "natal") {
       utils.setTransitNow();

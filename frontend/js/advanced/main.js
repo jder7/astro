@@ -17,6 +17,12 @@
     rangeEnd: document.getElementById("advancedRangeEnd"),
     rangeSummary: document.getElementById("advancedRangeSummary"),
     rangeNow: document.getElementById("advancedRangeNow"),
+    rangeVisualizeBtn: document.getElementById("advancedVisualizeBtn"),
+    rangeAspectsToggle: document.getElementById("rangeAspectsToggle"),
+    rangeGranularityHint: document.getElementById("rangeGranularityHint"),
+    rangeDisabledBanner: document.getElementById("rangeDisabledBanner"),
+    rangePanel: document.getElementById("rangePanel"),
+    rangeResults: document.getElementById("rangeResults"),
     summaryEl: document.getElementById("summaryContent"),
     apiCollapseBtn: document.getElementById("apiCollapseBtn"),
     apiResponseBody: document.getElementById("apiResponseBody"),
@@ -72,6 +78,10 @@
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
       date.getHours()
     )}:${pad(date.getMinutes())}`;
+  };
+  const toDateInput = (date) => {
+    if (!(date instanceof Date)) return "";
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   };
 
   const ELEMENT_RGB = {
@@ -1824,10 +1834,29 @@
     return `<div class="adv-asc-table-grid adv-moon-table-grid">${tables.join("")}</div>`;
   }
 
+  const parseDateOnly = (value) => {
+    if (!value) return null;
+    const [y, m, d] = String(value)
+      .split("-")
+      .map((n) => parseInt(n, 10));
+    if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
+    const date = new Date(y, m - 1, d);
+    return Number.isFinite(date.getTime()) ? date : null;
+  };
+
+  const getTransitAnchorDate = () => {
+    const advDom = (window.AdvancedApp && window.AdvancedApp.dom) || {};
+    const transitDate = advDom.transitDateInput ? advDom.transitDateInput.value : "";
+    const parsed = parseDateOnly(transitDate);
+    if (parsed) return parsed;
+    return null;
+  };
+
+  const DEFAULT_RANGE_DAYS = 30;
   const getDefaultRange = () => {
-    const start = new Date();
-    const end = new Date(start.getTime() + 6 * 60 * 60 * 1000);
-    return { start: toDatetimeLocal(start), end: toDatetimeLocal(end) };
+    const startDate = getTransitAnchorDate() || new Date();
+    const endDate = new Date(startDate.getTime() + DEFAULT_RANGE_DAYS * DAY_MS);
+    return { start: toDateInput(startDate), end: toDateInput(endDate), includeAspects: false };
   };
 
   function loadRange() {
@@ -1845,51 +1874,372 @@
 
   function saveRange(range) {
     try {
-      localStorage.setItem(STORAGE_RANGE, JSON.stringify(range));
+      const next = { ...range, includeAspects: Boolean(range.includeAspects) };
+      localStorage.setItem(STORAGE_RANGE, JSON.stringify(next));
     } catch (err) {
     }
   }
 
-  function formatRangeSummary(range) {
-    if (!dom.rangeSummary) return;
-    const start = range.start || "";
-    const end = range.end || "";
-    if (!start && !end) {
-      dom.rangeSummary.textContent = "Set start and end to see duration.";
-      return;
-    }
-    const parseDate = (value) => {
-      if (!value) return null;
-      const d = new Date(value);
-      return Number.isFinite(d.getTime()) ? d : null;
+  function isRangeAspectsEnabled() {
+    return dom.rangeAspectsToggle && dom.rangeAspectsToggle.getAttribute("aria-pressed") === "true";
+  }
+
+  function setRangeAspectsState(enabled) {
+    if (!dom.rangeAspectsToggle) return;
+    const active = Boolean(enabled);
+    dom.rangeAspectsToggle.setAttribute("aria-pressed", active ? "true" : "false");
+    const labelEl = dom.rangeAspectsToggle.querySelector(".range-toggle-label");
+    if (labelEl) labelEl.textContent = active ? "Aspects on" : "Aspects off";
+  }
+
+  function getRangeStateFromDom() {
+    return {
+      start: dom.rangeStart ? dom.rangeStart.value : "",
+      end: dom.rangeEnd ? dom.rangeEnd.value : "",
+      includeAspects: isRangeAspectsEnabled(),
     };
-    const startDate = parseDate(start);
-    const endDate = parseDate(end);
-    if (startDate && endDate && endDate > startDate) {
-      const diffMs = endDate.getTime() - startDate.getTime();
-      const hours = Math.floor(diffMs / (1000 * 60 * 60));
-      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-      dom.rangeSummary.textContent = `${start.replace("T", " ")} → ${end.replace("T", " ")} (${hours}h ${minutes}m)`;
-    } else if (startDate || endDate) {
-      dom.rangeSummary.textContent = startDate ? `Starting ${start.replace("T", " ")}` : `Ending ${end.replace("T", " ")}`;
-    } else {
-      dom.rangeSummary.textContent = "Set start and end to see duration.";
+  }
+
+  function normalizeRangeBounds(range) {
+    const startDate = parseDateOnly(range.start);
+    const endDate = parseDateOnly(range.end);
+    if (!startDate || !endDate) return { ok: false, error: "Pick both start and end dates." };
+    if (endDate < startDate) return { ok: false, error: "End date must be after the start date." };
+    const monthsApart = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth());
+    const granularity = monthsApart >= 3 ? "month" : "day";
+    const snapDay = (d) => {
+      const next = new Date(d);
+      next.setHours(12, 0, 0, 0);
+      return next;
+    };
+    const snapMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1, 12, 0, 0, 0);
+    const startNormalized = granularity === "month" ? snapMonth(startDate) : snapDay(startDate);
+    const endNormalized = granularity === "month" ? snapMonth(endDate) : snapDay(endDate);
+    const daysApart = Math.max(0, Math.round((endNormalized.getTime() - startNormalized.getTime()) / DAY_MS));
+    return { ok: true, startDate: startNormalized, endDate: endNormalized, granularity, monthsApart, daysApart };
+  }
+
+  function formatRangeSummary(range) {
+    if (!dom.rangeSummary) return null;
+    const normalized = normalizeRangeBounds(range);
+    if (!normalized.ok) {
+      dom.rangeSummary.textContent = range.start || range.end ? normalized.error : "Set start and end to see duration.";
+      if (dom.rangeGranularityHint) dom.rangeGranularityHint.textContent = "Auto picks day/month steps.";
+      return null;
     }
+    const { startDate, endDate, granularity, daysApart, monthsApart } = normalized;
+    const formatShort = (date) => {
+      try {
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      } catch (err) {
+        return `${date.getMonth() + 1}/${pad(date.getDate())}`;
+      }
+    };
+    const durationLabel = granularity === "month" ? `${monthsApart + 1} months` : `${daysApart + 1} days`;
+    dom.rangeSummary.textContent = `${formatShort(startDate)} → ${formatShort(endDate)} · ${durationLabel}`;
+    if (dom.rangeGranularityHint) {
+      dom.rangeGranularityHint.textContent =
+        granularity === "month" ? "Month cadence @ 1st of month, 12:00" : "Day cadence @ 12:00";
+    }
+    return normalized;
   }
 
   function applyRange(range) {
     if (dom.rangeStart) dom.rangeStart.value = range.start || "";
     if (dom.rangeEnd) dom.rangeEnd.value = range.end || "";
+    setRangeAspectsState(range.includeAspects);
     formatRangeSummary(range);
   }
 
   function handleRangeChange() {
-    const range = {
-      start: dom.rangeStart ? dom.rangeStart.value : "",
-      end: dom.rangeEnd ? dom.rangeEnd.value : "",
-    };
+    const range = getRangeStateFromDom();
     saveRange(range);
     formatRangeSummary(range);
+  }
+
+  function formatRangeTitle(date, showYear) {
+    if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return "Requested date";
+    let datePart = `${date.getMonth() + 1}/${pad(date.getDate())}`;
+    let weekday = "—";
+    try {
+      datePart = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      weekday = date.toLocaleDateString("en-US", { weekday: "short" });
+    } catch (err) {
+      weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+    }
+    const yearPart = showYear ? ` · '${String(date.getFullYear()).slice(-2)}` : "";
+    return `${datePart} · ${weekday}${yearPart}`;
+  }
+
+  function buildRangeChip(point, opts = {}) {
+    if (!point) return "";
+    const signMeta = SIGN_META[point.sign] || { name: point.sign || "—", icon: point.emoji || "" };
+    const elementIcon = ELEMENT_ICON[point.element] || "";
+    const retro = point.retrograde ? " · Rx" : "";
+    const label = opts.label || point.name || "Point";
+    const text = `${label} in ${signMeta.name || "?"} ${point.element || ""}${retro ? " · Retrograde" : ""}`.trim();
+    const extra = opts.extras ? ` ${opts.extras}` : "";
+    return `
+      <span class="range-chip-icon" title="${text}${extra}">
+        ${opts.icon || ""}
+        ${signMeta.icon || ""}
+        ${elementIcon || ""}
+        ${opts.suffix || ""}
+        ${retro ? '<span class="range-chip range-chip--retro">Rx</span>' : ""}
+      </span>
+    `;
+  }
+
+  function buildMoonRow(point, opts = {}) {
+    if (!point) return "";
+    const signMeta = SIGN_META[point.sign] || { name: point.sign || "—", icon: point.emoji || "" };
+    const elementIcon = ELEMENT_ICON[point.element] || "";
+    const retro = point.retrograde ? '<span class="range-chip range-chip--retro" title="Retrograde">Rx</span>' : "";
+    const label = opts.label || "Moon";
+    const extras = opts.extras || {};
+    const title = `${label} in ${signMeta.name || "?"} ${point.element || ""}`;
+    return `
+      <div class="range-moon-row" title="${title}">
+        <div class="range-moon-top">
+          <span class="range-chip-icon">${opts.icon || ""}</span>
+          <span class="range-chip-icon" title="${signMeta.name || ""}">${signMeta.icon || ""}</span>
+          <span class="range-chip-icon" title="${point.element || ""}">${elementIcon || ""}</span>
+          ${retro}
+        </div>
+        <div class="range-moon-bottom">
+          ${
+            extras.illumination
+              ? `<span class="range-chip range-chip--extra" title="Illumination">${extras.illumination}</span>`
+              : ""
+          }
+          ${
+            extras.phaseIcon
+              ? `<span class="range-chip-icon" title="Lunar phase">${extras.phaseIcon}</span>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  function buildMoonExtras(points, subject) {
+    const moonIllumVal = computeMoonIllumination(points);
+    const illumination =
+      typeof moonIllumVal === "number"
+        ? `~${moonIllumVal.toFixed(1)}%`
+        : typeof moonIllumVal === "string"
+          ? moonIllumVal
+          : "";
+    const lunar = subject?.lunar_phase || {};
+    const phaseIcon = lunar.moon_emoji || lunar.emoji || "";
+    return { illumination, phaseIcon };
+  }
+
+  function renderRangeAspects(majorAspects = []) {
+    const limited = majorAspects.slice(0, 3);
+    return limited
+      .map((aspect) => {
+        const icon = wrapMajorAspectIcon(fallbackIcon(aspect.id || "generic"));
+        const title = aspect.name || aspect.geometry || aspect.id || "Pattern";
+        return `<span class="range-aspect-icon" title="${title}">${icon}</span>`;
+      })
+      .join("");
+  }
+
+  function renderRangeBlock(label, subject, weekdayIdx, majorAspects = [], showAspects = false, granularity = "day") {
+    if (!subject) return "";
+    const { points } = collectPoints(subject);
+    const dayKey = CHALDEAN_DAY_RULERS?.[weekdayIdx] || null;
+    const dayPoint = dayKey ? pickPoint(points, dayKey) : null;
+    const sunPoint = pickPoint(points, "sun");
+    const dayRow = buildRangeChip(dayPoint, {
+      label: "Day ruler",
+      icon: POINTS_ICONS[dayKey] || "",
+    });
+    const sunRow = buildRangeChip(pickPoint(points, "sun"), { label: "Sun", icon: POINTS_ICONS.sun });
+    const moonExtras = buildMoonExtras(points, subject);
+    const moonRow = buildMoonRow(pickPoint(points, "moon"), {
+      label: "Moon",
+      icon: POINTS_ICONS.moon,
+      extras: moonExtras,
+    });
+    const rows = [sunRow, dayRow, moonRow].filter(Boolean).join("");
+    const aspectsBlock =
+      showAspects && majorAspects.length
+        ? `<div class="range-aspects">${renderRangeAspects(majorAspects)}</div>`
+        : "";
+    const useSun = granularity === "month";
+    const glyphSource = useSun ? sunPoint || dayPoint : dayPoint || sunPoint;
+    const glyphSign = glyphSource?.sign || null;
+    const glyphIcon = SIGN_META[glyphSign]?.icon || glyphSource?.emoji || "";
+    const glyphColor = elementStroke(glyphSource?.element || "Default", 0.9);
+    return `
+      <div class="range-block">
+        <div class="range-block-title">
+          <span class="range-pill range-pill--subtle" title="${label}">${label}</span>
+          ${
+            glyphIcon
+              ? `<span class="range-block-sign" style="color:${glyphColor}" title="${useSun ? "Sun sign" : "Day ruler sign"}">${glyphIcon}</span>`
+              : ""
+          }
+        </div>
+        <div class="range-rows range-rows--compact">${rows || ""}</div>
+        ${aspectsBlock}
+      </div>
+    `;
+  }
+
+  function renderRangeResults(payload, normalized, mode, includeAspects) {
+    if (!dom.rangeResults) return;
+    const snapshots = Array.isArray(payload?.snapshots) ? payload.snapshots : [];
+    if (!snapshots.length) {
+      dom.rangeResults.innerHTML = '<p class="hint">No snapshots returned for this window.</p>';
+      return;
+    }
+    const ordered = snapshots
+      .slice()
+      .sort((a, b) => {
+        const at = a?.timestamp ? new Date(a.timestamp).getTime() : 0;
+        const bt = b?.timestamp ? new Date(b.timestamp).getTime() : 0;
+        return at - bt;
+      });
+    const showYear =
+      normalized &&
+      normalized.startDate &&
+      normalized.endDate &&
+      normalized.startDate.getFullYear() !== normalized.endDate.getFullYear();
+    const cards = ordered
+      .map((snap) => {
+        const ts = snap.timestamp ? new Date(snap.timestamp) : null;
+        const weekdayIdx =
+          ts instanceof Date && Number.isFinite(ts.getTime()) ? ts.getDay() : new Date().getDay();
+        const hasNatal = Boolean(snap.natal_subject);
+        const title = formatRangeTitle(ts, showYear);
+        const { points: transitPoints } = collectPoints(snap.subject || {});
+        const dayKey = CHALDEAN_DAY_RULERS?.[weekdayIdx] || null;
+        const sunPoint = pickPoint(transitPoints, "sun");
+        const tonePoint = dayKey ? pickPoint(transitPoints, dayKey) : null;
+        const toneSource = normalized?.granularity === "month" ? sunPoint : tonePoint;
+        const tone = elementFill(toneSource?.element || "Default", 0.18);
+        const stroke = elementStroke(toneSource?.element || "Default", 0.7);
+        const transitBlock = renderRangeBlock(
+          "Transit",
+          snap.subject,
+          weekdayIdx,
+          snap.major_aspects || [],
+          includeAspects,
+          normalized?.granularity || "day"
+        );
+        const natalBlock = hasNatal
+          ? renderRangeBlock(
+              "Natal",
+              snap.natal_subject,
+              weekdayIdx,
+              snap.natal_major_aspects || [],
+              includeAspects,
+              normalized?.granularity || "day"
+            )
+          : "";
+        const blockGridClass = hasNatal ? "range-block-grid range-block-grid--dual" : "range-block-grid";
+        return `
+          <div class="range-entry-card" style="--range-tone:${tone}; --range-stroke:${stroke}">
+            <div class="range-entry-head">
+              <div class="range-entry-title">
+                <p class="range-entry-date">${title}</p>
+              </div>
+            </div>
+            <div class="${blockGridClass}">
+              ${transitBlock}
+              ${natalBlock}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+    dom.rangeResults.innerHTML = cards || '<p class="hint">No range entries found.</p>';
+  }
+
+  function buildTransitRangeBody(payload, normalized, mode, includeAspects) {
+    if (!payload || !payload.moment || !normalized) return null;
+    const toParts = (date) => ({
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      day: date.getDate(),
+      hour: date.getHours(),
+      minute: date.getMinutes(),
+    });
+    return {
+      ascendantRangeEnabled: payload.ascendantRangeEnabled,
+      moonRangeEnabled: payload.moonRangeEnabled,
+      moment: { ...payload.moment, ...toParts(normalized.startDate) },
+      end: toParts(normalized.endDate),
+      birth: mode === "natal_transit" ? payload.birth : null,
+      config: payload.config,
+      granularity: normalized.granularity,
+      include_aspects: Boolean(includeAspects),
+    };
+  }
+
+  async function handleRangeVisualize() {
+    const adv = window.AdvancedApp || {};
+    const advUtils = adv.utils || {};
+    const advPayloads = adv.payloads || {};
+    const mode = advUtils.getSelectedMode ? advUtils.getSelectedMode() : "natal";
+    if (mode !== "transit" && mode !== "natal_transit") {
+      advUtils.setStatus?.("Range explorer is available only for transit modes.", true);
+      return;
+    }
+    const range = getRangeStateFromDom();
+    const normalized = normalizeRangeBounds(range);
+    if (!normalized.ok) {
+      advUtils.setStatus?.(normalized.error, true);
+      return;
+    }
+    if (!advPayloads.buildPayloadFromForm) {
+      advUtils.setStatus?.("Cannot build payload for range request.", true);
+      return;
+    }
+    const { payload } = advPayloads.buildPayloadFromForm(mode);
+    const body = buildTransitRangeBody(payload, normalized, mode, range.includeAspects);
+    if (!body) {
+      advUtils.setStatus?.("Fill in the transit details first.", true);
+      return;
+    }
+
+    saveRange(range);
+    if (dom.rangeVisualizeBtn) {
+      dom.rangeVisualizeBtn.disabled = true;
+      dom.rangeVisualizeBtn.textContent = "Loading…";
+    }
+    if (dom.rangeResults) {
+      dom.rangeResults.innerHTML = '<p class="hint">Loading range…</p>';
+    }
+    advUtils.setStatus?.("Loading transit range…");
+
+    try {
+      const resp = await fetch("/api/transit-range", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error(`Range request failed: ${resp.status} ${resp.statusText}${text ? ` - ${text}` : ""}`);
+      }
+      const data = await resp.json();
+      renderRangeResults(data, normalized, mode, range.includeAspects);
+      advUtils.setStatus?.("Range loaded.");
+    } catch (err) {
+      if (dom.rangeResults) {
+        dom.rangeResults.innerHTML = `<p class="hint">Could not load range: ${err.message || err}</p>`;
+      }
+      advUtils.setStatus?.(err.message || "Could not load range.", true);
+    } finally {
+      if (dom.rangeVisualizeBtn) {
+        dom.rangeVisualizeBtn.disabled = false;
+        dom.rangeVisualizeBtn.textContent = "Visualise range";
+      }
+    }
   }
 
   function formatPointRow(point, { labelOverride } = {}) {
@@ -2927,9 +3277,24 @@
 
     if (dom.rangeStart) dom.rangeStart.addEventListener("change", handleRangeChange);
     if (dom.rangeEnd) dom.rangeEnd.addEventListener("change", handleRangeChange);
+    if (dom.rangeAspectsToggle) {
+      dom.rangeAspectsToggle.addEventListener("click", () => {
+        setRangeAspectsState(!isRangeAspectsEnabled());
+        handleRangeChange();
+      });
+    }
+    if (dom.rangeVisualizeBtn) {
+      dom.rangeVisualizeBtn.addEventListener("click", handleRangeVisualize);
+    }
     if (dom.rangeNow) {
       dom.rangeNow.addEventListener("click", () => {
-        const next = getDefaultRange();
+        const anchor = getTransitAnchorDate() || new Date();
+        const end = new Date(anchor.getTime() + DEFAULT_RANGE_DAYS * DAY_MS);
+        const next = {
+          start: toDateInput(anchor),
+          end: toDateInput(end),
+          includeAspects: isRangeAspectsEnabled(),
+        };
         applyRange(next);
         saveRange(next);
       });
