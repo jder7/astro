@@ -427,6 +427,184 @@
     return Number.isFinite(illum) ? illum : null;
   }
 
+  const ELEMENT_GRADIENTS = {
+    Fire: ["#fb7185", "#f97316"],
+    Earth: ["#afebb4ff", "#a16207"],
+    Air: ["#7dd3fc", "#22c55e"],
+    Water: ["#7dd3fc", "#1519fbff"],
+    Default: ["#94a3b8", "#fa10faff"],
+  };
+
+  const SPECIAL_GRADIENTS = {
+    silver: ["#ff94e3ff", "#cbd5e1"],
+    brightGold: ["#fef08a", "#f59e0b"],
+    silverViolet: ["#e2e8f0", "#a78bfa"],
+    goldViolet: ["#facc15", "#b194f4ff"],
+    violetLila: ["#850cf6ff", "#c084fc"],
+  };
+
+  function buildElementPentagram(opts = {}) {
+    const size = Number.isFinite(opts.size) ? opts.size : 140;
+    const center = size / 2;
+    const id = opts.id || `sigil-${Math.random().toString(36).slice(2, 8)}`;
+    const compact = opts.compact ? " sigil-figure--compact" : "";
+    const className = opts.className ? ` ${opts.className}` : "";
+    const tally = {};
+    ["sunElement", "moonElement", "dayElement", "ascElement"].forEach((key) => {
+      const el = opts[key];
+      if (!el) return;
+      const clean = String(el);
+      tally[clean] = (tally[clean] || 0) + 1;
+    });
+    const elementsList = Object.keys(tally).length
+      ? Object.entries(tally).flatMap(([el, count]) => Array.from({ length: count }, () => el))
+      : [];
+    const hasDuplicate = Object.values(tally).some((count) => count > 1);
+    const allProvided =
+      Boolean(opts.sunElement) &&
+      Boolean(opts.moonElement) &&
+      Boolean(opts.dayElement) &&
+      Boolean(opts.ascElement);
+
+    const gradientForElement = (el, fallback) => {
+      const key = el && ELEMENT_GRADIENTS[el] ? el : null;
+      if (key) return ELEMENT_GRADIENTS[key];
+      if (fallback && SPECIAL_GRADIENTS[fallback]) return SPECIAL_GRADIENTS[fallback];
+      return ELEMENT_GRADIENTS.Default;
+    };
+
+    const petal5Stops = gradientForElement(opts.sunElement);
+    const petal4Stops = gradientForElement(opts.moonElement, "silverViolet");
+    const petal3Stops = gradientForElement(opts.dayElement, "goldViolet");
+    const petal2Stops = gradientForElement(opts.ascElement, "violetLila");
+
+    let petal1Stops;
+    petal1Stops = hasDuplicate
+      ? SPECIAL_GRADIENTS.silver
+      : allProvided
+        ? SPECIAL_GRADIENTS.brightGold
+        : SPECIAL_GRADIENTS.brightGold;
+
+    const gradients = [
+      { id: `${id}-p1`, stops: petal1Stops },
+      { id: `${id}-p2`, stops: petal2Stops },
+      { id: `${id}-p3`, stops: petal3Stops },
+      { id: `${id}-p4`, stops: petal4Stops },
+      { id: `${id}-p5`, stops: petal5Stops },
+    ];
+
+    const isGoldPetal = !hasDuplicate;
+    const petal1Color = Array.isArray(petal1Stops) && petal1Stops.length ? petal1Stops[0] : "#facc15";
+    const centerRadius = isGoldPetal ? size * 0.14 : size * 0.11;
+    const centerStrokeWidth = isGoldPetal ? size * 0.05 : size * 0.015;
+
+    const defs = `
+      <defs>
+        ${gradients
+          .map(
+            (g) => `
+            <linearGradient id="${g.id}" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="${g.stops[0]}" />
+              <stop offset="100%" stop-color="${g.stops[1]}" />
+            </linearGradient>
+          `
+          )
+          .join("")}
+        <radialGradient id="${id}-bg" cx="50%" cy="45%" r="70%">
+          <stop offset="0%" stop-color="rgba(14,165,233,0.28)" />
+          <stop offset="100%" stop-color="rgba(99,102,241,0.05)" />
+        </radialGradient>
+        <filter id="${id}-shadow" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="rgba(14,165,233,0.35)" />
+          <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="rgba(12,12,24,0.8)" />
+        </filter>
+      </defs>
+    `;
+
+    const basePetal = (() => {
+      const tipY = center - size * 0.42;
+      const controlUp = center - size * 0.12;
+      const spread = size * 0.28;
+      const flareY = center + size * 0.18;
+      return [
+        `M ${center} ${center}`,
+        `C ${center - spread} ${controlUp}, ${center - spread * 0.5} ${flareY}, ${center} ${tipY}`,
+        `C ${center + spread * 0.5} ${flareY}, ${center + spread} ${controlUp}, ${center} ${center}`,
+        "Z",
+      ].join(" ");
+    })();
+
+    const angles = [
+      { angle: -90, grad: gradients[0].id, element: null, icon: "☸" }, // spirit (no element)
+      { angle: -90 + 72, grad: gradients[1].id, element: opts.ascElement, icon: ELEMENT_ICON[opts.ascElement] || "↗" }, // asc
+      { angle: -90 + 144, grad: gradients[2].id, element: opts.dayElement, icon: ELEMENT_ICON[opts.dayElement] || (POINTS_ICONS[(opts.dayRulerKey || "").toLowerCase()] || "✶") }, // day
+      { angle: -90 + 216, grad: gradients[3].id, element: opts.moonElement, icon: ELEMENT_ICON[opts.moonElement] || "☾" }, // moon
+      { angle: -90 + 288, grad: gradients[4].id, element: opts.sunElement, icon: ELEMENT_ICON[opts.sunElement] || "☉" }, // sun
+    ];
+
+    const dayRulerIcon =
+      POINTS_ICONS[(opts.dayRulerKey || "").toLowerCase()] || "☉";
+
+    const rotationOffset = 90;
+    const petalPaths = angles
+      .slice(0, 5)
+      .map(
+        (entry) => `
+          <path
+            d="${basePetal}"
+            transform="rotate(${entry.angle + rotationOffset} ${center} ${center})"
+            fill="url(#${entry.grad})"
+            stroke="rgba(7, 11, 22, 0.55)"
+            stroke-width="1.1"
+            opacity="0.94"
+          />
+        `
+      )
+      .join("");
+
+    const iconLabels = angles
+      .map((entry) => {
+        const rad = (entry.angle * Math.PI) / 180;
+        const labelR = size * 0.24;
+        const x = center + Math.cos(rad) * labelR;
+        const y = center + Math.sin(rad) * labelR;
+        const icon = entry.icon || "•";
+        return `
+          <text x="${x}" y="${y}" text-anchor="middle" font-family="'Space Grotesk','Inter',system-ui" font-weight="800" font-size="${size * 0.11}" fill="#0b172a" opacity="0.9" dominant-baseline="middle">${icon}</text>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="sigil-figure${compact}${className}" style="--sigil-size:${size}px;">
+        <svg class="element-pentagram" viewBox="0 0 ${size} ${size}" role="img" aria-label="${opts.label || "Elemental pentagram"}">
+          ${defs}
+          ${petalPaths}
+          ${iconLabels}
+          <circle
+            cx="${center}"
+            cy="${center}"
+            r="${size * 0.42}"
+            fill="url(#${id}-bg)"
+            stroke="${isGoldPetal ? `url(#${gradients[0].id})` : "rgba(56,189,248,0.18)"}"
+            stroke-width="${isGoldPetal ? size * 0.025 : 1}"
+            opacity="${isGoldPetal ? 0.9 : 1}"
+          />
+          <circle
+            cx="${center}"
+            cy="${center}"
+            r="${centerRadius}"
+            fill="url(#${gradients[0].id})"
+            stroke="${isGoldPetal ? `url(#${gradients[0].id})` : "rgba(255,255,255,0.12)"}"
+            stroke-width="${centerStrokeWidth}"
+            opacity="0.95"
+          />
+          <text x="${center}" y="${center}" text-anchor="middle" font-family="'Space Grotesk','Inter',system-ui" font-weight="800" font-size="${size * 0.13}" fill="#0b172a" dominant-baseline="middle">${dayRulerIcon}</text>
+        </svg>
+      </div>
+    `;
+  }
+
   function getLunationInfo(parts) {
     if (!parts) return null;
     const { year, month, day, hour = 0, minute = 0 } = parts;
@@ -563,5 +741,6 @@
     CHALDEAN_DAY_RULERS,
     computeIlluminationFromAbsPos,
     getLunationInfo,
+    buildElementPentagram,
   };
 })();

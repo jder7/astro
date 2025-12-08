@@ -259,6 +259,18 @@ body {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
 }
 
+.summary-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.summary-card-body {
+  display: grid;
+  gap: 0.7rem;
+}
+
 .summary-heading {
   font-size: 0.95rem;
   font-weight: 700;
@@ -291,6 +303,54 @@ body {
   display: block;
   font-size: 0.8rem;
   color: #cbd5e1;
+}
+
+.summary-sigil {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+}
+
+.sigil-figure {
+  --sigil-size: 132px;
+  width: var(--sigil-size);
+  min-width: var(--sigil-size);
+  aspect-ratio: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.35));
+}
+
+.sigil-figure svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.sigil-figure--compact {
+  --sigil-size: 110px;
+}
+
+.sigil-figure--mini {
+  --sigil-size: 82px;
+}
+
+.summary-sigil-figure .sigil-figure {
+  --sigil-size: 108px;
+}
+
+@media (max-width: 640px) {
+  .summary-card-head {
+    flex-direction: column;
+  }
+  .summary-sigil {
+    justify-content: flex-start;
+  }
+  .summary-sigil .sigil-figure {
+    --sigil-size: 118px;
+  }
 }
 
 .lunation {

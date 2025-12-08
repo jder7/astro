@@ -348,6 +348,7 @@ a {
 }
 
 .adv-asc-canvas-wrap {
+  position: relative;
   width: 100%;
   max-width: none;
   min-height: 320px;
@@ -377,6 +378,29 @@ a {
   pointer-events: auto;
   align-items: flex-end;
   justify-content: center;
+}
+
+.adv-asc-sigil-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.adv-asc-sigil {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 0.92;
+}
+
+.adv-asc-sigil .sigil-figure {
+  --sigil-size: 44px;
+}
+
+.adv-asc-sigil-figure {
+  --sigil-size: 48px;
 }
 
 .adv-asc-center-card {
@@ -673,9 +697,28 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   margin-bottom: 0.35rem;
   color: #e2e8f0;
   font-weight: 700;
+}
+
+.range-block-figure {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.range-block-sigil .sigil-figure {
+  --sigil-size: 88px;
+}
+
+.range-block-sigil {
+  flex-shrink: 0;
+}
+
+.range-sigil {
+  --sigil-size: 88px;
 }
 
 .range-block-sign {
@@ -777,12 +820,33 @@ a {
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
+.adv-summary-head-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.adv-summary-figure {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.adv-summary-figure .sigil-figure {
+  --sigil-size: 108px;
+}
+
+.adv-summary-sigil {
+  --sigil-size: 108px;
+}
+
 .adv-summary-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
   margin-bottom: 0.65rem;
+  flex-wrap: wrap;
 }
 
 .adv-summary-grid {
@@ -876,6 +940,40 @@ a {
   .adv-summary-extra {
     grid-column: span 2;
   }
+  .adv-summary-figure .sigil-figure {
+    --sigil-size: 96px;
+  }
+  .range-block-sigil .sigil-figure {
+    --sigil-size: 74px;
+  }
+  .sigil-cell {
+    width: 56px;
+  }
+}
+
+.sigil-figure {
+  --sigil-size: 128px;
+  width: var(--sigil-size);
+  min-width: var(--sigil-size);
+  aspect-ratio: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.35));
+}
+
+.sigil-figure svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.sigil-figure--compact {
+  --sigil-size: 106px;
+}
+
+.sigil-figure--mini {
+  --sigil-size: 82px;
 }
 
 .adv-asc-table,
@@ -918,6 +1016,24 @@ a {
 .adv-asc-table tbody tr:nth-child(odd),
 .adv-moon-table tbody tr:nth-child(odd) {
   background: rgba(255, 255, 255, 0.02);
+}
+
+.sigil-cell {
+  width: 64px;
+  text-align: center;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.table-sigil {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.table-sigil .sigil-figure {
+  --sigil-size: 44px;
+  min-width: var(--sigil-size);
 }
 
 .adv-asc-color-swatch {

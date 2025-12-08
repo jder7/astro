@@ -56,6 +56,7 @@
     CHALDEAN_DAY_RULERS,
     computeIlluminationFromAbsPos,
     getLunationInfo,
+    buildElementPentagram,
   } = shared;
   const flags = (app.flags = { ...(app.flags || {}), skipSvg: true });
 
@@ -203,6 +204,39 @@
       decan: computeDecan(pos),
       emoji: point?.emoji,
     };
+  };
+
+  const getDayRulerFromDate = (date) => {
+    if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return null;
+    return CHALDEAN_DAY_RULERS ? CHALDEAN_DAY_RULERS[date.getDay()] || null : null;
+  };
+
+  const buildSigilBase = (points, anchorDate) => {
+    const safeAnchor = anchorDate instanceof Date && Number.isFinite(anchorDate.getTime()) ? anchorDate : new Date();
+    const sun = pickPoint(points, "sun");
+    const moon = pickPoint(points, "moon");
+    const asc = pickPoint(points, "ascendant");
+    const dayKey = getDayRulerFromDate(safeAnchor);
+    const day = dayKey ? pickPoint(points, dayKey) : null;
+    return {
+      sunElement: sun?.element || null,
+      moonElement: moon?.element || null,
+      ascElement: asc?.element || null,
+      dayElement: day?.element || null,
+      dayRulerKey: dayKey,
+    };
+  };
+
+  const renderSigil = (base, overrides = {}, options = {}) => {
+    if (typeof buildElementPentagram !== "function") return "";
+    const data = { ...(base || {}), ...(overrides || {}) };
+    return buildElementPentagram({
+      ...data,
+      size: options.size || 118,
+      label: options.label || "Elementals",
+      compact: Boolean(options.compact),
+      className: options.className || "",
+    });
   };
 
   const formatSummaryRow = (label, icon, data, extras = "") => {
@@ -465,6 +499,8 @@
               <div class="adv-summary-major">${majorAspectLines}</div>
             </div>`
           : "";
+      const sigilBase = buildSigilBase(rangePoints, rangeAnchor);
+      const sigilMarkup = renderSigil(sigilBase, {}, { size: 108, compact: true, className: "adv-summary-sigil" });
 
       return `
         <div class="adv-summary-card">
@@ -473,7 +509,10 @@
               <p class="adv-asc-kicker">Day Ruler · ${dayRulerName} ${dayRulerIcon}</p>
               <p class="adv-asc-sub">${dateLabel}</p>
             </div>
-            <span class="adv-asc-pill">${range.label || range.id || "Range"}</span>
+            <div class="adv-summary-head-meta">
+              <span class="adv-asc-pill">${range.label || range.id || "Range"}</span>
+              ${sigilMarkup ? `<div class="adv-summary-figure">${sigilMarkup}</div>` : ""}
+            </div>
           </div>
           <div class="adv-summary-grid">
             ${sunData ? formatSummaryRow("Sun", POINTS_ICONS.sun, sunData) : ""}
@@ -782,6 +821,15 @@
     const bodyEl = document.getElementById(ids.bodyId);
     const range12Btn = document.getElementById(ids.range12Id);
     const range24Btn = document.getElementById(ids.range24Id);
+    const sigilEl = ids.sigilId ? document.getElementById(ids.sigilId) : null;
+    const sigilBase = (() => {
+      if (!sigilEl || !sigilEl.dataset.base) return null;
+      try {
+        return JSON.parse(decodeURIComponent(sigilEl.dataset.base));
+      } catch (err) {
+        return null;
+      }
+    })();
     if (!canvas || !centerEl) return;
 
     if (window.AdvancedApp && typeof window.AdvancedApp._cleanupAscClock === "function") {
@@ -810,6 +858,8 @@
       playing: false,
       lastTick: performance.now(),
       windowHours: range24Btn && range24Btn.getAttribute("aria-pressed") === "true" ? 24 : 12,
+      sigilPos: null,
+      sigilMarkup: "",
     };
 
     const hourStep = () => (Math.PI * 2) / state.windowHours;
@@ -851,6 +901,13 @@
       draw();
       applyLayout();
     };
+
+    const buildSigilForEntry = (entry) =>
+      renderSigil(
+        sigilBase || {},
+        { ascElement: entry?.element || null },
+        { size: 44, compact: true, className: "adv-asc-sigil-figure" }
+      );
 
     const drawRing = (range, ringConfig, ringIdx, activeOffset) => {
       if (!range.entries.length) return { handColor: ringConfig.handColor };
@@ -976,6 +1033,17 @@
             endAngle: sliceEnd,
             color: elementStroke(srcEntry.element, 0.9),
           };
+          if (sigilEl) {
+            const targetAngle = sliceStart + decanStep * 1.5;
+            const sigilRadius = innerR + (outerR - innerR) * 0.55;
+            state.sigilPos = {
+              x: cx + Math.cos(targetAngle) * sigilRadius,
+              y: cy + Math.sin(targetAngle) * sigilRadius,
+              w,
+              h,
+            };
+            state.sigilMarkup = buildSigilForEntry(srcEntry);
+          }
         }
       });
 
@@ -1083,6 +1151,8 @@
       const w = width / (window.devicePixelRatio || 1);
       const h = height / (window.devicePixelRatio || 1);
       ctx.clearRect(0, 0, w, h);
+      state.sigilPos = null;
+      state.sigilMarkup = "";
 
       const activeColors = ranges.map((range, idx) => {
         const offset = wrapOffset(state.offsets[idx] ?? state.offsets[0] ?? 0, state.windowHours);
@@ -1090,6 +1160,17 @@
         return result?.handColor || (rings[idx] || rings[0]).handColor;
       });
       drawHands(activeColors);
+      if (sigilEl && state.sigilPos) {
+        if (state.sigilMarkup) {
+          sigilEl.innerHTML = state.sigilMarkup;
+        }
+        const rect = canvas.getBoundingClientRect();
+        const x = (state.sigilPos.x / state.sigilPos.w) * rect.width;
+        const y = (state.sigilPos.y / state.sigilPos.h) * rect.height;
+        sigilEl.style.left = `${x}px`;
+        sigilEl.style.top = `${y}px`;
+        sigilEl.style.opacity = "1";
+      }
     };
 
     const tick = (ts) => {
@@ -1185,7 +1266,7 @@
     }
     draw();
   }
-  function buildAscendantClockBlock(ascendantRanges, metaSource) {
+  function buildAscendantClockBlock(ascendantRanges, metaSource, sigilHtml = "", sigilBase = null) {
     if (!ascendantRanges.length) return { html: "", ids: null };
     const clockId = `asc-clock-${++ascClockCounter}`;
     const canvasId = `${clockId}-canvas`;
@@ -1194,6 +1275,8 @@
     const range12Id = `${clockId}-12h`;
     const range24Id = `${clockId}-24h`;
     const bodyId = `${clockId}-body`;
+    const sigilId = `${clockId}-sigil`;
+    const sigilBaseAttr = sigilBase ? encodeURIComponent(JSON.stringify(sigilBase)) : "";
     const dateInfo = formatDateLabel(metaSource || {});
     const dateLabel = dateInfo.label ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}` : "Requested datetime";
     const legend = ascendantRanges
@@ -1225,15 +1308,18 @@
         <div class="adv-asc-body" id="${bodyId}">
           <div class="adv-asc-canvas-wrap">
             <canvas id="${canvasId}" class="adv-asc-canvas" aria-label="Ascendant clock"></canvas>
+            <div class="adv-asc-sigil-layer">
+              <div class="adv-asc-sigil" id="${sigilId}" data-base="${sigilBaseAttr}">${sigilHtml || ""}</div>
+            </div>
           </div>
           <div id="${centerId}" class="adv-asc-center"></div>
         </div>
       </div>
     `;
-    return { html, ids: { canvasId, playId, centerId, range12Id, range24Id, bodyId } };
+    return { html, ids: { canvasId, playId, centerId, range12Id, range24Id, bodyId, sigilId } };
   }
 
-  function buildAscendantTables(ranges) {
+  function buildAscendantTables(ranges, sigilBase = null) {
     if (!ranges.length) return "";
     const formatTime = (ts) => {
       if (!(ts instanceof Date) || !Number.isFinite(ts.getTime())) return "—";
@@ -1250,11 +1336,15 @@
         start instanceof Date && end instanceof Date
           ? ((end.getTime() - start.getTime()) / HOUR_MS).toFixed(2)
           : "—";
+      const sigilMarkup = sigilBase
+        ? renderSigil(sigilBase, { ascElement: entry.element }, { size: 44, compact: true, className: "table-sigil" })
+        : "";
       return `
         <tr>
           <td>${formatTime(start)}</td>
           <td>${formatTime(end)}</td>
           <td>${signMeta.icon || ""} ${signMeta.name}</td>
+          <td class="sigil-cell">${sigilMarkup || ""}</td>
           <td><span class="adv-asc-color-swatch" style="background:${swatchColor}"></span>${elementIcon ? `${elementIcon} ` : ""}${entry.element || "—"}</td>
           <td>${qualityIcon ? `${qualityIcon} ` : ""}${entry.quality || "—"}</td>
           <td>${durationHours === "—" ? "—" : `${durationHours}h`}</td>
@@ -1273,12 +1363,13 @@
               <th>Start</th>
               <th>End</th>
               <th>Sign</th>
+              <th>Sigil</th>
               <th>Element</th>
               <th>Quality</th>
               <th>Duration</th>
             </tr>
           </thead>
-          <tbody>${rows || '<tr><td colspan="5">No data</td></tr>'}</tbody>
+          <tbody>${rows || '<tr><td colspan="7">No data</td></tr>'}</tbody>
         </table>
       `;
     });
@@ -1339,7 +1430,7 @@
     `;
   }
 
-  function buildMoonClockBlock(moonRanges, metaSource) {
+  function buildMoonClockBlock(moonRanges, metaSource, sigilHtml = "", sigilBase = null) {
     if (!moonRanges.length) return { html: "", ids: null };
     const clockId = `moon-clock-${++moonClockCounter}`;
     const canvasId = `${clockId}-canvas`;
@@ -1348,6 +1439,8 @@
     const range14Id = `${clockId}-14d`;
     const range28Id = `${clockId}-28d`;
     const bodyId = `${clockId}-body`;
+    const sigilId = `${clockId}-sigil`;
+    const sigilBaseAttr = sigilBase ? encodeURIComponent(JSON.stringify(sigilBase)) : "";
     const dateInfo = formatDateLabel(metaSource || {});
     const dateLabel = dateInfo.label ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}` : "Requested datetime";
     const legend = moonRanges
@@ -1379,12 +1472,15 @@
         <div class="adv-asc-body adv-asc-body--stacked" id="${bodyId}">
           <div class="adv-asc-canvas-wrap">
             <canvas id="${canvasId}" class="adv-asc-canvas" aria-label="Moon clock"></canvas>
+            <div class="adv-asc-sigil-layer">
+              <div class="adv-asc-sigil" id="${sigilId}" data-base="${sigilBaseAttr}">${sigilHtml || ""}</div>
+            </div>
           </div>
           <div id="${centerId}" class="adv-asc-center"></div>
         </div>
       </div>
     `;
-    return { html, ids: { canvasId, centerId, playId, range14Id, range28Id, bodyId } };
+    return { html, ids: { canvasId, centerId, playId, range14Id, range28Id, bodyId, sigilId } };
   }
 
   function initMoonClock(ranges, ids) {
@@ -1394,6 +1490,15 @@
     const centerEl = document.getElementById(ids.centerId);
     const range14Btn = document.getElementById(ids.range14Id);
     const range28Btn = document.getElementById(ids.range28Id);
+    const sigilEl = ids.sigilId ? document.getElementById(ids.sigilId) : null;
+    const sigilBase = (() => {
+      if (!sigilEl || !sigilEl.dataset.base) return null;
+      try {
+        return JSON.parse(decodeURIComponent(sigilEl.dataset.base));
+      } catch (err) {
+        return null;
+      }
+    })();
     if (!canvas || !centerEl) return;
 
     if (window.AdvancedApp && typeof window.AdvancedApp._cleanupMoonClock === "function") {
@@ -1422,6 +1527,8 @@
       playing: false,
       lastTick: performance.now(),
       windowDays: range28Btn && range28Btn.getAttribute("aria-pressed") === "true" ? 28 : 14,
+      sigilPos: null,
+      sigilMarkup: "",
     };
 
     const windowHours = () => state.windowDays * 24;
@@ -1465,6 +1572,13 @@
       draw();
       applyLayout();
     };
+
+    const buildSigilForEntry = (entry) =>
+      renderSigil(
+        sigilBase || {},
+        { moonElement: entry?.element || null, ascElement: null },
+        { size: 44, compact: true, className: "adv-asc-sigil-figure" }
+      );
 
     const drawRing = (range, ringConfig, ringIdx, activeOffset) => {
       if (!range.entries.length) return { handColor: ringConfig.handColor };
@@ -1561,6 +1675,18 @@
             endAngle: sliceEnd,
             color: elementStroke(srcEntry.element, 0.9),
           };
+          if (sigilEl && ringIdx === 0) {
+            const decanStep = (sliceEnd - sliceStart) / 3;
+            const targetAngle = sliceStart + decanStep * 1.5;
+            const sigilRadius = innerR + (outerR - innerR) * 0.5;
+            state.sigilPos = {
+              x: cx + Math.cos(targetAngle) * sigilRadius,
+              y: cy + Math.sin(targetAngle) * sigilRadius,
+              w,
+              h,
+            };
+            state.sigilMarkup = buildSigilForEntry(srcEntry);
+          }
         }
       });
 
@@ -1658,6 +1784,8 @@
       const w = width / (window.devicePixelRatio || 1);
       const h = height / (window.devicePixelRatio || 1);
       ctx.clearRect(0, 0, w, h);
+      state.sigilPos = null;
+      state.sigilMarkup = "";
 
       const activeColors = ranges.map((range, idx) => {
         const offset = wrapOffset(state.offsets[idx] ?? state.offsets[0] ?? 0, windowHours());
@@ -1665,6 +1793,17 @@
         return result?.handColor || (rings[idx] || rings[0]).handColor;
       });
       drawHands(activeColors);
+      if (sigilEl && state.sigilPos) {
+        if (state.sigilMarkup) {
+          sigilEl.innerHTML = state.sigilMarkup;
+        }
+        const rect = canvas.getBoundingClientRect();
+        const x = (state.sigilPos.x / state.sigilPos.w) * rect.width;
+        const y = (state.sigilPos.y / state.sigilPos.h) * rect.height;
+        sigilEl.style.left = `${x}px`;
+        sigilEl.style.top = `${y}px`;
+        sigilEl.style.opacity = "1";
+      }
     };
 
     const tick = (ts) => {
@@ -1757,7 +1896,7 @@
     draw();
   }
 
-  function buildMoonTables(ranges) {
+  function buildMoonTables(ranges, sigilBase = null) {
     if (!ranges.length) return "";
     const formatDateTime = (ts) => {
       if (!(ts instanceof Date) || !Number.isFinite(ts.getTime())) return "—";
@@ -1794,11 +1933,15 @@
           : null;
       const illum = phase ? Math.round((phase.illumination ?? phase.fraction) * 100) : null;
       const phaseLabel = phase ? `${phase.icon || ""} ${phase.name}` : "—";
+      const sigilMarkup = sigilBase
+        ? renderSigil(sigilBase, { moonElement: entry.element, ascElement: null }, { size: 44, compact: true, className: "table-sigil" })
+        : "";
       return `
         <tr>
           <td>${formatDateTime(start)}</td>
           <td>${formatDateTime(end)}</td>
           <td>${signMeta.icon || ""} ${signMeta.name}</td>
+          <td class="sigil-cell">${sigilMarkup || ""}</td>
           <td>${illum !== null ? `${illum}%` : "—"}</td>
           <td>${phaseLabel}</td>
           <td><span class="adv-asc-color-swatch" style="background:${swatchColor}"></span>${elementIcon ? `${elementIcon} ` : ""}${entry.element || "—"}</td>
@@ -1819,6 +1962,7 @@
               <th>Start</th>
               <th>End</th>
               <th>Sign</th>
+              <th>Sigil</th>
               <th>Illum.</th>
               <th>Phase</th>
               <th>Element</th>
@@ -1826,7 +1970,7 @@
               <th>Duration</th>
             </tr>
           </thead>
-          <tbody>${rows || '<tr><td colspan="8">No data</td></tr>'}</tbody>
+          <tbody>${rows || '<tr><td colspan="9">No data</td></tr>'}</tbody>
         </table>
       `;
     });
@@ -2046,7 +2190,15 @@
       .join("");
   }
 
-  function renderRangeBlock(label, subject, weekdayIdx, majorAspects = [], showAspects = false, granularity = "day") {
+  function renderRangeBlock(
+    label,
+    subject,
+    weekdayIdx,
+    majorAspects = [],
+    showAspects = false,
+    granularity = "day",
+    anchorDate = null
+  ) {
     if (!subject) return "";
     const { points } = collectPoints(subject);
     const dayKey = CHALDEAN_DAY_RULERS?.[weekdayIdx] || null;
@@ -2073,15 +2225,29 @@
     const glyphSign = glyphSource?.sign || null;
     const glyphIcon = SIGN_META[glyphSign]?.icon || glyphSource?.emoji || "";
     const glyphColor = elementStroke(glyphSource?.element || "Default", 0.9);
+    const sigilBase = buildSigilBase(points, anchorDate || new Date());
+    const sigilOverrides = { dayElement: dayPoint?.element, dayRulerKey: dayKey };
+    if (granularity === "day") {
+      sigilOverrides.ascElement = null;
+    } else if (granularity === "month") {
+      sigilOverrides.ascElement = null;
+      sigilOverrides.moonElement = null;
+      sigilOverrides.dayElement = null;
+      sigilOverrides.dayRulerKey = null;
+    }
+    const sigilMarkup = renderSigil(sigilBase, sigilOverrides, { size: 92, compact: true, className: "range-sigil" });
     return `
       <div class="range-block">
         <div class="range-block-title">
           <span class="range-pill range-pill--subtle" title="${label}">${label}</span>
-          ${
-            glyphIcon
-              ? `<span class="range-block-sign" style="color:${glyphColor}" title="${useSun ? "Sun sign" : "Day ruler sign"}">${glyphIcon}</span>`
-              : ""
-          }
+          <div class="range-block-figure">
+            ${
+              glyphIcon
+                ? `<span class="range-block-sign" style="color:${glyphColor}" title="${useSun ? "Sun sign" : "Day ruler sign"}">${glyphIcon}</span>`
+                : ""
+            }
+            ${sigilMarkup ? `<div class="range-block-sigil">${sigilMarkup}</div>` : ""}
+          </div>
         </div>
         <div class="range-rows range-rows--compact">${rows || ""}</div>
         ${aspectsBlock}
@@ -2128,7 +2294,8 @@
           weekdayIdx,
           snap.major_aspects || [],
           includeAspects,
-          normalized?.granularity || "day"
+          normalized?.granularity || "day",
+          ts
         );
         const natalBlock = hasNatal
           ? renderRangeBlock(
@@ -2137,7 +2304,8 @@
               weekdayIdx,
               snap.natal_major_aspects || [],
               includeAspects,
-              normalized?.granularity || "day"
+              normalized?.granularity || "day",
+              ts
             )
           : "";
         const blockGridClass = hasNatal ? "range-block-grid range-block-grid--dual" : "range-block-grid";
@@ -3014,8 +3182,17 @@
     });
     pointsByRangeId.default = points;
     metaByRangeId.default = metaSource;
-    const clockBlock = buildAscendantClockBlock(ascendantRanges, metaSource);
-    const moonClockBlock = buildMoonClockBlock(moonRanges, metaSource);
+    const anchorDate =
+      safeDate(ascendantRanges[0]?.anchor) ||
+      safeDate(moonRanges[0]?.anchor) ||
+      safeDate(metaSource?.timestamp) ||
+      new Date();
+    const ascSigilBase = buildSigilBase(points, anchorDate);
+    const ascSigilHtml = renderSigil(ascSigilBase, {}, { size: 44, compact: true, className: "adv-asc-sigil-figure" });
+    const moonSigilBase = { ...buildSigilBase(points, anchorDate), ascElement: null };
+    const moonSigilHtml = renderSigil(moonSigilBase, { ascElement: null }, { size: 44, compact: true, className: "adv-asc-sigil-figure" });
+    const clockBlock = buildAscendantClockBlock(ascendantRanges, metaSource, ascSigilHtml, ascSigilBase);
+    const moonClockBlock = buildMoonClockBlock(moonRanges, metaSource, moonSigilHtml, moonSigilBase);
     const aspectContent =
       aspectMatrix +
       majorAspectsList +
@@ -3055,7 +3232,7 @@
       if (!ascendantRanges.length) {
         dom.ascClockContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the ascendant clock and hourly breakdown.</p>";
       } else {
-        const tables = buildAscendantTables(ascendantRanges);
+        const tables = buildAscendantTables(ascendantRanges, ascSigilBase);
         dom.ascClockContainer.innerHTML = `${clockBlock.html}${tables}`;
         initAscendantClock(ascendantRanges, clockBlock.ids);
       }
@@ -3065,7 +3242,7 @@
       if (!moonRanges.length) {
         dom.moonClockContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the lunar clock and sign breakdown.</p>";
       } else {
-        const tables = buildMoonTables(moonRanges);
+        const tables = buildMoonTables(moonRanges, moonSigilBase);
         dom.moonClockContainer.innerHTML = `${moonClockBlock.html}${tables}`;
         initMoonClock(moonRanges, moonClockBlock.ids);
       }

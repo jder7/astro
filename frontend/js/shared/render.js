@@ -8,7 +8,18 @@
   const ASPECTS = shared.ASPECTS || [];
   const ASPECT_ICON = shared.ASPECT_ICON_MAP || {};
   const POINTS_ICONS = shared.POINTS_ICONS || {};
+  const SIGN_META = shared.SIGN_META || {};
+  const SIGN_META_LOOKUP = (() => {
+    const map = {};
+    Object.entries(SIGN_META).forEach(([key, val]) => {
+      if (key) map[key.toLowerCase()] = val;
+      if (val?.name) map[String(val.name).toLowerCase()] = val;
+    });
+    return map;
+  })();
   const MOON_PHASES = shared.MOON_PHASES || [];
+  const CHALDEAN_DAY_RULERS = shared.CHALDEAN_DAY_RULERS || {};
+  const buildElementPentagram = shared.buildElementPentagram;
 
   const ALLOWED_POINTS = new Set([
     "sun",
@@ -106,6 +117,43 @@
     return aspects;
   }
 
+  function getDayRulerFromParts(parts) {
+    if (!parts) return null;
+    const { year, month, day, hour = 12, minute = 0 } = parts;
+    if (![year, month, day].every((n) => Number.isFinite(Number(n)))) return null;
+    try {
+      const date = new Date(year, (month || 1) - 1, day || 1, hour || 0, minute || 0);
+      return CHALDEAN_DAY_RULERS ? CHALDEAN_DAY_RULERS[date.getDay()] || null : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function buildSigil(subject, dateParts, options = {}) {
+    if (typeof buildElementPentagram !== "function" || !subject) return "";
+    const dayKey = options.dayRulerKey || getDayRulerFromParts(dateParts) || null;
+    const pickOverride = (key, fallback) =>
+      Object.prototype.hasOwnProperty.call(options, key) ? options[key] : fallback;
+    const dayPoint = dayKey ? subject[dayKey] : null;
+    const data = {
+      sunElement: pickOverride("sunElement", subject.sun?.element),
+      moonElement: pickOverride("moonElement", subject.moon?.element),
+      ascElement: pickOverride("ascElement", subject.ascendant?.element),
+      dayElement: pickOverride("dayElement", dayPoint?.element),
+      dayRulerKey: dayKey,
+      size: options.size || 132,
+      label: options.label || "Elemental pentagram",
+    };
+    return buildElementPentagram(data);
+  }
+
+  function resolveSignMeta(sign) {
+    if (!sign) return {};
+    const clean = String(sign).trim().toLowerCase();
+    const abbrev = clean.slice(0, 3);
+    return SIGN_META_LOOKUP[clean] || SIGN_META_LOOKUP[abbrev] || {};
+  }
+
   function formatPointLabel(key, point, options = {}) {
     const wrapPointIcon = (icon) => `<span class="home-point-icon">${icon}</span>`;
     const keyLower = (key || "").toLowerCase();
@@ -115,11 +163,18 @@
       ascendant: "Ascendant",
     };
     const label = baseNameMap[keyLower] || point.name || key;
-    const deg = typeof point.position === "number" ? point.position.toFixed(2) : "?";
+    const deg = typeof point.position === "number" ? point.position.toFixed(2) : null;
     const sign = point.sign || "";
+    const signMeta = resolveSignMeta(sign);
+    const signName = signMeta.name || sign || "";
+    const signIcon = signMeta.icon || "";
     const prefix = options.prefix ? `${options.prefix} ` : "";
-    const text = [prefix ? `${prefix}${label}` : label, sign, `${deg}°`].filter(Boolean).join(" ");
     const iconChar = POINTS_ICONS[keyLower] || "✶";
+    const parts = [];
+    if (label) parts.push(`${prefix}${label}`.trim());
+    if (signName) parts.push(`in ${signName}${signIcon ? ` ${signIcon}` : ""}`.trim());
+    if (deg !== null) parts.push(`@ ${deg}°`);
+    const text = parts.join(" ");
     return `${wrapPointIcon(iconChar)} ${text}`.trim();
   }
 
@@ -219,6 +274,7 @@
     const allowed = new Set(baseNames);
     const aspects = computeKeyAspects(subject, baseNames, allowed);
     const topList = aspects.slice(0, 7);
+    const sigil = buildSigil(subject, birthDateParts, { label: "Natal elemental star", size: 108, className: "summary-sigil-figure" });
 
     const birthLabel = birthDateParts
       ? `${birthDateParts.year}-${String(birthDateParts.month).padStart(2, "0")}-${String(
@@ -237,24 +293,32 @@
       .filter(Boolean)
       .map((text) => `<li>${text}</li>`)
       .join("");
+    const lunationBlock = renderLunationBlock(getLunationInfo(birthDateParts), "Moon cycle at birth");
 
     dom.summaryEl.innerHTML = `
-      <div class="summary-card">
-        <div class="summary-heading">Natal highlights ${birthLabel ? `· ${birthLabel}` : ""}</div>
-        <div class="summary-points">
-          <p><strong>Sun:</strong> ${sunText}</p>
-          <p><strong>Moon:</strong> ${moonText}</p>
-          <p><strong>Ascendant:</strong> ${ascText}</p>
+      <div class="summary-card summary-card--with-sigil">
+        <div class="summary-card-head">
+          <div>
+            <div class="summary-heading">Natal highlights ${birthLabel ? `· ${birthLabel}` : ""}</div>
+          </div>
+          ${sigil ? `<div class="summary-sigil">${sigil}</div>` : ""}
         </div>
-        <div class="summary-aspects">
-          <h4>Top aspects (Sun, Moon, Asc)</h4>
-          ${
-            aspectItems
-              ? `<ul>${aspectItems}</ul>`
-              : "<p>No major aspects found within the configured orbs.</p>"
-          }
+        <div class="summary-card-body">
+          <div class="summary-points">
+            <p><strong>Sun:</strong> ${sunText}</p>
+            <p><strong>Moon:</strong> ${moonText}</p>
+            <p><strong>Ascendant:</strong> ${ascText}</p>
+          </div>
+          <div class="summary-aspects">
+            <h4>Top aspects (Sun, Moon, Asc)</h4>
+            ${
+              aspectItems
+                ? `<ul>${aspectItems}</ul>`
+                : "<p>No major aspects found within the configured orbs.</p>"
+            }
+          </div>
+          ${lunationBlock}
         </div>
-        ${renderLunationBlock(getLunationInfo(birthDateParts), "Moon cycle at birth")}
       </div>
     `;
   }
@@ -273,6 +337,7 @@
     const baseNames = getAspectBasePoints();
     const allowed = new Set(baseNames);
     const aspects = computeKeyAspects(subject, baseNames, allowed).slice(0, 7);
+    const sigil = buildSigil(subject, transitDateParts, { label: "Transit elemental star", size: 108, className: "summary-sigil-figure" });
 
     const transitLabel = transitDateParts
       ? `${transitDateParts.year}-${String(transitDateParts.month).padStart(2, "0")}-${String(
@@ -287,24 +352,32 @@
       .filter(Boolean)
       .map((text) => `<li>${text}</li>`)
       .join("");
+    const lunationBlock = renderLunationBlock(getLunationInfo(transitDateParts), "Moon cycle at moment");
 
     dom.summaryEl.innerHTML = `
-      <div class="summary-card">
-        <div class="summary-heading">Transit snapshot ${transitLabel ? `· ${transitLabel}` : ""}</div>
-        <div class="summary-points">
-          <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", sun)}</p>
-          <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", moon)}</p>
-          <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", asc)}</p>
+      <div class="summary-card summary-card--with-sigil">
+        <div class="summary-card-head">
+          <div>
+            <div class="summary-heading">Transit snapshot ${transitLabel ? `· ${transitLabel}` : ""}</div>
+          </div>
+          ${sigil ? `<div class="summary-sigil">${sigil}</div>` : ""}
         </div>
-        <div class="summary-aspects">
-          <h4>Transit aspects</h4>
-          ${
-            aspectItems
-              ? `<ul>${aspectItems}</ul>`
-              : "<p>No major aspects found within the configured orbs.</p>"
-          }
+        <div class="summary-card-body">
+          <div class="summary-points">
+            <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", sun)}</p>
+            <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", moon)}</p>
+            <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", asc)}</p>
+          </div>
+          <div class="summary-aspects">
+            <h4>Transit aspects</h4>
+            ${
+              aspectItems
+                ? `<ul>${aspectItems}</ul>`
+                : "<p>No major aspects found within the configured orbs.</p>"
+            }
+          </div>
+          ${lunationBlock}
         </div>
-        ${renderLunationBlock(getLunationInfo(transitDateParts), "Moon cycle at moment")}
       </div>
     `;
   }
@@ -367,6 +440,8 @@
     }
 
     const baseNames = getAspectBasePoints();
+    const natalSigil = buildSigil(natalSubject, birthDateParts, { label: "Natal elemental star", size: 108, className: "summary-sigil-figure" });
+    const transitSigil = buildSigil(transitSubject, transitDateParts, { label: "Transit elemental star", size: 108, className: "summary-sigil-figure" });
     const natalBlock = (() => {
       const allowed = new Set(baseNames);
       const aspects = computeKeyAspects(natalSubject, baseNames, allowed).slice(0, 7);
@@ -376,18 +451,23 @@
         .map((text) => `<li>${text}</li>`)
         .join("");
       return `
-        <div class="summary-card">
-          <div class="summary-heading">Natal</div>
-          <div class="summary-points">
-            <p><strong>Sun:</strong> ${formatPointLabel("sun", natalSubject.sun)}</p>
-            <p><strong>Moon:</strong> ${formatPointLabel("moon", natalSubject.moon)}</p>
-            <p><strong>Ascendant:</strong> ${formatPointLabel("ascendant", natalSubject.ascendant)}</p>
+        <div class="summary-card summary-card--with-sigil">
+          <div class="summary-card-head">
+            <div class="summary-heading">Natal</div>
+            ${natalSigil ? `<div class="summary-sigil">${natalSigil}</div>` : ""}
           </div>
-          <div class="summary-aspects">
-            <h4>Top aspects (Sun, Moon, Asc)</h4>
-            ${aspectItems ? `<ul>${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
+          <div class="summary-card-body">
+            <div class="summary-points">
+              <p><strong>Sun:</strong> ${formatPointLabel("sun", natalSubject.sun)}</p>
+              <p><strong>Moon:</strong> ${formatPointLabel("moon", natalSubject.moon)}</p>
+              <p><strong>Ascendant:</strong> ${formatPointLabel("ascendant", natalSubject.ascendant)}</p>
+            </div>
+            <div class="summary-aspects">
+              <h4>Top aspects (Sun, Moon, Asc)</h4>
+              ${aspectItems ? `<ul>${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
+            </div>
+            ${renderLunationBlock(getLunationInfo(birthDateParts), "Moon cycle at birth")}
           </div>
-          ${renderLunationBlock(getLunationInfo(birthDateParts), "Moon cycle at birth")}
         </div>
       `;
     })();
@@ -401,18 +481,23 @@
         .map((text) => `<li>${text}</li>`)
         .join("");
       return `
-        <div class="summary-card">
-          <div class="summary-heading">Transit</div>
-          <div class="summary-points">
-            <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", transitSubject.sun)}</p>
-            <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", transitSubject.moon)}</p>
-            <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", transitSubject.ascendant)}</p>
+        <div class="summary-card summary-card--with-sigil">
+          <div class="summary-card-head">
+            <div class="summary-heading">Transit</div>
+            ${transitSigil ? `<div class="summary-sigil">${transitSigil}</div>` : ""}
           </div>
-          <div class="summary-aspects">
-            <h4>Transit aspects (Sun, Moon, Asc)</h4>
-            ${aspectItems ? `<ul>${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
+          <div class="summary-card-body">
+            <div class="summary-points">
+              <p><strong>Transit Sun:</strong> ${formatPointLabel("sun", transitSubject.sun)}</p>
+              <p><strong>Transit Moon:</strong> ${formatPointLabel("moon", transitSubject.moon)}</p>
+              <p><strong>Transit Ascendant:</strong> ${formatPointLabel("ascendant", transitSubject.ascendant)}</p>
+            </div>
+            <div class="summary-aspects">
+              <h4>Transit aspects (Sun, Moon, Asc)</h4>
+              ${aspectItems ? `<ul>${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
+            </div>
+            ${renderLunationBlock(getLunationInfo(transitDateParts), "Moon cycle at moment")}
           </div>
-          ${renderLunationBlock(getLunationInfo(transitDateParts), "Moon cycle at moment")}
         </div>
       `;
     })();
@@ -498,19 +583,32 @@
       })
       .join("");
 
+    const relSigil = buildSigil(relJson?.first_subject, relJson?.first_subject?.birth || relJson?.first_subject?.moment, {
+      size: 108,
+      label: "Synastry elemental star",
+      className: "summary-sigil-figure",
+    });
+
     dom.summaryEl.innerHTML = `
-      <div class="summary-card">
-        <div class="summary-heading">Synastry highlights</div>
-        <p class="summary-subheading">${firstName} &amp; ${secondName}</p>
-        <div class="summary-stats">
-          <div><span class="summary-stat-number">${totalAspects || 0}</span><span class="summary-stat-label">aspects</span></div>
-          <div><span class="summary-stat-number">${top.length || 0}</span><span class="summary-stat-label">key ties</span></div>
+      <div class="summary-card summary-card--with-sigil">
+        <div class="summary-card-head">
+          <div>
+            <div class="summary-heading">Synastry highlights</div>
+            <p class="summary-subheading">${firstName} &amp; ${secondName}</p>
+          </div>
+          ${relSigil ? `<div class="summary-sigil">${relSigil}</div>` : ""}
         </div>
-        ${
-          items
-            ? `<ul>${items}</ul>`
-            : "<p>No major aspects found for the selected partners.</p>"
-        }
+        <div class="summary-card-body">
+          <div class="summary-stats">
+            <div><span class="summary-stat-number">${totalAspects || 0}</span><span class="summary-stat-label">aspects</span></div>
+            <div><span class="summary-stat-number">${top.length || 0}</span><span class="summary-stat-label">key ties</span></div>
+          </div>
+          ${
+            items
+              ? `<ul>${items}</ul>`
+              : "<p>No major aspects found for the selected partners.</p>"
+          }
+        </div>
       </div>
     `;
   }
