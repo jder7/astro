@@ -449,6 +449,8 @@
     const id = opts.id || `sigil-${Math.random().toString(36).slice(2, 8)}`;
     const compact = opts.compact ? " sigil-figure--compact" : "";
     const className = opts.className ? ` ${opts.className}` : "";
+    const sizeStyleValue = opts.sizeStyle || `${size}px`;
+    const inlineSizeAttr = opts.noInlineSize ? "" : ` style="--sigil-size:${sizeStyleValue};"`;
     const tally = {};
     ["sunElement", "moonElement", "dayElement", "ascElement"].forEach((key) => {
       const el = opts[key];
@@ -576,7 +578,7 @@
       .join("");
 
     return `
-      <div class="sigil-figure${compact}${className}" style="--sigil-size:${size}px;">
+      <div class="sigil-figure${compact}${className}"${inlineSizeAttr}>
         <svg class="element-pentagram" viewBox="0 0 ${size} ${size}" role="img" aria-label="${opts.label || "Elemental pentagram"}">
           ${defs}
           ${petalPaths}

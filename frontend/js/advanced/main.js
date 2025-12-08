@@ -2235,7 +2235,12 @@
       sigilOverrides.dayElement = null;
       sigilOverrides.dayRulerKey = null;
     }
-    const sigilMarkup = renderSigil(sigilBase, sigilOverrides, { size: 92, compact: true, className: "range-sigil" });
+    const sigilMarkup = renderSigil(sigilBase, sigilOverrides, {
+      size: 92,
+      sizeStyle: "var(--range-sigil-size, 76px)",
+      compact: true,
+      className: "range-sigil",
+    });
     return `
       <div class="range-block">
         <div class="range-block-title">

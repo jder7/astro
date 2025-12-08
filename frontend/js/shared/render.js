@@ -172,9 +172,12 @@
     const iconChar = POINTS_ICONS[keyLower] || "✶";
     const parts = [];
     if (label) parts.push(`${prefix}${label}`.trim());
-    if (signName) parts.push(`in ${signName}${signIcon ? ` ${signIcon}` : ""}`.trim());
+    const signChunk = [];
+    if (signName) signChunk.push(signName);
+    if (signIcon) signChunk.push(signIcon);
+    if (signChunk.length) parts.push(`in ${signChunk.join(" ")}`);
     if (deg !== null) parts.push(`@ ${deg}°`);
-    const text = parts.join(" ");
+    const text = parts.join(" · ");
     return `${wrapPointIcon(iconChar)} ${text}`.trim();
   }
 
