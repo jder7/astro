@@ -576,21 +576,47 @@
                   </span>
                   <button
                     type="button"
-                    id="apiCollapseBtn"
+                    id="synthesisCollapse"
                     class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-cyan-400 hover:shadow-cyan-500/25 transition"
                     aria-expanded="false"
-                    aria-controls="apiResponseBody"
-                    aria-label="Expand API panel"
+                    aria-controls="synthesisBody"
+                    aria-label="Expand synthesis panel"
                   >
                     <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 15l6-6 6 6" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6" />
                     </svg>
                   </button>
                 </div>
               </div>
-              <div id="apiResponseBody" class="hidden">
+              <div id="synthesisBody" class="hidden">
                 <div id="summaryContent" class="summary-content">
-                  <p class="hint">Generate any mode to dump the raw API response here.</p>
+                  <p class="hint">Generate any mode to view aspects and configurations.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flowbite-card">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <p class="text-sm text-cyan-200/80 font-semibold">Sky map</p>
+                  <h2 class="text-xl font-semibold text-white">Points &amp; Houses</h2>
+                </div>
+                <button
+                  type="button"
+                  id="skyMapCollapse"
+                  class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-cyan-400 hover:shadow-cyan-500/25 transition"
+                  aria-expanded="false"
+                  aria-controls="skyMapBody"
+                  aria-label="Expand sky map panel"
+                >
+                  <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6" />
+                  </svg>
+                </button>
+              </div>
+              <div id="skyMapBody" class="hidden">
+                <div id="skyMapContent" class="summary-content">
+                  <p class="hint">Generate a chart to see point and house placements.</p>
                 </div>
               </div>
             </div>

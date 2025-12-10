@@ -24,8 +24,11 @@
     rangePanel: document.getElementById("rangePanel"),
     rangeResults: document.getElementById("rangeResults"),
     summaryEl: document.getElementById("summaryContent"),
-    apiCollapseBtn: document.getElementById("apiCollapseBtn"),
-    apiResponseBody: document.getElementById("apiResponseBody"),
+    skyMapContent: document.getElementById("skyMapContent"),
+    synthesisCollapse: document.getElementById("synthesisCollapse"),
+    synthesisBody: document.getElementById("synthesisBody"),
+    skyMapCollapse: document.getElementById("skyMapCollapse"),
+    skyMapBody: document.getElementById("skyMapBody"),
     ascSummaryContainer: document.getElementById("ascSummaryContainer"),
     ascClockContainer: document.getElementById("ascClockContainer"),
     ascClockBody: document.getElementById("ascClockBody"),
@@ -2419,7 +2422,7 @@
     if (!point) return "";
     const pointIcon = point.point_type === "House"
       ? wrapPointIcon(formatHouseLabelShort(point.name) || "🏠")
-      : wrapPointIcon(POINTS_ICONS[(point.name || "").toLowerCase()] || "✶");
+      : wrapPointIcon(POINTS_ICONS[(point.name || "").toLowerCase()] || "★");
     const signMeta = SIGN_META[point.sign] || { name: point.sign || "—", icon: point.emoji || "?" };
     const element = point.element || "";
     const quality = point.quality || "";
@@ -2522,7 +2525,7 @@
     });
     const iconFor = (key) => {
       const pt = points[key] || {};
-      return wrapPointIcon(POINTS_ICONS[(pt.name || "").toLowerCase()] || "✶");
+      return wrapPointIcon(POINTS_ICONS[(pt.name || "").toLowerCase()] || "★");
     };
     const rows = keys
       .map((rowKey, rowIdx) => {
@@ -2538,7 +2541,7 @@
             const note = hit.name ? ` — ${capitalise(hit.name)}` : "";
             const colName = points[colKey]?.name || colKey;
             if (colIdx < rowIdx) {
-              const icon = wrapMajorAspectIcon(hit.icon || "✶");
+          const icon = wrapMajorAspectIcon(hit.icon || "✶");
               return `<td class="adv-matrix-cell" title="${rowPt.name || rowKey} × ${colName}${note}">${icon}</td>`;
             }
             const orbLabel = Number.isFinite(hit.orb) ? hit.orb.toFixed(2) : "";
@@ -2619,14 +2622,14 @@
     const signShortName = pt.sign || "";
     const signIcon = (SIGN_META[pt.sign]?.icon || signShortName).trim();
     const pos = Number.isFinite(pt.position) ? `${pt.position.toFixed(2)}°` : "";
-    const icon = wrapPointIcon(POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "✶");
+    const icon = wrapPointIcon(POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "★");
     return `${icon} ${label}${signIcon ? ` ${signIcon}` : ""}${pos ? ` @ ${pos}` : ""}`;
   }
 
   function formatPointInlineShort(points, key) {
     if (!key) return "";
     const pt = points[key] || {};
-    const icon = wrapPointIcon(POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "✶");
+    const icon = wrapPointIcon(POINTS_ICONS[(pt.name || key || "").toLowerCase()] || "★");
     return `${icon}`;
   }
 
@@ -2904,8 +2907,8 @@
     const aspectName = capitalise(aspect.name || "Aspect");
     const aspectIcon = wrapMajorAspectIcon(aspect.icon || "✶");
     const aspectAngle = Number.isFinite(aspect.angle) ? `${aspect.angle}°` : "";
-    const baseIcon = wrapPointIcon(POINTS_ICONS[(base.name || "").toLowerCase()] || "✶");
-    const otherIcon = wrapPointIcon(POINTS_ICONS[(other.name || "").toLowerCase()] || "✶");
+    const baseIcon = wrapPointIcon(POINTS_ICONS[(base.name || "").toLowerCase()] || "★");
+    const otherIcon = wrapPointIcon(POINTS_ICONS[(other.name || "").toLowerCase()] || "★");
     return `
       <div class="adv-row adv-row-aspect">
         <div class="adv-aspect-grid">
@@ -2962,9 +2965,9 @@
           "sort-orb": orbVal || "",
         },
         cells: [
-          `<td>${wrapPointIcon(POINTS_ICONS[(row.base?.name || row.baseKey || "").toLowerCase()] || "✶")} ${row.base?.name || row.baseKey}</td>`,
+          `<td>${wrapPointIcon(POINTS_ICONS[(row.base?.name || row.baseKey || "").toLowerCase()] || "★")} ${row.base?.name || row.baseKey}</td>`,
           `<td>${wrapMajorAspectIcon(row.aspect?.icon || "✶")} ${capitalise(row.aspect?.name || "")}</td>`,
-          `<td>${wrapPointIcon(POINTS_ICONS[(row.other?.name || row.otherKey || "").toLowerCase()] || "✶")} ${row.other?.name || row.otherKey}</td>`,
+          `<td>${wrapPointIcon(POINTS_ICONS[(row.other?.name || row.otherKey || "").toLowerCase()] || "★")} ${row.other?.name || row.otherKey}</td>`,
           `<td>${orbVal ? `${orbVal}°` : "—"}</td>`,
         ],
       };
@@ -2999,7 +3002,7 @@
           "sort-retro": retro,
         },
         cells: [
-          `<td>${wrapPointIcon(POINTS_ICONS[(pt.name || k || "").toLowerCase()] || "✶")} ${pt.name || k}</td>`,
+          `<td>${wrapPointIcon(POINTS_ICONS[(pt.name || k || "").toLowerCase()] || "★")} ${pt.name || k}</td>`,
           `<td>${signMeta.icon || ""} ${signMeta.name}</td>`,
           `<td>${pos ? `${pos}°` : "—"}</td>`,
           `<td>${pt.house || "—"}</td>`,
@@ -3026,7 +3029,82 @@
     const title = data.title || data.name || "Chart";
     const city = data.city ? `${data.city}${data.nation ? `, ${data.nation}` : ""}` : "";
     const dateInfo = formatDateLabel(data);
-    const tz = dateInfo.tzShort || "";
+    const tz =
+      data.tz_str ||
+      data.timezone ||
+      data.moment?.timezone ||
+      data.birth?.timezone ||
+      dateInfo.tzShort ||
+      "UTC";
+
+    const resolveDate = () => {
+      const iso =
+        data.iso_formatted_local_datetime ||
+        data.iso_formatted_utc_datetime ||
+        data.iso_formatted_datetime ||
+        data.iso_datetime ||
+        data.iso;
+      if (iso) {
+        const dt = new Date(iso);
+        if (dt instanceof Date && Number.isFinite(dt.getTime())) return dt;
+      }
+      const y = data.year || data.moment?.year || data.birth?.year;
+      const m = data.month || data.moment?.month || data.birth?.month;
+      const d = data.day || data.moment?.day || data.birth?.day;
+      const h = data.hour ?? data.moment?.hour ?? data.birth?.hour ?? 0;
+      const min = data.minute ?? data.moment?.minute ?? data.birth?.minute ?? 0;
+      if ([y, m, d].every((n) => Number.isFinite(n))) {
+        return new Date(Date.UTC(y, (m || 1) - 1, d, h, min));
+      }
+      return null;
+    };
+
+    const dateObj = resolveDate();
+    const fmt = (opts) => {
+      try {
+        return dateObj
+          ? new Intl.DateTimeFormat("en-US", { timeZone: tz || "UTC", ...opts }).format(dateObj)
+          : "";
+      } catch {
+        return "";
+      }
+    };
+    const fmtParts = (opts) => {
+      try {
+        return dateObj
+          ? new Intl.DateTimeFormat("en-US", { timeZone: tz || "UTC", ...opts }).formatToParts(dateObj)
+          : [];
+      } catch {
+        return [];
+      }
+    };
+    const getPart = (parts, type) => parts.find((p) => p.type === type)?.value || "";
+    const monthYearLong = fmt({ month: "long", year: "numeric" }) || "—";
+    const monthYearShort = fmt({ month: "short", year: "2-digit" }) || "—";
+    const partsFull = fmtParts({
+      weekday: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZoneName: "short",
+    });
+    const partsShort = fmtParts({
+      weekday: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZoneName: "short",
+    });
+    const timeFull = `${getPart(partsFull, "hour")}:${getPart(partsFull, "minute")}`;
+    const timeShort = `${getPart(partsShort, "hour")}:${getPart(partsShort, "minute")}`;
+    const tzFull = getPart(partsFull, "timeZoneName") || tz || "";
+    const tzShort = getPart(partsShort, "timeZoneName") || tz || "";
+    const weekdayFull = getPart(partsFull, "weekday") || dateInfo.weekday || "";
+    const weekdayShort = getPart(partsShort, "weekday") || weekdayFull || "";
+    const dayFull = getPart(partsFull, "day") || "";
+    const dayShort = getPart(partsShort, "day") || dayFull || "";
     return `
       <div class="adv-meta">
         <div>
@@ -3034,8 +3112,14 @@
           <p class="adv-meta-sub">${city || "Unknown location"}</p>
         </div>
         <div class="adv-meta-time">
-          <p>${dateInfo.weekday || ""}</p>
-          <p>${dateInfo.label || ""} ${tz ? `(${tz})` : ""}</p>
+          <p>
+            <span class="hidden sm:inline">${monthYearLong}</span>
+            <span class="sm:hidden">${monthYearShort}</span>
+          </p>
+          <p>
+            <span class="hidden sm:inline">${weekdayFull}${dayFull ? `, ${dayFull}` : ""} · ${timeFull} ${tzFull}</span>
+            <span class="sm:hidden">${weekdayShort}${dayShort ? ` ${dayShort}` : ""} · ${timeShort} ${tzShort}</span>
+          </p>
         </div>
       </div>
     `;
@@ -3205,14 +3289,30 @@
 
     const meta = renderMetaHeader(metaSource);
     const pointsTable = renderPointsTable(filteredPointKeys, points);
-    const sections = [
-      renderSection("Aspects", aspectContent, true),
-      renderSection("Points", pointsTable || pointRows || "<p class=\"hint\">No points returned.</p>", false),
-      renderSection("Houses", houseRows || "<p class=\"hint\">No houses returned.</p>", false),
-    ].join("");
+    const pointsBlock = pointsTable || pointRows || "<p class=\"hint\">No points returned.</p>";
+    const housesBlock = houseRows || "<p class=\"hint\">No houses returned.</p>";
+    const skySections = `
+      <div class="space-y-3">
+        <div>
+          <p class="text-sm font-semibold text-slate-200 mb-1">Points</p>
+          ${pointsBlock}
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-200 mb-1">Houses</p>
+          ${housesBlock}
+        </div>
+      </div>
+    `;
 
-    dom.summaryEl.innerHTML = `${meta}${sections}`;
-    enableSortableTables(dom.summaryEl);
+    if (dom.summaryEl) {
+      dom.summaryEl.innerHTML = aspectContent || "<p class=\"hint\">No aspects found for active points.</p>";
+      enableSortableTables(dom.summaryEl);
+    }
+
+    if (dom.skyMapContent) {
+      dom.skyMapContent.innerHTML = skySections;
+      enableSortableTables(dom.skyMapContent);
+    }
     const hasDual = ascendantRanges.length > 1 || moonRanges.length > 1;
     if (dom.ascSummaryContainer) {
       if (!ascendantRanges.length && !moonRanges.length) {
@@ -3229,7 +3329,10 @@
           pointsByRangeId,
           metaByRangeId
         );
-        dom.ascSummaryContainer.innerHTML = summaries || "<p class=\"hint\">No summary available.</p>";
+        const overviewParts = [];
+        if (meta) overviewParts.push(meta);
+        overviewParts.push(summaries || "<p class=\"hint\">No summary available.</p>");
+        dom.ascSummaryContainer.innerHTML = overviewParts.join("");
       }
     }
 
@@ -3421,6 +3524,7 @@
     const triggerCanvasResize = () => {
       requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
     };
+    const pickEl = (cached, id) => cached || (id ? document.getElementById(id) : null);
 
     const setCollapseState = (btn, body, expandLabel, collapseLabel) => {
       const isHidden = body.classList.contains("hidden");
@@ -3457,6 +3561,28 @@
       });
     }
 
+    const synthBtn = pickEl(dom.synthesisCollapse, "synthesisCollapse");
+    const synthBody = pickEl(dom.synthesisBody, "synthesisBody");
+    if (synthBtn && synthBody) {
+      synthBody.classList.add("hidden");
+      setCollapseState(synthBtn, synthBody, "Expand synthesis panel", "Collapse synthesis panel");
+      synthBtn.addEventListener("click", () => {
+        synthBody.classList.toggle("hidden");
+        setCollapseState(synthBtn, synthBody, "Expand synthesis panel", "Collapse synthesis panel");
+      });
+    }
+
+    const skyBtn = pickEl(dom.skyMapCollapse, "skyMapCollapse");
+    const skyBody = pickEl(dom.skyMapBody, "skyMapBody");
+    if (skyBtn && skyBody) {
+      skyBody.classList.add("hidden");
+      setCollapseState(skyBtn, skyBody, "Expand sky map panel", "Collapse sky map panel");
+      skyBtn.addEventListener("click", () => {
+        skyBody.classList.toggle("hidden");
+        setCollapseState(skyBtn, skyBody, "Expand sky map panel", "Collapse sky map panel");
+      });
+    }
+
     if (dom.rangeStart) dom.rangeStart.addEventListener("change", handleRangeChange);
     if (dom.rangeEnd) dom.rangeEnd.addEventListener("change", handleRangeChange);
     if (dom.rangeAspectsToggle) {
@@ -3479,18 +3605,6 @@
         };
         applyRange(next);
         saveRange(next);
-      });
-    }
-
-    if (dom.apiCollapseBtn && dom.apiResponseBody) {
-      // start collapsed per markup
-      dom.apiCollapseBtn.addEventListener("click", () => {
-        const isHidden = dom.apiResponseBody.classList.toggle("hidden");
-        dom.apiCollapseBtn.setAttribute("aria-expanded", isHidden ? "false" : "true");
-        dom.apiCollapseBtn.setAttribute("aria-label", isHidden ? "Expand API panel" : "Collapse API panel");
-        dom.apiCollapseBtn.innerHTML = isHidden
-          ? '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6"/></svg>'
-          : '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>';
       });
     }
 

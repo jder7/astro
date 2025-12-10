@@ -73,6 +73,15 @@
     sun: "☉",
     moon: "☾",
     ascendant: "↗",
+    descendant: "↘",
+    medium_coeli: "MC",
+    imum_coeli: "IC",
+    mean_node: "☊",
+    true_node: "☊",
+    mean_south_node: "☋",
+    true_south_node: "☋",
+    north_node: "☊",
+    south_node: "☋",
     mercury: "☿️",
     venus: "♀️",
     mars: "♂️",
@@ -539,7 +548,7 @@
     const angles = [
       { angle: -90, grad: gradients[0].id, element: null, icon: "☸" }, // spirit (no element)
       { angle: -90 + 72, grad: gradients[1].id, element: opts.ascElement, icon: ELEMENT_ICON[opts.ascElement] || "↗" }, // asc
-      { angle: -90 + 144, grad: gradients[2].id, element: opts.dayElement, icon: ELEMENT_ICON[opts.dayElement] || (POINTS_ICONS[(opts.dayRulerKey || "").toLowerCase()] || "✶") }, // day
+      { angle: -90 + 144, grad: gradients[2].id, element: opts.dayElement, icon: ELEMENT_ICON[opts.dayElement] || (POINTS_ICONS[(opts.dayRulerKey || "").toLowerCase()] || "★") }, // day
       { angle: -90 + 216, grad: gradients[3].id, element: opts.moonElement, icon: ELEMENT_ICON[opts.moonElement] || "☾" }, // moon
       { angle: -90 + 288, grad: gradients[4].id, element: opts.sunElement, icon: ELEMENT_ICON[opts.sunElement] || "☉" }, // sun
     ];

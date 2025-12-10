@@ -236,6 +236,12 @@ a {
   color: #cfe9ff;
 }
 
+#skyMapContent {
+  max-height: 380px;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
 .adv-asc-card {
   border: 1px solid #0f3552;
   border-radius: 1rem;

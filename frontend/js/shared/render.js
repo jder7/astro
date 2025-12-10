@@ -169,7 +169,7 @@
     const signName = signMeta.name || sign || "";
     const signIcon = signMeta.icon || "";
     const prefix = options.prefix ? `${options.prefix} ` : "";
-    const iconChar = POINTS_ICONS[keyLower] || "✶";
+    const iconChar = POINTS_ICONS[keyLower] || "★";
     const parts = [];
     if (label) parts.push(`${prefix}${label}`.trim());
     const signChunk = [];
@@ -203,8 +203,8 @@
     const otherLabel = getLabelText(aspect.other, otherPoint, options.otherPrefix);
     const orbText = aspect.orb.toFixed(2);
     const typeIcon = wrapAspectIcon(ASPECT_ICON[aspect.type] || "✦");
-    const baseIcon = wrapPointIcon(POINTS_ICONS[(aspect.base || "").toLowerCase()] || "✶");
-    const otherIcon = wrapPointIcon(POINTS_ICONS[(aspect.other || "").toLowerCase()] || "✶");
+    const baseIcon = wrapPointIcon(POINTS_ICONS[(aspect.base || "").toLowerCase()] || "★");
+    const otherIcon = wrapPointIcon(POINTS_ICONS[(aspect.other || "").toLowerCase()] || "★");
 
     return `${baseIcon} ${baseLabel} in ${typeIcon} ${aspect.type} with ${otherIcon} ${otherLabel} - Orb ${orbText}°`;
   }
