@@ -237,9 +237,209 @@ a {
 }
 
 #skyMapContent {
-  max-height: 380px;
-  overflow: auto;
-  padding-right: 0.25rem;
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
+}
+
+.adv-sky-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.adv-sky-legend {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.adv-sky-pill {
+  --sky-pill: #38bdf8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sky-pill) 35%, transparent), rgba(15, 23, 42, 0.4));
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border: 1px solid color-mix(in srgb, var(--sky-pill) 45%, rgba(255, 255, 255, 0.08));
+  color: #e2f3ff;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.adv-sky-stage {
+  position: relative;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.12), rgba(2, 6, 23, 0.35)),
+    radial-gradient(circle at 70% 70%, rgba(14, 165, 233, 0.12), rgba(2, 6, 23, 0.15)),
+    linear-gradient(145deg, rgba(7, 11, 22, 0.9), rgba(7, 12, 26, 0.95));
+  padding: 0.85rem;
+  box-shadow: 0 20px 50px rgba(8, 47, 73, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.adv-sky-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 14px 36px rgba(8, 47, 73, 0.4));
+}
+
+.adv-sky-svg text {
+  font-family: "Inter", "Space Grotesk", "Sora", system-ui, -apple-system, sans-serif;
+}
+
+.adv-sky-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.adv-sky-center-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.8rem;
+  pointer-events: none;
+}
+
+.adv-sky-chip {
+  pointer-events: auto;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(125, 211, 252, 0.32);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(8, 13, 26, 0.92));
+  box-shadow: 0 12px 34px rgba(4, 7, 16, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.08);
+  max-width: 360px;
+  text-align: center;
+}
+
+.adv-sky-chip-title {
+  margin: 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #7dd3fc;
+}
+
+.adv-sky-chip-main {
+  margin: 0.15rem 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e2f3ff;
+}
+
+.adv-sky-chip-meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.adv-sky-constellation {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  fill: #e0f2fe;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.adv-sky-date {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  fill: rgba(148, 163, 184, 0.9);
+}
+
+.adv-sky-quality {
+  font-size: 0.78rem;
+  fill: #f8fafc;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.adv-sky-element {
+  font-size: 0.95rem;
+  fill: #bfdbfe;
+}
+
+.adv-sky-polarity {
+  font-size: 0.78rem;
+  fill: #fcd34d;
+  font-weight: 700;
+}
+
+.adv-sky-point-icon {
+  font-size: 0.82rem;
+  font-weight: 700;
+  fill: #0b172a;
+}
+
+.adv-sky-sunlabel {
+  font-size: 0.7rem;
+  fill: #f5c542;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+.adv-sky-tables {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.adv-sky-detail {
+  border: 1px solid #0f3552;
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(8, 13, 26, 0.92));
+  padding: 0.5rem 0.75rem;
+  color: #e2e8f0;
+  overflow-x: auto;
+}
+
+.adv-sky-detail summary {
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--sky-pill, #e0f2fe);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.adv-sky-detail summary::-webkit-details-marker {
+  display: none;
+}
+
+.adv-sky-detail summary::after {
+  content: "▾";
+  font-size: 0.9rem;
+  color: #94a3b8;
+  transition: transform 0.15s ease;
+}
+
+.adv-sky-detail[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.adv-sky-detail > *:not(summary) {
+  margin-top: 0.45rem;
+}
+
+.adv-sky-detail table {
+  width: 100%;
+  min-width: 520px;
+}
 }
 
 .adv-asc-card {

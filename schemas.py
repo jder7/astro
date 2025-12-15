@@ -241,6 +241,56 @@ class MoonMonthRange(BaseModel):
     )
 
 
+class SunRangeEntry(BaseModel):
+    """
+    Solar sign interval with explicit start/end timestamps (minute precision).
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    start: datetime = Field(
+        ...,
+        validation_alias=AliasChoices("start", "start_timestamp", "startTimestamp", "timestamp", "time", "date"),
+        serialization_alias="start",
+        description="Start of the solar sign interval (rounded to the minute).",
+    )
+    end: datetime = Field(
+        ...,
+        description="Timestamp (tz-aware) when the Sun leaves this sign (start of the next sign).",
+    )
+    sign: Optional[str] = Field(default=None, description="Three-letter sign code, e.g. 'Ari', 'Tau'.")
+    sign_num: Optional[int] = Field(default=None, description="One-based sign index (Aries=1, Pisces=12).")
+    element: Optional[str] = Field(default=None, description="Element for the Sun at this interval (Fire, Earth, Air, Water).")
+    quality: Optional[str] = Field(default=None, description="Quality for the Sun at this interval (Cardinal, Fixed, Mutable).")
+    emoji: Optional[str] = Field(default=None, description="Sign glyph when available.")
+
+
+class SunYearRange(BaseModel):
+    """
+    Year-long solar sweep starting at the requested datetime.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str = Field(
+        ...,
+        description="Stable identifier for the range (e.g. 'natal', 'transit', 'first', 'second').",
+    )
+    label: Optional[str] = Field(
+        default=None,
+        description="Display label for this Sun range.",
+    )
+    anchor: datetime = Field(
+        ...,
+        description="Anchor datetime used as the start of the window.",
+    )
+    entries: List[SunRangeEntry] = Field(
+        default_factory=list,
+        alias="entries",
+        description="Solar sign entries across the window.",
+    )
+
+
 class AspectPointSummary(BaseModel):
     """
     Lightweight summary for a chart point used in aspect computation.
@@ -330,17 +380,18 @@ class NatalRequest(BaseModel):
     Request payload for a natal chart computation.
     """
 
-    ascendant_range_enabled: bool = Field(
+    asc_moon_sun_range_enabled: bool = Field(
         default=False,
-        validation_alias=AliasChoices("ascendantRangeEnabled", "ascendant_range_enabled"),
-        serialization_alias="ascendantRangeEnabled",
-        description="When true, include a +/-12h hourly ascendant sweep around the provided datetime.",
-    )
-    moon_range_enabled: bool = Field(
-        default=False,
-        validation_alias=AliasChoices("moonRangeEnabled", "moon_range_enabled"),
-        serialization_alias="moonRangeEnabled",
-        description="When true, include a month-long Moon sign sweep around the provided datetime.",
+        validation_alias=AliasChoices(
+            "ascMoonSunRangeEnabled",
+            "asc_moon_sun_range_enabled",
+            "ascendantRangeEnabled",
+            "ascendant_range_enabled",
+            "moonRangeEnabled",
+            "moon_range_enabled",
+        ),
+        serialization_alias="ascMoonSunRangeEnabled",
+        description="When true, include ascendant, Moon, and Sun sign sweeps around the provided datetime.",
     )
     birth: BirthData = Field(
         default_factory=BirthData,
@@ -369,6 +420,11 @@ class NatalResponse(BaseModel):
         default_factory=list,
         serialization_alias="moonMonthRange",
         description="Moon sign sweep around the requested birth datetime when enabled.",
+    )
+    sun_year_range: List[SunYearRange] = Field(
+        default_factory=list,
+        serialization_alias="sunYearRange",
+        description="Sun sign sweep around the requested birth datetime when enabled.",
     )
     subject: dict = Field(
         ...,
@@ -499,17 +555,18 @@ class TransitMomentRequest(BaseModel):
     Transit snapshot for a single moment, optionally relative to a birth chart.
     """
 
-    ascendant_range_enabled: bool = Field(
+    asc_moon_sun_range_enabled: bool = Field(
         default=False,
-        validation_alias=AliasChoices("ascendantRangeEnabled", "ascendant_range_enabled"),
-        serialization_alias="ascendantRangeEnabled",
-        description="When true, include hourly ascendant data around the requested moment (and natal when provided).",
-    )
-    moon_range_enabled: bool = Field(
-        default=False,
-        validation_alias=AliasChoices("moonRangeEnabled", "moon_range_enabled"),
-        serialization_alias="moonRangeEnabled",
-        description="When true, include a month-long Moon sign sweep for the requested moment (and natal when provided).",
+        validation_alias=AliasChoices(
+            "ascMoonSunRangeEnabled",
+            "asc_moon_sun_range_enabled",
+            "ascendantRangeEnabled",
+            "ascendant_range_enabled",
+            "moonRangeEnabled",
+            "moon_range_enabled",
+        ),
+        serialization_alias="ascMoonSunRangeEnabled",
+        description="When true, include ascendant, Moon, and Sun sweeps for the requested moment (and natal when provided).",
     )
     moment: TransitMomentInput = Field(
         default_factory=TransitMomentInput,
@@ -539,6 +596,11 @@ class TransitSnapshot(BaseModel):
         default_factory=list,
         serialization_alias="moonMonthRange",
         description="Moon sign sweep(s) for this snapshot when enabled.",
+    )
+    sun_year_range: List[SunYearRange] = Field(
+        default_factory=list,
+        serialization_alias="sunYearRange",
+        description="Sun sign sweep(s) for this snapshot when enabled.",
     )
     timestamp: datetime = Field(
         ...,
@@ -585,6 +647,11 @@ class TransitResponse(BaseModel):
         serialization_alias="moonMonthRange",
         description="Moon sign sweeps around the requested moment (plus natal when provided) when enabled.",
     )
+    sun_year_range: List[SunYearRange] = Field(
+        default_factory=list,
+        serialization_alias="sunYearRange",
+        description="Sun sign sweeps around the requested moment (plus natal when provided) when enabled.",
+    )
     snapshot: TransitSnapshot
 
 
@@ -596,17 +663,18 @@ class TransitRangeRequest(BaseModel):
     and timezone are taken from `moment` for the entire range.
     """
 
-    ascendant_range_enabled: bool = Field(
+    asc_moon_sun_range_enabled: bool = Field(
         default=False,
-        validation_alias=AliasChoices("ascendantRangeEnabled", "ascendant_range_enabled"),
-        serialization_alias="ascendantRangeEnabled",
-        description="When true, include an ascendant +/-12h sweep around the start moment (and natal when provided).",
-    )
-    moon_range_enabled: bool = Field(
-        default=False,
-        validation_alias=AliasChoices("moonRangeEnabled", "moon_range_enabled"),
-        serialization_alias="moonRangeEnabled",
-        description="When true, include a month-long Moon sign sweep around the start moment (and natal when provided).",
+        validation_alias=AliasChoices(
+            "ascMoonSunRangeEnabled",
+            "asc_moon_sun_range_enabled",
+            "ascendantRangeEnabled",
+            "ascendant_range_enabled",
+            "moonRangeEnabled",
+            "moon_range_enabled",
+        ),
+        serialization_alias="ascMoonSunRangeEnabled",
+        description="When true, include ascendant, Moon, and Sun sweeps around the start moment (and natal when provided).",
     )
     moment: TransitMomentInput = Field(
         default_factory=TransitMomentInput,
@@ -651,6 +719,11 @@ class TransitRangeResponse(BaseModel):
         default_factory=list,
         serialization_alias="moonMonthRange",
         description="Moon sign sweeps around the start moment (and natal when provided) when enabled.",
+    )
+    sun_year_range: List[SunYearRange] = Field(
+        default_factory=list,
+        serialization_alias="sunYearRange",
+        description="Sun sign sweeps around the start moment (and natal when provided) when enabled.",
     )
     snapshots: List[TransitSnapshot]
 
@@ -743,17 +816,18 @@ class RelationshipRequest(BaseModel):
     Request payload for a relationship / aspects evaluation between two charts.
     """
 
-    ascendant_range_enabled: bool = Field(
+    asc_moon_sun_range_enabled: bool = Field(
         default=False,
-        validation_alias=AliasChoices("ascendantRangeEnabled", "ascendant_range_enabled"),
-        serialization_alias="ascendantRangeEnabled",
-        description="When true, include ascendant +/-12h sweeps for both partners.",
-    )
-    moon_range_enabled: bool = Field(
-        default=False,
-        validation_alias=AliasChoices("moonRangeEnabled", "moon_range_enabled"),
-        serialization_alias="moonRangeEnabled",
-        description="When true, include month-long Moon sign sweeps for both partners.",
+        validation_alias=AliasChoices(
+            "ascMoonSunRangeEnabled",
+            "asc_moon_sun_range_enabled",
+            "ascendantRangeEnabled",
+            "ascendant_range_enabled",
+            "moonRangeEnabled",
+            "moon_range_enabled",
+        ),
+        serialization_alias="ascMoonSunRangeEnabled",
+        description="When true, include ascendant, Moon, and Sun sweeps for both partners.",
     )
     first: BirthData = Field(
         default_factory=BirthData,
@@ -783,6 +857,11 @@ class RelationshipResponse(BaseModel):
         default_factory=list,
         serialization_alias="moonMonthRange",
         description="Moon sign sweeps for both partners when enabled.",
+    )
+    sun_year_range: List[SunYearRange] = Field(
+        default_factory=list,
+        serialization_alias="sunYearRange",
+        description="Sun sign sweeps for both partners when enabled.",
     )
     first_subject: dict = Field(
         ...,

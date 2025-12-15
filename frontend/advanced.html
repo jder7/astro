@@ -11,7 +11,11 @@
     <script>
       window.AppNamespace = "AdvancedApp";
       window.AdvancedApp = window.AdvancedApp || {};
-      window.AdvancedApp.flags = { ...(window.AdvancedApp.flags || {}), skipSvg: true, ascendantRangeEnabled: true, moonRangeEnabled: true };
+      window.AdvancedApp.flags = {
+        ...(window.AdvancedApp.flags || {}),
+        skipSvg: true,
+        ascMoonSunRangeEnabled: true,
+      };
     </script>
     <link rel="stylesheet" href="/static/css/advanced/style.css" />
   </head>
@@ -515,6 +519,32 @@
             <div class="flowbite-card">
               <div class="flex items-center justify-between gap-3 mb-4">
                 <div>
+                  <p class="text-sm text-cyan-200/80 font-semibold">Sky map</p>
+                  <h2 class="text-xl font-semibold text-white">Points &amp; Houses</h2>
+                </div>
+                <button
+                  type="button"
+                  id="skyMapCollapse"
+                  class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-cyan-400 hover:shadow-cyan-500/25 transition"
+                  aria-expanded="false"
+                  aria-controls="skyMapBody"
+                  aria-label="Expand sky map panel"
+                >
+                  <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6" />
+                  </svg>
+                </button>
+              </div>
+              <div id="skyMapBody" class="hidden">
+                <div id="skyMapContent" class="summary-content">
+                  <p class="hint">Generate a chart to see point and house placements.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flowbite-card">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
                   <p class="text-sm text-cyan-200/80 font-semibold">Ascendant</p>
                   <h2 class="text-xl font-semibold text-white">Clock &amp; Range</h2>
                 </div>
@@ -567,6 +597,32 @@
             <div class="flowbite-card">
               <div class="flex items-center justify-between gap-3 mb-4">
                 <div>
+                  <p class="text-sm text-cyan-200/80 font-semibold">Sun</p>
+                  <h2 class="text-xl font-semibold text-white">Ingresses</h2>
+                </div>
+                <button
+                  type="button"
+                  id="sunRangeCollapse"
+                  class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-cyan-400 hover:shadow-cyan-500/25 transition"
+                  aria-expanded="false"
+                  aria-controls="sunRangeBody"
+                  aria-label="Collapse Sun panel"
+                >
+                  <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
+              <div id="sunRangeBody" class="hidden">
+                <div id="sunRangeContainer" class="summary-content">
+                  <p class="hint">Generate a chart to see the Sun's upcoming sign changes.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flowbite-card">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
                   <p class="text-sm text-cyan-200/80 font-semibold">Synthesis</p>
                   <h2 class="text-xl font-semibold text-white">Aspects Summary</h2>
                 </div>
@@ -591,32 +647,6 @@
               <div id="synthesisBody" class="hidden">
                 <div id="summaryContent" class="summary-content">
                   <p class="hint">Generate any mode to view aspects and configurations.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="flowbite-card">
-              <div class="flex items-center justify-between gap-3 mb-4">
-                <div>
-                  <p class="text-sm text-cyan-200/80 font-semibold">Sky map</p>
-                  <h2 class="text-xl font-semibold text-white">Points &amp; Houses</h2>
-                </div>
-                <button
-                  type="button"
-                  id="skyMapCollapse"
-                  class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-cyan-400 hover:shadow-cyan-500/25 transition"
-                  aria-expanded="false"
-                  aria-controls="skyMapBody"
-                  aria-label="Expand sky map panel"
-                >
-                  <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6" />
-                  </svg>
-                </button>
-              </div>
-              <div id="skyMapBody" class="hidden">
-                <div id="skyMapContent" class="summary-content">
-                  <p class="hint">Generate a chart to see point and house placements.</p>
                 </div>
               </div>
             </div>

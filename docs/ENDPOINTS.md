@@ -83,11 +83,11 @@ Used only in `/api/transit-range` to mark the end of the interval:
 
 All fields are optional thanks to defaults.
 
-### Ascendant day range add-on
+### Range add-ons (Ascendant, Moon, Sun)
 
-- Set `ascendantRangeEnabled: true` on natal, transit, transit-range, or relationship requests to include `ascendantDayRange` in the response.
-- The payload is a +/-12h window (hourly granularity) around the requested datetime. Dual modes return two ranges (e.g., natal + transit or relationship first/second).
-- Each entry in `ascendantDayRange[].entries` carries the timestamp, sign, element, quality, decan, and orb (degrees into the sign).
+- Set `ascMoonSunRangeEnabled: true` on natal, transit, transit-range, or relationship requests to include `ascendantDayRange`, `moonMonthRange`, and `sunYearRange` in the response.
+- Ascendant ranges cover a +/-12h window (hourly granularity). Moon ranges sweep ~1 month. Sun ranges sweep ~1 year with minute-level ingress timestamps.
+- Dual modes return both ranges (e.g., natal + transit or both partners). Entries include start/end, sign, element, quality, decan, and orb (where relevant).
 
 ---
 
@@ -121,12 +121,14 @@ Compute a **natal chart configuration**.
 - **Request body**: `NatalRequest`
   - `birth`: `BirthData`
   - `config`: `ChartConfig` (optional)
-  - `ascendantRangeEnabled` *(optional, default false)*: include `ascendantDayRange` (hourly ascendant sweep).
+  - `ascMoonSunRangeEnabled` *(optional, default false)*: include `ascendantDayRange`, `moonMonthRange`, and `sunYearRange`.
 - **Response**: `NatalResponse`
   - `subject`: raw Kerykeion `AstrologicalSubject` as JSON.
   - `aspects`: point-to-point aspect list.
   - `major_aspects`: Ptolemaic pattern matches (see [major aspect docs](./ptolemaic-aspects-description.md)).
   - `ascendantDayRange` *(optional)*: +/-12h ascendant distribution when requested.
+  - `moonMonthRange` *(optional)*: month-long Moon sweep when requested.
+  - `sunYearRange` *(optional)*: year-long Sun ingress sweep when requested.
 
 ---
 
@@ -148,7 +150,7 @@ Compute a **transit snapshot** at a specific moment.
   - `moment`: `TransitMomentInput` (no `name`, just date/time/location).
   - `birth` *(optional)*: `BirthData` (natal chart to compare against).
   - `config`: `ChartConfig` (optional).
-  - `ascendantRangeEnabled` *(optional, default false)*: include hourly ascendant sweep(s).
+  - `ascMoonSunRangeEnabled` *(optional, default false)*: include ascendant, Moon, and Sun sweeps.
 - **Response**: `TransitResponse`
   - `snapshot`: `TransitSnapshot`
     - `timestamp`: local datetime of snapshot.
@@ -158,8 +160,7 @@ Compute a **transit snapshot** at a specific moment.
     - `major_aspects`: Ptolemaic patterns found in the transit sky.
     - `natal_aspects` *(optional)*: aspects for the provided natal chart.
     - `natal_major_aspects` *(optional)*: Ptolemaic patterns for the natal chart.
-    - `ascendantDayRange` *(optional)*: +/-12h ascendant sweep(s) for transit and/or natal.
-  - `ascendantDayRange` *(optional)*: mirrored at the response root for convenience.
+  - `ascendantDayRange`, `moonMonthRange`, `sunYearRange` *(optional)*: returned at the response root when enabled (not inside `snapshot` to avoid duplication).
 
 ---
 
@@ -186,10 +187,10 @@ Compute a **sequence of transit snapshots** between two datetimes.
   - `granularity`: `"minute" | "hour" | "day" | "month"`.
   - `birth` *(optional)*: `BirthData`.
   - `config`: `ChartConfig` (optional).
-  - `ascendantRangeEnabled` *(optional, default false)*: include hourly ascendant sweep(s) around the start moment.
+  - `ascMoonSunRangeEnabled` *(optional, default false)*: include ascendant, Moon, and Sun sweeps around the start moment.
 - **Response**: `TransitRangeResponse`
   - `snapshots`: list of `TransitSnapshot` (same structure as `/api/transit`, including `major_aspects` and optional `natal_major_aspects`).
-  - `ascendantDayRange` *(optional)*: +/-12h ascendant sweep(s) around the requested start moment.
+  - `ascendantDayRange`, `moonMonthRange`, `sunYearRange` *(optional)*: sweeps around the requested start moment (and natal, when provided).
 
 ---
 
@@ -229,12 +230,12 @@ Compute **dual-chart aspects** between two subjects.
   - `first`: `BirthData`.
   - `second`: `BirthData`.
   - `config`: `ChartConfig`.
-  - `ascendantRangeEnabled` *(optional, default false)*: include +/-12h ascendant sweeps for both partners.
+  - `ascMoonSunRangeEnabled` *(optional, default false)*: include ascendant, Moon, and Sun sweeps for both partners.
 - **Response**: `RelationshipResponse`
   - `first_subject`: first `AstrologicalSubject` JSON.
   - `second_subject`: second `AstrologicalSubject` JSON.
   - `aspects`: Kerykeion `DualChartAspectsModel` serialized to JSON.
-  - `ascendantDayRange` *(optional)*: hourly ascendant windows for `first` and `second` when requested.
+  - `ascendantDayRange`, `moonMonthRange`, `sunYearRange` *(optional)*: sweeps for `first` and `second` when requested.
 
 ---
 

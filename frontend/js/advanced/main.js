@@ -36,6 +36,9 @@
     moonClockContainer: document.getElementById("moonClockContainer"),
     moonClockBody: document.getElementById("moonClockBody"),
     moonClockCollapse: document.getElementById("moonClockCollapse"),
+    sunRangeContainer: document.getElementById("sunRangeContainer"),
+    sunRangeBody: document.getElementById("sunRangeBody"),
+    sunRangeCollapse: document.getElementById("sunRangeCollapse"),
   };
 
   const shared = window.AppShared || {};
@@ -95,6 +98,13 @@
     Water: "96, 165, 250",
     Default: "148, 163, 184",
   };
+  const ELEMENT_HEX = {
+    Fire: "#fb7185",
+    Earth: "#eab308",
+    Air: "#34d399",
+    Water: "#60a5fa",
+    Default: "#94a3b8",
+  };
   const ACTIVE_SEGMENT_COLOR = "#0ea5e9";
   const PRIMARY_HAND_COLOR = "#38bdf8";
   const SECONDARY_HAND_COLOR = "#34d399";
@@ -130,6 +140,333 @@
     const [r, g, b] = ints;
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
+
+  const PLANET_COLORS = {
+    sun: "#f5c542",
+    moon: "#dce4f0",
+    mercury: "#f3dd67",
+    venus: "#58d09a",
+    mars: "#ef4444",
+    jupiter: "#9c7bff",
+    saturn: "#f3a4c1",
+    uranus: "#3ed4d8",
+    neptune: "#245ad1",
+    pluto: "#cfd4dc",
+    ascendant: "#a855f7",
+    medium_coeli: "#f59e0b",
+  };
+
+  const PLANET_SIZE = {
+    xs: 6,
+    sm: 8,
+    md: 10,
+    lg: 12,
+    xl: 14,
+  };
+
+  const ELEMENT_POLARITY = {
+    Fire: "expressive",
+    Air: "expressive",
+    Earth: "receptive",
+    Water: "receptive",
+  };
+
+  const POLARITY_ICON = {
+    expressive: "➕",
+    receptive: "➖",
+  };
+
+  const clamp01 = (v) => Math.min(1, Math.max(0, v));
+
+  const hexToRgb = (hex) => {
+    if (typeof hex !== "string") return null;
+    const cleaned = hex.replace("#", "");
+    const chunked = cleaned.length === 3 ? cleaned.split("").map((c) => c + c) : cleaned.match(/.{1,2}/g);
+    if (!chunked || chunked.length < 3) return null;
+    const [r, g, b] = chunked.slice(0, 3).map((p) => parseInt(p, 16));
+    if ([r, g, b].some((n) => Number.isNaN(n))) return null;
+    return { r, g, b };
+  };
+
+  const adjustHex = (hex, amount = 0) => {
+    const rgb = hexToRgb(hex);
+    if (!rgb) return hex;
+    const t = amount >= 0 ? 255 : 0;
+    const p = clamp01(Math.abs(amount));
+    const mix = (c) => Math.round((t - c) * p + c);
+    const r = mix(rgb.r);
+    const g = mix(rgb.g);
+    const b = mix(rgb.b);
+    return `#${[r, g, b]
+      .map((n) => {
+        const clamped = Math.min(255, Math.max(0, n));
+        return clamped.toString(16).padStart(2, "0");
+      })
+      .join("")}`;
+  };
+
+  const normalizeAngle = (deg) => {
+    const m = deg % 360;
+    return m < 0 ? m + 360 : m;
+  };
+
+  const polarToCartesian = (cx, cy, radius, angleDeg) => {
+    const rad = ((angleDeg - 90) * Math.PI) / 180;
+    const x = cx + radius * Math.cos(rad);
+    const y = cy + radius * Math.sin(rad);
+    return { x, y };
+  };
+
+  const describeArc = (cx, cy, radius, startAngle, endAngle) => {
+    const start = polarToCartesian(cx, cy, radius, startAngle);
+    const end = polarToCartesian(cx, cy, radius, endAngle);
+    const sweep = normalizeAngle(endAngle - startAngle);
+    const largeArcFlag = sweep > 180 ? 1 : 0;
+    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
+  };
+
+  const resolvePolarity = (element) => {
+    const key = ELEMENT_POLARITY[element] || "expressive";
+    return {
+      key,
+      symbol: POLARITY_ICON[key] || "➕",
+      label: key === "expressive" ? "expressive" : "receptive",
+    };
+  };
+
+  const formatSignDate = (date, anchorYear) => {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "—";
+    const day = pad(date.getDate());
+    const month = pad(date.getMonth() + 1);
+    const suffix = date.getFullYear() === anchorYear ? "" : `-${String(date.getFullYear()).slice(-2)}`;
+    return `${day}-${month}${suffix}`;
+  };
+
+  function renderDiscOutlines(radii, cx, cy) {
+    return [
+      `<circle cx="${cx}" cy="${cy}" r="${radii.segmentOuter}" fill="none" stroke="rgba(226,232,240,0.26)" stroke-width="0.9" />`,
+      `<circle cx="${cx}" cy="${cy}" r="${radii.segmentInner}" fill="none" stroke="rgba(226,232,240,0.2)" stroke-width="0.75" />`,
+      `<circle cx="${cx}" cy="${cy}" r="${radii.quality}" fill="none" stroke="rgba(226,232,240,0.18)" stroke-width="0.7" />`,
+      `<circle cx="${cx}" cy="${cy}" r="${radii.element}" fill="none" stroke="rgba(226,232,240,0.14)" stroke-width="0.6" />`,
+      `<circle cx="${cx}" cy="${cy}" r="${radii.polarity}" fill="none" stroke="rgba(226,232,240,0.12)" stroke-width="0.6" />`,
+    ].join("");
+  }
+
+  function renderSignDisc(segments, radii, cx, cy, accent, anchorYear, defs, uid, rangeKey) {
+    const spanPaths = [];
+    const decans = [];
+    const labels = [];
+    const dates = [];
+    const separators = [];
+
+    segments.forEach((seg, idx) => {
+      const baseColor = ELEMENT_HEX[seg.element] || ELEMENT_HEX.Default;
+      const tone = toRgba(baseColor, 0.62);
+      const fullWidth = radii.segmentOuter - radii.polarity;
+      const midRadius = radii.polarity + fullWidth / 2;
+      const path = describeArc(cx, cy, midRadius, seg.startDeg, seg.endDeg);
+      spanPaths.push(
+        `<path d="${path}" fill="none" stroke="${tone}" stroke-width="${fullWidth}" opacity="0.3" />`
+      );
+
+      [seg.decan1, seg.decan2].forEach((angle) => {
+        const inner = radii.segmentInner - 2;
+        const outer = radii.segmentOuter + 6;
+        const startPt = polarToCartesian(cx, cy, inner, angle);
+        const endPt = polarToCartesian(cx, cy, outer, angle);
+        decans.push(
+          `<line x1="${startPt.x}" y1="${startPt.y}" x2="${endPt.x}" y2="${endPt.y}" stroke="rgba(226,232,240,0.28)" stroke-width="0.65" stroke-dasharray="2 8" />`
+        );
+      });
+
+      const namePathId = `sign-name-${uid || "sky"}-${rangeKey || "layer"}-${idx}`;
+      defs.push(`<path id="${namePathId}" d="${describeArc(cx, cy, radii.text, seg.startDeg, seg.endDeg)}" fill="none" />`);
+      const label = seg.signMeta.name || seg.sign || `Sign ${idx + 1}`;
+      labels.push(
+        `<text class="adv-sky-constellation" style="fill:${adjustHex(accent, 0.1)}"><textPath href="#${namePathId}" startOffset="50%" text-anchor="middle">${label}</textPath></text>`
+      );
+
+      const datePathId = `sign-date-${uid || "sky"}-${rangeKey || "layer"}-${idx}`;
+      defs.push(`<path id="${datePathId}" d="${describeArc(cx, cy, radii.date, seg.startDeg, seg.endDeg)}" fill="none" />`);
+      dates.push(
+        `<text class="adv-sky-date" style="fill:${adjustHex(accent, -0.05)}"><textPath href="#${datePathId}" startOffset="50%" text-anchor="middle">${formatSignDate(
+          seg.start,
+          anchorYear
+        )}</textPath></text>`
+      );
+
+      const sepInner = radii.polarity - 6;
+      const sepOuter = radii.date + 6;
+      const sepStart = polarToCartesian(cx, cy, sepInner, seg.startDeg);
+      const sepEnd = polarToCartesian(cx, cy, sepOuter, seg.startDeg);
+      separators.push(
+        `<line x1="${sepStart.x}" y1="${sepStart.y}" x2="${sepEnd.x}" y2="${sepEnd.y}" stroke="rgba(226,232,240,0.18)" stroke-width="0.7" />`
+      );
+    });
+
+    return {
+      spans: spanPaths.join(""),
+      decans: decans.join(""),
+      labels: labels.join(""),
+      dates: dates.join(""),
+      separators: separators.join(""),
+    };
+  }
+
+  function renderQualityDisc(segments, radii, cx, cy) {
+    return segments
+      .map((seg) => {
+        const qualityTransform = `translate(${cx} ${cy}) rotate(${seg.midDeg}) translate(0 ${-radii.quality})`;
+        return `<text class="adv-sky-quality" transform="${qualityTransform}" text-anchor="middle" dominant-baseline="middle">${QUALITY_ICON[seg.quality] || ""}</text>`;
+      })
+      .join("");
+  }
+
+  function renderElementDisc(segments, radii, cx, cy) {
+    return segments
+      .map((seg) => {
+        const elementTransform = `translate(${cx} ${cy}) rotate(${seg.midDeg}) translate(0 ${-radii.element})`;
+        return `<text class="adv-sky-element" transform="${elementTransform}" text-anchor="middle" dominant-baseline="middle">${ELEMENT_ICON[seg.element] || ""}</text>`;
+      })
+      .join("");
+  }
+
+  function renderPolarityDisc(segments, radii, cx, cy) {
+    return segments
+      .map((seg) => {
+        const pol = resolvePolarity(seg.element);
+        const polTransform = `translate(${cx} ${cy}) rotate(${seg.midDeg}) translate(0 ${-radii.polarity})`;
+        return `<text class="adv-sky-polarity" transform="${polTransform}" text-anchor="middle" dominant-baseline="middle"><title>${pol.label}</title>${pol.symbol}</text>`;
+      })
+      .join("");
+  }
+
+  function renderPlanetDisc({
+    cx,
+    cy,
+    radii,
+    accent,
+    rangeKey,
+    pointsByRangeId,
+    signLookup,
+    currentSeg,
+    anchor,
+    sunPolarity,
+    centerSignMeta,
+    defs,
+  }) {
+    const rangePoints = pointsByRangeId[rangeKey] || pointsByRangeId.default || {};
+    const bandGradId = `${rangeKey}-planet-band-${cx}-${cy}`;
+    defs.push(`
+      <linearGradient id="${bandGradId}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="${adjustHex(accent, 0.35)}" stop-opacity="0.42" />
+        <stop offset="60%" stop-color="${adjustHex(accent, -0.05)}" stop-opacity="0.36" />
+        <stop offset="100%" stop-color="${adjustHex(accent, -0.35)}" stop-opacity="0.3" />
+      </linearGradient>
+    `);
+    const band = [
+      `<circle cx="${cx}" cy="${cy}" r="${radii.planet + 10}" fill="none" stroke="rgba(226,232,240,0.24)" stroke-width="0.9" stroke-dasharray="1 6" />`,
+      `<circle cx="${cx}" cy="${cy}" r="${radii.planet}" fill="none" stroke="url(#${bandGradId})" stroke-width="${Math.max(
+        22,
+        (radii.segmentOuter - radii.segmentInner) + 6
+      )}" stroke-dasharray="2 6" opacity="0.65" />`,
+      `<circle cx="${cx}" cy="${cy}" r="${Math.max(radii.planet - 10, radii.segmentInner - 10)}" fill="none" stroke="rgba(226,232,240,0.18)" stroke-width="0.9" stroke-dasharray="1 6" />`,
+    ].join("");
+
+    const pointEntries = Object.entries(rangePoints || {}).filter(([, val]) => val && typeof val === "object");
+    const placedPoints = [];
+    const pointPieces = [];
+
+    const renderPointNode = (key, point, angle, radiusOverride, sizeOverride) => {
+      const coords = polarToCartesian(cx, cy, radiusOverride, angle);
+      const normKey = normalizePointKey(key);
+      const isPlanet = PLANET_KEYS.has(normKey);
+      const baseColor = resolvePointColor(normKey);
+      const gradId = `${rangeKey}-planet-${key}-${point.position || point.abs_pos || point.sign || ""}-${cx}-${cy}`;
+      defs.push(`
+        <radialGradient id="${gradId}" cx="50%" cy="40%" r="65%">
+          <stop offset="0%" stop-color="${adjustHex(baseColor, 0.32)}" stop-opacity="0.96" />
+          <stop offset="65%" stop-color="${baseColor}" stop-opacity="0.95" />
+          <stop offset="100%" stop-color="${adjustHex(baseColor, -0.18)}" stop-opacity="0.88" />
+        </radialGradient>
+      `);
+      const size = sizeOverride || resolvePointSize(normKey);
+      const pol = resolvePolarity(point.element || signLookup[point.sign]?.element);
+      const signName = (signLookup[point.sign]?.signMeta?.name || SIGN_META[point.sign]?.name || point.sign || "").trim();
+      const orb =
+        Number.isFinite(point.position) ? `${point.position.toFixed(2)}°` : Number.isFinite(point.abs_pos) ? `${(point.abs_pos % 30).toFixed(2)}°` : "—";
+      const titleText = `${point.name || key}${signName ? ` · ${signName}` : ""} ${orb} ${ELEMENT_ICON[point.element] || ""} ${
+        pol.symbol
+      } ${pol.label}`;
+      const glyph = isPlanet
+        ? `<circle r="${size}" fill="url(#${gradId})" stroke="rgba(255,255,255,0.35)" stroke-width="1.1" />`
+        : `<path d="M 0 ${-size} L ${size * 0.92} ${size * 0.8} L ${-size * 0.92} ${size * 0.8} Z" fill="url(#${gradId})" stroke="rgba(255,255,255,0.32)" stroke-width="1" />`;
+      const icon = POINTS_ICONS[normKey] || POINTS_ICONS[point.name?.toLowerCase?.()] || "";
+      const ring =
+        normKey === "saturn"
+          ? `<line x1="${-size * 1.2}" y1="0" x2="${size * 1.2}" y2="0" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" />`
+          : normKey === "uranus"
+            ? `<line x1="0" y1="${-size * 1.15}" x2="0" y2="${size * 1.15}" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" />`
+            : "";
+      const iconSize =
+        !isPlanet || size <= PLANET_SIZE.sm
+          ? "0.7rem"
+          : size <= PLANET_SIZE.md
+            ? "0.82rem"
+            : "0.95rem";
+      return `
+        <g class="adv-sky-point" transform="translate(${coords.x} ${coords.y})">
+          <title>${titleText}</title>
+          ${ring}
+          ${glyph}
+          <text class="adv-sky-point-icon" text-anchor="middle" dominant-baseline="middle" style="font-size:${iconSize}">${icon || "▲"}</text>
+        </g>
+      `;
+    };
+
+    pointEntries
+      .map(([key, point]) => ({ key, point, size: resolvePointSize(normalizePointKey(key)) }))
+      .sort((a, b) => b.size - a.size)
+      .forEach(({ key, point, size: presetSize }) => {
+        const normKey = normalizePointKey(key);
+        if (normKey === "sun") return;
+        const angle = resolvePointAngleFromSegments(point, signLookup);
+        if (!Number.isFinite(angle)) return;
+        const baseRadius = radii.planet;
+        const baseSize = presetSize || resolvePointSize(normKey);
+        const conflict = placedPoints.find((p) => angularDistance(p.angle, angle) < 7);
+        const radius = conflict ? baseRadius - baseSize * 1.3 : baseRadius;
+        const size = conflict ? Math.max(PLANET_SIZE.xs, baseSize * 0.6) : baseSize;
+        placedPoints.push({ angle, radius });
+        pointPieces.push(renderPointNode(key, point, angle, radius, size));
+      });
+
+    const sunPoint = pickPoint(rangePoints, "sun") || {};
+    const sunColor = resolvePointColor("sun");
+    const sunGradId = `${rangeKey}-sun-${cx}-${cy}`;
+    defs.push(`
+      <radialGradient id="${sunGradId}" cx="50%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="${adjustHex(sunColor, 0.4)}" stop-opacity="1" />
+        <stop offset="65%" stop-color="${sunColor}" stop-opacity="0.95" />
+        <stop offset="100%" stop-color="${adjustHex(sunColor, -0.2)}" stop-opacity="0.9" />
+      </radialGradient>
+    `);
+    const sunSpan = currentSeg ? currentSeg.end.getTime() - currentSeg.start.getTime() : 1;
+    const sunAngle = currentSeg
+      ? currentSeg.startDeg + ((anchor.getTime() - currentSeg.start.getTime()) / Math.max(1, sunSpan)) * currentSeg.span
+      : -90;
+    const sunCoords = polarToCartesian(cx, cy, radii.planet, sunAngle);
+    const sunLabel = currentSeg?.signMeta?.name || centerSignMeta?.name || "Sun";
+    const sun = `
+      <g class="adv-sky-sun" transform="translate(${sunCoords.x} ${sunCoords.y})">
+        <title>Sun · ${sunLabel} ${sunPolarity.symbol} ${sunPolarity.label}</title>
+        <circle r="${PLANET_SIZE.xl + 5}" fill="url(#${sunGradId})" opacity="0.92" />
+        <circle r="${PLANET_SIZE.xl + 1}" fill="url(#${sunGradId})" stroke="rgba(255,255,255,0.65)" stroke-width="1.2" />
+        <text class="adv-sky-point-icon" text-anchor="middle" dominant-baseline="middle">${POINTS_ICONS.sun || "☉"}</text>
+      </g>
+    `;
+    return { band, points: pointPieces.join(""), sun };
+  }
 
   const normalizeRangeId = (value) => (typeof value === "string" ? value.toLowerCase() : null);
 
@@ -169,6 +506,8 @@
     const decan = Math.max(1, Math.min(3, Math.floor(orb / 10) + 1));
     return { orb, decan };
   };
+
+  const computeSunProgress = (entry, targetTs) => computeMoonProgress(entry, targetTs);
 
   const computeDecan = (position) => {
     if (!Number.isFinite(position)) return null;
@@ -378,10 +717,41 @@
     };
   }
 
+  function buildSunSummary(range, formatTimeFn) {
+    if (!range || !Array.isArray(range.entries) || !range.entries.length) return null;
+    const anchor = safeDate(range.anchor) || safeDate(range.entries[0].start) || new Date();
+    const current =
+      range.entries.find((e) => {
+        const start = safeDate(e.start || e.timestamp);
+        const end = safeDate(e.end);
+        return start && end && anchor >= start && anchor < end;
+      }) || range.entries[0];
+
+    const currentProgress = computeSunProgress(current, anchor);
+    const idx = range.entries.indexOf(current);
+    const nextEntry = idx !== -1 && range.entries[idx + 1] ? range.entries[idx + 1] : null;
+    const nextSign = nextEntry?.sign || null;
+    const nextTime =
+      nextEntry?.start && nextEntry.start instanceof Date && Number.isFinite(nextEntry.start.getTime())
+        ? formatTimeFn(nextEntry.start)
+        : "—";
+
+    return {
+      anchor,
+      current,
+      orb: currentProgress.orb,
+      decan: currentProgress.decan,
+      nextSign,
+      nextTime,
+      nextStart: nextEntry?.start || null,
+    };
+  }
+
   function renderSummaryPanel(
     points,
     ascendantRanges,
     moonRanges,
+    sunRanges,
     metaSource,
     formatTimeFn,
     isDual,
@@ -389,7 +759,7 @@
     pointsByRange = {},
     metaByRange = {}
   ) {
-    if (!ascendantRanges.length && !moonRanges.length) return "";
+    if (!ascendantRanges.length && !moonRanges.length && !sunRanges.length) return "";
     const normalizedPointSets = { ...(pointsByRange || {}) };
     const normalizedMeta = { ...(metaByRange || {}) };
     const defaultPoints = points || {};
@@ -407,135 +777,167 @@
     };
     const ascMap = new Map();
     const moonMap = new Map();
+    const sunMap = new Map();
     ascendantRanges.forEach((r, idx) => ascMap.set(r.id || r.label || `asc-${idx}`, r));
     moonRanges.forEach((r, idx) => moonMap.set(r.id || r.label || `moon-${idx}`, r));
-    const cardIds = ascendantRanges.map((r, idx) => r.id || r.label || `range-${idx}`);
-    moonRanges.forEach((r, idx) => {
-      const id = r.id || r.label || `moon-${idx}`;
+    sunRanges.forEach((r, idx) => sunMap.set(r.id || r.label || `sun-${idx}`, r));
+    const cardIds = [];
+    const pushId = (range, idx, prefix) => {
+      const id = range.id || range.label || `${prefix}-${idx}`;
       if (!cardIds.includes(id)) cardIds.push(id);
-    });
-    const anchor = safeDate(ascendantRanges[0]?.anchor) || safeDate(moonRanges[0]?.anchor) || safeDate(metaSource?.timestamp) || new Date();
+    };
+    ascendantRanges.forEach((r, idx) => pushId(r, idx, "range"));
+    moonRanges.forEach((r, idx) => pushId(r, idx, "moon"));
+    sunRanges.forEach((r, idx) => pushId(r, idx, "sun"));
+    const anchor =
+      safeDate(ascendantRanges[0]?.anchor) ||
+      safeDate(moonRanges[0]?.anchor) ||
+      safeDate(sunRanges[0]?.anchor) ||
+      safeDate(metaSource?.timestamp) ||
+      new Date();
     const majorAspectLines = renderMajorAspectSummary(majorAspects, defaultPoints);
 
-    const cards = cardIds.map((cardId, idx) => {
-      const ascRange = ascMap.get(cardId) || null;
-      const moonRange = moonMap.get(cardId) || (!ascRange && moonRanges.length === 1 ? moonRanges[0] : null);
-      const range = ascRange || moonRange;
-      if (!range) return "";
-      const rangePoints = getPointsForRange(range.id || cardId);
-      const rangeMeta = getMetaForRange(range.id || cardId) || {};
-      const rangeAnchor = safeDate(range.anchor) || anchor;
-      const dayIdx = rangeAnchor instanceof Date && Number.isFinite(rangeAnchor.getTime()) ? rangeAnchor.getDay() : new Date().getDay();
-      const dayRulerKey = CHALDEAN_DAY_RULERS?.[dayIdx] || null;
-      const dayRulerName = dayRulerKey ? capitalise(dayRulerKey) : "—";
-      const dayRulerIcon = dayRulerKey ? POINTS_ICONS[dayRulerKey] || "" : "";
-      const dateInfo = formatDateLabel(rangeMeta);
-      const baseLabel =
-        dateInfo.label && dateInfo.label !== "—"
-          ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}`
-          : "";
-      const formattedAnchor = rangeAnchor ? formatDateTimeShort(rangeAnchor) : "";
-      const dateLabel = baseLabel || formattedAnchor || "Requested datetime";
+    const cards = cardIds
+      .map((cardId, idx) => {
+        const ascRange = ascMap.get(cardId) || null;
+        const moonRange = moonMap.get(cardId) || (!ascRange && moonRanges.length === 1 ? moonRanges[0] : null);
+        const sunRange =
+          sunMap.get(cardId) || (!ascRange && !moonRange && sunRanges.length === 1 ? sunRanges[0] : null);
+        const range = ascRange || moonRange || sunRange;
+        if (!range) return "";
+        const rangePoints = getPointsForRange(range.id || cardId);
+        const rangeMeta = getMetaForRange(range.id || cardId) || {};
+        const rangeAnchor = safeDate(range.anchor) || anchor;
+        const dayIdx =
+          rangeAnchor instanceof Date && Number.isFinite(rangeAnchor.getTime()) ? rangeAnchor.getDay() : new Date().getDay();
+        const dayRulerKey = CHALDEAN_DAY_RULERS?.[dayIdx] || null;
+        const dayRulerName = dayRulerKey ? capitalise(dayRulerKey) : "—";
+        const dayRulerIcon = dayRulerKey ? POINTS_ICONS[dayRulerKey] || "" : "";
+        const dateInfo = formatDateLabel(rangeMeta);
+        const baseLabel =
+          dateInfo.label && dateInfo.label !== "—"
+            ? `${dateInfo.label}${dateInfo.tzShort ? ` (${dateInfo.tzShort})` : ""}`
+            : "";
+        const formattedAnchor = rangeAnchor ? formatDateTimeShort(rangeAnchor) : "";
+        const dateLabel = baseLabel || formattedAnchor || "Requested datetime";
 
-      const ascSummary = ascRange ? buildAscSummary(ascRange, formatTimeFn) : null;
-      const ascData = ascSummary
-        ? {
-            ...summarizePoint(ascSummary.current),
-            orb: ascSummary.orb,
-            decan: ascSummary.decan,
-          }
-        : null;
-      const dayRulerPt = dayRulerKey ? pickPoint(rangePoints, dayRulerKey) : null;
-      const dayData = dayRulerPt ? summarizePoint(dayRulerPt) : null;
-      const sunPt = pickPoint(rangePoints, "sun");
-      const sunData = sunPt ? summarizePoint(sunPt) : null;
-      const moonSummary = moonRange ? buildMoonSummary(moonRange, formatDateTimeShort) : null;
-      const moonPt = pickPoint(rangePoints, "moon");
-      const moonPointData = moonPt ? summarizePoint(moonPt) : null;
-      const moonCurrent = moonSummary?.current || null;
-      const moonData =
-        moonCurrent || moonPointData
+        const ascSummary = ascRange ? buildAscSummary(ascRange, formatTimeFn) : null;
+        const ascData = ascSummary
           ? {
-              sign: moonCurrent?.sign || moonPointData?.sign,
-              quality: moonCurrent?.quality || moonPointData?.quality,
-              element: moonCurrent?.element || moonPointData?.element,
-              emoji: moonCurrent?.emoji || moonPointData?.emoji,
-              orb: typeof moonSummary?.orb === "number" ? moonSummary.orb : moonPointData?.orb,
-              decan: typeof moonSummary?.decan === "number" ? moonSummary.decan : moonPointData?.decan,
+              ...summarizePoint(ascSummary.current),
+              orb: ascSummary.orb,
+              decan: ascSummary.decan,
             }
           : null;
-      const moonIllumVal = computeMoonIllumination(rangePoints);
-      const lunation = getLunationInfo({
-        year: metaSource?.year || metaSource?.moment?.year || metaSource?.birth?.year || anchor.getFullYear(),
-        month: metaSource?.month || metaSource?.moment?.month || metaSource?.birth?.month || anchor.getMonth() + 1,
-        day: metaSource?.day || metaSource?.moment?.day || metaSource?.birth?.day || anchor.getDate(),
-        hour: metaSource?.hour || metaSource?.moment?.hour || metaSource?.birth?.hour || anchor.getHours(),
-        minute: metaSource?.minute || metaSource?.moment?.minute || metaSource?.birth?.minute || anchor.getMinutes(),
-      });
-      const moonIllumRaw =
-        typeof moonIllumVal === "number"
-          ? `${moonIllumVal.toFixed(1)}%`
-          : typeof moonIllumVal === "string"
-            ? moonIllumVal
+        const dayRulerPt = dayRulerKey ? pickPoint(rangePoints, dayRulerKey) : null;
+        const dayData = dayRulerPt ? summarizePoint(dayRulerPt) : null;
+        const sunSummary = sunRange ? buildSunSummary(sunRange, formatDateTimeShort) : null;
+        const sunPt = pickPoint(rangePoints, "sun");
+        const sunPointData = sunPt ? summarizePoint(sunPt) : null;
+        const sunCurrent = sunSummary?.current || null;
+        const sunData =
+          sunCurrent || sunPointData
+            ? {
+                sign: sunCurrent?.sign || sunPointData?.sign,
+                quality: sunCurrent?.quality || sunPointData?.quality,
+                element: sunCurrent?.element || sunPointData?.element,
+                emoji: sunCurrent?.emoji || sunPointData?.emoji,
+                orb: typeof sunSummary?.orb === "number" ? sunSummary.orb : sunPointData?.orb,
+                decan: typeof sunSummary?.decan === "number" ? sunSummary.decan : sunPointData?.decan,
+              }
+            : null;
+        const moonSummary = moonRange ? buildMoonSummary(moonRange, formatDateTimeShort) : null;
+        const moonPt = pickPoint(rangePoints, "moon");
+        const moonPointData = moonPt ? summarizePoint(moonPt) : null;
+        const moonCurrent = moonSummary?.current || null;
+        const moonData =
+          moonCurrent || moonPointData
+            ? {
+                sign: moonCurrent?.sign || moonPointData?.sign,
+                quality: moonCurrent?.quality || moonPointData?.quality,
+                element: moonCurrent?.element || moonPointData?.element,
+                emoji: moonCurrent?.emoji || moonPointData?.emoji,
+                orb: typeof moonSummary?.orb === "number" ? moonSummary.orb : moonPointData?.orb,
+                decan: typeof moonSummary?.decan === "number" ? moonSummary.decan : moonPointData?.decan,
+              }
+            : null;
+        const moonIllumVal = computeMoonIllumination(rangePoints);
+        const lunation = getLunationInfo({
+          year: metaSource?.year || metaSource?.moment?.year || metaSource?.birth?.year || anchor.getFullYear(),
+          month: metaSource?.month || metaSource?.moment?.month || metaSource?.birth?.month || anchor.getMonth() + 1,
+          day: metaSource?.day || metaSource?.moment?.day || metaSource?.birth?.day || anchor.getDate(),
+          hour: metaSource?.hour || metaSource?.moment?.hour || metaSource?.birth?.hour || anchor.getHours(),
+          minute: metaSource?.minute || metaSource?.moment?.minute || metaSource?.birth?.minute || anchor.getMinutes(),
+        });
+        const moonIllumRaw =
+          typeof moonIllumVal === "number"
+            ? `${moonIllumVal.toFixed(1)}%`
+            : typeof moonIllumVal === "string"
+              ? moonIllumVal
+              : "";
+        const moonIllum = moonIllumRaw || "—";
+
+        const ascNext =
+          ascSummary && ascSummary.nextSign
+            ? `Next ${SIGN_META[ascSummary.nextSign]?.name || ascSummary.nextSign} at ${ascSummary.nextTime}`
             : "";
-      const moonIllum = moonIllumRaw || "—";
 
-      const nextInfo =
-        ascSummary && ascSummary.nextSign
-          ? `Next ${SIGN_META[ascSummary.nextSign]?.name || ascSummary.nextSign} at ${ascSummary.nextTime}`
-          : "";
+        const sunNext =
+          sunSummary && sunSummary.nextSign
+            ? `Next ${SIGN_META[sunSummary.nextSign]?.name || sunSummary.nextSign} at ${sunSummary.nextTime}`
+            : "";
+        const moonNext =
+          moonSummary && moonSummary.nextSign
+            ? `Next ${SIGN_META[moonSummary.nextSign]?.name || moonSummary.nextSign} at ${moonSummary.nextTime}`
+            : "";
+        const moonExtras = [moonNext, `Illumination ${moonIllum}${lunation && lunation.name ? ` · ${lunation.name}` : ""}`]
+          .filter(Boolean)
+          .join(" · ");
+        const aspectsBlock =
+          idx === 0 && majorAspectLines
+            ? `<div class="adv-summary-major-card">
+                <div class="adv-summary-major-title">
+                  ${wrapMajorAspectIcon(fallbackIcon("generic"))}
+                  <span>Major aspects</span>
+                </div>
+                <div class="adv-summary-major">${majorAspectLines}</div>
+              </div>`
+            : "";
+        const sigilBase = buildSigilBase(rangePoints, rangeAnchor);
+        const sigilMarkup = renderSigil(sigilBase, {}, { size: 108, compact: true, className: "adv-summary-sigil" });
 
-      const moonNext =
-        moonSummary && moonSummary.nextSign
-          ? `Next ${SIGN_META[moonSummary.nextSign]?.name || moonSummary.nextSign} at ${moonSummary.nextTime}`
-          : "";
-      const moonExtras = [moonNext, `Illumination ${moonIllum}${lunation && lunation.name ? ` · ${lunation.name}` : ""}`]
-        .filter(Boolean)
-        .join(" · ");
-      const aspectsBlock =
-        idx === 0 && majorAspectLines
-          ? `<div class="adv-summary-major-card">
-              <div class="adv-summary-major-title">
-                ${wrapMajorAspectIcon(fallbackIcon("generic"))}
-                <span>Major aspects</span>
+        return `
+          <div class="adv-summary-card">
+            <div class="adv-summary-head">
+              <div>
+                <p class="adv-asc-kicker">Day Ruler · ${dayRulerName} ${dayRulerIcon}</p>
+                <p class="adv-asc-sub">${dateLabel}</p>
               </div>
-              <div class="adv-summary-major">${majorAspectLines}</div>
-            </div>`
-          : "";
-      const sigilBase = buildSigilBase(rangePoints, rangeAnchor);
-      const sigilMarkup = renderSigil(sigilBase, {}, { size: 108, compact: true, className: "adv-summary-sigil" });
-
-      return `
-        <div class="adv-summary-card">
-          <div class="adv-summary-head">
-            <div>
-              <p class="adv-asc-kicker">Day Ruler · ${dayRulerName} ${dayRulerIcon}</p>
-              <p class="adv-asc-sub">${dateLabel}</p>
+              <div class="adv-summary-head-meta">
+                <span class="adv-asc-pill">${range.label || range.id || "Range"}</span>
+                ${sigilMarkup ? `<div class="adv-summary-figure">${sigilMarkup}</div>` : ""}
+              </div>
             </div>
-            <div class="adv-summary-head-meta">
-              <span class="adv-asc-pill">${range.label || range.id || "Range"}</span>
-              ${sigilMarkup ? `<div class="adv-summary-figure">${sigilMarkup}</div>` : ""}
+            <div class="adv-summary-grid">
+              ${sunData ? formatSummaryRow("Sun", POINTS_ICONS.sun, sunData, sunNext) : ""}
+              ${moonData ? formatSummaryRow("Moon", POINTS_ICONS.moon, moonData, moonExtras) : ""}
+              ${dayData ? formatSummaryRow(dayRulerName || "Day Ruler", POINTS_ICONS[dayRulerKey] || "☉", dayData) : ""}
+              ${
+                ascData
+                  ? formatSummaryRow(
+                      "Asc",
+                      POINTS_ICONS.ascendant,
+                      ascData,
+                      ascNext ? ascNext : ""
+                    )
+                  : ""
+              }
             </div>
+            ${aspectsBlock}
           </div>
-          <div class="adv-summary-grid">
-            ${sunData ? formatSummaryRow("Sun", POINTS_ICONS.sun, sunData) : ""}
-            ${moonData ? formatSummaryRow("Moon", POINTS_ICONS.moon, moonData, moonExtras) : ""}
-            ${dayData ? formatSummaryRow(dayRulerName || "Day Ruler", POINTS_ICONS[dayRulerKey] || "☉", dayData) : ""}
-            ${
-              ascData
-                ? formatSummaryRow(
-                    "Asc",
-                    POINTS_ICONS.ascendant,
-                    ascData,
-                    nextInfo ? nextInfo : ""
-                  )
-                : ""
-            }
-          </div>
-          ${aspectsBlock}
-        </div>
-      `;
-    }).filter(Boolean);
+        `;
+      })
+      .filter(Boolean);
 
     const wrapClass = isDual ? "adv-summary-wrap adv-summary-wrap--stacked" : "adv-summary-wrap";
     return `<div class="${wrapClass}">${cards.join("")}</div>`;
@@ -703,6 +1105,88 @@
     return normalized;
   }
 
+  function normalizeSunRanges(payload) {
+    if (!payload) return [];
+    const rangesRaw = [];
+    const pushRanges = (val) => {
+      if (Array.isArray(val)) rangesRaw.push(...val);
+    };
+    pushRanges(payload.sun_year_range || payload.sunYearRange);
+    pushRanges(payload.snapshot?.sun_year_range || payload.snapshot?.sunYearRange);
+    pushRanges(payload.subject?.sun_year_range || payload.subject?.sunYearRange);
+    if (Array.isArray(payload.snapshots)) {
+      payload.snapshots.forEach((snap) => pushRanges(snap.sun_year_range || snap.sunYearRange));
+    }
+
+    const seen = new Set();
+    const normalized = [];
+    rangesRaw.forEach((range, idx) => {
+      if (!range || typeof range !== "object") return;
+      const id = String(range.id || range.label || `range-${idx}`);
+      if (seen.has(id)) return;
+      seen.add(id);
+
+      const anchorRaw = range.anchor || range.anchor_timestamp || range.anchorTimestamp;
+      const anchorCandidate = anchorRaw ? new Date(anchorRaw) : null;
+      const entriesRaw = Array.isArray(range.entries) ? range.entries : [];
+
+      const normalizedEntries = entriesRaw
+        .map((entry) => {
+          const startRaw =
+            entry.start ||
+            entry.start_timestamp ||
+            entry.startTimestamp ||
+            entry.timestamp ||
+            entry.time ||
+            entry.date ||
+            null;
+          const endRaw = entry.end || entry.end_timestamp || entry.endTimestamp || entry.finish || entry.until || entry.to || null;
+          const start = startRaw ? new Date(startRaw) : null;
+          const end = endRaw ? new Date(endRaw) : null;
+          const hasStart = start instanceof Date && Number.isFinite(start.getTime());
+          if (!hasStart) return null;
+          const hasEnd = end instanceof Date && Number.isFinite(end.getTime());
+          const resolvedEnd = hasEnd ? end : new Date(start.getTime() + 32 * DAY_MS);
+          return {
+            ...entry,
+            start,
+            end: resolvedEnd,
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.start - b.start);
+
+      const anchorDate =
+        anchorCandidate instanceof Date && Number.isFinite(anchorCandidate.getTime())
+          ? anchorCandidate
+          : normalizedEntries[0]?.start || new Date();
+
+      const withOffsets = normalizedEntries.map((entry, entryIdx) => {
+        const offsetHours =
+          anchorDate instanceof Date && entry.start instanceof Date
+            ? (entry.start.getTime() - anchorDate.getTime()) / HOUR_MS
+            : entry.offset_hours ?? entry.offsetHours ?? entryIdx * 720;
+        const endOffset =
+          anchorDate instanceof Date && entry.end instanceof Date
+            ? (entry.end.getTime() - anchorDate.getTime()) / HOUR_MS
+            : offsetHours + 720;
+        return {
+          ...entry,
+          offsetHours,
+          endOffset,
+        };
+      });
+
+      normalized.push({
+        id,
+        label: range.label || id,
+        anchor: anchorDate,
+        entries: withOffsets,
+      });
+    });
+    return normalized;
+  }
+
   function formatClockTime(entry, fallbackHour) {
     if (entry && entry.timestamp instanceof Date && Number.isFinite(entry.timestamp.getTime())) {
       const h = entry.timestamp.getHours();
@@ -758,6 +1242,253 @@
         };
       })
       .filter(Boolean);
+  }
+
+  const PLANET_KEYS = new Set(["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]);
+
+  const resolvePointSize = (key) => {
+    const norm = normalizePointKey(key);
+    if (norm === "sun") return PLANET_SIZE.xl;
+    if (norm === "moon" || norm === "pluto") return PLANET_SIZE.xs;
+    if (norm === "mercury" || norm === "venus") return PLANET_SIZE.sm;
+    if (norm === "mars") return PLANET_SIZE.md;
+    if (norm === "jupiter" || norm === "saturn") return PLANET_SIZE.lg;
+    if (norm === "uranus" || norm === "neptune") return PLANET_SIZE.md;
+    if (norm === "ascendant" || norm === "medium_coeli" || norm === "mc") return PLANET_SIZE.md;
+    return PLANET_SIZE.sm;
+  };
+
+  const resolvePointColor = (key) => {
+    const norm = normalizePointKey(key);
+    return PLANET_COLORS[norm] || "#67e8f9";
+  };
+
+  const angularDistance = (a, b) => {
+    const diff = Math.abs(normalizeAngle(a) - normalizeAngle(b)) % 360;
+    return diff > 180 ? 360 - diff : diff;
+  };
+
+  const resolvePointAngleFromSegments = (point, segmentLookup) => {
+    if (!point || !segmentLookup) return null;
+    const rawSign = point.sign || point.sign_key || point.signKey || "";
+    const signKey = rawSign.slice(0, 3);
+    const bySign = segmentLookup[rawSign] || segmentLookup[signKey] || segmentLookup[rawSign.toLowerCase()];
+    const byNum = Number.isFinite(point.sign_num) ? Object.values(segmentLookup).find((seg) => seg.sign_num === point.sign_num) : null;
+    const seg = bySign || byNum;
+    if (!seg) return null;
+    const pos = Number.isFinite(point.position)
+      ? point.position
+      : Number.isFinite(point.abs_pos)
+        ? (point.abs_pos % 30 + 30) % 30
+        : null;
+    const ratio = Number.isFinite(pos) ? clamp01(pos / 30) : 0.5;
+    return seg.startDeg + seg.span * ratio;
+  };
+
+  function buildSkyMapLayer(range, opts = {}) {
+    const { uid, cx, cy, layerIndex = 0, layerCount = 1, defs = [], pointsByRangeId = {} } = opts;
+    if (!range) return null;
+    const entries = (Array.isArray(range.entries) ? range.entries : [])
+      .map((entry) => {
+        const start = safeDate(entry.start || entry.timestamp);
+        const end = safeDate(entry.end);
+        if (!(start && end && end > start)) return null;
+        return { ...entry, start, end };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.start - b.start);
+    const anchor = safeDate(range.anchor) || entries[0]?.start;
+    const anchorYear = anchor?.getFullYear() || new Date().getFullYear();
+    const anchorMatchIdx = entries.findIndex((entry) => anchor && entry.start <= anchor && anchor <= entry.end);
+    const anchorIdx = anchorMatchIdx >= 0 ? anchorMatchIdx : 0;
+    const ordered = anchorIdx >= 0 ? [...entries.slice(anchorIdx), ...entries.slice(0, anchorIdx)] : entries;
+    const needed = 12;
+    const limited = ordered.slice(0, needed);
+    if (!limited.length) return null;
+    while (limited.length < needed && ordered.length) {
+      limited.push(ordered[limited.length % ordered.length]);
+    }
+    const span = 360 / Math.max(1, limited.length);
+    const startAngle = -90 - span / 2;
+    const segments = limited
+      .map((entry, idx) => {
+        const startDeg = startAngle + idx * span;
+        const endDeg = startDeg + span;
+        const signMeta = SIGN_META[entry.sign] || {};
+        return {
+          ...entry,
+          idx,
+          startDeg,
+          endDeg,
+          span,
+          midDeg: startDeg + span / 2,
+          decan1: startDeg + span / 3,
+          decan2: startDeg + (2 * span) / 3,
+          signMeta,
+        };
+      })
+      .filter(Boolean);
+    if (!segments.length) return null;
+
+    const rangeKey = normalizeRangeId(range.id || range.label || `layer-${layerIndex}`);
+    const accent = layerIndex === 0 ? "#22d3ee" : "#c084fc";
+    const isInner = layerCount > 1 && layerIndex === 1;
+    const innerScale = isInner ? 0.85 : 1;
+    const baseRadius = layerCount > 1 ? (isInner ? 118 : 230) : 224;
+    const radii = {
+      segmentOuter: baseRadius,
+      segmentInner: baseRadius - (isInner ? 32 : 24),
+      text: baseRadius - 14,
+      date: baseRadius + 14,
+      planet: baseRadius - (isInner ? 44 : 32),
+      quality: baseRadius - (isInner ? 54 : 60),
+      element: baseRadius - (isInner ? 66 : 78),
+      polarity: baseRadius - (isInner ? 78 : 96),
+    };
+    const outlines = renderDiscOutlines(radii, cx, cy);
+    const signLookup = segments.reduce((acc, seg) => {
+      const abbrev = (seg.sign || "").slice(0, 3);
+      const full = (seg.signMeta?.name || "").toLowerCase();
+      if (seg.sign) acc[seg.sign] = seg;
+      if (abbrev) acc[abbrev] = seg;
+      if (full) acc[full] = seg;
+      return acc;
+    }, {});
+
+    const currentSeg = segments[0];
+    const rangePoints = pointsByRangeId[rangeKey] || pointsByRangeId.default || {};
+    const sunPoint = pickPoint(rangePoints, "sun") || {};
+    const sunElement = sunPoint.element || currentSeg?.element || "Fire";
+    const sunQuality = sunPoint.quality || currentSeg?.quality || "Cardinal";
+    const sunPolarity = resolvePolarity(sunElement);
+    const centerSignMeta = SIGN_META[sunPoint.sign || currentSeg?.sign] || currentSeg?.signMeta || {};
+
+    const signDisc = renderSignDisc(segments, radii, cx, cy, accent, anchorYear, defs, uid, rangeKey);
+    const qualityDisc = renderQualityDisc(segments, radii, cx, cy);
+    const elementDisc = renderElementDisc(segments, radii, cx, cy);
+    const polarityDisc = renderPolarityDisc(segments, radii, cx, cy);
+    const planetDisc = renderPlanetDisc({
+      cx,
+      cy,
+      radii,
+      accent,
+      rangeKey,
+      pointsByRangeId,
+      signLookup,
+      currentSeg,
+      anchor,
+      sunPolarity,
+      centerSignMeta,
+      defs,
+    });
+    const sunLabel = currentSeg?.signMeta?.name || centerSignMeta?.name || "Sun";
+    const anchorLabel = formatDateTimeShort(anchor);
+    const qualityIcon = QUALITY_ICON[sunQuality] || "";
+    const titleColor = adjustHex(accent, 0.05);
+    const centerLabel = `
+      <div class="adv-sky-chip" aria-label="Sun in ${centerSignMeta.name || sunLabel || "current sign"}">
+        <div class="adv-sky-chip-title" style="color:${titleColor}">${range.label || range.id || "Sky layer"} · ${anchorLabel}</div>
+        <div class="adv-sky-chip-main">${POINTS_ICONS.sun || "☉"} ${centerSignMeta.name || sunLabel || "Sun"} ${centerSignMeta.icon || ""}</div>
+        <div class="adv-sky-chip-meta">${ELEMENT_ICON[sunElement] || ""} ${sunElement || "—"} · ${qualityIcon} · ${sunPolarity.symbol} ${sunPolarity.label}</div>
+      </div>
+    `;
+
+    const legendLabel = `<span class="adv-sky-pill" style="--sky-pill:${accent}">${range.label || range.id || "Layer"}</span>`;
+
+    const group = `
+      <g class="adv-sky-layer" style="--sky-accent:${accent}" transform="translate(${cx} ${cy}) scale(${innerScale}) translate(${-cx} ${-cy})">
+        ${signDisc.spans}
+        ${signDisc.separators}
+        ${signDisc.decans}
+        ${signDisc.labels}
+        ${signDisc.dates}
+        ${outlines}
+        ${qualityDisc}
+        ${elementDisc}
+        ${polarityDisc}
+        ${planetDisc.points}
+        ${planetDisc.sun}
+      </g>
+    `;
+
+    return {
+      svg: group,
+      centerLabel,
+      legendLabel,
+    };
+  }
+
+  function pickSkyRanges(sunRanges) {
+    const priority = ["transit", "first", "second", "natal"];
+    const list = Array.isArray(sunRanges) ? [...sunRanges] : [];
+    list.sort((a, b) => {
+      const ai = priority.indexOf((a.id || a.label || "").toLowerCase());
+      const bi = priority.indexOf((b.id || b.label || "").toLowerCase());
+      const av = ai === -1 ? 99 : ai;
+      const bv = bi === -1 ? 99 : bi;
+      return av - bv;
+    });
+    return list.slice(0, 2);
+  }
+
+  function renderSkyMap(sunRanges, pointsByRangeId, metaByRangeId) {
+    const ranges = pickSkyRanges(sunRanges);
+    if (!ranges.length) return "";
+    const uid = `sky-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    const layerCount = Math.min(2, ranges.length);
+    const size = layerCount > 1 ? 560 : 540;
+    const cx = size / 2;
+    const cy = size / 2;
+    const defs = [
+      `<linearGradient id="sky-shadow-${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0b172a" stop-opacity="0" />
+        <stop offset="55%" stop-color="#0b172a" stop-opacity="0.12" />
+        <stop offset="100%" stop-color="#050b18" stop-opacity="0.35" />
+      </linearGradient>`,
+    ];
+    const layers = [];
+    const chips = [];
+    const legends = [];
+    const accents = [];
+
+    ranges.forEach((range, idx) => {
+      const layer = buildSkyMapLayer(range, {
+        uid,
+        cx,
+        cy,
+        layerIndex: idx,
+        layerCount,
+        defs,
+        pointsByRangeId,
+        metaByRangeId,
+      });
+      if (layer) {
+        layers.push(layer.svg);
+        chips.push(layer.centerLabel);
+        legends.push(layer.legendLabel);
+        accents.push(layer.accent || "#38bdf8");
+      }
+    });
+
+    if (!layers.length) return "";
+    const defsBlock = defs.length ? `<defs>${defs.join("")}</defs>` : "";
+    const legendBlock = legends.length ? `<div class="adv-sky-legend">${legends.join("")}</div>` : "";
+    const tableAccent = accents[0] || "#38bdf8";
+    const centerClass = layerCount > 1 ? "adv-sky-center adv-sky-center-bottom" : "adv-sky-center";
+    const html = `
+      <div class="adv-sky-wrap" style="--sky-pill:${tableAccent}">
+        ${legendBlock}
+        <div class="adv-sky-stage">
+          <svg viewBox="0 0 ${size} ${size}" class="adv-sky-svg" role="img" aria-label="Circular sky map">
+            ${defsBlock}
+            ${layers.join("")}
+            <rect x="0" y="${cy}" width="${size}" height="${cy}" fill="url(#sky-shadow-${uid})" pointer-events="none" />
+          </svg>
+          <div class="${centerClass}">${chips.join("")}</div>
+        </div>
+      </div>
+    `;
+    return { html, accent: tableAccent };
   }
 
   function renderAscendantCenter(ranges, hours, centerEl, handColors = [], showLabels) {
@@ -1981,6 +2712,76 @@
     return `<div class="adv-asc-table-grid adv-moon-table-grid">${tables.join("")}</div>`;
   }
 
+  function buildSunTables(ranges, sigilBase = null) {
+    if (!ranges.length) return "";
+    const formatDateTime = (ts) => {
+      if (!(ts instanceof Date) || !Number.isFinite(ts.getTime())) return "—";
+      return ts.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    };
+    const renderRow = (entry) => {
+      const start = entry.start || entry.timestamp;
+      const end = entry.end;
+      const signMeta = SIGN_META[entry.sign] || { name: entry.sign || "—", icon: entry.emoji || "☉" };
+      const qualityIcon = QUALITY_ICON[entry.quality] || "";
+      const elementIcon = ELEMENT_ICON[entry.element] || "";
+      const swatchColor = elementFill(entry.element, 1).replace("rgba(", "rgb(").replace(/,\s*1\)$/, ")");
+      const durationHours =
+        start instanceof Date && end instanceof Date
+          ? (end.getTime() - start.getTime()) / HOUR_MS
+          : null;
+      const durationLabel =
+        durationHours !== null ? `${(durationHours / 24).toFixed(2)}d (${durationHours.toFixed(1)}h)` : "—";
+      const sigilMarkup = sigilBase
+        ? renderSigil(
+            sigilBase,
+            { sunElement: entry.element, ascElement: null },
+            { size: 44, compact: true, className: "table-sigil" }
+          )
+        : "";
+      return `
+        <tr>
+          <td>${formatDateTime(start)}</td>
+          <td>${formatDateTime(end)}</td>
+          <td>${signMeta.icon || ""} ${signMeta.name}</td>
+          <td class="sigil-cell">${sigilMarkup || ""}</td>
+          <td><span class="adv-asc-color-swatch" style="background:${swatchColor}"></span>${elementIcon ? `${elementIcon} ` : ""}${entry.element || "—"}</td>
+          <td>${qualityIcon ? `${qualityIcon} ` : ""}${entry.quality || "—"}</td>
+          <td>${durationLabel}</td>
+        </tr>
+      `;
+    };
+
+    const tables = ranges.map((range, idx) => {
+      const handColor = idx === 0 ? PRIMARY_HAND_COLOR : SECONDARY_HAND_COLOR;
+      const rows = (range.entries || []).map(renderRow).join("");
+      return `
+        <table class="adv-moon-table">
+          <caption style="color:${handColor}">${range.label || range.id}</caption>
+          <thead>
+            <tr>
+              <th>Start</th>
+              <th>End</th>
+              <th>Sign</th>
+              <th>Sigil</th>
+              <th>Element</th>
+              <th>Quality</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="7">No data</td></tr>'}</tbody>
+        </table>
+      `;
+    });
+
+    return `<div class="adv-asc-table-grid adv-moon-table-grid">${tables.join("")}</div>`;
+  }
+
   const parseDateOnly = (value) => {
     if (!value) return null;
     const [y, m, d] = String(value)
@@ -2345,8 +3146,7 @@
       minute: date.getMinutes(),
     });
     return {
-      ascendantRangeEnabled: payload.ascendantRangeEnabled,
-      moonRangeEnabled: payload.moonRangeEnabled,
+      ascMoonSunRangeEnabled: payload.ascMoonSunRangeEnabled,
       moment: { ...payload.moment, ...toParts(normalized.startDate) },
       end: toParts(normalized.endDate),
       birth: mode === "natal_transit" ? payload.birth : null,
@@ -3223,6 +4023,7 @@
       chart;
     const ascendantRanges = normalizeAscendantRanges(payload);
     const moonRanges = normalizeMoonRanges(payload);
+    const sunRanges = normalizeSunRanges(payload);
     const priority = ["transit", "second", "first", "natal"];
     if (ascendantRanges.length > 1) {
       ascendantRanges.sort((a, b) => {
@@ -3235,6 +4036,15 @@
     }
     if (moonRanges.length > 1) {
       moonRanges.sort((a, b) => {
+        const ai = priority.indexOf((a.id || "").toLowerCase());
+        const bi = priority.indexOf((b.id || "").toLowerCase());
+        const aval = ai === -1 ? 99 : ai;
+        const bval = bi === -1 ? 99 : bi;
+        return aval - bval;
+      });
+    }
+    if (sunRanges.length > 1) {
+      sunRanges.sort((a, b) => {
         const ai = priority.indexOf((a.id || "").toLowerCase());
         const bi = priority.indexOf((b.id || "").toLowerCase());
         const aval = ai === -1 ? 99 : ai;
@@ -3269,17 +4079,26 @@
         addPointsForRange(key, chart);
       }
     });
+    sunRanges.forEach((range) => {
+      const key = normalizeRangeId(range.id || range.label);
+      if (key && !pointsByRangeId[key]) {
+        addPointsForRange(key, chart);
+      }
+    });
     pointsByRangeId.default = points;
     metaByRangeId.default = metaSource;
     const anchorDate =
       safeDate(ascendantRanges[0]?.anchor) ||
       safeDate(moonRanges[0]?.anchor) ||
+      safeDate(sunRanges[0]?.anchor) ||
       safeDate(metaSource?.timestamp) ||
       new Date();
     const ascSigilBase = buildSigilBase(points, anchorDate);
     const ascSigilHtml = renderSigil(ascSigilBase, {}, { size: 44, compact: true, className: "adv-asc-sigil-figure" });
     const moonSigilBase = { ...buildSigilBase(points, anchorDate), ascElement: null };
     const moonSigilHtml = renderSigil(moonSigilBase, { ascElement: null }, { size: 44, compact: true, className: "adv-asc-sigil-figure" });
+    const sunSigilBase = { ...buildSigilBase(points, anchorDate), ascElement: null };
+    const sunSigilHtml = renderSigil(sunSigilBase, { ascElement: null }, { size: 44, compact: true, className: "adv-asc-sigil-figure" });
     const clockBlock = buildAscendantClockBlock(ascendantRanges, metaSource, ascSigilHtml, ascSigilBase);
     const moonClockBlock = buildMoonClockBlock(moonRanges, metaSource, moonSigilHtml, moonSigilBase);
     const aspectContent =
@@ -3291,18 +4110,26 @@
     const pointsTable = renderPointsTable(filteredPointKeys, points);
     const pointsBlock = pointsTable || pointRows || "<p class=\"hint\">No points returned.</p>";
     const housesBlock = houseRows || "<p class=\"hint\">No houses returned.</p>";
-    const skySections = `
-      <div class="space-y-3">
-        <div>
-          <p class="text-sm font-semibold text-slate-200 mb-1">Points</p>
+    const skyMap = renderSkyMap(sunRanges, pointsByRangeId, metaByRangeId);
+    const skyMapHtml = skyMap?.html || skyMap || "";
+    const detailTables =
+      pointsBlock || housesBlock
+        ? `
+      <div class="adv-sky-tables"${skyMap?.accent ? ` style="--sky-pill:${skyMap.accent}"` : ""}>
+        <details class="adv-sky-detail" open>
+          <summary>Points</summary>
           ${pointsBlock}
-        </div>
-        <div>
-          <p class="text-sm font-semibold text-slate-200 mb-1">Houses</p>
+        </details>
+        <details class="adv-sky-detail" open>
+          <summary>Houses</summary>
           ${housesBlock}
-        </div>
+        </details>
       </div>
-    `;
+    `
+        : "";
+    const skySections =
+      [skyMapHtml, detailTables].filter(Boolean).join("") ||
+      "<p class=\"hint\">Generate a chart to see point and house placements.</p>";
 
     if (dom.summaryEl) {
       dom.summaryEl.innerHTML = aspectContent || "<p class=\"hint\">No aspects found for active points.</p>";
@@ -3313,15 +4140,16 @@
       dom.skyMapContent.innerHTML = skySections;
       enableSortableTables(dom.skyMapContent);
     }
-    const hasDual = ascendantRanges.length > 1 || moonRanges.length > 1;
+    const hasDual = ascendantRanges.length > 1 || moonRanges.length > 1 || sunRanges.length > 1;
     if (dom.ascSummaryContainer) {
-      if (!ascendantRanges.length && !moonRanges.length) {
+      if (!ascendantRanges.length && !moonRanges.length && !sunRanges.length) {
         dom.ascSummaryContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the summary.</p>";
       } else {
         const summaries = renderSummaryPanel(
           points,
           ascendantRanges,
           moonRanges,
+          sunRanges,
           metaSource,
           formatTimeSimple,
           hasDual,
@@ -3353,6 +4181,14 @@
         const tables = buildMoonTables(moonRanges, moonSigilBase);
         dom.moonClockContainer.innerHTML = `${moonClockBlock.html}${tables}`;
         initMoonClock(moonRanges, moonClockBlock.ids);
+      }
+    }
+    if (dom.sunRangeContainer) {
+      if (!sunRanges.length) {
+        dom.sunRangeContainer.innerHTML = "<p class=\"hint\">Generate a chart to see the Sun's upcoming sign changes.</p>";
+      } else {
+        const tables = buildSunTables(sunRanges, sunSigilBase);
+        dom.sunRangeContainer.innerHTML = `${sunSigilHtml ? `<div class=\"adv-sun-sigil\">${sunSigilHtml}</div>` : ""}${tables}`;
       }
     }
     attachPatternModalHandlers();
@@ -3558,6 +4394,15 @@
         if (!dom.moonClockBody.classList.contains("hidden")) {
           triggerCanvasResize();
         }
+      });
+    }
+
+    if (dom.sunRangeCollapse && dom.sunRangeBody) {
+      dom.sunRangeBody.classList.add("hidden");
+      setCollapseState(dom.sunRangeCollapse, dom.sunRangeBody, "Expand Sun panel", "Collapse Sun panel");
+      dom.sunRangeCollapse.addEventListener("click", () => {
+        dom.sunRangeBody.classList.toggle("hidden");
+        setCollapseState(dom.sunRangeCollapse, dom.sunRangeBody, "Expand Sun panel", "Collapse Sun panel");
       });
     }
 

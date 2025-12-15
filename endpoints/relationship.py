@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from schemas import RelationshipRequest, RelationshipResponse
 from aspects.ascendant_range import compute_ascendant_day_range
 from aspects.moon_range import compute_moon_month_range
+from aspects.sun_range import compute_sun_year_range
 from utils import compute_dual_chart_aspects, ensure_config, to_local_datetime
 
 router = APIRouter(tags=["relationship"])
@@ -25,7 +26,8 @@ async def relationship(payload: RelationshipRequest) -> RelationshipResponse:
 
     ascendant_day_range = []
     moon_month_range = []
-    if payload.ascendant_range_enabled:
+    sun_year_range = []
+    if payload.asc_moon_sun_range_enabled:
         ascendant_day_range.append(
             compute_ascendant_day_range(
                 payload.first,
@@ -44,7 +46,6 @@ async def relationship(payload: RelationshipRequest) -> RelationshipResponse:
                 label=payload.second.name or "Partner B",
             )
         )
-    if payload.moon_range_enabled:
         moon_month_range.append(
             compute_moon_month_range(
                 payload.first,
@@ -56,6 +57,24 @@ async def relationship(payload: RelationshipRequest) -> RelationshipResponse:
         )
         moon_month_range.append(
             compute_moon_month_range(
+                payload.second,
+                cfg,
+                to_local_datetime(payload.second),
+                identifier="second",
+                label=payload.second.name or "Partner B",
+            )
+        )
+        sun_year_range.append(
+            compute_sun_year_range(
+                payload.first,
+                cfg,
+                to_local_datetime(payload.first),
+                identifier="first",
+                label=payload.first.name or "Partner A",
+            )
+        )
+        sun_year_range.append(
+            compute_sun_year_range(
                 payload.second,
                 cfg,
                 to_local_datetime(payload.second),
@@ -70,4 +89,5 @@ async def relationship(payload: RelationshipRequest) -> RelationshipResponse:
         aspects=aspects_model.model_dump(mode="json"),
         ascendant_day_range=ascendant_day_range,
         moon_month_range=moon_month_range,
+        sun_year_range=sun_year_range,
     )

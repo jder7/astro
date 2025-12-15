@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from schemas import TransitMomentRequest, TransitResponse, TransitSnapshot, BirthData
 from aspects.ascendant_range import compute_ascendant_day_range
 from aspects.moon_range import compute_moon_month_range
+from aspects.sun_range import compute_sun_year_range
 from utils import build_subject, compute_major_aspects, compute_normal_aspects, ensure_config, to_local_datetime
 
 router = APIRouter(tags=["transit"])
@@ -56,7 +57,8 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
     timestamp = to_local_datetime(moment_birth)
     ascendant_day_range = []
     moon_month_range = []
-    if payload.ascendant_range_enabled:
+    sun_year_range = []
+    if payload.asc_moon_sun_range_enabled:
         ascendant_day_range.append(
             compute_ascendant_day_range(
                 moment_birth,
@@ -73,11 +75,10 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
                     payload.birth,
                     cfg,
                     natal_anchor,
-                    identifier="natal",
-                    label=payload.birth.name or "Natal",
-                )
+                identifier="natal",
+                label=payload.birth.name or "Natal",
             )
-    if payload.moon_range_enabled:
+        )
         moon_month_range.append(
             compute_moon_month_range(
                 moment_birth,
@@ -95,6 +96,26 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
                     cfg,
                     natal_anchor,
                     identifier="natal",
+                label=payload.birth.name or "Natal",
+            )
+        )
+        sun_year_range.append(
+            compute_sun_year_range(
+                moment_birth,
+                cfg,
+                timestamp,
+                identifier="transit",
+                label="Transit",
+            )
+        )
+        if payload.birth is not None:
+            natal_anchor = to_local_datetime(payload.birth)
+            sun_year_range.append(
+                compute_sun_year_range(
+                    payload.birth,
+                    cfg,
+                    natal_anchor,
+                    identifier="natal",
                     label=payload.birth.name or "Natal",
                 )
             )
@@ -107,11 +128,10 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
         natal_subject=natal_dict,
         natal_aspects=natal_aspects,
         natal_major_aspects=natal_major_aspects,
-        ascendant_day_range=ascendant_day_range,
-        moon_month_range=moon_month_range,
     )
     return TransitResponse(
         snapshot=snapshot,
         ascendant_day_range=ascendant_day_range,
         moon_month_range=moon_month_range,
+        sun_year_range=sun_year_range,
     )

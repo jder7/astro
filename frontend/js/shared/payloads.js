@@ -5,8 +5,13 @@
 
   const { config } = App;
   const { getConfigFromInputs } = config;
-  const ascendantRangeEnabled = !!(App.flags && App.flags.ascendantRangeEnabled);
-  const moonRangeEnabled = !!(App.flags && App.flags.moonRangeEnabled);
+  const ascMoonSunRangeEnabled = !!(
+    App.flags &&
+    (App.flags.ascMoonSunRangeEnabled ??
+      App.flags.asc_moon_sun_range_enabled ??
+      App.flags.ascendantRangeEnabled ??
+      App.flags.moonRangeEnabled)
+  );
 
   function getValue(id) {
     const el = document.getElementById(id);
@@ -107,8 +112,7 @@
     if (mode === "natal") {
       return {
         payload: {
-          ascendantRangeEnabled,
-          moonRangeEnabled,
+          ascMoonSunRangeEnabled,
           birth,
           config: normalizedConfig,
         },
@@ -121,8 +125,7 @@
     if (mode === "transit") {
       return {
         payload: {
-          ascendantRangeEnabled,
-          moonRangeEnabled,
+          ascMoonSunRangeEnabled,
           moment,
           birth: null,
           config: normalizedConfig,
@@ -136,8 +139,7 @@
     if (mode === "natal_transit") {
       return {
         payload: {
-          ascendantRangeEnabled,
-          moonRangeEnabled,
+          ascMoonSunRangeEnabled,
           moment,
           birth,
           config: normalizedConfig,
@@ -172,8 +174,7 @@
 
       return {
         payload: {
-          ascendantRangeEnabled,
-          moonRangeEnabled,
+          ascMoonSunRangeEnabled,
           birth: null,
           moment: null,
           first,
@@ -188,8 +189,7 @@
 
     return {
       payload: {
-        ascendantRangeEnabled,
-        moonRangeEnabled,
+        ascMoonSunRangeEnabled,
         birth: null,
         moment,
         config: normalizedConfig,
@@ -202,8 +202,7 @@
 
   function buildRelationshipPayload() {
     return {
-      ascendantRangeEnabled,
-      moonRangeEnabled,
+      ascMoonSunRangeEnabled,
       first: buildRelationshipPartner("first", {
         name: "Partner A",
         date: "1990-01-01",

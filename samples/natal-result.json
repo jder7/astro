@@ -1,0 +1,2451 @@
+{
+    "ascendantDayRange": [
+        {
+            "id": "natal",
+            "label": "john",
+            "anchor": "1984-08-07T09:40:00+03:00",
+            "entries": [
+                {
+                    "timestamp": "1984-08-07T07:14:00+03:00",
+                    "end": "1984-08-07T09:55:00+03:00",
+                    "sign": "Leo",
+                    "sign_num": 4,
+                    "element": "Fire",
+                    "quality": "Fixed",
+                    "emoji": "♌️"
+                },
+                {
+                    "timestamp": "1984-08-07T09:55:00+03:00",
+                    "end": "1984-08-07T12:36:00+03:00",
+                    "sign": "Vir",
+                    "sign_num": 5,
+                    "element": "Earth",
+                    "quality": "Mutable",
+                    "emoji": "♍️"
+                },
+                {
+                    "timestamp": "1984-08-07T12:36:00+03:00",
+                    "end": "1984-08-07T15:18:00+03:00",
+                    "sign": "Lib",
+                    "sign_num": 6,
+                    "element": "Air",
+                    "quality": "Cardinal",
+                    "emoji": "♎️"
+                },
+                {
+                    "timestamp": "1984-08-07T15:18:00+03:00",
+                    "end": "1984-08-07T17:50:00+03:00",
+                    "sign": "Sco",
+                    "sign_num": 7,
+                    "element": "Water",
+                    "quality": "Fixed",
+                    "emoji": "♏️"
+                },
+                {
+                    "timestamp": "1984-08-07T17:50:00+03:00",
+                    "end": "1984-08-07T19:49:00+03:00",
+                    "sign": "Sag",
+                    "sign_num": 8,
+                    "element": "Fire",
+                    "quality": "Mutable",
+                    "emoji": "♐️"
+                },
+                {
+                    "timestamp": "1984-08-07T19:49:00+03:00",
+                    "end": "1984-08-07T22:15:00+03:00",
+                    "sign": "Cap",
+                    "sign_num": 9,
+                    "element": "Earth",
+                    "quality": "Cardinal",
+                    "emoji": "♑️"
+                },
+                {
+                    "timestamp": "1984-08-07T22:15:00+03:00",
+                    "end": "1984-08-08T00:28:00+03:00",
+                    "sign": "Pis",
+                    "sign_num": 11,
+                    "element": "Water",
+                    "quality": "Mutable",
+                    "emoji": "♓️"
+                },
+                {
+                    "timestamp": "1984-08-08T00:28:00+03:00",
+                    "end": "1984-08-08T02:10:00+03:00",
+                    "sign": "Tau",
+                    "sign_num": 1,
+                    "element": "Earth",
+                    "quality": "Fixed",
+                    "emoji": "♉️"
+                },
+                {
+                    "timestamp": "1984-08-08T02:10:00+03:00",
+                    "end": "1984-08-08T04:30:00+03:00",
+                    "sign": "Gem",
+                    "sign_num": 2,
+                    "element": "Air",
+                    "quality": "Mutable",
+                    "emoji": "♊️"
+                },
+                {
+                    "timestamp": "1984-08-08T04:30:00+03:00",
+                    "end": "1984-08-08T07:10:00+03:00",
+                    "sign": "Can",
+                    "sign_num": 3,
+                    "element": "Water",
+                    "quality": "Cardinal",
+                    "emoji": "♋️"
+                },
+                {
+                    "timestamp": "1984-08-08T07:10:00+03:00",
+                    "end": "1984-08-08T09:51:00+03:00",
+                    "sign": "Leo",
+                    "sign_num": 4,
+                    "element": "Fire",
+                    "quality": "Fixed",
+                    "emoji": "♌️"
+                }
+            ]
+        }
+    ],
+    "moonMonthRange": [
+        {
+            "id": "natal",
+            "label": "john",
+            "anchor": "1984-08-07T09:40:00+03:00",
+            "entries": [
+                {
+                    "start": "1984-08-07T08:46:00+03:00",
+                    "end": "1984-08-09T16:07:00+03:00",
+                    "sign": "Sag",
+                    "sign_num": 8,
+                    "element": "Fire",
+                    "quality": "Mutable",
+                    "emoji": "♐️"
+                },
+                {
+                    "start": "1984-08-09T16:07:00+03:00",
+                    "end": "1984-08-12T04:41:00+03:00",
+                    "sign": "Cap",
+                    "sign_num": 9,
+                    "element": "Earth",
+                    "quality": "Cardinal",
+                    "emoji": "♑️"
+                },
+                {
+                    "start": "1984-08-12T04:41:00+03:00",
+                    "end": "1984-08-14T15:51:00+03:00",
+                    "sign": "Aqu",
+                    "sign_num": 10,
+                    "element": "Air",
+                    "quality": "Fixed",
+                    "emoji": "♒️"
+                },
+                {
+                    "start": "1984-08-14T15:51:00+03:00",
+                    "end": "1984-08-17T04:18:00+03:00",
+                    "sign": "Pis",
+                    "sign_num": 11,
+                    "element": "Water",
+                    "quality": "Mutable",
+                    "emoji": "♓️"
+                },
+                {
+                    "start": "1984-08-17T04:18:00+03:00",
+                    "end": "1984-08-19T17:01:00+03:00",
+                    "sign": "Ari",
+                    "sign_num": 0,
+                    "element": "Fire",
+                    "quality": "Cardinal",
+                    "emoji": "♈️"
+                },
+                {
+                    "start": "1984-08-19T17:01:00+03:00",
+                    "end": "1984-08-21T23:57:00+03:00",
+                    "sign": "Tau",
+                    "sign_num": 1,
+                    "element": "Earth",
+                    "quality": "Fixed",
+                    "emoji": "♉️"
+                },
+                {
+                    "start": "1984-08-21T23:57:00+03:00",
+                    "end": "1984-08-24T03:55:00+03:00",
+                    "sign": "Gem",
+                    "sign_num": 2,
+                    "element": "Air",
+                    "quality": "Mutable",
+                    "emoji": "♊️"
+                },
+                {
+                    "start": "1984-08-24T03:55:00+03:00",
+                    "end": "1984-08-26T04:57:00+03:00",
+                    "sign": "Can",
+                    "sign_num": 3,
+                    "element": "Water",
+                    "quality": "Cardinal",
+                    "emoji": "♋️"
+                },
+                {
+                    "start": "1984-08-26T04:57:00+03:00",
+                    "end": "1984-08-28T04:45:00+03:00",
+                    "sign": "Leo",
+                    "sign_num": 4,
+                    "element": "Fire",
+                    "quality": "Fixed",
+                    "emoji": "♌️"
+                },
+                {
+                    "start": "1984-08-28T04:45:00+03:00",
+                    "end": "1984-08-30T05:12:00+03:00",
+                    "sign": "Vir",
+                    "sign_num": 5,
+                    "element": "Earth",
+                    "quality": "Mutable",
+                    "emoji": "♍️"
+                },
+                {
+                    "start": "1984-08-30T05:12:00+03:00",
+                    "end": "1984-09-01T07:38:00+03:00",
+                    "sign": "Lib",
+                    "sign_num": 6,
+                    "element": "Air",
+                    "quality": "Cardinal",
+                    "emoji": "♎️"
+                },
+                {
+                    "start": "1984-09-01T07:38:00+03:00",
+                    "end": "1984-09-03T12:47:00+03:00",
+                    "sign": "Sco",
+                    "sign_num": 7,
+                    "element": "Water",
+                    "quality": "Fixed",
+                    "emoji": "♏️"
+                },
+                {
+                    "start": "1984-09-03T12:47:00+03:00",
+                    "end": "1984-09-05T23:16:00+03:00",
+                    "sign": "Sag",
+                    "sign_num": 8,
+                    "element": "Fire",
+                    "quality": "Mutable",
+                    "emoji": "♐️"
+                },
+                {
+                    "start": "1984-09-05T23:16:00+03:00",
+                    "end": "1984-09-08T10:24:00+03:00",
+                    "sign": "Cap",
+                    "sign_num": 9,
+                    "element": "Earth",
+                    "quality": "Cardinal",
+                    "emoji": "♑️"
+                }
+            ]
+        }
+    ],
+    "sunYearRange": [
+        {
+            "id": "natal",
+            "label": "john",
+            "anchor": "1984-08-07T09:40:00+03:00",
+            "entries": [
+                {
+                    "start": "1984-07-16T00:30:00+03:00",
+                    "end": "1984-08-16T08:55:00+03:00",
+                    "sign": "Can",
+                    "sign_num": 3,
+                    "element": "Water",
+                    "quality": "Cardinal",
+                    "emoji": "♋️"
+                },
+                {
+                    "start": "1984-08-16T08:55:00+03:00",
+                    "end": "1984-09-16T08:54:00+03:00",
+                    "sign": "Leo",
+                    "sign_num": 4,
+                    "element": "Fire",
+                    "quality": "Fixed",
+                    "emoji": "♌️"
+                },
+                {
+                    "start": "1984-09-16T08:54:00+03:00",
+                    "end": "1984-10-16T19:57:00+02:00",
+                    "sign": "Vir",
+                    "sign_num": 5,
+                    "element": "Earth",
+                    "quality": "Mutable",
+                    "emoji": "♍️"
+                },
+                {
+                    "start": "1984-10-16T19:57:00+02:00",
+                    "end": "1984-11-15T19:44:00+02:00",
+                    "sign": "Lib",
+                    "sign_num": 6,
+                    "element": "Air",
+                    "quality": "Cardinal",
+                    "emoji": "♎️"
+                },
+                {
+                    "start": "1984-11-15T19:44:00+02:00",
+                    "end": "1984-12-15T10:15:00+02:00",
+                    "sign": "Sco",
+                    "sign_num": 7,
+                    "element": "Water",
+                    "quality": "Fixed",
+                    "emoji": "♏️"
+                },
+                {
+                    "start": "1984-12-15T10:15:00+02:00",
+                    "end": "1985-01-13T20:59:00+02:00",
+                    "sign": "Sag",
+                    "sign_num": 8,
+                    "element": "Fire",
+                    "quality": "Mutable",
+                    "emoji": "♐️"
+                },
+                {
+                    "start": "1985-01-13T20:59:00+02:00",
+                    "end": "1985-02-12T09:51:00+02:00",
+                    "sign": "Cap",
+                    "sign_num": 9,
+                    "element": "Earth",
+                    "quality": "Cardinal",
+                    "emoji": "♑️"
+                },
+                {
+                    "start": "1985-02-12T09:51:00+02:00",
+                    "end": "1985-03-14T06:41:00+02:00",
+                    "sign": "Aqu",
+                    "sign_num": 10,
+                    "element": "Air",
+                    "quality": "Fixed",
+                    "emoji": "♒️"
+                },
+                {
+                    "start": "1985-03-14T06:41:00+02:00",
+                    "end": "1985-04-13T16:15:00+03:00",
+                    "sign": "Pis",
+                    "sign_num": 11,
+                    "element": "Water",
+                    "quality": "Mutable",
+                    "emoji": "♓️"
+                },
+                {
+                    "start": "1985-04-13T16:15:00+03:00",
+                    "end": "1985-05-14T13:07:00+03:00",
+                    "sign": "Ari",
+                    "sign_num": 0,
+                    "element": "Fire",
+                    "quality": "Cardinal",
+                    "emoji": "♈️"
+                },
+                {
+                    "start": "1985-05-14T13:07:00+03:00",
+                    "end": "1985-06-14T19:47:00+03:00",
+                    "sign": "Tau",
+                    "sign_num": 1,
+                    "element": "Earth",
+                    "quality": "Fixed",
+                    "emoji": "♉️"
+                },
+                {
+                    "start": "1985-06-14T19:47:00+03:00",
+                    "end": "1985-07-16T06:33:00+03:00",
+                    "sign": "Gem",
+                    "sign_num": 2,
+                    "element": "Air",
+                    "quality": "Mutable",
+                    "emoji": "♊️"
+                },
+                {
+                    "start": "1985-07-16T06:33:00+03:00",
+                    "end": "1985-08-16T14:59:00+03:00",
+                    "sign": "Can",
+                    "sign_num": 3,
+                    "element": "Water",
+                    "quality": "Cardinal",
+                    "emoji": "♋️"
+                }
+            ]
+        }
+    ],
+    "subject": {
+        "name": "john",
+        "city": "Salonta",
+        "nation": "RO",
+        "lng": 21.6499,
+        "lat": 46.805,
+        "tz_str": "Europe/Bucharest",
+        "iso_formatted_local_datetime": "1984-08-07T09:40:00+03:00",
+        "iso_formatted_utc_datetime": "1984-08-07T06:40:00+00:00",
+        "julian_day": 2445919.777777778,
+        "day_of_week": "Tuesday",
+        "zodiac_type": "Sidereal",
+        "sidereal_mode": "KRISHNAMURTI",
+        "houses_system_identifier": "P",
+        "houses_system_name": "Placidus",
+        "perspective_type": "Topocentric",
+        "sun": {
+            "name": "Sun",
+            "quality": "Cardinal",
+            "element": "Water",
+            "sign": "Can",
+            "sign_num": 3,
+            "position": 21.395461261176848,
+            "abs_pos": 111.39546126117685,
+            "emoji": "♋️",
+            "point_type": "AstrologicalPoint",
+            "house": "Eleventh_House",
+            "retrograde": false,
+            "speed": 0.952643680136589,
+            "declination": 16.3538786981326
+        },
+        "moon": {
+            "name": "Moon",
+            "quality": "Mutable",
+            "element": "Fire",
+            "sign": "Sag",
+            "sign_num": 8,
+            "position": 0.6357967003158649,
+            "abs_pos": 240.63579670031586,
+            "emoji": "♐️",
+            "point_type": "AstrologicalPoint",
+            "house": "Fourth_House",
+            "retrograde": false,
+            "speed": 16.739964087264525,
+            "declination": -25.3971503726527
+        },
+        "mercury": {
+            "name": "Mercury",
+            "quality": "Fixed",
+            "element": "Fire",
+            "sign": "Leo",
+            "sign_num": 4,
+            "position": 17.50294151585672,
+            "abs_pos": 137.50294151585672,
+            "emoji": "♌️",
+            "point_type": "AstrologicalPoint",
+            "house": "Twelfth_House",
+            "retrograde": false,
+            "speed": 0.5906465165139707,
+            "declination": 5.0205885839028594
+        },
+        "venus": {
+            "name": "Venus",
+            "quality": "Fixed",
+            "element": "Fire",
+            "sign": "Leo",
+            "sign_num": 4,
+            "position": 5.793692768127656,
+            "abs_pos": 125.79369276812766,
+            "emoji": "♌️",
+            "point_type": "AstrologicalPoint",
+            "house": "Twelfth_House",
+            "retrograde": false,
+            "speed": 1.228660842045315,
+            "declination": 13.083039339809947
+        },
+        "mars": {
+            "name": "Mars",
+            "quality": "Fixed",
+            "element": "Water",
+            "sign": "Sco",
+            "sign_num": 7,
+            "position": 1.1791682929740261,
+            "abs_pos": 211.17916829297403,
+            "emoji": "♏️",
+            "point_type": "AstrologicalPoint",
+            "house": "Third_House",
+            "retrograde": false,
+            "speed": 0.482646021993105,
+            "declination": -21.22517362868802
+        },
+        "jupiter": {
+            "name": "Jupiter",
+            "quality": "Mutable",
+            "element": "Fire",
+            "sign": "Sag",
+            "sign_num": 8,
+            "position": 10.382358243731858,
+            "abs_pos": 250.38235824373186,
+            "emoji": "♐️",
+            "point_type": "AstrologicalPoint",
+            "house": "Fourth_House",
+            "retrograde": true,
+            "speed": -0.06649371414368943,
+            "declination": -23.408229017926416
+        },
+        "saturn": {
+            "name": "Saturn",
+            "quality": "Cardinal",
+            "element": "Air",
+            "sign": "Lib",
+            "sign_num": 6,
+            "position": 16.665528536827736,
+            "abs_pos": 196.66552853682774,
+            "emoji": "♎️",
+            "point_type": "AstrologicalPoint",
+            "house": "Second_House",
+            "retrograde": false,
+            "speed": 0.041023955787977684,
+            "declination": -12.708154853923519
+        },
+        "uranus": {
+            "name": "Uranus",
+            "quality": "Fixed",
+            "element": "Water",
+            "sign": "Sco",
+            "sign_num": 7,
+            "position": 16.04196185986595,
+            "abs_pos": 226.04196185986595,
+            "emoji": "♏️",
+            "point_type": "AstrologicalPoint",
+            "house": "Third_House",
+            "retrograde": true,
+            "speed": -0.008598677680993205,
+            "declination": -21.867966997968423
+        },
+        "neptune": {
+            "name": "Neptune",
+            "quality": "Mutable",
+            "element": "Fire",
+            "sign": "Sag",
+            "sign_num": 8,
+            "position": 5.404773355129464,
+            "abs_pos": 245.40477335512946,
+            "emoji": "♐️",
+            "point_type": "AstrologicalPoint",
+            "house": "Fourth_House",
+            "retrograde": true,
+            "speed": -0.016360183821007013,
+            "declination": -22.240003320075207
+        },
+        "pluto": {
+            "name": "Pluto",
+            "quality": "Cardinal",
+            "element": "Air",
+            "sign": "Lib",
+            "sign_num": 6,
+            "position": 6.009323844825559,
+            "abs_pos": 186.00932384482556,
+            "emoji": "♎️",
+            "point_type": "AstrologicalPoint",
+            "house": "Second_House",
+            "retrograde": false,
+            "speed": 0.01665878215817429,
+            "declination": 4.323549748146731
+        },
+        "ascendant": {
+            "name": "Ascendant",
+            "quality": "Fixed",
+            "element": "Fire",
+            "sign": "Leo",
+            "sign_num": 4,
+            "position": 27.233404897319275,
+            "abs_pos": 147.23340489731928,
+            "emoji": "♌️",
+            "point_type": "AstrologicalPoint",
+            "house": "First_House",
+            "retrograde": false,
+            "speed": 360.0,
+            "declination": null
+        },
+        "descendant": {
+            "name": "Descendant",
+            "quality": "Fixed",
+            "element": "Air",
+            "sign": "Aqu",
+            "sign_num": 10,
+            "position": 27.233404897319247,
+            "abs_pos": 327.23340489731925,
+            "emoji": "♒️",
+            "point_type": "AstrologicalPoint",
+            "house": "Sixth_House",
+            "retrograde": false,
+            "speed": 360.0,
+            "declination": null
+        },
+        "medium_coeli": {
+            "name": "Medium_Coeli",
+            "quality": "Fixed",
+            "element": "Earth",
+            "sign": "Tau",
+            "sign_num": 1,
+            "position": 25.074174183138922,
+            "abs_pos": 55.07417418313892,
+            "emoji": "♉️",
+            "point_type": "AstrologicalPoint",
+            "house": "Tenth_House",
+            "retrograde": false,
+            "speed": 360.0,
+            "declination": null
+        },
+        "imum_coeli": {
+            "name": "Imum_Coeli",
+            "quality": "Fixed",
+            "element": "Water",
+            "sign": "Sco",
+            "sign_num": 7,
+            "position": 25.074174183138922,
+            "abs_pos": 235.07417418313892,
+            "emoji": "♏️",
+            "point_type": "AstrologicalPoint",
+            "house": "Fourth_House",
+            "retrograde": false,
+            "speed": 360.0,
+            "declination": null
+        },
+        "chiron": {
+            "name": "Chiron",
+            "quality": "Fixed",
+            "element": "Earth",
+            "sign": "Tau",
+            "sign_num": 1,
+            "position": 14.234591111947275,
+            "abs_pos": 44.234591111947275,
+            "emoji": "♉️",
+            "point_type": "AstrologicalPoint",
+            "house": "Ninth_House",
+            "retrograde": false,
+            "speed": 0.03879637983317252,
+            "declination": 17.76624611762637
+        },
+        "earth": null,
+        "pholus": null,
+        "mean_lilith": {
+            "name": "Mean_Lilith",
+            "quality": "Mutable",
+            "element": "Water",
+            "sign": "Pis",
+            "sign_num": 11,
+            "position": 3.2238320728959025,
+            "abs_pos": 333.2238320728959,
+            "emoji": "♓️",
+            "point_type": "AstrologicalPoint",
+            "house": "Seventh_House",
+            "retrograde": false,
+            "speed": 0.1118131834232372,
+            "declination": -5.60399223193444
+        },
+        "true_lilith": null,
+        "ceres": null,
+        "pallas": null,
+        "juno": null,
+        "vesta": null,
+        "eris": null,
+        "sedna": null,
+        "haumea": null,
+        "makemake": null,
+        "ixion": null,
+        "orcus": null,
+        "quaoar": null,
+        "regulus": null,
+        "spica": null,
+        "pars_fortunae": null,
+        "pars_spiritus": null,
+        "pars_amoris": null,
+        "pars_fidei": null,
+        "vertex": null,
+        "anti_vertex": null,
+        "first_house": {
+            "name": "First_House",
+            "quality": "Fixed",
+            "element": "Fire",
+            "sign": "Leo",
+            "sign_num": 4,
+            "position": 27.233404897319275,
+            "abs_pos": 147.23340489731928,
+            "emoji": "♌️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "second_house": {
+            "name": "Second_House",
+            "quality": "Mutable",
+            "element": "Earth",
+            "sign": "Vir",
+            "sign_num": 5,
+            "position": 21.11909151532265,
+            "abs_pos": 171.11909151532265,
+            "emoji": "♍️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "third_house": {
+            "name": "Third_House",
+            "quality": "Cardinal",
+            "element": "Air",
+            "sign": "Lib",
+            "sign_num": 6,
+            "position": 20.581244401860175,
+            "abs_pos": 200.58124440186018,
+            "emoji": "♎️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "fourth_house": {
+            "name": "Fourth_House",
+            "quality": "Fixed",
+            "element": "Water",
+            "sign": "Sco",
+            "sign_num": 7,
+            "position": 25.074174183138922,
+            "abs_pos": 235.07417418313892,
+            "emoji": "♏️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "fifth_house": {
+            "name": "Fifth_House",
+            "quality": "Cardinal",
+            "element": "Earth",
+            "sign": "Cap",
+            "sign_num": 9,
+            "position": 0.3869700799272664,
+            "abs_pos": 270.38697007992727,
+            "emoji": "♑️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "sixth_house": {
+            "name": "Sixth_House",
+            "quality": "Fixed",
+            "element": "Air",
+            "sign": "Aqu",
+            "sign_num": 10,
+            "position": 1.4387078807770308,
+            "abs_pos": 301.43870788077703,
+            "emoji": "♒️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "seventh_house": {
+            "name": "Seventh_House",
+            "quality": "Fixed",
+            "element": "Air",
+            "sign": "Aqu",
+            "sign_num": 10,
+            "position": 27.233404897319303,
+            "abs_pos": 327.2334048973193,
+            "emoji": "♒️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "eighth_house": {
+            "name": "Eighth_House",
+            "quality": "Mutable",
+            "element": "Water",
+            "sign": "Pis",
+            "sign_num": 11,
+            "position": 21.11909151532268,
+            "abs_pos": 351.1190915153227,
+            "emoji": "♓️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "ninth_house": {
+            "name": "Ninth_House",
+            "quality": "Cardinal",
+            "element": "Fire",
+            "sign": "Ari",
+            "sign_num": 0,
+            "position": 20.581244401860186,
+            "abs_pos": 20.581244401860186,
+            "emoji": "♈️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "tenth_house": {
+            "name": "Tenth_House",
+            "quality": "Fixed",
+            "element": "Earth",
+            "sign": "Tau",
+            "sign_num": 1,
+            "position": 25.074174183138922,
+            "abs_pos": 55.07417418313892,
+            "emoji": "♉️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "eleventh_house": {
+            "name": "Eleventh_House",
+            "quality": "Cardinal",
+            "element": "Water",
+            "sign": "Can",
+            "sign_num": 3,
+            "position": 0.3869700799272664,
+            "abs_pos": 90.38697007992727,
+            "emoji": "♋️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "twelfth_house": {
+            "name": "Twelfth_House",
+            "quality": "Fixed",
+            "element": "Fire",
+            "sign": "Leo",
+            "sign_num": 4,
+            "position": 1.4387078807769882,
+            "abs_pos": 121.43870788077699,
+            "emoji": "♌️",
+            "point_type": "House",
+            "house": null,
+            "retrograde": null,
+            "speed": null,
+            "declination": null
+        },
+        "mean_north_lunar_node": null,
+        "true_north_lunar_node": {
+            "name": "True_North_Lunar_Node",
+            "quality": "Fixed",
+            "element": "Earth",
+            "sign": "Tau",
+            "sign_num": 1,
+            "position": 10.57802397246003,
+            "abs_pos": 40.57802397246003,
+            "emoji": "♉️",
+            "point_type": "AstrologicalPoint",
+            "house": "Ninth_House",
+            "retrograde": true,
+            "speed": -0.04800183206619124,
+            "declination": 20.972656156956518
+        },
+        "mean_south_lunar_node": null,
+        "true_south_lunar_node": {
+            "name": "True_South_Lunar_Node",
+            "quality": "Fixed",
+            "element": "Water",
+            "sign": "Sco",
+            "sign_num": 7,
+            "position": 10.578023972460016,
+            "abs_pos": 220.57802397246002,
+            "emoji": "♏️",
+            "point_type": "AstrologicalPoint",
+            "house": "Third_House",
+            "retrograde": true,
+            "speed": 0.04800183206619124,
+            "declination": -20.972656156956518
+        },
+        "houses_names_list": [
+            "First_House",
+            "Second_House",
+            "Third_House",
+            "Fourth_House",
+            "Fifth_House",
+            "Sixth_House",
+            "Seventh_House",
+            "Eighth_House",
+            "Ninth_House",
+            "Tenth_House",
+            "Eleventh_House",
+            "Twelfth_House"
+        ],
+        "active_points": [
+            "Sun",
+            "Moon",
+            "Mercury",
+            "Venus",
+            "Mars",
+            "Jupiter",
+            "Saturn",
+            "Uranus",
+            "Neptune",
+            "Pluto",
+            "True_North_Lunar_Node",
+            "True_South_Lunar_Node",
+            "Mean_Lilith",
+            "Chiron",
+            "Ascendant",
+            "Medium_Coeli",
+            "Descendant",
+            "Imum_Coeli"
+        ],
+        "lunar_phase": {
+            "degrees_between_s_m": 129.24033543913902,
+            "moon_phase": 11,
+            "moon_emoji": "🌔",
+            "moon_phase_name": "Waxing Gibbous"
+        },
+        "year": 1984,
+        "month": 8,
+        "day": 7,
+        "hour": 9,
+        "minute": 40
+    },
+    "aspects": [
+        {
+            "left": "Sun",
+            "aspect": "square",
+            "right": "Saturn",
+            "orb": "4.73°",
+            "orb_value": 4.729932724349112,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Sun",
+                "p1_owner": "john",
+                "p1_abs_pos": 111.39546126117685,
+                "p2_name": "Saturn",
+                "p2_owner": "john",
+                "p2_abs_pos": 196.66552853682774,
+                "aspect": "square",
+                "orbit": 4.729932724349112,
+                "aspect_degrees": 90,
+                "diff": 85.27006727565089,
+                "p1": 0,
+                "p2": 6,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Sun",
+            "aspect": "trine",
+            "right": "Uranus",
+            "orb": "5.35°",
+            "orb_value": 5.3534994013108985,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Sun",
+                "p1_owner": "john",
+                "p1_abs_pos": 111.39546126117685,
+                "p2_name": "Uranus",
+                "p2_owner": "john",
+                "p2_abs_pos": 226.04196185986595,
+                "aspect": "trine",
+                "orbit": 5.3534994013108985,
+                "aspect_degrees": 120,
+                "diff": 114.6465005986891,
+                "p1": 0,
+                "p2": 7,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Sun",
+            "aspect": "sextile",
+            "right": "Medium_Coeli",
+            "orb": "3.68°",
+            "orb_value": 3.678712921962074,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Sun",
+                "p1_owner": "john",
+                "p1_abs_pos": 111.39546126117685,
+                "p2_name": "Medium_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 55.07417418313892,
+                "aspect": "sextile",
+                "orbit": 3.678712921962074,
+                "aspect_degrees": 60,
+                "diff": 56.321287078037926,
+                "p1": 0,
+                "p2": 14,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Sun",
+            "aspect": "trine",
+            "right": "Imum_Coeli",
+            "orb": "3.68°",
+            "orb_value": 3.678712921962074,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Sun",
+                "p1_owner": "john",
+                "p1_abs_pos": 111.39546126117685,
+                "p2_name": "Imum_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 235.07417418313892,
+                "aspect": "trine",
+                "orbit": 3.678712921962074,
+                "aspect_degrees": 120,
+                "diff": 123.67871292196207,
+                "p1": 0,
+                "p2": 16,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Moon",
+            "aspect": "trine",
+            "right": "Venus",
+            "orb": "5.16°",
+            "orb_value": 5.157896067811791,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Moon",
+                "p1_owner": "john",
+                "p1_abs_pos": 240.63579670031586,
+                "p2_name": "Venus",
+                "p2_owner": "john",
+                "p2_abs_pos": 125.79369276812766,
+                "aspect": "trine",
+                "orbit": 5.157896067811791,
+                "aspect_degrees": 120,
+                "diff": 114.84210393218821,
+                "p1": 1,
+                "p2": 3,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Moon",
+            "aspect": "conjunction",
+            "right": "Jupiter",
+            "orb": "9.75°",
+            "orb_value": 9.746561543415964,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Moon",
+                "p1_owner": "john",
+                "p1_abs_pos": 240.63579670031586,
+                "p2_name": "Jupiter",
+                "p2_owner": "john",
+                "p2_abs_pos": 250.38235824373186,
+                "aspect": "conjunction",
+                "orbit": 9.746561543415964,
+                "aspect_degrees": 0,
+                "diff": 9.746561543415993,
+                "p1": 1,
+                "p2": 5,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Moon",
+            "aspect": "conjunction",
+            "right": "Neptune",
+            "orb": "4.77°",
+            "orb_value": 4.768976654813628,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Moon",
+                "p1_owner": "john",
+                "p1_abs_pos": 240.63579670031586,
+                "p2_name": "Neptune",
+                "p2_owner": "john",
+                "p2_abs_pos": 245.40477335512946,
+                "aspect": "conjunction",
+                "orbit": 4.768976654813628,
+                "aspect_degrees": 0,
+                "diff": 4.768976654813599,
+                "p1": 1,
+                "p2": 8,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Moon",
+            "aspect": "sextile",
+            "right": "Pluto",
+            "orb": "5.37°",
+            "orb_value": 5.373527144509694,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Moon",
+                "p1_owner": "john",
+                "p1_abs_pos": 240.63579670031586,
+                "p2_name": "Pluto",
+                "p2_owner": "john",
+                "p2_abs_pos": 186.00932384482556,
+                "aspect": "sextile",
+                "orbit": 5.373527144509694,
+                "aspect_degrees": 60,
+                "diff": 54.626472855490306,
+                "p1": 1,
+                "p2": 9,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Moon",
+            "aspect": "square",
+            "right": "Ascendant",
+            "orb": "3.40°",
+            "orb_value": 3.40239180299659,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Moon",
+                "p1_owner": "john",
+                "p1_abs_pos": 240.63579670031586,
+                "p2_name": "Ascendant",
+                "p2_owner": "john",
+                "p2_abs_pos": 147.23340489731928,
+                "aspect": "square",
+                "orbit": 3.40239180299659,
+                "aspect_degrees": 90,
+                "diff": 93.40239180299659,
+                "p1": 1,
+                "p2": 13,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Moon",
+            "aspect": "opposition",
+            "right": "Medium_Coeli",
+            "orb": "5.56°",
+            "orb_value": 5.561622517176943,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Moon",
+                "p1_owner": "john",
+                "p1_abs_pos": 240.63579670031586,
+                "p2_name": "Medium_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 55.07417418313892,
+                "aspect": "opposition",
+                "orbit": 5.561622517176943,
+                "aspect_degrees": 180,
+                "diff": 185.56162251717694,
+                "p1": 1,
+                "p2": 14,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Moon",
+            "aspect": "square",
+            "right": "Descendant",
+            "orb": "3.40°",
+            "orb_value": 3.40239180299659,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Moon",
+                "p1_owner": "john",
+                "p1_abs_pos": 240.63579670031586,
+                "p2_name": "Descendant",
+                "p2_owner": "john",
+                "p2_abs_pos": 327.23340489731925,
+                "aspect": "square",
+                "orbit": 3.40239180299659,
+                "aspect_degrees": 90,
+                "diff": 86.59760819700338,
+                "p1": 1,
+                "p2": 15,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Moon",
+            "aspect": "conjunction",
+            "right": "Imum_Coeli",
+            "orb": "5.56°",
+            "orb_value": 5.561622517176943,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Moon",
+                "p1_owner": "john",
+                "p1_abs_pos": 240.63579670031586,
+                "p2_name": "Imum_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 235.07417418313892,
+                "aspect": "conjunction",
+                "orbit": 5.561622517176943,
+                "aspect_degrees": 0,
+                "diff": 5.561622517176943,
+                "p1": 1,
+                "p2": 16,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Moon",
+            "aspect": "square",
+            "right": "Mean_Lilith",
+            "orb": "2.59°",
+            "orb_value": 2.588035372580066,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Moon",
+                "p1_owner": "john",
+                "p1_abs_pos": 240.63579670031586,
+                "p2_name": "Mean_Lilith",
+                "p2_owner": "john",
+                "p2_abs_pos": 333.2238320728959,
+                "aspect": "square",
+                "orbit": 2.588035372580066,
+                "aspect_degrees": 90,
+                "diff": 92.58803537258004,
+                "p1": 1,
+                "p2": 17,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Mercury",
+            "aspect": "quintile",
+            "right": "Mars",
+            "orb": "1.68°",
+            "orb_value": 1.6762267771173356,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Mercury",
+                "p1_owner": "john",
+                "p1_abs_pos": 137.50294151585672,
+                "p2_name": "Mars",
+                "p2_owner": "john",
+                "p2_abs_pos": 211.17916829297403,
+                "aspect": "quintile",
+                "orbit": 1.6762267771173356,
+                "aspect_degrees": 72,
+                "diff": 73.67622677711731,
+                "p1": 2,
+                "p2": 4,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Mercury",
+            "aspect": "trine",
+            "right": "Jupiter",
+            "orb": "7.12°",
+            "orb_value": 7.120583272124861,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Mercury",
+                "p1_owner": "john",
+                "p1_abs_pos": 137.50294151585672,
+                "p2_name": "Jupiter",
+                "p2_owner": "john",
+                "p2_abs_pos": 250.38235824373186,
+                "aspect": "trine",
+                "orbit": 7.120583272124861,
+                "aspect_degrees": 120,
+                "diff": 112.87941672787514,
+                "p1": 2,
+                "p2": 5,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Mercury",
+            "aspect": "sextile",
+            "right": "Saturn",
+            "orb": "0.84°",
+            "orb_value": 0.8374129790289544,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Mercury",
+                "p1_owner": "john",
+                "p1_abs_pos": 137.50294151585672,
+                "p2_name": "Saturn",
+                "p2_owner": "john",
+                "p2_abs_pos": 196.66552853682774,
+                "aspect": "sextile",
+                "orbit": 0.8374129790289544,
+                "aspect_degrees": 60,
+                "diff": 59.16258702097102,
+                "p1": 2,
+                "p2": 6,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Mercury",
+            "aspect": "square",
+            "right": "Uranus",
+            "orb": "1.46°",
+            "orb_value": 1.4609796559907409,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Mercury",
+                "p1_owner": "john",
+                "p1_abs_pos": 137.50294151585672,
+                "p2_name": "Uranus",
+                "p2_owner": "john",
+                "p2_abs_pos": 226.04196185986595,
+                "aspect": "square",
+                "orbit": 1.4609796559907409,
+                "aspect_degrees": 90,
+                "diff": 88.53902034400923,
+                "p1": 2,
+                "p2": 7,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Mercury",
+            "aspect": "square",
+            "right": "Chiron",
+            "orb": "3.27°",
+            "orb_value": 3.2683504039094373,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Mercury",
+                "p1_owner": "john",
+                "p1_abs_pos": 137.50294151585672,
+                "p2_name": "Chiron",
+                "p2_owner": "john",
+                "p2_abs_pos": 44.234591111947275,
+                "aspect": "square",
+                "orbit": 3.2683504039094373,
+                "aspect_degrees": 90,
+                "diff": 93.26835040390944,
+                "p1": 2,
+                "p2": 12,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Mercury",
+            "aspect": "conjunction",
+            "right": "Ascendant",
+            "orb": "9.73°",
+            "orb_value": 9.730463381462528,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Mercury",
+                "p1_owner": "john",
+                "p1_abs_pos": 137.50294151585672,
+                "p2_name": "Ascendant",
+                "p2_owner": "john",
+                "p2_abs_pos": 147.23340489731928,
+                "aspect": "conjunction",
+                "orbit": 9.730463381462528,
+                "aspect_degrees": 0,
+                "diff": 9.730463381462556,
+                "p1": 2,
+                "p2": 13,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Mercury",
+            "aspect": "opposition",
+            "right": "Descendant",
+            "orb": "9.73°",
+            "orb_value": 9.730463381462528,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Mercury",
+                "p1_owner": "john",
+                "p1_abs_pos": 137.50294151585672,
+                "p2_name": "Descendant",
+                "p2_owner": "john",
+                "p2_abs_pos": 327.23340489731925,
+                "aspect": "opposition",
+                "orbit": 9.730463381462528,
+                "aspect_degrees": 180,
+                "diff": 189.73046338146253,
+                "p1": 2,
+                "p2": 15,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Venus",
+            "aspect": "square",
+            "right": "Mars",
+            "orb": "4.61°",
+            "orb_value": 4.614524475153644,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Venus",
+                "p1_owner": "john",
+                "p1_abs_pos": 125.79369276812766,
+                "p2_name": "Mars",
+                "p2_owner": "john",
+                "p2_abs_pos": 211.17916829297403,
+                "aspect": "square",
+                "orbit": 4.614524475153644,
+                "aspect_degrees": 90,
+                "diff": 85.38547552484637,
+                "p1": 3,
+                "p2": 4,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Venus",
+            "aspect": "trine",
+            "right": "Jupiter",
+            "orb": "4.59°",
+            "orb_value": 4.588665475604216,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Venus",
+                "p1_owner": "john",
+                "p1_abs_pos": 125.79369276812766,
+                "p2_name": "Jupiter",
+                "p2_owner": "john",
+                "p2_abs_pos": 250.38235824373186,
+                "aspect": "trine",
+                "orbit": 4.588665475604216,
+                "aspect_degrees": 120,
+                "diff": 124.5886654756042,
+                "p1": 3,
+                "p2": 5,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Venus",
+            "aspect": "trine",
+            "right": "Neptune",
+            "orb": "0.39°",
+            "orb_value": 0.38891941299817745,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Venus",
+                "p1_owner": "john",
+                "p1_abs_pos": 125.79369276812766,
+                "p2_name": "Neptune",
+                "p2_owner": "john",
+                "p2_abs_pos": 245.40477335512946,
+                "aspect": "trine",
+                "orbit": 0.38891941299817745,
+                "aspect_degrees": 120,
+                "diff": 119.61108058700181,
+                "p1": 3,
+                "p2": 8,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Venus",
+            "aspect": "sextile",
+            "right": "Pluto",
+            "orb": "0.22°",
+            "orb_value": 0.21563107669788906,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Venus",
+                "p1_owner": "john",
+                "p1_abs_pos": 125.79369276812766,
+                "p2_name": "Pluto",
+                "p2_owner": "john",
+                "p2_abs_pos": 186.00932384482556,
+                "aspect": "sextile",
+                "orbit": 0.21563107669788906,
+                "aspect_degrees": 60,
+                "diff": 60.2156310766979,
+                "p1": 3,
+                "p2": 9,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Venus",
+            "aspect": "square",
+            "right": "True_North_Lunar_Node",
+            "orb": "4.78°",
+            "orb_value": 4.784331204332375,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Venus",
+                "p1_owner": "john",
+                "p1_abs_pos": 125.79369276812766,
+                "p2_name": "True_North_Lunar_Node",
+                "p2_owner": "john",
+                "p2_abs_pos": 40.57802397246003,
+                "aspect": "square",
+                "orbit": 4.784331204332375,
+                "aspect_degrees": 90,
+                "diff": 85.21566879566763,
+                "p1": 3,
+                "p2": 11,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Venus",
+            "aspect": "square",
+            "right": "True_South_Lunar_Node",
+            "orb": "4.78°",
+            "orb_value": 4.784331204332375,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Venus",
+                "p1_owner": "john",
+                "p1_abs_pos": 125.79369276812766,
+                "p2_name": "True_South_Lunar_Node",
+                "p2_owner": "john",
+                "p2_abs_pos": 220.57802397246002,
+                "aspect": "square",
+                "orbit": 4.784331204332375,
+                "aspect_degrees": 90,
+                "diff": 94.78433120433236,
+                "p1": 3,
+                "p2": 19,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Mars",
+            "aspect": "opposition",
+            "right": "True_North_Lunar_Node",
+            "orb": "9.40°",
+            "orb_value": 9.398855679486019,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Mars",
+                "p1_owner": "john",
+                "p1_abs_pos": 211.17916829297403,
+                "p2_name": "True_North_Lunar_Node",
+                "p2_owner": "john",
+                "p2_abs_pos": 40.57802397246003,
+                "aspect": "opposition",
+                "orbit": 9.398855679486019,
+                "aspect_degrees": 180,
+                "diff": 170.60114432051398,
+                "p1": 4,
+                "p2": 11,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Mars",
+            "aspect": "sextile",
+            "right": "Ascendant",
+            "orb": "3.95°",
+            "orb_value": 3.945763395654751,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Mars",
+                "p1_owner": "john",
+                "p1_abs_pos": 211.17916829297403,
+                "p2_name": "Ascendant",
+                "p2_owner": "john",
+                "p2_abs_pos": 147.23340489731928,
+                "aspect": "sextile",
+                "orbit": 3.945763395654751,
+                "aspect_degrees": 60,
+                "diff": 63.94576339565475,
+                "p1": 4,
+                "p2": 13,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Mars",
+            "aspect": "trine",
+            "right": "Descendant",
+            "orb": "3.95°",
+            "orb_value": 3.9457633956547795,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Mars",
+                "p1_owner": "john",
+                "p1_abs_pos": 211.17916829297403,
+                "p2_name": "Descendant",
+                "p2_owner": "john",
+                "p2_abs_pos": 327.23340489731925,
+                "aspect": "trine",
+                "orbit": 3.9457633956547795,
+                "aspect_degrees": 120,
+                "diff": 116.05423660434522,
+                "p1": 4,
+                "p2": 15,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Mars",
+            "aspect": "trine",
+            "right": "Mean_Lilith",
+            "orb": "2.04°",
+            "orb_value": 2.0446637799218763,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Mars",
+                "p1_owner": "john",
+                "p1_abs_pos": 211.17916829297403,
+                "p2_name": "Mean_Lilith",
+                "p2_owner": "john",
+                "p2_abs_pos": 333.2238320728959,
+                "aspect": "trine",
+                "orbit": 2.0446637799218763,
+                "aspect_degrees": 120,
+                "diff": 122.04466377992188,
+                "p1": 4,
+                "p2": 17,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Mars",
+            "aspect": "conjunction",
+            "right": "True_South_Lunar_Node",
+            "orb": "9.40°",
+            "orb_value": 9.398855679486019,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Mars",
+                "p1_owner": "john",
+                "p1_abs_pos": 211.17916829297403,
+                "p2_name": "True_South_Lunar_Node",
+                "p2_owner": "john",
+                "p2_abs_pos": 220.57802397246002,
+                "aspect": "conjunction",
+                "orbit": 9.398855679486019,
+                "aspect_degrees": 0,
+                "diff": 9.39885567948599,
+                "p1": 4,
+                "p2": 19,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Jupiter",
+            "aspect": "conjunction",
+            "right": "Neptune",
+            "orb": "4.98°",
+            "orb_value": 4.977584888602394,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Jupiter",
+                "p1_owner": "john",
+                "p1_abs_pos": 250.38235824373186,
+                "p2_name": "Neptune",
+                "p2_owner": "john",
+                "p2_abs_pos": 245.40477335512946,
+                "aspect": "conjunction",
+                "orbit": 4.977584888602394,
+                "aspect_degrees": 0,
+                "diff": 4.977584888602394,
+                "p1": 5,
+                "p2": 8,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Jupiter",
+            "aspect": "sextile",
+            "right": "Pluto",
+            "orb": "4.37°",
+            "orb_value": 4.373034398906299,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Jupiter",
+                "p1_owner": "john",
+                "p1_abs_pos": 250.38235824373186,
+                "p2_name": "Pluto",
+                "p2_owner": "john",
+                "p2_abs_pos": 186.00932384482556,
+                "aspect": "sextile",
+                "orbit": 4.373034398906299,
+                "aspect_degrees": 60,
+                "diff": 64.3730343989063,
+                "p1": 5,
+                "p2": 9,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Saturn",
+            "aspect": "conjunction",
+            "right": "Pluto",
+            "orb": "10.66°",
+            "orb_value": 10.656204692002177,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Saturn",
+                "p1_owner": "john",
+                "p1_abs_pos": 196.66552853682774,
+                "p2_name": "Pluto",
+                "p2_owner": "john",
+                "p2_abs_pos": 186.00932384482556,
+                "aspect": "conjunction",
+                "orbit": 10.656204692002177,
+                "aspect_degrees": 0,
+                "diff": 10.656204692002177,
+                "p1": 6,
+                "p2": 9,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Uranus",
+            "aspect": "opposition",
+            "right": "True_North_Lunar_Node",
+            "orb": "5.46°",
+            "orb_value": 5.463937887405905,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Uranus",
+                "p1_owner": "john",
+                "p1_abs_pos": 226.04196185986595,
+                "p2_name": "True_North_Lunar_Node",
+                "p2_owner": "john",
+                "p2_abs_pos": 40.57802397246003,
+                "aspect": "opposition",
+                "orbit": 5.463937887405905,
+                "aspect_degrees": 180,
+                "diff": 185.4639378874059,
+                "p1": 7,
+                "p2": 11,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Uranus",
+            "aspect": "opposition",
+            "right": "Chiron",
+            "orb": "1.81°",
+            "orb_value": 1.807370747918668,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Uranus",
+                "p1_owner": "john",
+                "p1_abs_pos": 226.04196185986595,
+                "p2_name": "Chiron",
+                "p2_owner": "john",
+                "p2_abs_pos": 44.234591111947275,
+                "aspect": "opposition",
+                "orbit": 1.807370747918668,
+                "aspect_degrees": 180,
+                "diff": 181.80737074791867,
+                "p1": 7,
+                "p2": 12,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Uranus",
+            "aspect": "opposition",
+            "right": "Medium_Coeli",
+            "orb": "9.03°",
+            "orb_value": 9.032212323272972,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Uranus",
+                "p1_owner": "john",
+                "p1_abs_pos": 226.04196185986595,
+                "p2_name": "Medium_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 55.07417418313892,
+                "aspect": "opposition",
+                "orbit": 9.032212323272972,
+                "aspect_degrees": 180,
+                "diff": 170.96778767672703,
+                "p1": 7,
+                "p2": 14,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Uranus",
+            "aspect": "conjunction",
+            "right": "Imum_Coeli",
+            "orb": "9.03°",
+            "orb_value": 9.032212323272972,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Uranus",
+                "p1_owner": "john",
+                "p1_abs_pos": 226.04196185986595,
+                "p2_name": "Imum_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 235.07417418313892,
+                "aspect": "conjunction",
+                "orbit": 9.032212323272972,
+                "aspect_degrees": 0,
+                "diff": 9.032212323272972,
+                "p1": 7,
+                "p2": 16,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Uranus",
+            "aspect": "conjunction",
+            "right": "True_South_Lunar_Node",
+            "orb": "5.46°",
+            "orb_value": 5.463937887405933,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Uranus",
+                "p1_owner": "john",
+                "p1_abs_pos": 226.04196185986595,
+                "p2_name": "True_South_Lunar_Node",
+                "p2_owner": "john",
+                "p2_abs_pos": 220.57802397246002,
+                "aspect": "conjunction",
+                "orbit": 5.463937887405933,
+                "aspect_degrees": 0,
+                "diff": 5.463937887405933,
+                "p1": 7,
+                "p2": 19,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Neptune",
+            "aspect": "sextile",
+            "right": "Pluto",
+            "orb": "0.60°",
+            "orb_value": 0.6045504896960949,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Neptune",
+                "p1_owner": "john",
+                "p1_abs_pos": 245.40477335512946,
+                "p2_name": "Pluto",
+                "p2_owner": "john",
+                "p2_abs_pos": 186.00932384482556,
+                "aspect": "sextile",
+                "orbit": 0.6045504896960949,
+                "aspect_degrees": 60,
+                "diff": 59.395449510303905,
+                "p1": 8,
+                "p2": 9,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Neptune",
+            "aspect": "conjunction",
+            "right": "Imum_Coeli",
+            "orb": "10.33°",
+            "orb_value": 10.330599171990542,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Neptune",
+                "p1_owner": "john",
+                "p1_abs_pos": 245.40477335512946,
+                "p2_name": "Imum_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 235.07417418313892,
+                "aspect": "conjunction",
+                "orbit": 10.330599171990542,
+                "aspect_degrees": 0,
+                "diff": 10.330599171990542,
+                "p1": 8,
+                "p2": 16,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Neptune",
+            "aspect": "square",
+            "right": "Mean_Lilith",
+            "orb": "2.18°",
+            "orb_value": 2.1809412822335617,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Neptune",
+                "p1_owner": "john",
+                "p1_abs_pos": 245.40477335512946,
+                "p2_name": "Mean_Lilith",
+                "p2_owner": "john",
+                "p2_abs_pos": 333.2238320728959,
+                "aspect": "square",
+                "orbit": 2.1809412822335617,
+                "aspect_degrees": 90,
+                "diff": 87.81905871776644,
+                "p1": 8,
+                "p2": 17,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "True_North_Lunar_Node",
+            "aspect": "conjunction",
+            "right": "Chiron",
+            "orb": "3.66°",
+            "orb_value": 3.656567139487265,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "True_North_Lunar_Node",
+                "p1_owner": "john",
+                "p1_abs_pos": 40.57802397246003,
+                "p2_name": "Chiron",
+                "p2_owner": "john",
+                "p2_abs_pos": 44.234591111947275,
+                "aspect": "conjunction",
+                "orbit": 3.656567139487265,
+                "aspect_degrees": 0,
+                "diff": 3.656567139487244,
+                "p1": 11,
+                "p2": 12,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "True_North_Lunar_Node",
+            "aspect": "quintile",
+            "right": "Descendant",
+            "orb": "1.34°",
+            "orb_value": 1.3446190751407698,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "True_North_Lunar_Node",
+                "p1_owner": "john",
+                "p1_abs_pos": 40.57802397246003,
+                "p2_name": "Descendant",
+                "p2_owner": "john",
+                "p2_abs_pos": 327.23340489731925,
+                "aspect": "quintile",
+                "orbit": 1.3446190751407698,
+                "aspect_degrees": 72,
+                "diff": 286.65538092485923,
+                "p1": 11,
+                "p2": 15,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Chiron",
+            "aspect": "conjunction",
+            "right": "Medium_Coeli",
+            "orb": "10.84°",
+            "orb_value": 10.839583071191669,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Chiron",
+                "p1_owner": "john",
+                "p1_abs_pos": 44.234591111947275,
+                "p2_name": "Medium_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 55.07417418313892,
+                "aspect": "conjunction",
+                "orbit": 10.839583071191669,
+                "aspect_degrees": 0,
+                "diff": 10.839583071191647,
+                "p1": 12,
+                "p2": 14,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Chiron",
+            "aspect": "quintile",
+            "right": "Mean_Lilith",
+            "orb": "0.99°",
+            "orb_value": 0.9892409609486208,
+            "movement": "Separating",
+            "raw": {
+                "p1_name": "Chiron",
+                "p1_owner": "john",
+                "p1_abs_pos": 44.234591111947275,
+                "p2_name": "Mean_Lilith",
+                "p2_owner": "john",
+                "p2_abs_pos": 333.2238320728959,
+                "aspect": "quintile",
+                "orbit": 0.9892409609486208,
+                "aspect_degrees": 72,
+                "diff": 288.9892409609486,
+                "p1": 12,
+                "p2": 17,
+                "aspect_movement": "Separating"
+            }
+        },
+        {
+            "left": "Chiron",
+            "aspect": "opposition",
+            "right": "True_South_Lunar_Node",
+            "orb": "3.66°",
+            "orb_value": 3.656567139487265,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Chiron",
+                "p1_owner": "john",
+                "p1_abs_pos": 44.234591111947275,
+                "p2_name": "True_South_Lunar_Node",
+                "p2_owner": "john",
+                "p2_abs_pos": 220.57802397246002,
+                "aspect": "opposition",
+                "orbit": 3.656567139487265,
+                "aspect_degrees": 180,
+                "diff": 176.34343286051273,
+                "p1": 12,
+                "p2": 19,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Ascendant",
+            "aspect": "square",
+            "right": "Medium_Coeli",
+            "orb": "2.16°",
+            "orb_value": 2.159230714180353,
+            "movement": "Fixed",
+            "raw": {
+                "p1_name": "Ascendant",
+                "p1_owner": "john",
+                "p1_abs_pos": 147.23340489731928,
+                "p2_name": "Medium_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 55.07417418313892,
+                "aspect": "square",
+                "orbit": 2.159230714180353,
+                "aspect_degrees": 90,
+                "diff": 92.15923071418035,
+                "p1": 13,
+                "p2": 14,
+                "aspect_movement": "Fixed"
+            }
+        },
+        {
+            "left": "Ascendant",
+            "aspect": "square",
+            "right": "Imum_Coeli",
+            "orb": "2.16°",
+            "orb_value": 2.159230714180353,
+            "movement": "Fixed",
+            "raw": {
+                "p1_name": "Ascendant",
+                "p1_owner": "john",
+                "p1_abs_pos": 147.23340489731928,
+                "p2_name": "Imum_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 235.07417418313892,
+                "aspect": "square",
+                "orbit": 2.159230714180353,
+                "aspect_degrees": 90,
+                "diff": 87.84076928581965,
+                "p1": 13,
+                "p2": 16,
+                "aspect_movement": "Fixed"
+            }
+        },
+        {
+            "left": "Ascendant",
+            "aspect": "opposition",
+            "right": "Mean_Lilith",
+            "orb": "5.99°",
+            "orb_value": 5.990427175576627,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Ascendant",
+                "p1_owner": "john",
+                "p1_abs_pos": 147.23340489731928,
+                "p2_name": "Mean_Lilith",
+                "p2_owner": "john",
+                "p2_abs_pos": 333.2238320728959,
+                "aspect": "opposition",
+                "orbit": 5.990427175576627,
+                "aspect_degrees": 180,
+                "diff": 185.99042717557663,
+                "p1": 13,
+                "p2": 17,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Ascendant",
+            "aspect": "quintile",
+            "right": "True_South_Lunar_Node",
+            "orb": "1.34°",
+            "orb_value": 1.344619075140713,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Ascendant",
+                "p1_owner": "john",
+                "p1_abs_pos": 147.23340489731928,
+                "p2_name": "True_South_Lunar_Node",
+                "p2_owner": "john",
+                "p2_abs_pos": 220.57802397246002,
+                "aspect": "quintile",
+                "orbit": 1.344619075140713,
+                "aspect_degrees": 72,
+                "diff": 73.34461907514074,
+                "p1": 13,
+                "p2": 19,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Medium_Coeli",
+            "aspect": "square",
+            "right": "Descendant",
+            "orb": "2.16°",
+            "orb_value": 2.159230714180353,
+            "movement": "Fixed",
+            "raw": {
+                "p1_name": "Medium_Coeli",
+                "p1_owner": "john",
+                "p1_abs_pos": 55.07417418313892,
+                "p2_name": "Descendant",
+                "p2_owner": "john",
+                "p2_abs_pos": 327.23340489731925,
+                "aspect": "square",
+                "orbit": 2.159230714180353,
+                "aspect_degrees": 90,
+                "diff": 272.15923071418035,
+                "p1": 14,
+                "p2": 15,
+                "aspect_movement": "Fixed"
+            }
+        },
+        {
+            "left": "Descendant",
+            "aspect": "square",
+            "right": "Imum_Coeli",
+            "orb": "2.16°",
+            "orb_value": 2.1592307141803246,
+            "movement": "Fixed",
+            "raw": {
+                "p1_name": "Descendant",
+                "p1_owner": "john",
+                "p1_abs_pos": 327.23340489731925,
+                "p2_name": "Imum_Coeli",
+                "p2_owner": "john",
+                "p2_abs_pos": 235.07417418313892,
+                "aspect": "square",
+                "orbit": 2.1592307141803246,
+                "aspect_degrees": 90,
+                "diff": 92.15923071418032,
+                "p1": 15,
+                "p2": 16,
+                "aspect_movement": "Fixed"
+            }
+        },
+        {
+            "left": "Descendant",
+            "aspect": "conjunction",
+            "right": "Mean_Lilith",
+            "orb": "5.99°",
+            "orb_value": 5.990427175576656,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Descendant",
+                "p1_owner": "john",
+                "p1_abs_pos": 327.23340489731925,
+                "p2_name": "Mean_Lilith",
+                "p2_owner": "john",
+                "p2_abs_pos": 333.2238320728959,
+                "aspect": "conjunction",
+                "orbit": 5.990427175576656,
+                "aspect_degrees": 0,
+                "diff": 5.990427175576656,
+                "p1": 15,
+                "p2": 17,
+                "aspect_movement": "Applying"
+            }
+        },
+        {
+            "left": "Mean_Lilith",
+            "aspect": "trine",
+            "right": "True_South_Lunar_Node",
+            "orb": "7.35°",
+            "orb_value": 7.354191899564114,
+            "movement": "Applying",
+            "raw": {
+                "p1_name": "Mean_Lilith",
+                "p1_owner": "john",
+                "p1_abs_pos": 333.2238320728959,
+                "p2_name": "True_South_Lunar_Node",
+                "p2_owner": "john",
+                "p2_abs_pos": 220.57802397246002,
+                "aspect": "trine",
+                "orbit": 7.354191899564114,
+                "aspect_degrees": 120,
+                "diff": 112.64580810043589,
+                "p1": 17,
+                "p2": 19,
+                "aspect_movement": "Applying"
+            }
+        }
+    ],
+    "major_aspects": [
+        {
+            "id": "stellium",
+            "name": "Stellium",
+            "planets": "3+ planets",
+            "aspects": [
+                "conjunction"
+            ],
+            "aspects_label": "Conjunctions",
+            "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+            "orb": "Planets within ~5–10° of each other across the cluster.",
+            "construction": "Conjunction-series bundle occupying one tight sector.",
+            "points": [
+                "mercury",
+                "sun",
+                "venus"
+            ],
+            "links": [],
+            "structure": {
+                "cluster": [
+                    "mercury",
+                    "sun",
+                    "venus"
+                ]
+            }
+        },
+        {
+            "id": "stellium",
+            "name": "Stellium",
+            "planets": "3+ planets",
+            "aspects": [
+                "conjunction"
+            ],
+            "aspects_label": "Conjunctions",
+            "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+            "orb": "Planets within ~5–10° of each other across the cluster.",
+            "construction": "Conjunction-series bundle occupying one tight sector.",
+            "points": [
+                "ascendant",
+                "mercury",
+                "venus"
+            ],
+            "links": [
+                {
+                    "type": "conjunction",
+                    "pair": [
+                        "ascendant",
+                        "mercury"
+                    ],
+                    "orb": 9.73,
+                    "difference": 9.730463381462556
+                }
+            ],
+            "structure": {
+                "cluster": [
+                    "ascendant",
+                    "mercury",
+                    "venus"
+                ]
+            }
+        },
+        {
+            "id": "stellium",
+            "name": "Stellium",
+            "planets": "3+ planets",
+            "aspects": [
+                "conjunction"
+            ],
+            "aspects_label": "Conjunctions",
+            "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+            "orb": "Planets within ~5–10° of each other across the cluster.",
+            "construction": "Conjunction-series bundle occupying one tight sector.",
+            "points": [
+                "mars",
+                "pluto",
+                "saturn"
+            ],
+            "links": [],
+            "structure": {
+                "cluster": [
+                    "mars",
+                    "pluto",
+                    "saturn"
+                ]
+            }
+        },
+        {
+            "id": "stellium",
+            "name": "Stellium",
+            "planets": "3+ planets",
+            "aspects": [
+                "conjunction"
+            ],
+            "aspects_label": "Conjunctions",
+            "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+            "orb": "Planets within ~5–10° of each other across the cluster.",
+            "construction": "Conjunction-series bundle occupying one tight sector.",
+            "points": [
+                "mars",
+                "saturn",
+                "uranus"
+            ],
+            "links": [],
+            "structure": {
+                "cluster": [
+                    "mars",
+                    "saturn",
+                    "uranus"
+                ]
+            }
+        },
+        {
+            "id": "stellium",
+            "name": "Stellium",
+            "planets": "3+ planets",
+            "aspects": [
+                "conjunction"
+            ],
+            "aspects_label": "Conjunctions",
+            "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+            "orb": "Planets within ~5–10° of each other across the cluster.",
+            "construction": "Conjunction-series bundle occupying one tight sector.",
+            "points": [
+                "mars",
+                "moon",
+                "uranus"
+            ],
+            "links": [],
+            "structure": {
+                "cluster": [
+                    "mars",
+                    "moon",
+                    "uranus"
+                ]
+            }
+        },
+        {
+            "id": "stellium",
+            "name": "Stellium",
+            "planets": "3+ planets",
+            "aspects": [
+                "conjunction"
+            ],
+            "aspects_label": "Conjunctions",
+            "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+            "orb": "Planets within ~5–10° of each other across the cluster.",
+            "construction": "Conjunction-series bundle occupying one tight sector.",
+            "points": [
+                "moon",
+                "neptune",
+                "uranus"
+            ],
+            "links": [
+                {
+                    "type": "conjunction",
+                    "pair": [
+                        "moon",
+                        "neptune"
+                    ],
+                    "orb": 4.77,
+                    "difference": 4.768976654813599
+                }
+            ],
+            "structure": {
+                "cluster": [
+                    "moon",
+                    "neptune",
+                    "uranus"
+                ]
+            }
+        },
+        {
+            "id": "stellium",
+            "name": "Stellium",
+            "planets": "3+ planets",
+            "aspects": [
+                "conjunction"
+            ],
+            "aspects_label": "Conjunctions",
+            "geometry": "Clustered within ~30° (often one sign) with overlapping 0° links.",
+            "orb": "Planets within ~5–10° of each other across the cluster.",
+            "construction": "Conjunction-series bundle occupying one tight sector.",
+            "points": [
+                "jupiter",
+                "moon",
+                "neptune",
+                "uranus"
+            ],
+            "links": [
+                {
+                    "type": "conjunction",
+                    "pair": [
+                        "jupiter",
+                        "moon"
+                    ],
+                    "orb": 9.75,
+                    "difference": 9.746561543415993
+                },
+                {
+                    "type": "conjunction",
+                    "pair": [
+                        "jupiter",
+                        "neptune"
+                    ],
+                    "orb": 4.98,
+                    "difference": 4.977584888602394
+                },
+                {
+                    "type": "conjunction",
+                    "pair": [
+                        "moon",
+                        "neptune"
+                    ],
+                    "orb": 4.77,
+                    "difference": 4.768976654813599
+                }
+            ],
+            "structure": {
+                "cluster": [
+                    "jupiter",
+                    "moon",
+                    "neptune",
+                    "uranus"
+                ]
+            }
+        },
+        {
+            "id": "t_square",
+            "name": "T-Square",
+            "planets": "3 planets",
+            "aspects": [
+                "opposition",
+                "square"
+            ],
+            "aspects_label": "Opposition + Squares",
+            "geometry": "Opposition capped by two 90° squares, forming a T spine.",
+            "orb": "Squares/opposition typically ±8–10°.",
+            "construction": "A ↔ B opposition with C square to both (C = focal).",
+            "points": [
+                "ascendant",
+                "medium_coeli",
+                "moon"
+            ],
+            "links": [
+                {
+                    "type": "opposition",
+                    "pair": [
+                        "medium_coeli",
+                        "moon"
+                    ],
+                    "orb": 5.56,
+                    "difference": 174.43837748282306
+                },
+                {
+                    "type": "square",
+                    "pair": [
+                        "ascendant",
+                        "moon"
+                    ],
+                    "orb": 3.4,
+                    "difference": 93.40239180299659
+                },
+                {
+                    "type": "square",
+                    "pair": [
+                        "ascendant",
+                        "medium_coeli"
+                    ],
+                    "orb": 2.16,
+                    "difference": 92.15923071418035
+                }
+            ],
+            "structure": {
+                "focal": "ascendant"
+            }
+        }
+    ]
+}
