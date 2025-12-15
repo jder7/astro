@@ -311,6 +311,58 @@ a {
   pointer-events: none;
 }
 
+.adv-sky-center-dual {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.adv-sky-chip-slot {
+  display: flex;
+  justify-content: center;
+}
+
+.adv-sky-element-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--badge-accent, #38bdf8) 35%, transparent), rgba(8, 47, 73, 0.5));
+  border: 1px solid color-mix(in srgb, var(--badge-accent, #38bdf8) 45%, rgba(255, 255, 255, 0.3));
+  color: #e2f3ff;
+  font-size: 1.1rem;
+  box-shadow: 0 10px 24px rgba(8, 47, 73, 0.35);
+}
+
+.adv-sky-element-badge-right {
+  left: auto;
+  right: 0.75rem;
+}
+
+.adv-sky-summary-badge {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.75), rgba(8, 13, 26, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 14px 30px rgba(8, 47, 73, 0.4);
+  overflow: hidden;
+}
+
+.adv-sky-summary-badge .adv-summary-sigil {
+  --sigil-size: 78px;
+}
+
 .adv-sky-chip {
   pointer-events: auto;
   padding: 0.7rem 0.9rem;
@@ -358,21 +410,23 @@ a {
 }
 
 .adv-sky-quality {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   fill: #f8fafc;
   font-weight: 700;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
 
 .adv-sky-element {
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   fill: #bfdbfe;
+  letter-spacing: 0.04em;
 }
 
 .adv-sky-polarity {
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   fill: #fcd34d;
   font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .adv-sky-point-icon {

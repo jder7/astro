@@ -230,7 +230,7 @@
     return {
       key,
       symbol: POLARITY_ICON[key] || "➕",
-      label: key === "expressive" ? "expressive" : "receptive",
+      label: key === "expressive" ? "Expressive" : "Receptive",
     };
   };
 
@@ -252,7 +252,7 @@
     ].join("");
   }
 
-  function renderSignDisc(segments, radii, cx, cy, accent, anchorYear, defs, uid, rangeKey) {
+  function renderSignDisc(segments, radii, cx, cy, accent, anchorYear, defs, uid, rangeKey, isInnerLayer) {
     const spanPaths = [];
     const decans = [];
     const labels = [];
@@ -282,14 +282,15 @@
       const namePathId = `sign-name-${uid || "sky"}-${rangeKey || "layer"}-${idx}`;
       defs.push(`<path id="${namePathId}" d="${describeArc(cx, cy, radii.text, seg.startDeg, seg.endDeg)}" fill="none" />`);
       const label = seg.signMeta.name || seg.sign || `Sign ${idx + 1}`;
+      const labelStyle = `fill:${adjustHex(accent, 0.1)}${isInnerLayer ? ";font-size:0.62rem" : ""}`;
       labels.push(
-        `<text class="adv-sky-constellation" style="fill:${adjustHex(accent, 0.1)}"><textPath href="#${namePathId}" startOffset="50%" text-anchor="middle">${label}</textPath></text>`
+        `<text class="adv-sky-constellation" style="${labelStyle}"><textPath href="#${namePathId}" startOffset="50%" text-anchor="middle">${label}</textPath></text>`
       );
 
       const datePathId = `sign-date-${uid || "sky"}-${rangeKey || "layer"}-${idx}`;
       defs.push(`<path id="${datePathId}" d="${describeArc(cx, cy, radii.date, seg.startDeg, seg.endDeg)}" fill="none" />`);
       dates.push(
-        `<text class="adv-sky-date" style="fill:${adjustHex(accent, -0.05)}"><textPath href="#${datePathId}" startOffset="50%" text-anchor="middle">${formatSignDate(
+        `<text class="adv-sky-date" style="fill:${adjustHex(accent, -0.05)}"><textPath href="#${datePathId}" startOffset="2%" text-anchor="start">${formatSignDate(
           seg.start,
           anchorYear
         )}</textPath></text>`
@@ -313,33 +314,48 @@
     };
   }
 
-  function renderQualityDisc(segments, radii, cx, cy) {
+  function renderElementQualityDisc(segments, radii, cx, cy) {
+    const eqRadius = (radii.element + radii.quality) / 2;
     return segments
       .map((seg) => {
-        const qualityTransform = `translate(${cx} ${cy}) rotate(${seg.midDeg}) translate(0 ${-radii.quality})`;
-        return `<text class="adv-sky-quality" transform="${qualityTransform}" text-anchor="middle" dominant-baseline="middle">${QUALITY_ICON[seg.quality] || ""}</text>`;
-      })
-      .join("");
-  }
-
-  function renderElementDisc(segments, radii, cx, cy) {
-    return segments
-      .map((seg) => {
-        const elementTransform = `translate(${cx} ${cy}) rotate(${seg.midDeg}) translate(0 ${-radii.element})`;
-        return `<text class="adv-sky-element" transform="${elementTransform}" text-anchor="middle" dominant-baseline="middle">${ELEMENT_ICON[seg.element] || ""}</text>`;
+        const transform = `translate(${cx} ${cy}) rotate(${seg.midDeg}) translate(0 ${-eqRadius})`;
+        const title = `Element ${seg.element || "—"} · Quality ${seg.quality || "—"}`;
+        return `<text class="adv-sky-element" transform="${transform}" text-anchor="middle" dominant-baseline="middle"><title>${title}</title>${ELEMENT_ICON[seg.element] || ""} ${QUALITY_ICON[seg.quality] || ""}</text>`;
       })
       .join("");
   }
 
   function renderPolarityDisc(segments, radii, cx, cy) {
+    const polRadius = Math.max(6, radii.polarity - 10);
     return segments
       .map((seg) => {
         const pol = resolvePolarity(seg.element);
-        const polTransform = `translate(${cx} ${cy}) rotate(${seg.midDeg}) translate(0 ${-radii.polarity})`;
+        const polTransform = `translate(${cx} ${cy}) rotate(${seg.midDeg}) translate(0 ${-polRadius})`;
         return `<text class="adv-sky-polarity" transform="${polTransform}" text-anchor="middle" dominant-baseline="middle"><title>${pol.label}</title>${pol.symbol}</text>`;
       })
       .join("");
   }
+
+  function filterPointsByActive(points, activeSet) {
+    if (!points || typeof points !== "object") return {};
+    if (!activeSet || activeSet.size === 0) return points;
+    return Object.entries(points)
+      .filter(([k]) => activeSet.has(normalizePointKey(k)))
+      .reduce((acc, [k, v]) => {
+        acc[k] = v;
+        return acc;
+      }, {});
+  }
+
+  const pickFirstSignNum = (range) => {
+    const firstEntry = Array.isArray(range?.entries)
+      ? range.entries.find((e) => e && (typeof e.sign_num === "number" || typeof e.signNum === "number" || e.sign))
+      : null;
+    if (!firstEntry) return null;
+    if (typeof firstEntry.sign_num === "number") return firstEntry.sign_num;
+    if (typeof firstEntry.signNum === "number") return firstEntry.signNum;
+    return null;
+  };
 
   function renderPlanetDisc({
     cx,
@@ -356,22 +372,11 @@
     defs,
   }) {
     const rangePoints = pointsByRangeId[rangeKey] || pointsByRangeId.default || {};
-    const bandGradId = `${rangeKey}-planet-band-${cx}-${cy}`;
-    defs.push(`
-      <linearGradient id="${bandGradId}" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="${adjustHex(accent, 0.35)}" stop-opacity="0.42" />
-        <stop offset="60%" stop-color="${adjustHex(accent, -0.05)}" stop-opacity="0.36" />
-        <stop offset="100%" stop-color="${adjustHex(accent, -0.35)}" stop-opacity="0.3" />
-      </linearGradient>
-    `);
-    const band = [
-      `<circle cx="${cx}" cy="${cy}" r="${radii.planet + 10}" fill="none" stroke="rgba(226,232,240,0.24)" stroke-width="0.9" stroke-dasharray="1 6" />`,
-      `<circle cx="${cx}" cy="${cy}" r="${radii.planet}" fill="none" stroke="url(#${bandGradId})" stroke-width="${Math.max(
-        22,
-        (radii.segmentOuter - radii.segmentInner) + 6
-      )}" stroke-dasharray="2 6" opacity="0.65" />`,
-      `<circle cx="${cx}" cy="${cy}" r="${Math.max(radii.planet - 10, radii.segmentInner - 10)}" fill="none" stroke="rgba(226,232,240,0.18)" stroke-width="0.9" stroke-dasharray="1 6" />`,
-    ].join("");
+    const bandOuter = radii.segmentOuter - 2;
+    const bandInner = Math.max(radii.element - 10, radii.polarity + 8);
+    const bandMid = (bandOuter + bandInner) / 2;
+    const planetTrack = bandMid;
+    const band = "";
 
     const pointEntries = Object.entries(rangePoints || {}).filter(([, val]) => val && typeof val === "object");
     const placedPoints = [];
@@ -404,18 +409,13 @@
       const icon = POINTS_ICONS[normKey] || POINTS_ICONS[point.name?.toLowerCase?.()] || "";
       const ring =
         normKey === "saturn"
-          ? `<line x1="${-size * 1.2}" y1="0" x2="${size * 1.2}" y2="0" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" />`
+          ? `<ellipse rx="${size * 1.3}" ry="${size * 0.4}" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.1" />`
           : normKey === "uranus"
-            ? `<line x1="0" y1="${-size * 1.15}" x2="0" y2="${size * 1.15}" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" />`
+            ? `<ellipse rx="${size * 0.2}" ry="${size * 1.3}" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.1" />`
             : "";
-      const iconSize =
-        !isPlanet || size <= PLANET_SIZE.sm
-          ? "0.7rem"
-          : size <= PLANET_SIZE.md
-            ? "0.82rem"
-            : "0.95rem";
+      const iconSize = !isPlanet ? "0.5rem" : size <= PLANET_SIZE.sm ? "0.7rem" : size <= PLANET_SIZE.md ? "0.8rem" : "0.95rem";
       return `
-        <g class="adv-sky-point" transform="translate(${coords.x} ${coords.y})">
+        <g class="adv-sky-point" transform="translate(${coords.x} ${coords.y}) rotate(-90)">
           <title>${titleText}</title>
           ${ring}
           ${glyph}
@@ -432,11 +432,11 @@
         if (normKey === "sun") return;
         const angle = resolvePointAngleFromSegments(point, signLookup);
         if (!Number.isFinite(angle)) return;
-        const baseRadius = radii.planet;
+        const baseRadius = planetTrack;
         const baseSize = presetSize || resolvePointSize(normKey);
-        const conflict = placedPoints.find((p) => angularDistance(p.angle, angle) < 7);
-        const radius = conflict ? baseRadius - baseSize * 1.3 : baseRadius;
-        const size = conflict ? Math.max(PLANET_SIZE.xs, baseSize * 0.6) : baseSize;
+        const conflict = placedPoints.find((p) => (angularDistance(p.angle, angle) < 7) && (p.radius === baseRadius));
+        const radius = conflict ? Math.max(bandInner + baseSize * 0.3, baseRadius - baseSize * 0.6) : baseRadius;
+        const size = conflict ? Math.max(PLANET_SIZE.xs, baseSize * 0.9) : baseSize;
         placedPoints.push({ angle, radius });
         pointPieces.push(renderPointNode(key, point, angle, radius, size));
       });
@@ -455,10 +455,10 @@
     const sunAngle = currentSeg
       ? currentSeg.startDeg + ((anchor.getTime() - currentSeg.start.getTime()) / Math.max(1, sunSpan)) * currentSeg.span
       : -90;
-    const sunCoords = polarToCartesian(cx, cy, radii.planet, sunAngle);
+    const sunCoords = polarToCartesian(cx, cy, planetTrack, sunAngle);
     const sunLabel = currentSeg?.signMeta?.name || centerSignMeta?.name || "Sun";
     const sun = `
-      <g class="adv-sky-sun" transform="translate(${sunCoords.x} ${sunCoords.y})">
+      <g class="adv-sky-sun" transform="translate(${sunCoords.x} ${sunCoords.y}) rotate(-90)">
         <title>Sun · ${sunLabel} ${sunPolarity.symbol} ${sunPolarity.label}</title>
         <circle r="${PLANET_SIZE.xl + 5}" fill="url(#${sunGradId})" opacity="0.92" />
         <circle r="${PLANET_SIZE.xl + 1}" fill="url(#${sunGradId})" stroke="rgba(255,255,255,0.65)" stroke-width="1.2" />
@@ -1250,12 +1250,14 @@
     const norm = normalizePointKey(key);
     if (norm === "sun") return PLANET_SIZE.xl;
     if (norm === "moon" || norm === "pluto") return PLANET_SIZE.xs;
-    if (norm === "mercury" || norm === "venus") return PLANET_SIZE.sm;
+    if (norm === "mercury" || norm === "venus" || norm === "chiron" || norm === "lilith" || norm === "mean_lilith" || norm === "black_moon_lilith")
+      return PLANET_SIZE.sm;
     if (norm === "mars") return PLANET_SIZE.md;
     if (norm === "jupiter" || norm === "saturn") return PLANET_SIZE.lg;
     if (norm === "uranus" || norm === "neptune") return PLANET_SIZE.md;
-    if (norm === "ascendant" || norm === "medium_coeli" || norm === "mc") return PLANET_SIZE.md;
-    return PLANET_SIZE.sm;
+    if (norm === "ascendant") return PLANET_SIZE.lg;
+    if (norm === "medium_coeli" || norm === "mc") return PLANET_SIZE.md;
+    return PLANET_SIZE.md;
   };
 
   const resolvePointColor = (key) => {
@@ -1286,7 +1288,16 @@
   };
 
   function buildSkyMapLayer(range, opts = {}) {
-    const { uid, cx, cy, layerIndex = 0, layerCount = 1, defs = [], pointsByRangeId = {} } = opts;
+    const {
+      uid,
+      cx,
+      cy,
+      layerIndex = 0,
+      layerCount = 1,
+      defs = [],
+      pointsByRangeId = {},
+      rotationOffset = 0,
+    } = opts;
     if (!range) return null;
     const entries = (Array.isArray(range.entries) ? range.entries : [])
       .map((entry) => {
@@ -1335,15 +1346,16 @@
     const isInner = layerCount > 1 && layerIndex === 1;
     const innerScale = isInner ? 0.85 : 1;
     const baseRadius = layerCount > 1 ? (isInner ? 118 : 230) : 224;
+    const elementRadius = baseRadius - (isInner ? 70 : 86);
     const radii = {
       segmentOuter: baseRadius,
       segmentInner: baseRadius - (isInner ? 32 : 24),
       text: baseRadius - 14,
       date: baseRadius + 14,
-      planet: baseRadius - (isInner ? 44 : 32),
-      quality: baseRadius - (isInner ? 54 : 60),
-      element: baseRadius - (isInner ? 66 : 78),
-      polarity: baseRadius - (isInner ? 78 : 96),
+      planet: baseRadius - (isInner ? 52 : 40),
+      quality: baseRadius - (isInner ? 58 : 64),
+      element: elementRadius,
+      polarity: elementRadius,
     };
     const outlines = renderDiscOutlines(radii, cx, cy);
     const signLookup = segments.reduce((acc, seg) => {
@@ -1363,9 +1375,9 @@
     const sunPolarity = resolvePolarity(sunElement);
     const centerSignMeta = SIGN_META[sunPoint.sign || currentSeg?.sign] || currentSeg?.signMeta || {};
 
-    const signDisc = renderSignDisc(segments, radii, cx, cy, accent, anchorYear, defs, uid, rangeKey);
-    const qualityDisc = renderQualityDisc(segments, radii, cx, cy);
-    const elementDisc = renderElementDisc(segments, radii, cx, cy);
+    const isDual = layerCount > 1;
+    const signDisc = renderSignDisc(segments, radii, cx, cy, accent, anchorYear, defs, uid, rangeKey, isInner);
+    const elementQualityDisc = isDual && isInner ? "" : renderElementQualityDisc(segments, radii, cx, cy);
     const polarityDisc = renderPolarityDisc(segments, radii, cx, cy);
     const planetDisc = renderPlanetDisc({
       cx,
@@ -1385,10 +1397,18 @@
     const anchorLabel = formatDateTimeShort(anchor);
     const qualityIcon = QUALITY_ICON[sunQuality] || "";
     const titleColor = adjustHex(accent, 0.05);
+    const orbText =
+      typeof currentSeg?.entry?.position === "number"
+        ? `${currentSeg.entry.position.toFixed(2)}°`
+        : typeof currentSeg?.position === "number"
+          ? `${currentSeg.position.toFixed(2)}°`
+          : typeof sunPoint?.position === "number"
+            ? `${sunPoint.position.toFixed(2)}°`
+            : "—";
     const centerLabel = `
       <div class="adv-sky-chip" aria-label="Sun in ${centerSignMeta.name || sunLabel || "current sign"}">
         <div class="adv-sky-chip-title" style="color:${titleColor}">${range.label || range.id || "Sky layer"} · ${anchorLabel}</div>
-        <div class="adv-sky-chip-main">${POINTS_ICONS.sun || "☉"} ${centerSignMeta.name || sunLabel || "Sun"} ${centerSignMeta.icon || ""}</div>
+        <div class="adv-sky-chip-main">${POINTS_ICONS.sun || "☉"} ${centerSignMeta.name || sunLabel || "Sun"} ${centerSignMeta.icon || ""} · ${orbText}</div>
         <div class="adv-sky-chip-meta">${ELEMENT_ICON[sunElement] || ""} ${sunElement || "—"} · ${qualityIcon} · ${sunPolarity.symbol} ${sunPolarity.label}</div>
       </div>
     `;
@@ -1396,18 +1416,18 @@
     const legendLabel = `<span class="adv-sky-pill" style="--sky-pill:${accent}">${range.label || range.id || "Layer"}</span>`;
 
     const group = `
-      <g class="adv-sky-layer" style="--sky-accent:${accent}" transform="translate(${cx} ${cy}) scale(${innerScale}) translate(${-cx} ${-cy})">
+      <g class="adv-sky-layer" style="--sky-accent:${accent}" transform="translate(${cx} ${cy}) rotate(${90 + rotationOffset}) scale(${innerScale}) translate(${-cx} ${-cy})">
         ${signDisc.spans}
         ${signDisc.separators}
         ${signDisc.decans}
         ${signDisc.labels}
         ${signDisc.dates}
         ${outlines}
-        ${qualityDisc}
-        ${elementDisc}
+        ${planetDisc.band}
+        ${elementQualityDisc}
         ${polarityDisc}
-        ${planetDisc.points}
         ${planetDisc.sun}
+        ${planetDisc.points}
       </g>
     `;
 
@@ -1415,6 +1435,16 @@
       svg: group,
       centerLabel,
       legendLabel,
+      firstSignNum: pickFirstSignNum(range) ?? segments[0]?.sign_num ?? segments[0]?.signNum ?? null,
+      elementSigil: {
+        icon: ELEMENT_ICON[sunElement] || "",
+        label: sunElement || "",
+      },
+      summarySigil:
+        range.summarySigil ||
+        renderSigil(buildSigilBase(rangePoints, anchor), {}, { size: 72, compact: true, className: "adv-summary-sigil" }) ||
+        "",
+      accent,
     };
   }
 
@@ -1446,12 +1476,18 @@
         <stop offset="100%" stop-color="#050b18" stop-opacity="0.35" />
       </linearGradient>`,
     ];
-    const layers = [];
+    const layerObjs = [];
     const chips = [];
     const legends = [];
     const accents = [];
 
+    let baseSignNum = null;
     ranges.forEach((range, idx) => {
+      const targetSign = pickFirstSignNum(range);
+      const rotationOffset =
+        idx === 0 || baseSignNum === null || targetSign === null
+          ? 0
+          : ((((targetSign - baseSignNum) % 12) + 12) % 12) * 30;
       const layer = buildSkyMapLayer(range, {
         uid,
         cx,
@@ -1461,30 +1497,56 @@
         defs,
         pointsByRangeId,
         metaByRangeId,
+        rotationOffset,
       });
       if (layer) {
-        layers.push(layer.svg);
+        layerObjs.push(layer);
         chips.push(layer.centerLabel);
         legends.push(layer.legendLabel);
         accents.push(layer.accent || "#38bdf8");
+        if (idx === 0 && layer.firstSignNum != null) {
+          baseSignNum = layer.firstSignNum;
+        }
       }
     });
 
-    if (!layers.length) return "";
+    if (!layerObjs.length) return "";
+    const layerSvgs = layerObjs.map((l) => l.svg);
     const defsBlock = defs.length ? `<defs>${defs.join("")}</defs>` : "";
     const legendBlock = legends.length ? `<div class="adv-sky-legend">${legends.join("")}</div>` : "";
     const tableAccent = accents[0] || "#38bdf8";
-    const centerClass = layerCount > 1 ? "adv-sky-center adv-sky-center-bottom" : "adv-sky-center";
+    const centerClass = layerCount > 1 ? "adv-sky-center adv-sky-center-dual" : "adv-sky-center";
+    const centerContent =
+      layerCount > 1
+        ? chips
+            .map((chip, idx) => `<div class="adv-sky-chip-slot ${idx === 0 ? "adv-sky-chip-left" : "adv-sky-chip-right"}">${chip || ""}</div>`)
+            .join("")
+        : chips.join("");
     const html = `
       <div class="adv-sky-wrap" style="--sky-pill:${tableAccent}">
         ${legendBlock}
         <div class="adv-sky-stage">
           <svg viewBox="0 0 ${size} ${size}" class="adv-sky-svg" role="img" aria-label="Circular sky map">
             ${defsBlock}
-            ${layers.join("")}
+            ${layerSvgs.join("")}
             <rect x="0" y="${cy}" width="${size}" height="${cy}" fill="url(#sky-shadow-${uid})" pointer-events="none" />
           </svg>
-          <div class="${centerClass}">${chips.join("")}</div>
+          <div class="${centerClass}">${centerContent}</div>
+          ${
+            layerObjs[0] && layerObjs[0].elementSigil
+              ? `<div class="adv-sky-element-badge${layerCount > 1 ? "" : ""}" aria-label="Element ${layerObjs[0].elementSigil.label}" title="Element ${layerObjs[0].elementSigil.label}" style="--badge-accent:${layerObjs[0].accent || tableAccent};">${layerObjs[0].elementSigil.icon || ""}</div>`
+              : ""
+          }
+          ${
+            layerCount > 1 && layerObjs[1] && layerObjs[1].elementSigil
+              ? `<div class="adv-sky-element-badge adv-sky-element-badge-right" aria-label="Element ${layerObjs[1].elementSigil.label}" title="Element ${layerObjs[1].elementSigil.label}" style="--badge-accent:${layerObjs[1].accent || tableAccent};">${layerObjs[1].elementSigil.icon || ""}</div>`
+              : ""
+          }
+          ${
+            layerCount === 1 && layerObjs[0] && layerObjs[0].summarySigil
+              ? `<div class="adv-sky-summary-badge" aria-label="Chart summary sigil" title="Chart summary sigil">${layerObjs[0].summarySigil}</div>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -3948,6 +4010,7 @@
     const sourceActive = Array.isArray(chart.active_points) ? chart.active_points : [];
     const activePoints = (Array.isArray(cfg.active_points) ? cfg.active_points : sourceActive).filter(Boolean);
     const filteredPointKeys = resolveActivePointKeys(points, activePoints);
+    const activeSet = new Set((activePoints || []).map((p) => normalizePointKey(p)));
 
     const pointRows = filteredPointKeys
       .map((k) => renderPointRowProxy(points[k], { labelOverride: points[k]?.name || k }))
@@ -4086,6 +4149,9 @@
       }
     });
     pointsByRangeId.default = points;
+    Object.keys(pointsByRangeId).forEach((k) => {
+      pointsByRangeId[k] = filterPointsByActive(pointsByRangeId[k], activeSet);
+    });
     metaByRangeId.default = metaSource;
     const anchorDate =
       safeDate(ascendantRanges[0]?.anchor) ||
