@@ -17,9 +17,9 @@
   ];
 </script>
 
-<nav class="page-shell py-6 flex items-center justify-between gap-4" id="nav-bar">
-  <div class="flex items-center gap-3">
-    <div class="h-11 w-11 rounded-2xl bg-gradient-to-br from-cyan-500/80 via-indigo-500/60 to-emerald-400/80 flex items-center justify-center shadow-glow">
+<nav class="page-shell nav-shell" id="nav-bar">
+  <div class="nav-brand">
+    <div class="brand-mark">
       <span class="font-display text-lg">✺</span>
     </div>
     <div>
@@ -27,7 +27,7 @@
       <p class="font-display text-xl leading-tight">Astro</p>
     </div>
   </div>
-  <div class="flex items-center gap-2">
+  <div class="nav-links">
     {#each links as link}
       <a
         class={`nav-link ${active === link.key ? 'active' : ''}`}

@@ -1,8 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
-  import BirthFields from '../forms/BirthFields.svelte';
-  import TransitFields from '../forms/TransitFields.svelte';
-  import PartnerFields from '../forms/PartnerFields.svelte';
+  import SubjectFields from '../forms/SubjectFields.svelte';
   import ConfigPanel from './ConfigPanel.svelte';
   import { inputStore, resetInputs, setMode, updateBirth, updateRelationship, updateTransit } from '$lib/state/inputStore';
 
@@ -71,7 +69,9 @@
       </div>
       <div class="flex items-center gap-2 mode-legend">
         <span class="legend-dot" aria-hidden="true"></span>
-        <p class="text-xs text-slate-400">Active mode</p>
+        <p class="text-xs text-slate-400">
+          <span class="badge">{modes.find((m) => m.key === state.mode)?.label}</span>
+        </p>
       </div>
     </div>
 
@@ -116,20 +116,48 @@
 
   {#if state.mode === 'natal' || state.mode === 'natal_transit'}
     <section id="birth-fields">
-      <BirthFields value={birthValue} onChange={updateBirth} />
+      <SubjectFields
+        variant="natal"
+        label="Birth"
+        tag="Natal"
+        value={birthValue}
+        idPrefix="birth"
+        onChange={updateBirth}
+      />
     </section>
   {/if}
 
   {#if state.mode === 'transit' || state.mode === 'natal_transit'}
     <section id="transit-fields">
-      <TransitFields value={transitValue} onChange={updateTransit} title={state.mode === 'transit' ? 'Transit' : 'Transit overlay'} />
+      <SubjectFields
+        variant="transit"
+        label={state.mode === 'transit' ? 'Transit' : 'Transit overlay'}
+        tag="Transit"
+        value={transitValue}
+        idPrefix="transit"
+        onChange={updateTransit}
+      />
     </section>
   {/if}
 
   {#if state.mode === 'relationship'}
-    <div class="grid sm:grid-cols-2 gap-4" id="relationship-fields">
-      <PartnerFields value={firstValue} label="Partner A" onChange={(patch) => updateRelationship('first', patch)} />
-      <PartnerFields value={secondValue} label="Partner B" onChange={(patch) => updateRelationship('second', patch)} />
+    <div class="space-y-4" id="relationship-fields">
+      <SubjectFields
+        variant="partner"
+        label="Partner A"
+        tag="Synastry"
+        value={firstValue}
+        idPrefix="partner-a"
+        onChange={(patch) => updateRelationship('first', patch)}
+      />
+      <SubjectFields
+        variant="partner"
+        label="Partner B"
+        tag="Synastry"
+        value={secondValue}
+        idPrefix="partner-b"
+        onChange={(patch) => updateRelationship('second', patch)}
+      />
     </div>
   {/if}
 
