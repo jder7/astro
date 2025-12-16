@@ -45,6 +45,7 @@
           type="button"
           class="icon-button"
           aria-label="Toggle configuration"
+          title="Toggle configuration"
           on:click={() => (showConfig = !showConfig)}
         >
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -60,6 +61,7 @@
           type="button"
           class="icon-button"
           aria-label="Reset inputs"
+          title="Reset inputs"
           on:click={resetInputs}
         >
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -93,6 +95,20 @@
 
     {#if showConfig}
       <div class="slide-panel">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs text-slate-400">Chart configuration</p>
+          <button
+            type="button"
+            class="icon-button"
+            aria-label="Close configuration"
+            title="Close configuration"
+            on:click={() => (showConfig = false)}
+          >
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
         <ConfigPanel />
       </div>
     {/if}

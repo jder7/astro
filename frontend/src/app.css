@@ -54,7 +54,7 @@ body {
 .micro-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
+  gap: 6px 10px;
 }
 
 .micro-label {
@@ -64,6 +64,18 @@ body {
 
 .micro-input {
   @apply h-10;
+}
+
+.flowbite-input {
+  @apply h-9 text-xs sm:text-sm bg-slate-900/70 border border-slate-800 rounded-lg px-2 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 w-full;
+  --tw-ring-color: var(--accent, #06b6d4);
+}
+
+.flowbite-select {
+  @apply pr-7;
+  background-position: right 0.35rem center;
+  background-repeat: no-repeat;
+  background-size: 0.75rem 0.75rem;
 }
 
 .section-title {
@@ -170,6 +182,15 @@ label {
 
 .slide-panel {
   @apply border border-slate-800 rounded-xl p-3 bg-slate-900/60;
+}
+
+.slide-panel .flowbite-select,
+.slide-panel .flowbite-input {
+  @apply h-9 text-[11px] sm:text-xs;
+}
+
+.slide-panel .grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .card-header {

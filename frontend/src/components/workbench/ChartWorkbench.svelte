@@ -57,7 +57,9 @@
     errorMessage = '';
     loading = true;
     const state = get(inputStore);
-    const cfg = get(configStore);
+    const cfg = page === 'home'
+      ? get(configStore)
+      : { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
     const { payload, birthParts, transitParts } = buildChartPayload(state.mode, state, cfg);
     try {
       const { json, svg } = await requestChart(state.mode, payload);
@@ -78,7 +80,9 @@
     errorMessage = '';
     status = 'Generating report…';
     const state = get(inputStore);
-    const cfg = get(configStore);
+    const cfg = page === 'home'
+      ? get(configStore)
+      : { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
     try {
       const payload = buildReportPayload(state.mode, state, cfg);
       report = await requestReport(payload);
@@ -97,7 +101,9 @@
     errorMessage = '';
     try {
       const state = get(inputStore);
-      const cfg = get(configStore);
+      const cfg = page === 'home'
+        ? get(configStore)
+        : { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
       const range = get(rangeStore);
       const payload = buildRangePayload(state, cfg, range, state.mode !== 'transit');
       rangeResult = await requestTransitRange(payload);

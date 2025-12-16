@@ -7,8 +7,8 @@ export const createDefaultConfig = () => ({
   house_system: 'P',
   theme: 'dark',
   active_points: ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'ascendant'],
-  asc_moon_sun_range_enabled: true,
-  include_aspects: true,
+  asc_moon_sun_range_enabled: false,
+  include_aspects: false,
 });
 
 export const configStore = createPersistedStore('astroConfig', createDefaultConfig());
