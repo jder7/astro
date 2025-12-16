@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from schemas import BirthData, ChartConfig
+from schemas import BirthData, ChartConfig, NextLunation
 from aspects.moon_range import compute_moon_month_range
 from utils import build_subject_for_moment
 
@@ -87,3 +87,16 @@ class TestMoonMonthRange(unittest.TestCase):
             self.assertEqual(entry.start.microsecond, 0)
             self.assertEqual(entry.end.second, 0)
             self.assertEqual(entry.end.microsecond, 0)
+
+    def test_next_lunation_present_and_ordered(self):
+        result = compute_moon_month_range(self.birth, self.cfg, self.anchor, "lunation", label="Lunation")
+        self.assertIsNotNone(result.next_lunation, "Expected next_lunation on MoonMonthRange.")
+        self.assertIsInstance(result.next_lunation, NextLunation)
+        ts = result.next_lunation.timestamp
+        self.assertIsInstance(ts, datetime)
+        self.assertGreater(ts, self.anchor)
+        # Should arrive within a month from anchor.
+        self.assertLessEqual(ts - self.anchor, timedelta(days=35))
+        # Minute precision
+        self.assertEqual(ts.second, 0)
+        self.assertEqual(ts.microsecond, 0)

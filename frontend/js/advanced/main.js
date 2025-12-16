@@ -869,6 +869,11 @@
           hour: metaSource?.hour || metaSource?.moment?.hour || metaSource?.birth?.hour || anchor.getHours(),
           minute: metaSource?.minute || metaSource?.moment?.minute || metaSource?.birth?.minute || anchor.getMinutes(),
         });
+        const nextLunationDate = safeDate(moonRange?.nextLunation?.date || moonRange?.nextLunation?.timestamp);
+        const nextLunationLabel =
+          nextLunationDate && moonRange?.nextLunation
+            ? `Next ${moonRange.nextLunation.type || "Lunation"} ~${formatDateShort(nextLunationDate)}`
+            : "";
         const moonIllumRaw =
           typeof moonIllumVal === "number"
             ? `${moonIllumVal.toFixed(1)}%`
@@ -890,7 +895,11 @@
           moonSummary && moonSummary.nextSign
             ? `Next ${SIGN_META[moonSummary.nextSign]?.name || moonSummary.nextSign} at ${moonSummary.nextTime}`
             : "";
-        const moonExtras = [moonNext, `Illumination ${moonIllum}${lunation && lunation.name ? ` · ${lunation.name}` : ""}`]
+        const moonExtras = [
+          moonNext,
+          nextLunationLabel,
+          `Illumination ${moonIllum}${lunation && lunation.name ? ` · ${lunation.name}` : ""}`,
+        ]
           .filter(Boolean)
           .join(" · ");
         const aspectsBlock =
@@ -1079,6 +1088,20 @@
           ? anchorCandidate
           : normalizedEntries[0]?.start || new Date();
 
+      const nextLunationRaw = range.next_lunation || range.nextLunation;
+      let nextLunation = null;
+      if (nextLunationRaw && typeof nextLunationRaw === "object") {
+        const tsRaw = nextLunationRaw.timestamp || nextLunationRaw.date || nextLunationRaw.datetime;
+        const ts = tsRaw ? new Date(tsRaw) : null;
+        if (ts instanceof Date && Number.isFinite(ts.getTime())) {
+          nextLunation = {
+            type: nextLunationRaw.type || nextLunationRaw.kind || "Lunation",
+            date: ts,
+            timestamp: ts,
+          };
+        }
+      }
+
       const withOffsets = normalizedEntries.map((entry, entryIdx) => {
         const offsetHours =
           anchorDate instanceof Date && entry.start instanceof Date
@@ -1100,6 +1123,7 @@
         label: range.label || id,
         anchor: anchorDate,
         entries: withOffsets,
+        nextLunation,
       });
     });
     return normalized;
@@ -1208,6 +1232,14 @@
       return date.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
     } catch (err) {
       return `${date.getMonth() + 1}/${date.getDate()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+  };
+  const formatDateShort = (date) => {
+    if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return "—";
+    try {
+      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    } catch (err) {
+      return `${date.getMonth() + 1}/${date.getDate()}`;
     }
   };
 
@@ -1555,6 +1587,8 @@
 
   function renderAscendantCenter(ranges, hours, centerEl, handColors = [], showLabels) {
     if (!centerEl) return;
+    const isDual = ranges.length > 1;
+    centerEl.classList.toggle("adv-asc-center--dual", isDual);
     const parts = ranges.map((range) => {
       if (!range.entries.length || !range.anchor) return null;
       const rangeIdx = ranges.indexOf(range);
@@ -1602,9 +1636,17 @@
       `;
     }).filter(Boolean);
 
+    const content = isDual
+      ? parts
+          .map(
+            (part, idx) =>
+              `<div class="adv-asc-center-slot ${idx === 0 ? "adv-asc-center-slot--outer" : "adv-asc-center-slot--inner"}">${part}</div>`
+          )
+          .join("")
+      : parts.join("");
     centerEl.innerHTML = `
       <div class="adv-asc-center-card">
-        ${parts.join("")}
+        ${content}
       </div>
     `;
   }
@@ -1874,7 +1916,11 @@
           const labelDate = new Date(rangeWindow.start.getTime() + i * HOUR_MS);
           const mins = labelDate.getMinutes();
           const labelVal = mins ? `${pad(labelDate.getHours())}:${pad(mins)}` : `${pad(labelDate.getHours())}`;
-          ctx.fillText(labelVal, Math.cos(a) * labelR, Math.sin(a) * labelR);
+          ctx.save();
+          ctx.translate(Math.cos(a) * labelR, Math.sin(a) * labelR);
+          ctx.rotate(a + Math.PI / 2);
+          ctx.fillText(labelVal, 0, 0);
+          ctx.restore();
         }
       }
 
@@ -1889,7 +1935,11 @@
           const labelDate = new Date(rangeWindow.start.getTime() + i * HOUR_MS);
           const mins = labelDate.getMinutes();
           const labelVal = `${pad(labelDate.getHours())}:${pad(mins)}`;
-          ctx.fillText(labelVal, Math.cos(a) * innerLabelR, Math.sin(a) * innerLabelR);
+          ctx.save();
+          ctx.translate(Math.cos(a) * innerLabelR, Math.sin(a) * innerLabelR);
+          ctx.rotate(a + Math.PI / 2);
+          ctx.fillText(labelVal, 0, 0);
+          ctx.restore();
         }
       }
 
@@ -2175,6 +2225,8 @@
 
   function renderMoonCenter(ranges, offsets, centerEl, handColors = [], showLabels = false, windowDays = 14) {
     if (!centerEl) return;
+    const isDual = ranges.length > 1;
+    centerEl.classList.toggle("adv-asc-center--dual", isDual);
     const parts = ranges
       .map((range, idx) => {
         if (!range.entries.length || !range.anchor) return null;
@@ -2192,26 +2244,39 @@
         const best = pickEntry();
         const signMeta = SIGN_META[best.sign] || { name: best.sign || "—", icon: best.emoji || "☾" };
         const { orb, decan } = computeMoonProgress(best, targetTs);
+        const lunation = getLunationInfo({
+          year: targetTs.getFullYear(),
+          month: targetTs.getMonth() + 1,
+          day: targetTs.getDate(),
+          hour: targetTs.getHours(),
+          minute: targetTs.getMinutes(),
+        });
+        const illumPct = typeof lunation?.illumination === "number" ? `${Math.round(lunation.illumination * 100)}%` : "—";
+        const phaseIcon = lunation?.icon || "";
+        const phaseName = lunation?.name || "";
         const qualityIcon = QUALITY_ICON[best.quality] || "";
         const tone = elementStroke(best.element || "Default", 0.6);
         const handColor = handColors[idx] || tone;
         const timeLabel = formatDateTimeShort(targetTs);
+        const illumLabel = illumPct !== "—" ? `Illumination ${illumPct}` : "Illumination unavailable";
+        const phaseLabel = phaseName ? `${phaseName} phase` : "Phase unavailable";
+        const phaseInline =
+          phaseIcon || illumPct !== "—"
+            ? `<span class="adv-asc-meta-inline adv-moon-phase-inline" aria-label="${illumLabel}${phaseName ? ` · ${phaseLabel}` : ""}">${phaseIcon ? `${phaseIcon} ` : ""}${illumPct !== "—" ? `${illumPct}` : ""}</span>`
+            : "";
 
         const label = showLabels ? `<span class="adv-asc-label">${range.label || range.id}</span>` : "";
-        const bandLabel = ranges.length > 1 ? `<span class="adv-asc-label">${idx === 0 ? "Outer:" : "Inner:"}</span>` : "";
         return `
           <div class="adv-asc-active-row adv-moon-active" style="--asc-accent:${tone}">
-            <div class="adv-asc-glyph">${signMeta.icon || "☾"}</div>
             <div class="adv-asc-active-meta">
               <div class="adv-asc-active-title">
-                ${bandLabel}${label}
-                <span class="adv-asc-sign" style="color:${handColor}">${signMeta.name}</span>
+                ${label}
+                <span class="adv-asc-sign" style="color:${handColor}">${signMeta.name}</span>${phaseInline ? ` ${phaseInline}` : ""}
                 <span class="adv-asc-meta-inline">${decan ? `${formatOrdinal(decan)} Dec.` : "—"} · Orb ${typeof orb === "number" ? orb.toFixed(2) : "—"}°</span>
               </div>
               <div class="adv-asc-active-stats">
                 <span>${timeLabel}</span>
                 <span>${qualityIcon ? `${qualityIcon} ` : ""}${best.quality || "—"} ${ELEMENT_ICON[best.element] || ""}</span>
-                <span>Window ${windowDays}d</span>
               </div>
             </div>
           </div>
@@ -2219,9 +2284,17 @@
       })
       .filter(Boolean);
 
+    const content = isDual
+      ? parts
+          .map(
+            (part, idx) =>
+              `<div class="adv-asc-center-slot ${idx === 0 ? "adv-asc-center-slot--outer" : "adv-asc-center-slot--inner"}">${part}</div>`
+          )
+          .join("")
+      : parts.join("");
     centerEl.innerHTML = `
       <div class="adv-asc-center-card adv-moon-center">
-        ${parts.join("")}
+        ${content}
       </div>
     `;
   }
@@ -2455,15 +2528,53 @@
 
         const signMeta = SIGN_META[srcEntry.sign] || {};
         const glyph = signMeta.icon || srcEntry.emoji || "?";
+        const segMid =
+          seg.start instanceof Date && seg.end instanceof Date
+            ? new Date((seg.start.getTime() + seg.end.getTime()) / 2)
+            : seg.start instanceof Date
+              ? seg.start
+              : rangeWindow.start;
+        const lunation = segMid
+          ? getLunationInfo({
+              year: segMid.getFullYear(),
+              month: segMid.getMonth() + 1,
+              day: segMid.getDate(),
+              hour: segMid.getHours(),
+              minute: segMid.getMinutes(),
+            })
+          : null;
+        const illumPct =
+          typeof lunation?.illumination === "number" ? `${Math.round(lunation.illumination * 100)}%` : "";
+        const labelMain = glyph;
+        const labelBottom = [lunation?.icon || "", illumPct].filter(Boolean).join(" ").trim();
         const decanCenter = sliceStart + (sliceEnd - sliceStart) / 6;
         const labelR = innerR + (outerR - innerR) * 0.45;
+        const labelRBottom = innerR + (outerR - innerR) * 0.18;
         const tx = Math.cos(decanCenter) * labelR;
         const ty = Math.sin(decanCenter) * labelR;
+        const txBottom = Math.cos(decanCenter) * labelRBottom;
+        const tyBottom = Math.sin(decanCenter) * labelRBottom;
         ctx.fillStyle = "#e8f4ff";
-        ctx.font = `${Math.max(12, radius * 0.06)}px "Space Grotesk", "Inter", system-ui`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(glyph, tx, ty);
+        const sizeScale = isDual && ringIdx > 0 ? 0.82 : 1;
+        const mainSize = Math.max(10, radius * 0.05 * sizeScale);
+        const tangentAngle = decanCenter + Math.PI / 2;
+        ctx.font = `${mainSize}px "Space Grotesk", "Inter", system-ui`;
+        ctx.save();
+        ctx.translate(tx, ty);
+        ctx.rotate(tangentAngle);
+        ctx.fillText(labelMain, 0, -mainSize * 0.18);
+        ctx.restore();
+        if (labelBottom) {
+          ctx.font = `${mainSize * 0.72}px "Space Grotesk", "Inter", system-ui`;
+          ctx.save();
+          ctx.translate(txBottom, tyBottom);
+          ctx.rotate(tangentAngle);
+          ctx.fillText(labelBottom, 0, mainSize * 0.05);
+          ctx.restore();
+        }
+
 
         if (isActive) {
           currentSignHighlighter = {
@@ -2516,7 +2627,11 @@
         ctx.font = `${Math.max(9, radius * 0.035)}px "Space Grotesk", "Inter", system-ui`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(labelVal, Math.cos(a) * labelR, Math.sin(a) * labelR);
+        ctx.save();
+        ctx.translate(Math.cos(a) * labelR, Math.sin(a) * labelR);
+        ctx.rotate(a + Math.PI / 2);
+        ctx.fillText(labelVal, 0, 0);
+        ctx.restore();
       }
 
       if (currentSignHighlighter) {

@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import re
-from typing import Optional
+from typing import Optional, Literal
 
-from schemas import MoonMonthRange, MoonRangeEntry, BirthData, ChartConfig
+from schemas import MoonMonthRange, MoonRangeEntry, BirthData, ChartConfig, NextLunation
 from utils import ensure_config, build_subject_for_moment
 
 
@@ -32,6 +32,8 @@ class MoonRangeCalculator:
         self.cfg = ensure_config(self.config)
         self.moon_cfg = self.cfg.model_copy(deep=True)
         self.moon_cfg.active_points = ["Moon"]
+        self.lunation_cfg = self.cfg.model_copy(deep=True)
+        self.lunation_cfg.active_points = ["Sun", "Moon"]
 
     def compute_month_range(self, anchor: datetime, identifier: str, label: Optional[str] = None) -> MoonMonthRange:
         anchor_data = self._moon_at(anchor)
@@ -80,11 +82,13 @@ class MoonRangeCalculator:
                 break
 
         entries.sort(key=lambda e: e.start)
+        next_lunation = self._compute_next_lunation(anchor)
         return MoonMonthRange(
             id=range_id,
             label=label or identifier.title(),
             anchor=anchor,
             entries=entries,
+            next_lunation=next_lunation,
         )
 
     def _moon_at(self, dt: datetime) -> dict:
@@ -178,6 +182,73 @@ class MoonRangeCalculator:
             else:
                 high = mid
         return _round_to_minute(high)
+
+    def _sun_moon_phase(self, dt: datetime) -> Optional[float]:
+        subject = build_subject_for_moment(self.base, dt, self.lunation_cfg)
+        payload = subject.model_dump(mode="json") if subject else {}
+        sun = payload.get("sun") or {}
+        moon = payload.get("moon") or {}
+        sun_pos = sun.get("abs_pos")
+        moon_pos = moon.get("abs_pos")
+        if not isinstance(sun_pos, (int, float)) or not isinstance(moon_pos, (int, float)):
+            return None
+        return (moon_pos - sun_pos) % 360
+
+    def _compute_next_lunation(self, anchor: datetime) -> Optional[NextLunation]:
+        phase_now = self._sun_moon_phase(anchor)
+        if phase_now is None:
+            return None
+
+        # Determine target phase (Full at 180°, New at 360° wrap).
+        target = 180.0 if phase_now < 180.0 else 360.0
+        if target < phase_now:
+            target += 360.0
+
+        step = timedelta(hours=6)
+        prev_time = anchor
+        prev_phase = phase_now
+        bracket = None
+
+        for _ in range(80):
+            probe_time = prev_time + step
+            probe_phase_raw = self._sun_moon_phase(probe_time)
+            if probe_phase_raw is None:
+                prev_time = probe_time
+                continue
+            probe_phase = probe_phase_raw
+            while probe_phase < prev_phase:
+                probe_phase += 360.0
+            if probe_phase >= target:
+                bracket = (prev_time, probe_time, prev_phase, probe_phase)
+                break
+            prev_time = probe_time
+            prev_phase = probe_phase
+
+        if bracket is None:
+            return None
+
+        low, high, low_phase, high_phase = bracket
+        for _ in range(80):
+            if (high - low) <= timedelta(minutes=1):
+                break
+            mid = low + (high - low) / 2
+            mid_phase_raw = self._sun_moon_phase(mid)
+            if mid_phase_raw is None:
+                high = mid
+                continue
+            mid_phase = mid_phase_raw
+            while mid_phase < low_phase:
+                mid_phase += 360.0
+            if mid_phase >= target:
+                high = mid
+                high_phase = mid_phase
+            else:
+                low = mid
+                low_phase = mid_phase
+
+        ts = _round_to_minute(high)
+        phase_type: Literal["Full Moon", "New Moon"] = "Full Moon" if (target % 360) == 180 else "New Moon"
+        return NextLunation(type=phase_type, timestamp=ts)
 
 
 def compute_moon_month_range(

@@ -393,6 +393,8 @@
 
   const MAJOR_ASPECT_ICON_MAP = buildMajorAspectIcons();
 
+  const SYNODIC_MONTH = 29.530588853;
+
   const MOON_PHASES = [
       { name: "New Moon", icon: "🌑" },
       { name: "Waxing Crescent", icon: "🌒" },
@@ -625,12 +627,11 @@
     const { year, month, day, hour = 0, minute = 0 } = parts;
     if ([year, month, day].some((n) => !Number.isFinite(n))) return null;
 
-    const synodic = 29.530588853;
     const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14);
     const target = Date.UTC(year, (month || 1) - 1, day || 1, hour || 0, minute || 0);
     const daysSince = (target - knownNewMoon) / 86400000;
-    const normalized = ((daysSince % synodic) + synodic) % synodic;
-    const fraction = normalized / synodic;
+    const normalized = ((daysSince % SYNODIC_MONTH) + SYNODIC_MONTH) % SYNODIC_MONTH;
+    const fraction = normalized / SYNODIC_MONTH;
     const illumination = 0.5 * (1 - Math.cos((normalized / 29.53) * 2 * Math.PI));
 
     const idx = Math.floor((fraction * 8 + 0.5)) % 8;

@@ -631,6 +631,12 @@ a {
   padding: 1rem;
 }
 
+.adv-asc-center--dual {
+  width: 100%;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
 .adv-asc-body--stacked .adv-asc-center {
   inset: auto 0 0 0;
   padding: 0.4rem 0.75rem 0.9rem;
@@ -638,6 +644,58 @@ a {
   pointer-events: auto;
   align-items: flex-end;
   justify-content: center;
+}
+
+.adv-asc-center-slot {
+  display: flex;
+  flex: 1;
+}
+
+.adv-asc-center-slot--outer {
+  justify-content: flex-start;
+}
+
+.adv-asc-center-slot--inner {
+  justify-content: flex-end;
+}
+
+.adv-asc-center--dual .adv-asc-center-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.adv-asc-center--dual .adv-asc-active-row {
+  width: min(360px, 100%);
+}
+
+.adv-asc-center--dual .adv-asc-active-title,
+.adv-asc-center--dual .adv-asc-active-stats {
+  width: 100%;
+}
+
+.adv-asc-center-slot--inner .adv-asc-active-title,
+.adv-asc-center-slot--inner .adv-asc-active-stats {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.adv-asc-body--stacked .adv-asc-center--dual {
+  justify-content: center;
+}
+
+.adv-asc-body--stacked .adv-asc-center--dual .adv-asc-center-card {
+  grid-template-columns: 1fr;
+}
+
+.adv-asc-body--stacked .adv-asc-center-slot {
+  justify-content: center;
+}
+
+.adv-asc-body--stacked .adv-asc-center-slot--inner .adv-asc-active-title,
+.adv-asc-body--stacked .adv-asc-center-slot--inner .adv-asc-active-stats {
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .adv-asc-sigil-layer {
@@ -700,6 +758,47 @@ a {
   font-size: 1.3rem;
   color: #f8fafc;
   text-shadow: 0 1px 8px rgba(125, 211, 252, 0.35);
+}
+
+.adv-moon-glyph {
+  min-width: 2.5rem;
+  width: auto;
+  height: auto;
+  padding: 0.35rem 0.5rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  flex-direction: column;
+}
+
+.adv-moon-glyph-top {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.adv-moon-glyph-icon {
+  font-size: 1.3rem;
+}
+
+.adv-moon-glyph-illum {
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: #e5e7eb;
+  line-height: 1;
+}
+
+.adv-moon-glyph-phase {
+  font-size: 1.1rem;
+}
+
+.adv-moon-phase-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .adv-asc-active-title {

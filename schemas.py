@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 from pydantic import AliasChoices, BaseModel, Field, ConfigDict
 
@@ -238,6 +238,30 @@ class MoonMonthRange(BaseModel):
         default_factory=list,
         alias="entries",
         description="Lunar sign entries across the window.",
+    )
+    next_lunation: Optional["NextLunation"] = Field(
+        default=None,
+        alias="next_lunation",
+        description="Next lunation (Full or New Moon) relative to the anchor, minute precision.",
+    )
+
+
+class NextLunation(BaseModel):
+    """
+    Next lunation event info (Full/New) with timestamp.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: Literal["Full Moon", "New Moon"] = Field(
+        ...,
+        description="Type of lunation event.",
+    )
+    timestamp: datetime = Field(
+        ...,
+        alias="timestamp",
+        serialization_alias="timestamp",
+        description="Timestamp (tz-aware) of the lunation, rounded to the minute.",
     )
 
 
