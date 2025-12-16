@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Astro App – Esoteric</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/legacy/favicon.ico" type="image/x-icon" />
+    <script src="/legacy/vendor/flowbite/tailwind.js"></script>
+    <script src="/legacy/vendor/flowbite/flowbite.min.js"></script>
+    <script src="/legacy/vendor/flowbite/datepicker.min.js"></script>
+    <script>
+      window.AppNamespace = "EsotericApp";
+      window.EsotericApp = window.EsotericApp || {};
+      window.EsotericApp.flags = { ...(window.EsotericApp.flags || {}), skipSvg: true };
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ['"Space Grotesk"', "Inter", "system-ui", "sans-serif"],
+              body: ["Inter", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="/legacy/css/esoteric/style.css" />
+  </head>
+  <body class="bg-slate-950 text-slate-50 font-body min-h-screen esoteric-bg">
+    <div class="bg-esoteric">
+      <header class="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-8">
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between relative">
+          <a
+            class="home-link absolute right-0 top-0 sm:relative sm:right-auto sm:top-auto"
+            href="/"
+            aria-label="Back to home"
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12L12 4l9 8" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10" />
+            </svg>
+          </a>
+          <div class="flex flex-col gap-2 max-w-3xl">
+            <p class="text-sm uppercase tracking-[0.4em] text-emerald-200/70 font-semibold">Esoteric toolkit</p>
+            <h1 class="font-display text-3xl sm:text-4xl leading-tight">Esoteric Lab</h1>
+            <p class="text-emerald-50/80">
+              Work with draconic, heliocentric, and karmic overlays without losing the shared inputs. Generate charts, stash responses per mode, and keep the green esoteric vibe.
+            </p>
+          </div>
+          <div class="flex items-center gap-3 sm:self-start">
+            <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-slate-800/70 border border-slate-700 text-xs font-semibold tracking-wide text-emerald-200">
+              Esoteric
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-12">
+        <div class="sm:hidden flex justify-center mb-4">
+          <button
+            type="button"
+            id="inputPanelToggle"
+            data-input-panel-toggle
+            aria-controls="inputPanel"
+            aria-expanded="true"
+            class="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800/80 text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 12h14M5 16h14" />
+            </svg>
+            <span data-toggle-label>Hide inputs</span>
+          </button>
+        </div>
+        <div class="grid lg:grid-cols-3 gap-6">
+          <section class="lg:col-span-1 space-y-4">
+            <div class="flowbite-card h-full" id="inputPanel" data-input-panel>
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <p class="text-sm text-emerald-200/80 font-semibold">Chart input</p>
+                    <h2 class="text-xl font-semibold text-white">Configuration</h2>
+                  </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    id="configToggle"
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-emerald-400 hover:shadow-emerald-500/25 shadow-lg transition"
+                    aria-label="Open configuration"
+                  >
+                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    id="clearStateBtn"
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-800/80 text-slate-200 hover:text-white hover:border-rose-400 hover:shadow-rose-500/25 shadow-lg transition"
+                    aria-label="Clear saved state"
+                  >
+                    <svg class="w-5 h-5" aria-hidden="true" viewBox="0 0 64 64" fill="none">
+                      <path d="M16 10l1.8 3.6L22 16l-4.2 1.4L16 21l-1.8-3.6L10 16l4.2-1.4L16 10Z" fill="currentColor"/>
+                      <path d="M50 10l1.4 2.8L54 14l-2.6.8L50 18l-1.4-3.2L46 14l2.6-1.2L50 10Z" fill="currentColor"/>
+                      <path d="M14 40l1.4 2.8L18 44l-2.6.8L14 48l-1.4-3.2L10 44l2.6-1.2L14 40Z" fill="currentColor"/>
+                      <rect x="28" y="8" width="6" height="34" rx="3" transform="rotate(-15 28 8)" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                      <rect x="23" y="36" width="16" height="6" rx="3" transform="rotate(-15 23 36)" fill="none" stroke="currentColor" stroke-width="3"/>
+                      <path d="M20 44l26-8-6 18c-.6 1.8-2.6 2.8-4.4 2.2l-15.2-5.2c-1.8-.6-2.8-2.6-2.2-4.4Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div id="configPanel" class="config-panel hidden">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <p class="text-xs uppercase tracking-[0.25em] text-emerald-200/80 font-semibold">Chart config</p>
+                    <p class="text-sm text-slate-300">Defaults persist in this browser.</p>
+                  </div>
+                  <button type="button" id="configClose" class="text-slate-400 hover:text-white transition" aria-label="Close config">
+                    <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <label for="configPerspective" class="flowbite-label">Perspective</label>
+                    <select id="configPerspective" class="flowbite-input">
+                      <option value="Topocentric" selected>Topocentric</option>
+                      <option value="Apparent Geocentric">Apparent Geocentric</option>
+                      <option value="True Geocentric">True Geocentric</option>
+                      <option value="Heliocentric">Heliocentric</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="configZodiac" class="flowbite-label">Zodiac type</label>
+                    <select id="configZodiac" class="flowbite-input">
+                      <option value="Sidereal" selected>Sidereal</option>
+                      <option value="Tropic">Tropic</option>
+                    </select>
+                  </div>
+                  <div id="siderealRow">
+                    <label for="configSiderealMode" class="flowbite-label">Sidereal mode</label>
+                    <select id="configSiderealMode" class="flowbite-input">
+                      <option value="KRISHNAMURTI" selected>KRISHNAMURTI</option>
+                      <option value="LAHIRI">LAHIRI</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="configHouse" class="flowbite-label">House system</label>
+                    <select id="configHouse" class="flowbite-input">
+                      <option value="W">Whole sign (W)</option>
+                      <option value="P" selected>Placidus (P)</option>
+                      <option value="K">Koch (K)</option>
+                      <option value="R">Regiomontanus (R)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="configTheme" class="flowbite-label">Chart SVG theme</label>
+                    <select id="configTheme" class="flowbite-input">
+                      <option value="dark" selected>dark</option>
+                      <option value="classic">classic</option>
+                      <option value="dark-high-contrast">dark-high-contrast</option>
+                      <option value="light">light</option>
+                      <option value="strawberry">strawberry</option>
+                      <option value="black-and-white">black-and-white</option>
+                    </select>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label for="configAspectPoints" class="flowbite-label">Aspect base points (summaries)</label>
+                    <select id="configAspectPoints" class="flowbite-input h-32" multiple>
+                      <option value="sun" selected>Sun</option>
+                      <option value="moon" selected>Moon</option>
+                      <option value="mercury" selected>Mercury</option>
+                      <option value="venus" selected>Venus</option>
+                      <option value="mars" selected>Mars</option>
+                      <option value="jupiter" selected>Jupiter</option>
+                      <option value="saturn" selected>Saturn</option>
+                      <option value="ascendant" selected>Ascendant</option>
+                      <option value="uranus">Uranus</option>
+                      <option value="neptune">Neptune</option>
+                      <option value="pluto">Pluto</option>
+                      <option value="mean_node">Mean Node</option>
+                      <option value="mean_south_node">Mean South Node</option>
+                      <option value="true_node">True Node</option>
+                      <option value="true_south_node">True South Node</option>
+                      <option value="medium_coeli">Medium Coeli</option>
+                      <option value="descendant">Descendant</option>
+                      <option value="imum_coeli">Imum Coeli</option>
+                    </select>
+                    <p class="text-xs text-slate-400 mt-1">Choose which bodies anchor the aspect highlights.</p>
+                  </div>
+                </div>
+                <p class="mt-3 text-xs text-slate-400">Saved automatically to this browser and applied to all API requests.</p>
+              </div>
+
+              <form id="natalForm" class="space-y-6">
+                <div>
+                  <div class="flex items-center justify-between mb-3">
+                    <label class="block text-sm font-medium text-slate-200">Mode</label>
+                    <span class="text-xs text-slate-400">Choose how to generate the chart</span>
+                  </div>
+                  <div class="mode-grid">
+                    <label class="mode-card">
+                      <input type="radio" name="mode" value="natal" checked class="sr-only" />
+                      <div class="mode-card-inner">
+                        <div class="mode-card-check" aria-hidden="true"></div>
+                        <div class="mode-card-icon" aria-hidden="true">👤</div>
+                        <div>
+                          <p class="mode-card-title">Natal</p>
+                          <p class="mode-card-sub">Base chart only</p>
+                        </div>
+                      </div>
+                    </label>
+                    <label class="mode-card">
+                      <input type="radio" name="mode" value="transit" class="sr-only" />
+                      <div class="mode-card-inner">
+                        <div class="mode-card-check" aria-hidden="true"></div>
+                        <div class="mode-card-icon" aria-hidden="true">⏳</div>
+                        <div>
+                          <p class="mode-card-title">Transit</p>
+                          <p class="mode-card-sub">Only moment data</p>
+                        </div>
+                      </div>
+                    </label>
+                    <label class="mode-card">
+                      <input type="radio" name="mode" value="natal_transit" class="sr-only" />
+                      <div class="mode-card-inner">
+                        <div class="mode-card-check" aria-hidden="true"></div>
+                        <div class="mode-card-icon" aria-hidden="true">🜂</div>
+                        <div>
+                          <p class="mode-card-title">Natal + Transit</p>
+                          <p class="mode-card-sub">Dual-wheel snapshot</p>
+                        </div>
+                      </div>
+                    </label>
+                    <label class="mode-card">
+                      <input type="radio" name="mode" value="relationship" class="sr-only" />
+                      <div class="mode-card-inner">
+                        <div class="mode-card-check" aria-hidden="true"></div>
+                        <div class="mode-card-icon" aria-hidden="true">∞</div>
+                        <div>
+                          <p class="mode-card-title">Relationship</p>
+                          <p class="mode-card-sub">Dual-chart analysis</p>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div id="birthSection" class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-[0.2em]">Birth</h3>
+                    <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-emerald-200 border border-slate-700">Natal</span>
+                  </div>
+                  <div id="nameRow">
+                    <label for="name" class="flowbite-label">Name</label>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      class="flowbite-input"
+                      placeholder="Person or chart label"
+                      value="Subject"
+                    />
+                  </div>
+
+                  <div class="flex items-center justify-between gap-3">
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-emerald-200/80 font-semibold">Clock</p>
+                      <p class="text-sm text-slate-300">Birthday</p>
+                    </div>
+                    <button
+                      type="button"
+                      data-datetime-target="birth"
+                      data-modal-target="datetime-modal"
+                      data-modal-toggle="datetime-modal"
+                    class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-datetime-trigger"
+                    >
+                      <span id="birthDatetimeDisplay" class="whitespace-nowrap">1990-01-01 · 12:00</span>
+                      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                      </svg>
+                      <span class="sr-only">Edit birth date and time</span>
+                    </button>
+                  </div>
+                  <input id="dateInput" name="dateInput" type="hidden" value="1990-01-01" />
+                  <input id="timeInput" name="timeInput" type="hidden" value="12:00" />
+
+                  <div class="flex items-center justify-between gap-3">
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-emerald-200/80 font-semibold">Location</p>
+                      <p class="text-sm text-slate-300">Birth place</p>
+                    </div>
+                    <button
+                      type="button"
+                      data-location-target="birth"
+                      data-modal-target="location-modal"
+                      data-modal-toggle="location-modal"
+                    class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-datetime-trigger"
+                    >
+                      <span id="birthLocationDisplay" class="text-left leading-snug max-w-[220px] sm:max-w-[260px]">
+                        Amsterdam, NL · Europe/Amsterdam · 52.3702, 4.8952
+                      </span>
+                      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                      </svg>
+                      <span class="sr-only">Edit birth location</span>
+                    </button>
+                  </div>
+                  <input id="lat" name="lat" type="hidden" value="52.3702" />
+                  <input id="lng" name="lng" type="hidden" value="4.8952" />
+                  <input id="tz_str" name="tz_str" type="hidden" value="Europe/Amsterdam" />
+                  <input id="city" name="city" type="hidden" value="Amsterdam" />
+                  <input id="nation" name="nation" type="hidden" value="NL" />
+                </div>
+
+                <div id="transitSection" class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-[0.2em]">Transit moment</h3>
+                    <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-emerald-200 border border-slate-700">Outer wheel</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3">
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-emerald-200/80 font-semibold">Clock</p>
+                      <p class="text-sm text-slate-300">When?</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        id="transitNowInline"
+                        class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-datetime-trigger"
+                      >
+                        <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+                          <circle cx="12" cy="12" r="9" />
+                        </svg>
+                        Now
+                      </button>
+                      <button
+                        type="button"
+                        data-datetime-target="transit"
+                        data-modal-target="datetime-modal"
+                        data-modal-toggle="datetime-modal"
+                    class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-datetime-trigger"
+                      >
+                        <span id="transitDatetimeDisplay" class="whitespace-nowrap">2025-01-01 · 12:00</span>
+                        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                        </svg>
+                        <span class="sr-only">Edit transit date and time</span>
+                      </button>
+                    </div>
+                  </div>
+                  <input id="transitDateInput" name="transitDateInput" type="hidden" value="2025-01-01" />
+                  <input id="transitTimeInput" name="transitTimeInput" type="hidden" value="12:00" />
+
+                  <div class="flex items-center justify-between gap-3">
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-emerald-200/80 font-semibold">Location</p>
+                      <p class="text-sm text-slate-300">Transit spot</p>
+                    </div>
+                    <button
+                      type="button"
+                      data-location-target="transit"
+                      data-modal-target="location-modal"
+                      data-modal-toggle="location-modal"
+                      class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-location-trigger"
+                    >
+                      <span id="transitLocationDisplay" class="text-left leading-snug max-w-[220px] sm:max-w-[260px]">
+                        Amsterdam, NL · Europe/Amsterdam · 52.3702, 4.8952
+                      </span>
+                      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                      </svg>
+                      <span class="sr-only">Edit transit location</span>
+                    </button>
+                  </div>
+                  <input id="transitLat" name="transitLat" type="hidden" value="52.3702" />
+                  <input id="transitLng" name="transitLng" type="hidden" value="4.8952" />
+                  <input id="transitTz" name="transitTz" type="hidden" value="Europe/Amsterdam" />
+                  <input id="transitCity" name="transitCity" type="hidden" value="Amsterdam" />
+                  <input id="transitNation" name="transitNation" type="hidden" value="NL" />
+                </div>
+
+                <div id="relationshipSection" class="space-y-4 hidden">
+                  <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+                    <div class="flex items-center justify-between mb-3">
+                      <div>
+                        <p class="text-xs uppercase tracking-[0.25em] text-emerald-200/80 font-semibold">Partner A</p>
+                        <p class="text-sm text-slate-300">First person</p>
+                      </div>
+                      <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-emerald-200 border border-slate-700">Natal</span>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-2">
+                      <div>
+                        <label for="firstName" class="flowbite-label">Name</label>
+                        <input id="firstName" name="firstName" type="text" value="Partner A" class="flowbite-input" />
+                      </div>
+                      <div class="flex items-end justify-end gap-2">
+                        <button
+                          type="button"
+                          data-datetime-target="first"
+                          data-modal-target="datetime-modal"
+                          data-modal-toggle="datetime-modal"
+                          class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-datetime-trigger"
+                        >
+                          <span id="firstDatetimeDisplay">1990-01-01 12:00</span>
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2.5 2.5" />
+                            <circle cx="12" cy="12" r="9" />
+                          </svg>
+                          <span class="sr-only">Edit Partner A datetime</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                      <input id="firstDate" name="firstDate" type="date" value="1990-01-01" class="flowbite-input" />
+                      <input id="firstTime" name="firstTime" type="time" value="12:00" step="60" class="flowbite-input" />
+                    </div>
+                    <div class="mt-2">
+                      <div class="flex items-center justify-between mb-1">
+                        <p class="text-xs uppercase tracking-[0.25em] text-emerald-200/80 font-semibold">Location</p>
+                        <button
+                          type="button"
+                          data-location-target="first"
+                          data-modal-target="location-modal"
+                          data-modal-toggle="location-modal"
+                        class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-datetime-trigger"
+                        >
+                          <span id="firstLocationDisplay" class="text-left leading-snug max-w-[220px] sm:max-w-[260px]">
+                            Amsterdam, NL
+                          </span>
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                          </svg>
+                          <span class="sr-only">Edit Partner A location</span>
+                        </button>
+                      </div>
+                      <input id="firstLat" name="firstLat" type="hidden" value="52.3702" />
+                      <input id="firstLng" name="firstLng" type="hidden" value="4.8952" />
+                      <input id="firstTz" name="firstTz" type="hidden" value="Europe/Amsterdam" />
+                      <input id="firstCity" name="firstCity" type="hidden" value="Amsterdam" />
+                      <input id="firstNation" name="firstNation" type="hidden" value="NL" />
+                    </div>
+                  </div>
+
+                  <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+                    <div class="flex items-center justify-between mb-3">
+                      <div>
+                        <p class="text-xs uppercase tracking-[0.25em] text-emerald-200/80 font-semibold">Partner B</p>
+                        <p class="text-sm text-slate-300">Second person</p>
+                      </div>
+                      <span class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-emerald-200 border border-slate-700">Natal</span>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-2">
+                      <div>
+                        <label for="secondName" class="flowbite-label">Name</label>
+                        <input id="secondName" name="secondName" type="text" value="Partner B" class="flowbite-input" />
+                      </div>
+                      <div class="flex items-end justify-end gap-2">
+                        <button
+                          type="button"
+                          data-datetime-target="second"
+                          data-modal-target="datetime-modal"
+                          data-modal-toggle="datetime-modal"
+                          class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-datetime-trigger"
+                        >
+                          <span id="secondDatetimeDisplay">1992-02-02 14:00</span>
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2.5 2.5" />
+                            <circle cx="12" cy="12" r="9" />
+                          </svg>
+                          <span class="sr-only">Edit Partner B datetime</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                      <input id="secondDate" name="secondDate" type="date" value="1992-02-02" class="flowbite-input" />
+                      <input id="secondTime" name="secondTime" type="time" value="14:00" step="60" class="flowbite-input" />
+                    </div>
+                    <div class="mt-2">
+                      <div class="flex items-center justify-between mb-1">
+                        <p class="text-xs uppercase tracking-[0.25em] text-emerald-200/80 font-semibold">Location</p>
+                        <button
+                          type="button"
+                          data-location-target="second"
+                          data-modal-target="location-modal"
+                          data-modal-toggle="location-modal"
+                            class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 shadow-sm hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-datetime-trigger"
+                        >
+                          <span id="secondLocationDisplay" class="text-left leading-snug max-w-[220px] sm:max-w-[260px]">
+                            New York, US
+                          </span>
+                          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+                          </svg>
+                          <span class="sr-only">Edit Partner B location</span>
+                        </button>
+                      </div>
+                      <input id="secondLat" name="secondLat" type="hidden" value="40.7128" />
+                      <input id="secondLng" name="secondLng" type="hidden" value="-74.0060" />
+                      <input id="secondTz" name="secondTz" type="hidden" value="America/New_York" />
+                      <input id="secondCity" name="secondCity" type="hidden" value="New York" />
+                      <input id="secondNation" name="secondNation" type="hidden" value="US" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                  <button
+                    type="submit"
+                    id="generateBtn"
+                    class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 via-emerald-500 to-green-600 rounded-xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-400/40 focus:ring-4 focus:outline-none focus:ring-emerald-300 transition"
+                  >
+                    Generate chart
+                  </button>
+                  <span id="status" class="status"></span>
+                </div>
+              </form>
+            </div>
+
+          </section>
+
+          <section class="lg:col-span-2 space-y-6">
+            <div class="flowbite-card">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <p class="text-sm text-emerald-200/80 font-semibold">Overview</p>
+                  <h2 class="text-xl font-semibold text-white">Esoteric summary</h2>
+                </div>
+              </div>
+              <div id="summaryContent" class="summary-content">
+                <p class="hint">Generate any mode to view the esoteric summary.</p>
+              </div>
+            </div>
+
+            <div class="flowbite-card">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <p class="text-sm text-emerald-200/80 font-semibold">Sky map</p>
+                  <h2 class="text-xl font-semibold text-white">Points &amp; houses</h2>
+                </div>
+              </div>
+              <div id="skyMapContent" class="summary-content">
+                <p class="hint">Sky map placeholder. It refreshes with each mode and clears with the clean button.</p>
+              </div>
+            </div>
+
+            <div class="flowbite-card" id="futureVisionCard">
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <p class="text-sm text-emerald-200/80 font-semibold">Future vision</p>
+                  <h2 class="text-xl font-semibold text-white">Range explorer</h2>
+                  <p class="text-xs text-slate-400">Reserved for esoteric mapping.</p>
+                </div>
+              </div>
+              <div id="futureVisionContent" class="summary-content">
+                <p class="hint">Future vision map placeholder. Responses are still cached per mode.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer class="border-t border-slate-800/80 bg-slate-950/70 backdrop-blur">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 text-sm text-slate-300 flex flex-wrap items-center gap-2">
+          <span class="font-semibold text-white">Astro App &amp; API</span>
+          <span class="text-slate-500">— powered by</span>
+          <a class="text-emerald-200 hover:text-emerald-100 font-semibold" href="https://www.kerykeion.net/" target="_blank" rel="noreferrer">
+            Kerykeion
+          </a>
+          <span class="text-slate-500">and FastAPI.</span>
+        </div>
+      </footer>
+    </div>
+    <div
+      id="datetime-modal"
+      tabindex="-1"
+      aria-hidden="true"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
+          <div class="fixed inset-0 bg-emerald-950/60 backdrop-blur-sm" data-modal-hide="datetime-modal"></div>
+          <div class="relative w-full max-w-lg">
+        <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-xl modal-safe-area eso-modal-panel">
+          <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4 eso-modal-header">
+            <div>
+              <p class="text-[11px] uppercase tracking-[0.22em] text-emerald-200/70 font-semibold">Date &amp; time</p>
+              <h3 id="datetimeModalTitle" class="text-lg font-semibold eso-modal-title">Edit moment</h3>
+            </div>
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 text-slate-300 hover:text-white hover:border-emerald-400 eso-datetime-ghost"
+              data-modal-hide="datetime-modal"
+              aria-label="Close date time modal"
+            >
+              <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="px-5 py-4 space-y-4">
+            <div
+              id="datetimeInlinePicker"
+              inline-datepicker
+              datepicker-format="yyyy-mm-dd"
+              datepicker-autoselect-today
+              class="mx-auto flex justify-center [&>div>div]:shadow-none [&>div>div]:bg-slate-900 [&_div>button]:bg-slate-900"
+            ></div>
+              <div class="mt-3 grid sm:grid-cols-2 gap-3">
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label for="datetimeDateField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em]">
+                      Precise date
+                    </label>
+                    <button
+                      type="button"
+                    id="datetimeTodayBtn"
+                    class="text-[11px] px-2 py-1 rounded-md border border-slate-700 text-emerald-200 hover:border-emerald-400 hover:text-white eso-datetime-ghost"
+                    >
+                      Today
+                    </button>
+                  </div>
+                  <input
+                    type="date"
+                    id="datetimeDateField"
+                    class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500"
+                    value="2025-01-01"
+                  />
+                  <p class="text-[11px] text-slate-400 mt-1">Use the calendar or enter a date directly.</p>
+                </div>
+                <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label for="datetimeTimeField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em]">
+                    Precise time
+                  </label>
+                  <button
+                    type="button"
+                    id="datetimeNowBtn"
+                    class="text-[11px] px-2 py-1 rounded-md border border-slate-700 text-emerald-200 hover:border-emerald-400 hover:text-white eso-datetime-ghost"
+                  >
+                    Now
+                  </button>
+                </div>
+                <input
+                  type="time"
+                  id="datetimeTimeField"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500"
+                  step="60"
+                  value="12:00"
+                />
+                <p class="text-[11px] text-slate-400 mt-1">Use a preset or set an exact time.</p>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em] mb-3">Quick time picks</p>
+              <ul id="datetimeTimeList" class="grid w-full grid-cols-3 gap-2">
+                <li>
+                  <input type="radio" id="dt-09-00" value="09:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-09-00" class="datetime-time-btn">09:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-12-00" value="12:00" class="hidden peer" name="datetimeTimeOption" checked />
+                  <label for="dt-12-00" class="datetime-time-btn">12:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-15-00" value="15:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-15-00" class="datetime-time-btn">15:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-18-00" value="18:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-18-00" class="datetime-time-btn">18:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-21-00" value="21:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-21-00" class="datetime-time-btn">21:00</label>
+                </li>
+                <li>
+                  <input type="radio" id="dt-23-00" value="23:00" class="hidden peer" name="datetimeTimeOption" />
+                  <label for="dt-23-00" class="datetime-time-btn">23:00</label>
+                </li>
+              </ul>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                id="datetimeSaveBtn"
+                data-modal-hide="datetime-modal"
+              class="w-full rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-300 eso-datetime-trigger"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                data-modal-hide="datetime-modal"
+                class="w-full rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-200 hover:border-slate-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-slate-600 eso-datetime-ghost"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="location-modal"
+      tabindex="-1"
+      aria-hidden="true"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
+          <div class="fixed inset-0 bg-emerald-950/60 backdrop-blur-sm" data-modal-hide="location-modal"></div>
+          <div class="relative w-full max-w-lg">
+        <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-xl modal-safe-area eso-modal-panel">
+          <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4 eso-modal-header">
+            <div>
+              <p class="text-[11px] uppercase tracking-[0.22em] text-emerald-200/70 font-semibold">Location</p>
+              <h3 id="locationModalTitle" class="text-lg font-semibold eso-modal-title">Edit location</h3>
+            </div>
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 text-slate-300 hover:text-white hover:border-emerald-400 eso-datetime-ghost"
+              data-modal-hide="location-modal"
+              aria-label="Close location modal"
+            >
+              <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="px-5 py-4 space-y-4">
+            <div class="grid sm:grid-cols-2 gap-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label for="locationCityField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em]">City</label>
+                  <a
+                    id="locationLookupLink"
+                    href="https://www.latlong.net/"
+                    target="_blank"
+                    rel="noreferrer"
+                    class="text-[11px] text-emerald-200 hover:text-emerald-100 underline-offset-4 hover:underline"
+                  >
+                    LatLong.net
+                  </a>
+                </div>
+                <input id="locationCityField" type="text" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label for="locationNationField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em]">Country code</label>
+                <input id="locationNationField" type="text" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500" />
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-3">
+              <div>
+                <label for="locationLatField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em]">Latitude</label>
+                <input id="locationLatField" type="text" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label for="locationLngField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em]">Longitude</label>
+                <input id="locationLngField" type="text" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500" />
+              </div>
+            </div>
+            <div>
+              <label for="locationTzField" class="text-xs font-semibold text-slate-300 uppercase tracking-[0.15em]">Timezone ID</label>
+              <input id="locationTzField" type="text" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500" />
+              <p class="text-[11px] text-slate-400 mt-1">e.g. Europe/Amsterdam or America/New_York</p>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="locationPasteBtn"
+                  class="inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-md border border-slate-700 text-emerald-200 hover:border-emerald-400 hover:text-white eso-datetime-ghost"
+                >
+                  Paste
+                </button>
+                <button
+                  type="button"
+                  id="locationTzCurrentBtn"
+                  class="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-100 hover:border-emerald-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 eso-datetime-ghost"
+                >
+                  <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2.5 2.5" />
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+                  <span id="locationTzCurrentLabel" class="font-semibold text-emerald-100">--</span>
+                </button>
+              </div>
+              <button
+                type="button"
+                id="locationSaveBtn"
+                data-modal-hide="location-modal"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg border border-slate-700 bg-slate-800 hover:border-emerald-400 hover:text-emerald-100 transition eso-location-trigger"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/legacy/js/shared/core.js"></script>
+    <script src="/legacy/js/shared/shared.js"></script>
+    <script src="/legacy/js/shared/config.js"></script>
+    <script src="/legacy/js/shared/payloads.js"></script>
+    <script src="/legacy/js/shared/render.js"></script>
+    <script src="/legacy/js/esoteric/main.js"></script>
+    <script src="/legacy/js/shared/state.js"></script>
+    <script src="/legacy/js/shared/actions.js"></script>
+  </body>
+</html>

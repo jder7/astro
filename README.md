@@ -42,6 +42,16 @@ Then open:
 
 ---
 
+## Frontend (Svelte + Vite + Tailwind)
+
+- Dev server: `cd frontend && npm install && npm run dev -- --host`
+- Production build: `npm run build` (outputs to `frontend/dist`, served at `/static`)
+- Legacy static pages live under `frontend/legacy` and are exposed at `/legacy/*`.
+
+The FastAPI app falls back to the legacy HTML files if a fresh `dist` build is missing.
+
+---
+
 ## Docker build & run
 
 Build the image (from the repo root):
@@ -58,7 +68,18 @@ docker run --rm -p 8000:8000 astro-app
 
 Then visit <http://127.0.0.1:8000/home>. Swagger and ReDoc are available at `/docs` and `/redoc` as usual.
 
----
+### Basic auth env vars
+
+The API is protected with HTTP Basic Auth. Defaults are `demo` / `demo1234`. Override them in Docker with:
+
+```bash
+docker run --rm -p 8000:8000 \
+  -e DEMO_USERNAME=youruser \
+  -e DEMO_PASSWORD=yourpass \
+  astro-app
+```
+
+--- 
 
 ## Endpoint reference
 

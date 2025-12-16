@@ -1,0 +1,82 @@
+const BASIC_USER = import.meta.env.VITE_API_USER;
+const BASIC_PASS = import.meta.env.VITE_API_PASS;
+const AUTH_HEADER =
+  BASIC_USER && BASIC_PASS ? `Basic ${btoa(`${BASIC_USER}:${BASIC_PASS}`)}` : null;
+
+const baseHeaders = { 'Content-Type': 'application/json' };
+const headersWithAuth = AUTH_HEADER ? { ...baseHeaders, Authorization: AUTH_HEADER } : baseHeaders;
+
+async function parseJson(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(`Unexpected JSON from ${res.url}: ${text}`);
+  }
+}
+
+async function postJson(path, payload) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: headersWithAuth,
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`${path} failed: ${res.status} ${res.statusText} - ${body}`);
+  }
+  return parseJson(res);
+}
+
+async function postSvg(path, payload) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: headersWithAuth,
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`${path} failed: ${res.status} ${res.statusText} - ${body}`);
+  }
+  return res.text();
+}
+
+export async function requestChart(mode, payload) {
+  if (mode === 'natal') {
+    const [json, svg] = await Promise.all([
+      postJson('/api/natal', payload),
+      postSvg('/api/svg/natal', payload),
+    ]);
+    return { json, svg };
+  }
+
+  if (mode === 'transit') {
+    const [json, svg] = await Promise.all([
+      postJson('/api/transit', payload),
+      postSvg('/api/svg/transit', payload),
+    ]);
+    return { json, svg };
+  }
+
+  if (mode === 'natal_transit') {
+    const [json, svg] = await Promise.all([
+      postJson('/api/transit', payload),
+      postSvg('/api/svg/transit', payload),
+    ]);
+    return { json, svg };
+  }
+
+  const [json, svg] = await Promise.all([
+    postJson('/api/relationship', payload),
+    postSvg('/api/svg/synastry', { ...payload, grid_view: false }),
+  ]);
+  return { json, svg };
+}
+
+export async function requestReport(payload) {
+  return postJson('/api/report', payload);
+}
+
+export async function requestTransitRange(payload) {
+  return postJson('/api/transit-range', payload);
+}
