@@ -3,7 +3,7 @@ from pathlib import Path
 import secrets
 import os
 
-from fastapi import FastAPI,Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -19,6 +19,10 @@ from endpoints.relationship import router as relationship_router
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR / "frontend"
+FRONTEND_DIST = FRONTEND_DIR / "dist"
+FRONTEND_LEGACY = FRONTEND_DIR / "legacy"
+FRONTEND_DIST.mkdir(parents=True, exist_ok=True)
+FRONTEND_LEGACY.mkdir(parents=True, exist_ok=True)
 
 
 security = HTTPBasic()
@@ -66,9 +70,29 @@ app.add_middleware(
 # Serve static assets (CSS/JS) from the `frontend` folder under `/static`.
 app.mount(
     "/static",
-    StaticFiles(directory=str(FRONTEND_DIR), html=False),
+    StaticFiles(directory=str(FRONTEND_DIST), html=True),
     name="static",
 )
+app.mount(
+    "/legacy",
+    StaticFiles(directory=str(FRONTEND_LEGACY), html=True),
+    name="legacy",
+)
+
+
+def _frontend_page(filename: str) -> Path:
+    """
+    Resolve a built frontend page, falling back to the legacy copy if the build is missing.
+    """
+    candidate = FRONTEND_DIST / filename
+    if candidate.exists():
+        return candidate
+    legacy_map = {
+        "index.html": FRONTEND_LEGACY / "home.html",
+        "advanced.html": FRONTEND_LEGACY / "advanced.html",
+        "esoteric.html": FRONTEND_LEGACY / "esoteric.html",
+    }
+    return legacy_map.get(filename, candidate)
 
 
 @app.get("/", include_in_schema=False)
@@ -84,32 +108,29 @@ async def home() -> FileResponse:
     """
     Serve the simple frontend used to generate natal SVG charts.
 
-    The page loads `frontend/home.html`, which in turn loads its JS/CSS
-    from `/static/js/home.js` and `/static/css/home.css`.
+    The page loads `frontend/dist/index.html`, which pulls assets from `/static`.
     """
-    return FileResponse(FRONTEND_DIR / "home.html")
+    return FileResponse(_frontend_page("index.html"))
 
 
 @app.get("/advanced", include_in_schema=False)
 async def advanced() -> FileResponse:
-  """
-  Serve the advanced layout page.
+    """
+    Serve the advanced layout page.
 
-  The page loads `frontend/advanced.html` with its own scoped CSS/JS from
-  `/static/css/advanced` and `/static/js/advanced`.
-  """
-  return FileResponse(FRONTEND_DIR / "advanced.html")
+    The page loads `frontend/dist/advanced.html` and assets from `/static`.
+    """
+    return FileResponse(_frontend_page("advanced.html"))
 
 
 @app.get("/esoteric", include_in_schema=False)
 async def esoteric() -> FileResponse:
-  """
-  Serve the esoteric layout page.
+    """
+    Serve the esoteric layout page.
 
-  The page loads `frontend/esoteric.html` with its own scoped CSS/JS from
-  `/static/css/esoteric` and `/static/js/esoteric`.
-  """
-  return FileResponse(FRONTEND_DIR / "esoteric.html")
+    The page loads `frontend/dist/esoteric.html` and assets from `/static`.
+    """
+    return FileResponse(_frontend_page("esoteric.html"))
 
 
 # API routers – all mounted under `/api`
