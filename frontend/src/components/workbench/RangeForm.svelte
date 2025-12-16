@@ -20,7 +20,7 @@
   }
 </script>
 
-<form class="glass-card p-4 space-y-4" on:submit|preventDefault={submit}>
+<form class="glass-card p-4 space-y-4" on:submit|preventDefault={submit} id="range-form">
   <div class="flex items-center justify-between">
     <div>
       <p class="section-title text-xs">Transit range</p>

@@ -299,7 +299,7 @@
     const lunationBlock = renderLunationBlock(getLunationInfo(birthDateParts), "Moon cycle at birth");
 
     dom.summaryEl.innerHTML = `
-      <div class="summary-card summary-card--with-sigil">
+      <div class="summary-card summary-card--with-sigil" id="summary-natal-card">
         <div class="summary-card-head">
           <div>
             <div class="summary-heading">Natal highlights ${birthLabel ? `· ${birthLabel}` : ""}</div>
@@ -316,7 +316,7 @@
             <h4>Top aspects (Sun, Moon, Asc)</h4>
             ${
               aspectItems
-                ? `<ul>${aspectItems}</ul>`
+                ? `<ul id="summary-natal-aspects">${aspectItems}</ul>`
                 : "<p>No major aspects found within the configured orbs.</p>"
             }
           </div>
@@ -358,7 +358,7 @@
     const lunationBlock = renderLunationBlock(getLunationInfo(transitDateParts), "Moon cycle at moment");
 
     dom.summaryEl.innerHTML = `
-      <div class="summary-card summary-card--with-sigil">
+      <div class="summary-card summary-card--with-sigil" id="summary-transit-card">
         <div class="summary-card-head">
           <div>
             <div class="summary-heading">Transit snapshot ${transitLabel ? `· ${transitLabel}` : ""}</div>
@@ -375,7 +375,7 @@
             <h4>Transit aspects</h4>
             ${
               aspectItems
-                ? `<ul>${aspectItems}</ul>`
+                ? `<ul id="summary-transit-aspects">${aspectItems}</ul>`
                 : "<p>No major aspects found within the configured orbs.</p>"
             }
           </div>
@@ -454,7 +454,7 @@
         .map((text) => `<li>${text}</li>`)
         .join("");
       return `
-        <div class="summary-card summary-card--with-sigil">
+        <div class="summary-card summary-card--with-sigil" id="summary-combined-natal">
           <div class="summary-card-head">
             <div class="summary-heading">Natal</div>
             ${natalSigil ? `<div class="summary-sigil">${natalSigil}</div>` : ""}
@@ -467,7 +467,7 @@
             </div>
             <div class="summary-aspects">
               <h4>Top aspects (Sun, Moon, Asc)</h4>
-              ${aspectItems ? `<ul>${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
+              ${aspectItems ? `<ul id="summary-combined-natal-aspects">${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
             </div>
             ${renderLunationBlock(getLunationInfo(birthDateParts), "Moon cycle at birth")}
           </div>
@@ -484,7 +484,7 @@
         .map((text) => `<li>${text}</li>`)
         .join("");
       return `
-        <div class="summary-card summary-card--with-sigil">
+        <div class="summary-card summary-card--with-sigil" id="summary-combined-transit">
           <div class="summary-card-head">
             <div class="summary-heading">Transit</div>
             ${transitSigil ? `<div class="summary-sigil">${transitSigil}</div>` : ""}
@@ -497,7 +497,7 @@
             </div>
             <div class="summary-aspects">
               <h4>Transit aspects (Sun, Moon, Asc)</h4>
-              ${aspectItems ? `<ul>${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
+              ${aspectItems ? `<ul id="summary-combined-transit-aspects">${aspectItems}</ul>` : "<p>No major aspects found.</p>"}
             </div>
             ${renderLunationBlock(getLunationInfo(transitDateParts), "Moon cycle at moment")}
           </div>
@@ -514,11 +514,11 @@
         .map((text) => `<li>${text}</li>`)
         .join("");
       return `
-        <div class="summary-card">
+        <div class="summary-card" id="summary-combined-cross">
           <div class="summary-heading">Transit to natal</div>
           <div class="summary-aspects">
             <h4>Key inter-chart aspects</h4>
-            ${items ? `<ul>${items}</ul>` : "<p>No inter-chart aspects within the orbs.</p>"}
+            ${items ? `<ul id="summary-combined-cross-aspects">${items}</ul>` : "<p>No inter-chart aspects within the orbs.</p>"}
           </div>
         </div>
       `;
@@ -593,7 +593,7 @@
     });
 
     dom.summaryEl.innerHTML = `
-      <div class="summary-card summary-card--with-sigil">
+      <div class="summary-card summary-card--with-sigil" id="summary-relationship-card">
         <div class="summary-card-head">
           <div>
             <div class="summary-heading">Synastry highlights</div>
@@ -608,7 +608,7 @@
           </div>
           ${
             items
-              ? `<ul>${items}</ul>`
+              ? `<ul id="summary-relationship-aspects">${items}</ul>`
               : "<p>No major aspects found for the selected partners.</p>"
           }
         </div>

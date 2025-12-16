@@ -2,7 +2,7 @@
   export let aspects = [];
 </script>
 
-<div class="glass-card p-4 space-y-3">
+<div class="glass-card p-4 space-y-3" id="aspects-list">
   <div class="flex items-center justify-between">
     <p class="section-title text-xs">Aspects</p>
     <span class="badge">{aspects.length}</span>

@@ -14,7 +14,7 @@
   }
 </script>
 
-<div class="glass-card p-4 space-y-3">
+<div class="glass-card p-4 space-y-3" id="svg-viewer">
   <div class="flex items-center justify-between">
     <div>
       <p class="section-title text-xs">{title}</p>

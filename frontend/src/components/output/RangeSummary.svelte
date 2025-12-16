@@ -3,7 +3,7 @@
 </script>
 
 {#if ranges && ranges.length}
-  <div class="glass-card p-4 space-y-4">
+  <div class="glass-card p-4 space-y-4" id="range-summary">
     <div class="flex items-center justify-between">
       <p class="section-title text-xs">Sweeps</p>
       <span class="badge">{ranges.length}</span>

@@ -117,7 +117,7 @@
   }
 </script>
 
-<div class="page-shell pb-12">
+<div class="page-shell pb-12" id="chart-workbench">
   <div class="grid lg:grid-cols-3 gap-6">
     <div class="space-y-4">
       <ChartForm on:submit={generateChart} />

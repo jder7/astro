@@ -4,7 +4,7 @@
   export let section;
 </script>
 
-<div class="glass-card p-4 space-y-3">
+<div class="glass-card p-4 space-y-3" id={`summary-section-${(section?.meta?.title || 'section').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
   <div class="flex items-center justify-between flex-wrap gap-2">
     <div>
       <p class="section-title text-xs">{section.meta?.title}</p>

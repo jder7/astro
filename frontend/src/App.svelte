@@ -19,7 +19,7 @@
   `;
 </script>
 
-<div class={`min-h-screen flex flex-col gap-4 ${theme.bgClass}`} style={themeVars}>
+<div class={`min-h-screen flex flex-col gap-4 ${theme.bgClass}`} style={themeVars} id="app-shell">
   <NavBar active={page} />
   <main class="flex-1">
     <svelte:component this={Current} />

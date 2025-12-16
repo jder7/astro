@@ -14,7 +14,7 @@
   }
 </script>
 
-<div class="glass-card p-4 space-y-3">
+<div class="glass-card p-4 space-y-3" id="api-response-view">
   <div class="flex items-center justify-between">
     <p class="section-title text-xs">{title}</p>
     <button type="button" class="button-ghost" on:click={copy} disabled={!data}>{copied ? 'Copied' : 'Copy'}</button>

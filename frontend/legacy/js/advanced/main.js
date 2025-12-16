@@ -3295,8 +3295,9 @@
             )
           : "";
         const blockGridClass = hasNatal ? "range-block-grid range-block-grid--dual" : "range-block-grid";
+        const slug = String(title || "entry").toLowerCase().replace(/[^a-z0-9]+/g, "-");
         return `
-          <div class="range-entry-card" style="--range-tone:${tone}; --range-stroke:${stroke}">
+          <div class="range-entry-card" id="range-entry-${slug}" style="--range-tone:${tone}; --range-stroke:${stroke}">
             <div class="range-entry-head">
               <div class="range-entry-title">
                 <p class="range-entry-date">${title}</p>

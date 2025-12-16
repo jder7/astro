@@ -17,7 +17,7 @@
   ];
 </script>
 
-<nav class="page-shell py-6 flex items-center justify-between gap-4">
+<nav class="page-shell py-6 flex items-center justify-between gap-4" id="nav-bar">
   <div class="flex items-center gap-3">
     <div class="h-11 w-11 rounded-2xl bg-gradient-to-br from-cyan-500/80 via-indigo-500/60 to-emerald-400/80 flex items-center justify-center shadow-glow">
       <span class="font-display text-lg">✺</span>

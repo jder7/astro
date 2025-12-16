@@ -28,7 +28,7 @@
 </script>
 
 {#if report}
-  <div class="glass-card p-4 space-y-3">
+  <div class="glass-card p-4 space-y-3" id="report-view">
     <div class="flex items-center justify-between">
       <div>
         <p class="section-title text-xs">Report</p>

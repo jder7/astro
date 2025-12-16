@@ -203,8 +203,9 @@
       .join("");
     if (!rows) return "";
     const sigil = renderSigil(subject, dayKey);
+    const slug = (cardLabel || 'card').toLowerCase().replace(/[^a-z0-9]+/g, "-");
     return `
-      <div class="adv-summary-card">
+      <div class="adv-summary-card" id="eso-summary-${slug}">
         <div class="adv-summary-head">
           <div>
             <p class="adv-asc-kicker">Day Ruler · ${dayKey ? capitalise(dayKey) : "—"}</p>
