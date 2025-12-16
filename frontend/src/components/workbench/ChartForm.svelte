@@ -37,8 +37,8 @@
   }
 </script>
 
-<form class="space-y-5" on:submit|preventDefault={submit}>
-  <div class="glass-card p-4 space-y-4">
+<form class="space-y-5" on:submit|preventDefault={submit} id="chart-form">
+  <div class="glass-card p-4 space-y-4" id="mode-panel">
     <div class="flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <button
@@ -115,15 +115,19 @@
   </div>
 
   {#if state.mode === 'natal' || state.mode === 'natal_transit'}
-    <BirthFields value={birthValue} onChange={updateBirth} />
+    <section id="birth-fields">
+      <BirthFields value={birthValue} onChange={updateBirth} />
+    </section>
   {/if}
 
   {#if state.mode === 'transit' || state.mode === 'natal_transit'}
-    <TransitFields value={transitValue} onChange={updateTransit} title={state.mode === 'transit' ? 'Transit' : 'Transit overlay'} />
+    <section id="transit-fields">
+      <TransitFields value={transitValue} onChange={updateTransit} title={state.mode === 'transit' ? 'Transit' : 'Transit overlay'} />
+    </section>
   {/if}
 
   {#if state.mode === 'relationship'}
-    <div class="grid sm:grid-cols-2 gap-4">
+    <div class="grid sm:grid-cols-2 gap-4" id="relationship-fields">
       <PartnerFields value={firstValue} label="Partner A" onChange={(patch) => updateRelationship('first', patch)} />
       <PartnerFields value={secondValue} label="Partner B" onChange={(patch) => updateRelationship('second', patch)} />
     </div>
