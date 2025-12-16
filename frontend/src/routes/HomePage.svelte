@@ -8,6 +8,7 @@
   title="Astro Home"
   description="Generate natal, transit, or dual-wheel charts with shared inputs and a tighter Svelte UI."
   badge="Home"
+  page="home"
 />
 
 <ChartWorkbench page="home" enableReport={true} />

@@ -8,10 +8,6 @@
 
 body {
   @apply font-body bg-slate-950 text-slate-50 min-h-screen antialiased;
-  background-image:
-    radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.12), transparent 25%),
-    radial-gradient(circle at 90% 10%, rgba(79, 70, 229, 0.12), transparent 25%),
-    radial-gradient(circle at 50% 75%, rgba(34, 197, 94, 0.1), transparent 30%);
 }
 
 .page-shell {
@@ -19,27 +15,60 @@ body {
 }
 
 .glass-card {
-  @apply bg-slate-900/70 border border-slate-800 rounded-2xl shadow-glow backdrop-blur;
+  @apply bg-slate-900/70 border rounded-2xl shadow-glow backdrop-blur;
+  border-color: color-mix(in srgb, var(--accent, #06b6d4) 16%, #0f172a 84%);
 }
 
 .button-primary {
-  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-cyan-600 hover:bg-cyan-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 disabled:opacity-60 disabled:cursor-not-allowed;
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white focus-visible:outline-none focus-visible:ring-2 disabled:opacity-60 disabled:cursor-not-allowed;
+  background-color: var(--accent-strong, #0ea5e9);
+  border: 1px solid color-mix(in srgb, var(--accent-strong, #0ea5e9) 65%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent, #06b6d4) 40%, transparent),
+    0 12px 45px rgba(15, 23, 42, 0.65);
+  transition: all 150ms ease;
+}
+
+.button-primary:hover {
+  background-color: var(--accent, #06b6d4);
+}
+
+.button-primary:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent, #06b6d4);
 }
 
 .button-ghost {
   @apply inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-800 text-slate-200 hover:border-slate-600 hover:text-white;
+  border-color: color-mix(in srgb, var(--accent, #06b6d4) 18%, #1e293b 82%);
 }
 
 .tag {
-  @apply inline-flex items-center gap-2 px-2.5 py-1 text-[11px] font-semibold rounded-full border border-slate-800 bg-slate-900/60;
+  @apply inline-flex items-center gap-2 px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-slate-900/60;
+  border-color: color-mix(in srgb, var(--accent, #06b6d4) 30%, #1e293b 70%);
+  color: color-mix(in srgb, var(--accent, #06b6d4) 80%, #e2e8f0 20%);
 }
 
 .grid-cards {
   @apply grid gap-4 sm:grid-cols-2;
 }
 
+.micro-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.micro-label {
+  @apply text-[11px] uppercase tracking-[0.2em] font-semibold;
+  color: color-mix(in srgb, var(--accent, #06b6d4) 60%, #cbd5e1 40%);
+}
+
+.micro-input {
+  @apply h-10;
+}
+
 .section-title {
-  @apply text-sm uppercase tracking-[0.25em] text-slate-300 font-semibold;
+  @apply text-sm uppercase tracking-[0.25em] font-semibold;
+  color: color-mix(in srgb, var(--accent-strong, #0ea5e9) 65%, #cbd5e1 35%);
 }
 
 .section-heading {
@@ -63,7 +92,9 @@ code {
 }
 
 input, select, textarea {
-  @apply bg-slate-900/70 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/70;
+  @apply bg-slate-900/70 border rounded-xl px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2;
+  border-color: color-mix(in srgb, var(--accent, #06b6d4) 12%, #1f2937 88%);
+  --tw-ring-color: var(--accent, #06b6d4);
 }
 
 label {
@@ -75,11 +106,70 @@ label {
 }
 
 .nav-link.active {
-  @apply border-cyan-500/50 bg-cyan-500/10 text-white shadow-glow;
+  @apply text-white shadow-glow;
+  border-color: var(--accent, #06b6d4);
+  background-color: var(--accent-soft, rgba(14, 165, 233, 0.12));
 }
 
 .badge {
   @apply inline-flex items-center gap-2 px-2 py-1 rounded-full text-[11px] font-semibold bg-slate-800/70 border border-slate-700;
+}
+
+.accent-badge {
+  background-color: var(--badge-bg, rgba(14, 165, 233, 0.12));
+  border-color: var(--badge-border, rgba(14, 165, 233, 0.4));
+  color: var(--badge-text, #c0e9ff);
+}
+
+.mode-grid {
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+}
+
+.mode-pill {
+  @apply relative flex items-center justify-center gap-1 rounded-xl border border-slate-800 bg-slate-900/60 h-14;
+  transition: all 150ms ease;
+}
+
+.mode-pill:hover {
+  border-color: var(--accent, #06b6d4);
+}
+
+.mode-pill.active {
+  border-color: var(--accent, #06b6d4);
+  background: var(--accent-soft, rgba(14, 165, 233, 0.12));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent, #06b6d4) 50%, transparent);
+}
+
+.mode-icon {
+  @apply text-xl;
+}
+
+.legend-dot {
+  @apply inline-flex rounded-full absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  background: color-mix(in srgb, var(--accent, #06b6d4) 80%, #0f172a 20%);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-soft, rgba(14, 165, 233, 0.12)) 100%, transparent);
+}
+
+.legend-dot.bright {
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-soft, rgba(14, 165, 233, 0.16)) 100%, transparent);
+}
+
+.icon-button {
+  @apply inline-flex items-center justify-center rounded-full border bg-slate-900/70 text-slate-200 hover:text-white w-10 h-10;
+  border-color: color-mix(in srgb, var(--accent, #06b6d4) 30%, #1e293b 70%);
+  transition: all 150ms ease;
+}
+
+.icon-button:hover {
+  background: var(--accent-soft, rgba(14, 165, 233, 0.12));
+}
+
+.slide-panel {
+  @apply border border-slate-800 rounded-xl p-3 bg-slate-900/60;
 }
 
 .card-header {
@@ -104,4 +194,35 @@ label {
 
 hr.section-divider {
   @apply border-slate-800 my-6;
+}
+
+.page-home-bg {
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.15), transparent 25%),
+    radial-gradient(circle at 88% 12%, rgba(129, 140, 248, 0.12), transparent 25%),
+    radial-gradient(circle at 50% 78%, rgba(14, 165, 233, 0.1), transparent 32%);
+}
+
+.page-advanced-bg {
+  background-image:
+    radial-gradient(circle at 18% 20%, rgba(251, 191, 36, 0.15), transparent 25%),
+    radial-gradient(circle at 82% 10%, rgba(129, 140, 248, 0.12), transparent 25%),
+    radial-gradient(circle at 60% 80%, rgba(236, 72, 153, 0.12), transparent 30%);
+}
+
+.page-esoteric-bg {
+  background-image:
+    radial-gradient(circle at 18% 18%, rgba(52, 211, 153, 0.18), transparent 26%),
+    radial-gradient(circle at 84% 12%, rgba(74, 222, 128, 0.16), transparent 26%),
+    radial-gradient(circle at 46% 78%, rgba(16, 185, 129, 0.15), transparent 36%);
+}
+
+.gradient-overlay.home {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(129, 140, 248, 0.08), rgba(34, 197, 94, 0.08));
+}
+.gradient-overlay.advanced {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.16), rgba(236, 72, 153, 0.1), rgba(79, 70, 229, 0.08));
+}
+.gradient-overlay.esoteric {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(52, 211, 153, 0.14), rgba(74, 222, 128, 0.1));
 }

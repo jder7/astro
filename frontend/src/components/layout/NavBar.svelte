@@ -1,10 +1,19 @@
 <script>
   export let active = 'home';
 
+  const isDev = import.meta.env.DEV;
+  const hrefFor = (key) => {
+    if (isDev) {
+      if (key === 'home') return '/';
+      return `/${key}.html`;
+    }
+    return key === 'home' ? '/home' : `/${key}`;
+  };
+
   const links = [
-    { href: '/home', key: 'home', label: 'Home' },
-    { href: '/advanced', key: 'advanced', label: 'Advanced' },
-    { href: '/esoteric', key: 'esoteric', label: 'Esoteric' },
+    { href: hrefFor('home'), key: 'home', label: 'Home' },
+    { href: hrefFor('advanced'), key: 'advanced', label: 'Advanced' },
+    { href: hrefFor('esoteric'), key: 'esoteric', label: 'Esoteric' },
   ];
 </script>
 

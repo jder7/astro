@@ -14,7 +14,6 @@
   import SummarySection from '../output/SummarySection.svelte';
   import SvgViewer from '../output/SvgViewer.svelte';
   import ChartForm from './ChartForm.svelte';
-  import ConfigPanel from './ConfigPanel.svelte';
   import RangeForm from './RangeForm.svelte';
 
   export let page = 'home';
@@ -115,7 +114,6 @@
 <div class="page-shell pb-12">
   <div class="grid lg:grid-cols-3 gap-6">
     <div class="space-y-4">
-      <ConfigPanel />
       <ChartForm on:submit={generateChart} />
       {#if showRange}
         <RangeForm on:range={runRange} loading={rangeLoading} />

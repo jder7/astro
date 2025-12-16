@@ -8,6 +8,7 @@
   title="Advanced Workbench"
   description="Pro controls for range sweeps, reusable inputs, and richer summaries for ascendant and lunar cycles."
   badge="Advanced"
+  page="advanced"
 />
 
 <ChartWorkbench page="advanced" showRange={true} enableReport={true} />

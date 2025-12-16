@@ -3,14 +3,15 @@
   import BirthFields from '../forms/BirthFields.svelte';
   import TransitFields from '../forms/TransitFields.svelte';
   import PartnerFields from '../forms/PartnerFields.svelte';
+  import ConfigPanel from './ConfigPanel.svelte';
   import { inputStore, resetInputs, setMode, updateBirth, updateRelationship, updateTransit } from '$lib/state/inputStore';
 
   const dispatch = createEventDispatcher();
   const modes = [
-    { key: 'natal', label: 'Natal', description: 'Single chart' },
-    { key: 'transit', label: 'Transit', description: 'Moment in time' },
-    { key: 'natal_transit', label: 'Natal + Transit', description: 'Dual wheel' },
-    { key: 'relationship', label: 'Relationship', description: 'Synastry' },
+    { key: 'natal', label: 'Natal', icon: '👤' },
+    { key: 'transit', label: 'Transit', icon: '🕒' },
+    { key: 'natal_transit', label: 'Dual', icon: '🌀' },
+    { key: 'relationship', label: 'Synastry', icon: '👥' },
   ];
 
   const pad = (v) => String(v ?? 0).padStart(2, '0');
@@ -28,6 +29,7 @@
   $: transitValue = { ...state.transit, date: toDate(state.transit), time: toTime(state.transit) };
   $: firstValue = { ...state.relationship.first, date: toDate(state.relationship.first), time: toTime(state.relationship.first) };
   $: secondValue = { ...state.relationship.second, date: toDate(state.relationship.second), time: toTime(state.relationship.second) };
+  let showConfig = false;
 
   function submit(event) {
     event.preventDefault();
@@ -35,33 +37,65 @@
   }
 </script>
 
-<form class="space-y-6" on:submit|preventDefault={submit}>
-  <div class="glass-card p-4 space-y-3">
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="section-title text-xs">Mode</p>
-        <p class="text-sm text-slate-300">Choose how to generate the chart.</p>
+<form class="space-y-5" on:submit|preventDefault={submit}>
+  <div class="glass-card p-4 space-y-4">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Toggle configuration"
+          on:click={() => (showConfig = !showConfig)}
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z"
+            />
+            <circle cx="12" cy="12" r="2.75" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Reset inputs"
+          on:click={resetInputs}
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16M10 11v6m4-6v6M6 7h12l-1 13H7L6 7Z" />
+          </svg>
+        </button>
       </div>
-      <button class="button-ghost" type="button" on:click={resetInputs}>Reset inputs</button>
+      <div class="flex items-center gap-2 mode-legend">
+        <span class="legend-dot" aria-hidden="true"></span>
+        <p class="text-xs text-slate-400">Active mode</p>
+      </div>
     </div>
-    <div class="grid grid-cols-2 gap-3">
+
+    <div class="grid grid-cols-4 gap-2 mode-grid">
       {#each modes as mode}
         <button
           type="button"
-          class={`glass-card p-3 text-left border ${state.mode === mode.key ? 'border-cyan-400/60 shadow-glow' : 'border-slate-800'} hover:border-cyan-400/60 transition`}
+          class={`mode-pill ${state.mode === mode.key ? 'active' : ''}`}
           on:click={() => setMode(mode.key)}
+          aria-label={mode.label}
           aria-pressed={state.mode === mode.key}
         >
-          <div class="flex items-center justify-between">
-            <p class="font-semibold">{mode.label}</p>
-            {#if state.mode === mode.key}
-              <span class="badge">Active</span>
-            {/if}
-          </div>
-          <p class="text-sm text-slate-400">{mode.description}</p>
+          <span class="mode-icon" aria-hidden="true">{mode.icon}</span>
+          {#if state.mode === mode.key}
+            <span class="legend-dot bright" aria-hidden="true"></span>
+          {/if}
+          <span class="sr-only">{mode.label}</span>
         </button>
       {/each}
     </div>
+
+    {#if showConfig}
+      <div class="slide-panel">
+        <ConfigPanel />
+      </div>
+    {/if}
   </div>
 
   {#if state.mode === 'natal' || state.mode === 'natal_transit'}
