@@ -41,6 +41,19 @@ async function postSvg(path, payload) {
   return res.text();
 }
 
+async function postPdf(path, payload) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: headersWithAuth,
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`${path} failed: ${res.status} ${res.statusText} - ${body}`);
+  }
+  return res.blob();
+}
+
 export async function requestChart(mode, payload) {
   if (mode === 'natal') {
     const [json, svg] = await Promise.all([
@@ -79,4 +92,12 @@ export async function requestReport(payload) {
 
 export async function requestTransitRange(payload) {
   return postJson('/api/transit-range', payload);
+}
+
+export async function requestChartPdf(payload) {
+  return postPdf('/api/svg/pdf', payload);
+}
+
+export async function requestReportPdf(payload) {
+  return postPdf('/api/report/pdf', payload);
 }

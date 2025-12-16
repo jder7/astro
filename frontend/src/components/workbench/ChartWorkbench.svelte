@@ -24,7 +24,8 @@
   let errorMessage = '';
   let svgMarkup = '';
   let apiResponse = null;
-  let summary = { sections: [], ranges: [], aspects: [], context: {} };
+  const emptySummary = { sections: [], ranges: [], aspects: [], context: {} };
+  let summary = emptySummary;
   let report = null;
   let rangeResult = null;
   let loading = false;
@@ -43,12 +44,14 @@
   $: if (cached) {
     svgMarkup = cached.svg || '';
     apiResponse = cached.response || null;
-    summary = cached.summary || summary;
+    summary =
+      cached.summary ||
+      (cached.response ? buildSummary(activeMode, cached.response, cached.birthParts, cached.transitParts) : emptySummary);
     report = cached.report || report;
   } else {
     svgMarkup = '';
     apiResponse = null;
-    summary = { sections: [], ranges: [], aspects: [], context: {} };
+    summary = emptySummary;
     report = null;
   }
 
@@ -66,7 +69,7 @@
       apiResponse = json;
       svgMarkup = svg;
       summary = buildSummary(state.mode, json, birthParts, transitParts);
-      setCacheForMode(state.mode, { svg, response: json, summary });
+      setCacheForMode(state.mode, { svg, response: json, summary, birthParts, transitParts });
       status = 'Chart generated successfully.';
     } catch (err) {
       errorMessage = err?.message || 'Failed to generate chart.';

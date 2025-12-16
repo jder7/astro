@@ -1,6 +1,13 @@
 import { createPersistedStore, resetStore } from './persistence';
 
-const defaultModeCache = () => ({ svg: '', summary: null, report: null, response: null });
+const defaultModeCache = () => ({
+  svg: '',
+  summary: null,
+  report: null,
+  response: null,
+  birthParts: null,
+  transitParts: null,
+});
 export const createDefaultCache = () => ({ byMode: {} });
 
 export const cacheStore = createPersistedStore('astroApiState', createDefaultCache());

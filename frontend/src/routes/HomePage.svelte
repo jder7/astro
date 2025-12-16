@@ -1,6 +1,6 @@
 <script>
   import PageIntro from '$components/layout/PageIntro.svelte';
-  import ChartWorkbench from '$components/workbench/ChartWorkbench.svelte';
+  import HomeWorkbench from '$components/workbench/HomeWorkbench.svelte';
 </script>
 
 <PageIntro
@@ -11,4 +11,4 @@
   page="home"
 />
 
-<ChartWorkbench page="home" enableReport={true} />
+<HomeWorkbench />

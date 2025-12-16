@@ -163,6 +163,5 @@
 
   <div class="flex items-center gap-3">
     <button type="submit" class="button-primary">Generate chart</button>
-    <p class="text-sm text-slate-400">Data persists in this browser.</p>
   </div>
 </form>
