@@ -66,7 +66,7 @@
   }
 </script>
 
-<div class="glass-card p-4 space-y-3">
+<div class="flowbite-card space-y-3">
   <div class="flex items-center justify-between gap-3 flex-wrap">
     <div>
       <p class="section-title text-xs">Full report</p>

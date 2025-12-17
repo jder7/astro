@@ -1,6 +1,5 @@
 <script>
   import { get } from 'svelte/store';
-  import { buildSummary } from '$lib/astro/summary';
   import { requestChart, requestTransitRange } from '$lib/api/client';
   import { buildChartPayload, buildRangePayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
@@ -12,20 +11,19 @@
   import SummaryCard from '$components/advanced/SummaryCard.svelte';
   import AspectsCard from '$components/advanced/AspectsCard.svelte';
   import RangeCard from '$components/advanced/RangeCard.svelte';
-  import SvgCard from '$components/advanced/SvgCard.svelte';
-  import ReportCard from '$components/advanced/ReportCard.svelte';
+  import SkyMapCard from '$components/advanced/SkyMapCard.svelte';
+  import AscClockCard from '$components/advanced/AscClockCard.svelte';
+  import MoonClockCard from '$components/advanced/MoonClockCard.svelte';
+  import SunIngressCard from '$components/advanced/SunIngressCard.svelte';
   import ChartForm from './ChartForm.svelte';
   import RangeForm from './RangeForm.svelte';
 
   const pageId = 'advanced';
-  const emptySummary = { sections: [], ranges: [], aspects: [], context: {}, rawAspects: [] };
 
   let status = '';
   let errorMessage = '';
   let svgMarkup = '';
   let apiResponse = null;
-  let summary = emptySummary;
-  let cachedReport = null;
   let rangeResult = null;
   let loading = false;
   let rangeLoading = false;
@@ -34,21 +32,12 @@
   $: cached = $cacheStore.byPage?.[pageId]?.byMode?.[activeMode];
   $: if (cached) {
     const chartCache = cached.chart || {};
-    const state = get(inputStore);
-    const cfg = { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
-    const { birthParts, transitParts } = buildChartPayload(activeMode, state, cfg);
 
     svgMarkup = chartCache.svg || '';
     apiResponse = chartCache.response || null;
-    summary =
-      chartCache.summary ||
-      (chartCache.response ? buildSummary(activeMode, chartCache.response, birthParts, transitParts) : emptySummary);
-    cachedReport = (cached.report && cached.report.report) || cached.report || null;
   } else {
     svgMarkup = '';
     apiResponse = null;
-    summary = emptySummary;
-    cachedReport = null;
   }
 
   async function generateChart() {
@@ -57,13 +46,12 @@
     loading = true;
     const state = get(inputStore);
     const cfg = { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
-    const { payload, birthParts, transitParts } = buildChartPayload(state.mode, state, cfg);
+    const { payload } = buildChartPayload(state.mode, state, cfg);
     try {
       const { json, svg } = await requestChart(state.mode, payload);
       apiResponse = json;
       svgMarkup = svg;
-      summary = buildSummary(state.mode, json, birthParts, transitParts);
-      setCacheEntry(pageId, state.mode, 'chart', { svg, response: json, summary });
+      setCacheEntry(pageId, state.mode, 'chart', { svg, response: json });
       status = 'Chart generated successfully.';
     } catch (err) {
       errorMessage = err?.message || 'Failed to generate chart.';
@@ -102,17 +90,21 @@
     </div>
 
     <div class="lg:col-span-2 space-y-4">
-      <StatusCard {status} {errorMessage} loading={loading} ready={Boolean(svgMarkup)} />
+      <StatusCard {status} {errorMessage} loading={loading} ready={Boolean(apiResponse)} />
 
-      <SummaryCard {summary} />
+      <SummaryCard response={apiResponse} mode={activeMode} />
 
-      <AspectsCard {summary} />
+      <SkyMapCard response={apiResponse} mode={activeMode} />
 
-      <SvgCard {svgMarkup} />
+      <AscClockCard response={apiResponse} mode={activeMode} />
 
-      <ReportCard mode={activeMode} page={pageId} cachedReport={cachedReport} />
+      <MoonClockCard response={apiResponse} mode={activeMode} />
 
-      <RangeCard rangeResult={rangeResult} {summary} />
+      <SunIngressCard response={apiResponse} mode={activeMode} />
+
+      <AspectsCard response={apiResponse} mode={activeMode} />
+
+      <RangeCard rangeResult={rangeResult} mode={activeMode} />
     </div>
   </div>
 </div>
