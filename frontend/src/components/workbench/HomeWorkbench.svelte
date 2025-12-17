@@ -90,8 +90,6 @@
       <SvgCard svgMarkup={svgMarkup} loading={loading} mode={activeMode} />
 
       <ReportCard cachedReport={cachedReport} mode={activeMode} page={pageId} />
-
-      <ApiResponseView data={apiResponse} title="API response (cached)" />
     </div>
   </div>
 </div>

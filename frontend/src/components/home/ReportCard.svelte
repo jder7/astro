@@ -5,36 +5,25 @@
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
   import { setCacheEntry } from '$lib/state/cacheStore';
+  import { marked } from 'marked';
   import { copyToClipboard, downloadBlob } from '$lib/utils/download';
 
   export let mode = 'natal';
   export let page = 'home';
   export let cachedReport = null;
 
-  let report = cachedReport;
+  let reportMarkdown = cachedReport || '';
   let reportLoading = false;
   let copied = false;
   let localStatus = '';
 
-  $: if (cachedReport && report !== cachedReport) {
-    report = cachedReport;
+  $: if (cachedReport && reportMarkdown !== cachedReport) {
+    reportMarkdown = cachedReport;
   }
 
-  $: reportText =
-    typeof report === 'string'
-      ? report
-      : report?.text || '';
-
-  $: reportHtml = reportText
-    ? reportText
-        .split('\n')
-        .filter(Boolean)
-        .map((line) => `<p>${line}</p>`)
-        .join('')
-    : '';
-
-  $: reportTitle = report?.title || 'Detailed text';
-  $: hasReport = Boolean(report);
+  $: reportTitle = 'Detailed text';
+  $: hasReport = Boolean(reportMarkdown);
+  $: reportHtml = typeof reportMarkdown === 'string' && reportMarkdown.trim() ? marked.parse(reportMarkdown) : '';
 
   async function generateReport() {
     reportLoading = true;
@@ -43,8 +32,10 @@
     const cfg = get(configStore);
     try {
       const payload = buildReportPayload(mode, state, cfg);
-      report = await requestReport(payload);
-      setCacheEntry(page, mode, 'report', { report });
+      const resp = await requestReport(payload);
+      console.info('[report] response', resp);
+      reportMarkdown = typeof resp?.structured?.markdown === 'string' ? resp.structured.markdown : '';
+      setCacheEntry(page, mode, 'report', { report: reportMarkdown });
       localStatus = 'Report ready.';
     } catch (err) {
       localStatus = err?.message || 'Failed to generate report.';
@@ -71,8 +62,8 @@
   }
 
   async function copyReport() {
-    if (!reportText) return;
-    const ok = await copyToClipboard(reportText);
+    if (!reportMarkdown) return;
+    const ok = await copyToClipboard(reportMarkdown);
     copied = ok;
     setTimeout(() => (copied = false), 1200);
   }
@@ -89,15 +80,15 @@
         {reportLoading ? 'Loading…' : 'Load report'}
       </button>
       <button class="button-ghost" type="button" on:click={downloadReportPdf} disabled={reportLoading}>
-        PDF
+        <span aria-hidden="true">📄</span> PDF
       </button>
     </div>
   </div>
   <div class="flex items-center justify-between gap-3">
     <p class="text-sm text-slate-400">Uses the same payload as the chart.</p>
     <div class="flex items-center gap-2">
-      <button class="button-ghost" type="button" on:click={copyReport} disabled={!reportText}>
-        {copied ? 'Copied' : 'Copy'}
+      <button class="button-ghost" type="button" on:click={copyReport} disabled={!reportMarkdown}>
+        <span aria-hidden="true">📝</span>{copied ? 'Copied' : 'Copy'}
       </button>
       {#if hasReport}
         <span class="badge">Cached</span>
@@ -107,8 +98,8 @@
   {#if localStatus}
     <p class="text-xs text-slate-400">{localStatus}</p>
   {/if}
-  <div class="border border-slate-800 rounded-2xl bg-slate-950/60 p-4 min-h-[140px]">
-    {#if reportHtml}
+  <div class="border border-slate-800 rounded-2xl bg-slate-950/60 p-4 min-h-[140px]" id="report-markdown">
+    {#if reportMarkdown}
       <div class="prose-report space-y-2 text-sm" aria-live="polite">
         {@html reportHtml}
       </div>

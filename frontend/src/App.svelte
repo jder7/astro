@@ -25,9 +25,11 @@
     <svelte:component this={Current} />
   </main>
   <footer class="page-shell pb-10 text-sm text-slate-500">
-    <p>
-      New Svelte/Tailwind UI. Legacy static assets remain under
-      <a href="/legacy/home.html" class="text-cyan-300 hover:text-cyan-100">/legacy</a>.
-    </p>
+          <span>Astro App</span>
+          <span>— powered by</span>
+          <a href="https://www.kerykeion.net/" target="_blank" rel="noreferrer">
+            Kerykeion
+          </a>
+          <span>and FastAPI.</span>
   </footer>
 </div>

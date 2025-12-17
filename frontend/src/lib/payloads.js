@@ -112,9 +112,19 @@ export function buildChartPayload(mode, state, config) {
 
 export function buildReportPayload(mode, state, config) {
   const { payload } = buildChartPayload(mode, state, config);
+  // Ensure birth is always present for the report API (required field).
+  const { payload: natalPayload } = buildChartPayload('natal', state, config);
+  const birth = payload.birth || natalPayload.birth;
+
+  // Transit/dual reports also need a moment; reuse transit normalization when missing.
+  const { payload: transitPayload } = buildChartPayload('transit', state, config);
+  const moment = payload.moment || transitPayload.moment || null;
+
   const kind = mode === 'transit' ? 'SUBJECT' : 'NATAL';
   return {
     ...payload,
+    birth,
+    ...(mode === 'transit' || mode === 'natal_transit' ? { moment } : {}),
     mode,
     kind,
     include_aspects: Boolean(config?.include_aspects),
