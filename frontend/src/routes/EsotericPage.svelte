@@ -1,6 +1,6 @@
 <script>
   import PageIntro from '$components/layout/PageIntro.svelte';
-  import ChartWorkbench from '$components/workbench/ChartWorkbench.svelte';
+  import EsotericWorkbench from '$components/workbench/EsotericWorkbench.svelte';
 </script>
 
 <PageIntro
@@ -11,4 +11,4 @@
   page="esoteric"
 />
 
-<ChartWorkbench page="esoteric" showRange={false} enableReport={true} />
+<EsotericWorkbench />

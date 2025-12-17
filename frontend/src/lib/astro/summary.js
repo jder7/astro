@@ -1,4 +1,5 @@
 import { fallback, formatDateTime, formatDegree, ucfirst } from './format';
+import { POINT_SYMBOLS } from './signs';
 
 const POINT_LABELS = {
   sun: 'Sun',
@@ -99,14 +100,6 @@ function collectRanges(response) {
   return ranges;
 }
 
-function pickAspects(data) {
-  if (!data) return [];
-  if (Array.isArray(data)) return data.slice(0, 12);
-  if (Array.isArray(data?.major_aspects)) return data.major_aspects.slice(0, 12);
-  if (Array.isArray(data?.aspects)) return data.aspects.slice(0, 12);
-  return [];
-}
-
 function simplifyAspect(entry) {
   if (!entry || typeof entry !== 'object') return null;
   const name = entry.name || entry.aspect || entry.id || 'Aspect';
@@ -126,9 +119,12 @@ export function buildSummary(mode, response, birthParts, transitParts) {
   const ranges = collectRanges(response || {});
   let aspects = [];
 
+  let rawAspects = null;
+
   if (mode === 'natal' && response?.subject) {
     sections.push({ meta: buildMeta(response.subject, 'Natal'), points: extractPoints(response.subject) });
-    aspects = pickAspects(response.major_aspects || response.aspects).map(simplifyAspect).filter(Boolean);
+    rawAspects = Array.isArray(response.aspects) ? response.aspects : null;
+    aspects = response.aspects.map(simplifyAspect).filter(Boolean);
   } else if ((mode === 'transit' || mode === 'natal_transit') && response?.snapshot) {
     const snap = response.snapshot;
     if (snap.subject) {
@@ -137,7 +133,8 @@ export function buildSummary(mode, response, birthParts, transitParts) {
     if (snap.natal_subject) {
       sections.push({ meta: buildMeta(snap.natal_subject, 'Natal'), points: extractPoints(snap.natal_subject) });
     }
-    aspects = pickAspects(snap.major_aspects || snap.aspects).map(simplifyAspect).filter(Boolean);
+    rawAspects = Array.isArray(snap.aspects) ? snap.aspects : null;
+    aspects = snap.aspects.map(simplifyAspect).filter(Boolean);
   } else if (mode === 'relationship' && response) {
     if (response.first_subject) {
       sections.push({ meta: buildMeta(response.first_subject, 'Partner A'), points: extractPoints(response.first_subject) });
@@ -145,15 +142,18 @@ export function buildSummary(mode, response, birthParts, transitParts) {
     if (response.second_subject) {
       sections.push({ meta: buildMeta(response.second_subject, 'Partner B'), points: extractPoints(response.second_subject) });
     }
-    aspects = pickAspects(response.aspects).map(simplifyAspect).filter(Boolean);
+    rawAspects = Array.isArray(response.aspects) ? response.aspects : null;
+    aspects = response.aspects.map(simplifyAspect).filter(Boolean);
   }
 
   const context = {
     birth: birthParts ? formatDateTime(birthParts) : '',
     transit: transitParts ? formatDateTime(transitParts) : '',
+    birthParts: birthParts || null,
+    transitParts: transitParts || null,
   };
 
-  return { sections, ranges, aspects, context };
+  return { sections, ranges, aspects, context, rawAspects };
 }
 
 export function classesForPoint(point) {

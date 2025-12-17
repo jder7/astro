@@ -1,6 +1,6 @@
 <script>
   import PageIntro from '$components/layout/PageIntro.svelte';
-  import ChartWorkbench from '$components/workbench/ChartWorkbench.svelte';
+  import AdvancedWorkbench from '$components/workbench/AdvancedWorkbench.svelte';
 </script>
 
 <PageIntro
@@ -11,4 +11,4 @@
   page="advanced"
 />
 
-<ChartWorkbench page="advanced" showRange={true} enableReport={true} />
+<AdvancedWorkbench />

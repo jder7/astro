@@ -1,6 +1,6 @@
 <script>
   import { configStore, resetConfig, updateConfig } from '$lib/state/configStore';
-  import { ACTIVE_POINTS } from '$lib/astro/points';
+  import { ACTIVE_POINTS } from '$lib/astro/signs';
 
   const perspectiveOptions = ['Topocentric', 'Apparent Geocentric', 'True Geocentric', 'Heliocentric'];
   const zodiacOptions = ['Sidereal', 'Tropic'];

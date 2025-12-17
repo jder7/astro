@@ -1,21 +1,31 @@
 import { createPersistedStore, resetStore } from './persistence';
 
-const defaultModeCache = () => ({
+const defaultFnCache = () => ({
   svg: '',
   summary: null,
   report: null,
   response: null,
-  birthParts: null,
-  transitParts: null,
 });
-export const createDefaultCache = () => ({ byMode: {} });
 
-export const cacheStore = createPersistedStore('astroApiState', createDefaultCache());
+export const createDefaultCache = () => ({ byPage: {} });
 
-export function setCacheForMode(mode, data) {
+export const cacheStore = createPersistedStore('astroApiStateV2', createDefaultCache());
+
+export function setCacheEntry(page, mode, fn, data) {
   cacheStore.update((cache) => {
-    const next = { ...(cache.byMode?.[mode] || defaultModeCache()), ...data };
-    return { ...cache, byMode: { ...(cache.byMode || {}), [mode]: next } };
+    const safePage = page || 'home';
+    const safeMode = mode || 'natal';
+    const safeFn = fn || 'chart';
+
+    const pageEntry = cache.byPage?.[safePage] || {};
+    const modeEntry = pageEntry.byMode?.[safeMode] || {};
+    const fnEntry = modeEntry[safeFn] || defaultFnCache();
+
+    const nextFn = { ...fnEntry, ...data };
+    const nextMode = { ...modeEntry, [safeFn]: nextFn };
+    const nextPage = { ...pageEntry, byMode: { ...(pageEntry.byMode || {}), [safeMode]: nextMode } };
+
+    return { ...cache, byPage: { ...(cache.byPage || {}), [safePage]: nextPage } };
   });
 }
 
