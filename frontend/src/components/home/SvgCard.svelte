@@ -13,6 +13,19 @@
   let zoomOpen = false;
   let zoomScale = 1;
 
+  const portal = (node) => {
+    if (typeof document === 'undefined') return {};
+    const target = document.body;
+    target.appendChild(node);
+    return {
+      destroy() {
+        if (node && node.parentNode === target) {
+          target.removeChild(node);
+        }
+      },
+    };
+  };
+
   const openZoom = () => {
     if (!svgMarkup) return;
     zoomScale = 1;
@@ -38,12 +51,17 @@
     const cfg = get(configStore);
     const { payload } = buildChartPayload(mode, state, cfg);
     const { asc_moon_sun_range_enabled, ...pdfPayload } = payload;
-    const body = { mode, ...pdfPayload, grid_view: false };
+    const body = {
+      mode,
+      ...pdfPayload,
+      config: { ...(pdfPayload.config || {}), theme: 'classic' },
+      grid_view: false,
+    };
     try {
       const blob = await requestChartPdf(body);
       downloadBlob(blob, `${mode}-chart.pdf`);
     } catch (err) {
-      console.warn('PDF download failed', err);
+      console.warn('PDF download failed', err, body);
     }
   };
 </script>
@@ -56,13 +74,13 @@
     </div>
     <div class="flex items-center gap-2">
       <button class="button-ghost" type="button" on:click={downloadPdf} disabled={!svgMarkup || loading}>
-        PDF
+        <span aria-hidden="true">📄</span> PDF
       </button>
       <button class="button-ghost" type="button" on:click={() => downloadSvg(svgMarkup)} disabled={!svgMarkup}>
-        Download SVG
+        <span aria-hidden="true">⬇️</span> SVG
       </button>
       <button class="button-ghost" type="button" on:click={openZoom} disabled={!svgMarkup}>
-        Zoom
+        <span aria-hidden="true">🔍</span> Zoom
       </button>
       {#if svgMarkup}
         <span class="badge">Live render</span>
@@ -71,8 +89,8 @@
   </div>
   <div class="relative rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
     {#if svgMarkup}
-      <div class="w-full flex justify-center overflow-auto max-h-[540px]">
-        <div class="min-w-[320px]" aria-live="polite">
+      <div class="flex justify-center overflow-x-auto">
+        <div class="shrink-0" style="width: 720px; max-width: 100%;" aria-live="polite">
           {@html svgMarkup}
         </div>
       </div>
@@ -84,8 +102,8 @@
   </div>
 
   {#if zoomOpen}
-    <div class="modal-backdrop" role="dialog" aria-label="Zoomed chart view" on:click={closeZoom}>
-      <div class="modal-panel max-w-6xl" on:click|stopPropagation>
+    <div class="modal-backdrop zoom-full" role="dialog" aria-label="Zoomed chart view" on:click={closeZoom} use:portal>
+      <div class="modal-panel zoom-panel" on:click|stopPropagation>
         <div class="flex items-center justify-between">
           <div>
             <p class="section-title text-xs">Zoom</p>
@@ -97,10 +115,10 @@
             <button class="button-ghost" type="button" on:click={closeZoom}>Close</button>
           </div>
         </div>
-        <div class="border border-slate-800 rounded-2xl bg-slate-950/80 p-4 overflow-auto max-h-[720px]">
+        <div class="border border-slate-800 rounded-2xl bg-slate-950/80 p-4 overflow-auto zoom-body">
           {#if svgMarkup}
             <div class="w-full flex justify-center">
-              <div class="min-w-[420px] origin-top" style={`transform: scale(${zoomScale});`}>
+              <div class="w-full sm:w-4/5 lg:w-2/3 min-w-[320px] sm:min-w-[420px] max-w-5xl origin-top" style={`transform: scale(${zoomScale});`}>
                 {@html svgMarkup}
               </div>
             </div>
@@ -112,3 +130,37 @@
     </div>
   {/if}
 </div>
+
+  <style>
+  :global(.modal-backdrop.zoom-full) {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0 !important;
+    margin: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+  }
+
+  :global(.modal-backdrop.zoom-full .modal-panel.zoom-panel) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  :global(.modal-backdrop.zoom-full .zoom-body) {
+    flex: 1;
+    max-height: none;
+    overflow: auto;
+  }
+</style>
