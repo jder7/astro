@@ -6,7 +6,6 @@
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
-  import ApiResponseView from '$components/output/ApiResponseView.svelte';
   import AspectsList from '$components/output/AspectsList.svelte';
   import ReportView from '$components/output/ReportView.svelte';
   import SummarySection from '$components/output/SummarySection.svelte';
@@ -129,8 +128,6 @@
       </div>
 
       <ReportView {report} />
-
-      <ApiResponseView data={apiResponse} />
     </div>
   </div>
 </div>

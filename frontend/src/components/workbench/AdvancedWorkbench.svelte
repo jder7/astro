@@ -1,18 +1,19 @@
 <script>
   import { get } from 'svelte/store';
   import { buildSummary } from '$lib/astro/summary';
-  import { requestChart, requestReport, requestTransitRange } from '$lib/api/client';
-  import { buildChartPayload, buildRangePayload, buildReportPayload } from '$lib/payloads';
+  import { requestChart, requestTransitRange } from '$lib/api/client';
+  import { buildChartPayload, buildRangePayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
   import { rangeStore } from '$lib/state/rangeStore';
-  import ApiResponseView from '$components/output/ApiResponseView.svelte';
-  import AspectsList from '$components/output/AspectsList.svelte';
-  import RangeSummary from '$components/output/RangeSummary.svelte';
-  import ReportView from '$components/output/ReportView.svelte';
-  import SummarySection from '$components/output/SummarySection.svelte';
-  import SvgViewer from '$components/output/SvgViewer.svelte';
+  
+  import StatusCard from '$components/advanced/StatusCard.svelte';
+  import SummaryCard from '$components/advanced/SummaryCard.svelte';
+  import AspectsCard from '$components/advanced/AspectsCard.svelte';
+  import RangeCard from '$components/advanced/RangeCard.svelte';
+  import SvgCard from '$components/advanced/SvgCard.svelte';
+  import ReportCard from '$components/advanced/ReportCard.svelte';
   import ChartForm from './ChartForm.svelte';
   import RangeForm from './RangeForm.svelte';
 
@@ -24,7 +25,7 @@
   let svgMarkup = '';
   let apiResponse = null;
   let summary = emptySummary;
-  let report = null;
+  let cachedReport = null;
   let rangeResult = null;
   let loading = false;
   let rangeLoading = false;
@@ -42,12 +43,12 @@
     summary =
       chartCache.summary ||
       (chartCache.response ? buildSummary(activeMode, chartCache.response, birthParts, transitParts) : emptySummary);
-    report = (cached.report && cached.report.report) || cached.report || report;
+    cachedReport = (cached.report && cached.report.report) || cached.report || null;
   } else {
     svgMarkup = '';
     apiResponse = null;
     summary = emptySummary;
-    report = null;
+    cachedReport = null;
   }
 
   async function generateChart() {
@@ -69,22 +70,6 @@
       status = 'Something went wrong.';
     } finally {
       loading = false;
-    }
-  }
-
-  async function generateReport() {
-    errorMessage = '';
-    status = 'Generating report…';
-    const state = get(inputStore);
-    const cfg = { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
-    try {
-      const payload = buildReportPayload(state.mode, state, cfg);
-      report = await requestReport(payload);
-      setCacheEntry(pageId, state.mode, 'report', { report });
-      status = 'Report ready.';
-    } catch (err) {
-      errorMessage = err?.message || 'Failed to generate report.';
-      status = 'Report generation failed.';
     }
   }
 
@@ -117,63 +102,17 @@
     </div>
 
     <div class="lg:col-span-2 space-y-4">
-      <div class="glass-card p-4 flex items-center justify-between">
-        <div>
-          <p class="section-title text-xs">Status</p>
-          <p class="text-sm text-slate-200">{status || 'Idle'}</p>
-          {#if errorMessage}
-            <p class="text-sm text-rose-300">{errorMessage}</p>
-          {/if}
-        </div>
-        {#if loading}
-          <span class="badge">Working…</span>
-        {:else if svgMarkup}
-          <span class="badge">Chart ready</span>
-        {/if}
-      </div>
+      <StatusCard {status} {errorMessage} loading={loading} ready={Boolean(svgMarkup)} />
 
-      {#if summary.sections && summary.sections.length}
-        {#each summary.sections as section}
-          <SummarySection {section} />
-        {/each}
-      {/if}
+      <SummaryCard {summary} />
 
-      {#if summary.aspects && summary.aspects.length}
-        <AspectsList aspects={summary.aspects} />
-      {/if}
+      <AspectsCard {summary} />
 
-      {#if summary.ranges && summary.ranges.length}
-        <RangeSummary ranges={summary.ranges} />
-      {/if}
+      <SvgCard {svgMarkup} />
 
-      <SvgViewer svgMarkup={svgMarkup} />
+      <ReportCard mode={activeMode} page={pageId} cachedReport={cachedReport} />
 
-      <div class="glass-card p-4 space-y-3">
-        <div class="flex items-center gap-3">
-          <button class="button-primary" type="button" on:click={generateReport} disabled={loading}>Generate report</button>
-          {#if report}
-            <span class="badge">Cached</span>
-          {/if}
-        </div>
-        <p class="text-sm text-slate-400">Uses the same payload as the chart.</p>
-      </div>
-
-      <ReportView {report} />
-
-      <ApiResponseView data={apiResponse} />
-
-      {#if rangeResult}
-        <div class="glass-card p-4 space-y-2">
-          <div class="flex items-center justify-between">
-            <p class="section-title text-xs">Range</p>
-            <span class="badge">{rangeResult.snapshots?.length || 0} snapshots</span>
-          </div>
-          <p class="text-sm text-slate-300">Ascendant sweeps, moon and sun ranges reuse the transit moment + config.</p>
-        </div>
-        {#if rangeResult?.snapshots?.length}
-          <RangeSummary ranges={rangeSummary?.ranges || []} />
-        {/if}
-      {/if}
+      <RangeCard rangeResult={rangeResult} {summary} />
     </div>
   </div>
 </div>

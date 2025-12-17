@@ -6,7 +6,6 @@
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
   import { downloadBlob } from '$lib/utils/download';
-  import ApiResponseView from '$components/output/ApiResponseView.svelte';
   import SummaryCard from '$components/home/SummaryCard.svelte';
   import SvgCard from '$components/home/SvgCard.svelte';
   import ReportCard from '$components/home/ReportCard.svelte';
