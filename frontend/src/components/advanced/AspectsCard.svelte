@@ -1,5 +1,4 @@
 <script>
-  import AspectsList from '$components/output/AspectsList.svelte';
   import { extractAspects } from '$lib/astro/advanced';
 
   export let response = null;
@@ -41,12 +40,36 @@
           <span class="badge">{aspects.length + natalAspects.length}</span>
         </div>
         {#if aspects.length}
-          <AspectsList aspects={aspects} />
+          <ul class="space-y-2">
+            {#each aspects as aspect}
+              <li class="border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between">
+                <div>
+                  <p class="font-semibold">{aspect.name}</p>
+                  <p class="text-xs text-slate-400">{aspect.left || '…'} ↔ {aspect.right || '…'}</p>
+                </div>
+                {#if aspect.orb}
+                  <span class="badge">{aspect.orb}°</span>
+                {/if}
+              </li>
+            {/each}
+          </ul>
         {/if}
         {#if natalAspects.length}
-          <div class="space-y-1">
+          <div class="space-y-2">
             <p class="text-xs text-slate-400">Natal</p>
-            <AspectsList aspects={natalAspects} />
+            <ul class="space-y-2">
+              {#each natalAspects as aspect}
+                <li class="border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between">
+                  <div>
+                    <p class="font-semibold">{aspect.name}</p>
+                    <p class="text-xs text-slate-400">{aspect.left || '…'} ↔ {aspect.right || '…'}</p>
+                  </div>
+                  {#if aspect.orb}
+                    <span class="badge">{aspect.orb}°</span>
+                  {/if}
+                </li>
+              {/each}
+            </ul>
           </div>
         {/if}
         {#if !aspects.length && !natalAspects.length}

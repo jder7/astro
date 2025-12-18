@@ -1,15 +1,11 @@
 <script>
   import { get } from 'svelte/store';
-  import { buildSummary } from '$lib/astro/summary';
+  import { buildSummary, classesForPoint } from '$lib/astro/summary';
   import { requestChart, requestReport } from '$lib/api/client';
   import { buildChartPayload, buildReportPayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
-  import AspectsList from '$components/output/AspectsList.svelte';
-  import ReportView from '$components/output/ReportView.svelte';
-  import SummarySection from '$components/output/SummarySection.svelte';
-  import SvgViewer from '$components/output/SvgViewer.svelte';
   import ChartForm from './ChartForm.svelte';
 
   const pageId = 'esoteric';
@@ -107,15 +103,37 @@
 
       {#if summary.sections && summary.sections.length}
         {#each summary.sections as section}
-          <SummarySection {section} />
+          <div class="glass-card p-4 space-y-3" id={`summary-section-${(section?.meta?.title || 'section').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <p class="section-title text-xs">{section.meta?.title}</p>
+                <p class="text-sm text-slate-300">
+                  {[section.meta?.datetime, section.meta?.tz].filter(Boolean).join(' • ') || '—'}
+                </p>
+                {#if section.meta?.location}
+                  <p class="text-xs text-slate-400">{section.meta.location}</p>
+                {/if}
+              </div>
+              <span class="badge">{section.points?.length || 0} points</span>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-3">
+              {#each section.points || [] as point}
+                <div class="border border-slate-800 rounded-xl p-3 bg-slate-900/60">
+                  <div class="flex items-center justify-between">
+                    <p class="font-semibold">{point.label}</p>
+                    <span class={`text-xs ${classesForPoint(point)}`}>
+                      {point.emoji ? `${point.emoji} ` : ''}{point.element || ''}
+                    </span>
+                  </div>
+                  <p class="text-lg font-display">{point.sign} {point.degree}</p>
+                  <p class="text-xs text-slate-400">{point.quality || '—'} • {point.decan ? `Decan ${point.decan}` : 'No decan data'}</p>
+                </div>
+              {/each}
+            </div>
+          </div>
         {/each}
       {/if}
-
-      {#if summary.aspects && summary.aspects.length}
-        <AspectsList aspects={summary.aspects} />
-      {/if}
-
-      <SvgViewer svgMarkup={svgMarkup} />
 
       <div class="glass-card p-4 space-y-3">
         <div class="flex items-center gap-3">
@@ -126,8 +144,6 @@
         </div>
         <p class="text-sm text-slate-400">Uses the same payload as the chart.</p>
       </div>
-
-      <ReportView {report} />
     </div>
   </div>
 </div>

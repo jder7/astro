@@ -1,6 +1,4 @@
 <script>
-  import SvgViewer from '$components/output/SvgViewer.svelte';
-
   export let svgMarkup = '';
 </script>
 
@@ -11,5 +9,11 @@
       <span class="badge">Live render</span>
     {/if}
   </div>
-  <SvgViewer {svgMarkup} />
+  <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4" aria-live="polite" id="svg-viewer">
+    {#if svgMarkup}
+      {@html svgMarkup}
+    {:else}
+      <p class="text-sm text-slate-400">Run a chart to see the SVG output.</p>
+    {/if}
+  </div>
 </div>
