@@ -19,6 +19,29 @@ export const POINT_ICONS = {
   imum_coeli: 'IC',
 };
 
+export const DAY_RULERS = {
+  0: 'sun',
+  1: 'moon',
+  2: 'mars',
+  3: 'mercury',
+  4: 'jupiter',
+  5: 'venus',
+  6: 'saturn',
+};
+
+export const ELEMENT_ICON = {
+  Fire: '🔥',
+  Earth: '🌍',
+  Air: '🌬️',
+  Water: '💧',
+};
+
+export const QUALITY_ICON = {
+  Cardinal: '⬆️',
+  Fixed: '⏺️',
+  Mutable: '🔁',
+};
+
 const FULL = {
   aries: '♈︎',
   taurus: '♉︎',
