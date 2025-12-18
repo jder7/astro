@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <div id="sunRangeContainer" class="space-y-4">
+  <div id="adv-sun-ingress-panel" class="space-y-4">
     {#if !response || !ranges.length}
       <p class="text-sm text-slate-400">Generate a chart to see the Sun's upcoming sign changes.</p>
     {:else}

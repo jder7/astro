@@ -4,9 +4,10 @@
   export let loading = false;
   export let ready = false;
   export let title = 'Status';
+  export let panelId = 'adv-status-panel';
 </script>
 
-<div class="flowbite-card flex items-center justify-between">
+<div id={panelId} class="flowbite-card flex items-center justify-between">
   <div>
     <p class="section-title text-xs">{title}</p>
     <p class="text-sm text-slate-200">{status || 'Idle'}</p>

@@ -95,7 +95,7 @@
   {#if localStatus}
     <p class="text-xs text-slate-400">{localStatus}</p>
   {/if}
-  <div class="border border-slate-800 rounded-2xl bg-slate-950/60 p-4 min-h-[140px]" id="report-markdown">
+  <div class="border border-slate-800 rounded-2xl bg-slate-950/60 p-4 min-h-[140px]" id="adv-report-panel">
     {#if reportMarkdown}
       <div class="prose-report space-y-2 text-sm" aria-live="polite">
         {@html reportHtml}

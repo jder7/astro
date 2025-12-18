@@ -2,9 +2,12 @@
   import { collectPoints } from '$lib/astro/advanced';
   import { formatDateLabel, formatDateShort, toDate } from '$lib/astro/format';
   import { POINT_SYMBOLS, signName, signSymbol } from '$lib/astro/signs';
+  import RangeForm from '$components/workbench/RangeForm.svelte';
 
   export let rangeResult = null;
   export let mode = 'natal';
+  export let onRange = null;
+  export let loading = false;
 
   const formatSnapshot = (snap) => {
     const ts = toDate(snap?.timestamp);
@@ -44,7 +47,7 @@
   $: entries = ordered.map(formatSnapshot);
 </script>
 
-<div class="flowbite-card space-y-4" id="rangePanel">
+<div class="flowbite-card space-y-4" id="adv-range-panel">
   <div class="flex items-center justify-between gap-3">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Future vision</p>
@@ -58,9 +61,11 @@
     {/if}
   </div>
 
-  <p id="advancedRangeSummary" class="text-sm text-slate-200">{summaryLine}</p>
+  <RangeForm on:range={onRange} {loading} />
 
-  <div id="rangeResults" class="space-y-3">
+  <p id="adv-range-summary" class="text-sm text-slate-200">{summaryLine}</p>
+
+  <div id="adv-range-results" class="space-y-3">
     {#if entries.length}
       {#each entries as entry}
         <div class="compact-row">

@@ -1,5 +1,6 @@
 <script>
   import ElementSigil from '$components/shared/ElementSigil.svelte';
+  import MajorAspectIcon from '$components/shared/MajorAspectIcon.svelte';
   import { formatDecimalDegree, ucfirst } from '$lib/astro/format';
   import { formatDateLabel, formatDateShort, toDate } from '$lib/astro/date';
   import { DAY_RULERS, ELEMENT_ICON, POINT_SYMBOLS, QUALITY_ICON, signName, signSymbol } from '$lib/astro/signs';
@@ -128,14 +129,18 @@
           if (norm && !uniq.includes(norm)) uniq.push(norm);
         });
         const placements = uniq.map((val) => formatPointPlacement(points, val)).filter(Boolean).join(' · ');
-        if (!placements) return '';
+        if (!placements) return null;
         const label =
           pattern.name ||
           pattern.geometry ||
           pattern.aspects_label ||
           pattern.aspectsLabel ||
           (pattern.id ? ucfirst(String(pattern.id).replace(/_/g, ' ')) : 'Pattern');
-        return `${label}: ${placements}`;
+        return {
+          patternId: pattern.id || 'generic',
+          label,
+          placements,
+        };
       })
       .filter(Boolean);
   };
@@ -341,7 +346,7 @@
     {/if}
   </div>
 
-  <div id="ascSummaryContainer" class="space-y-4">
+  <div id="adv-summary-panel" class="space-y-4">
     {#if !response}
       <p class="text-sm text-slate-400">Generate a chart to see the summary.</p>
     {:else}
@@ -388,7 +393,10 @@
                       <div class="mt-2 space-y-1 text-sm text-slate-100">
                         {#if row.lines.length}
                           {#each row.lines as line}
-                            <p>{line}</p>
+                            <div class="flex items-start gap-2">
+                              <MajorAspectIcon patternId={line.patternId} size={22} />
+                              <p class="text-xs text-slate-200">{line.label}: {line.placements}</p>
+                            </div>
                           {/each}
                         {:else}
                           <p class="text-xs text-slate-400">No major aspects found.</p>

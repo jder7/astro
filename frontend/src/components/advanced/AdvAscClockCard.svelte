@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <div id="ascClockContainer" class="space-y-4">
+  <div id="adv-asc-clock-panel" class="space-y-4">
     {#if !response || !ranges.length}
       <p class="text-sm text-slate-400">Generate a chart to see the ascendant clock and hourly breakdown.</p>
     {:else}

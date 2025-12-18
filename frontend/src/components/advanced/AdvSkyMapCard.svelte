@@ -44,7 +44,7 @@
     </div>
   </div>
 
-  <div id="skyMapContent" class="space-y-4">
+  <div id="adv-skymap-panel" class="space-y-4">
     {#if !response}
       <p class="text-sm text-slate-400">Generate a chart to see point and house placements.</p>
     {:else}

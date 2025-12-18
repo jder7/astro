@@ -9,7 +9,7 @@
       <span class="badge">Live render</span>
     {/if}
   </div>
-  <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4" aria-live="polite" id="svg-viewer">
+<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4" aria-live="polite" id="adv-svg-panel">
     {#if svgMarkup}
       {@html svgMarkup}
     {:else}

@@ -16,7 +16,6 @@
   import AdvMoonClockCard from '$components/advanced/AdvMoonClockCard.svelte';
   import AdvSunIngressCard from '$components/advanced/AdvSunIngressCard.svelte';
   import ChartForm from './ChartForm.svelte';
-  import RangeForm from './RangeForm.svelte';
 
   const pageId = 'advanced';
 
@@ -86,12 +85,10 @@
   <div class="grid lg:grid-cols-3 gap-6">
     <div class="space-y-4">
       <ChartForm on:submit={generateChart} />
-      <RangeForm on:range={runRange} loading={rangeLoading} />
+      <AdvStatusCard {status} {errorMessage} loading={loading} ready={Boolean(apiResponse)} />
     </div>
 
     <div class="lg:col-span-2 space-y-4">
-      <AdvStatusCard {status} {errorMessage} loading={loading} ready={Boolean(apiResponse)} />
-
       <AdvSummaryCard response={apiResponse} mode={activeMode} />
 
       <AdvSkyMapCard response={apiResponse} mode={activeMode} />
@@ -104,7 +101,7 @@
 
       <AdvAspectsCard response={apiResponse} mode={activeMode} />
 
-      <AdvRangeCard rangeResult={rangeResult} mode={activeMode} />
+      <AdvRangeCard rangeResult={rangeResult} mode={activeMode} onRange={runRange} loading={rangeLoading} />
     </div>
   </div>
 </div>

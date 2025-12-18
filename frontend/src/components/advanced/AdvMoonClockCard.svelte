@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <div id="moonClockContainer" class="space-y-4">
+  <div id="adv-moon-clock-panel" class="space-y-4">
     {#if !response || !ranges.length}
       <p class="text-sm text-slate-400">Generate a chart to see the lunar clock, next sign, and month-long breakdown.</p>
     {:else}
