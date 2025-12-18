@@ -7,14 +7,14 @@
   import { inputStore } from '$lib/state/inputStore';
   import { rangeStore } from '$lib/state/rangeStore';
   
-  import StatusCard from '$components/advanced/StatusCard.svelte';
-  import SummaryCard from '$components/advanced/SummaryCard.svelte';
-  import AspectsCard from '$components/advanced/AspectsCard.svelte';
-  import RangeCard from '$components/advanced/RangeCard.svelte';
-  import SkyMapCard from '$components/advanced/SkyMapCard.svelte';
-  import AscClockCard from '$components/advanced/AscClockCard.svelte';
-  import MoonClockCard from '$components/advanced/MoonClockCard.svelte';
-  import SunIngressCard from '$components/advanced/SunIngressCard.svelte';
+  import AdvStatusCard from '$components/advanced/AdvStatusCard.svelte';
+  import AdvSummaryCard from '$components/advanced/AdvSummaryCard.svelte';
+  import AdvAspectsCard from '$components/advanced/AdvAspectsCard.svelte';
+  import AdvRangeCard from '$components/advanced/AdvRangeCard.svelte';
+  import AdvSkyMapCard from '$components/advanced/AdvSkyMapCard.svelte';
+  import AdvAscClockCard from '$components/advanced/AdvAscClockCard.svelte';
+  import AdvMoonClockCard from '$components/advanced/AdvMoonClockCard.svelte';
+  import AdvSunIngressCard from '$components/advanced/AdvSunIngressCard.svelte';
   import ChartForm from './ChartForm.svelte';
   import RangeForm from './RangeForm.svelte';
 
@@ -90,21 +90,21 @@
     </div>
 
     <div class="lg:col-span-2 space-y-4">
-      <StatusCard {status} {errorMessage} loading={loading} ready={Boolean(apiResponse)} />
+      <AdvStatusCard {status} {errorMessage} loading={loading} ready={Boolean(apiResponse)} />
 
-      <SummaryCard response={apiResponse} mode={activeMode} />
+      <AdvSummaryCard response={apiResponse} mode={activeMode} />
 
-      <SkyMapCard response={apiResponse} mode={activeMode} />
+      <AdvSkyMapCard response={apiResponse} mode={activeMode} />
 
-      <AscClockCard response={apiResponse} mode={activeMode} />
+      <AdvAscClockCard response={apiResponse} mode={activeMode} />
 
-      <MoonClockCard response={apiResponse} mode={activeMode} />
+      <AdvMoonClockCard response={apiResponse} mode={activeMode} />
 
-      <SunIngressCard response={apiResponse} mode={activeMode} />
+      <AdvSunIngressCard response={apiResponse} mode={activeMode} />
 
-      <AspectsCard response={apiResponse} mode={activeMode} />
+      <AdvAspectsCard response={apiResponse} mode={activeMode} />
 
-      <RangeCard rangeResult={rangeResult} mode={activeMode} />
+      <AdvRangeCard rangeResult={rangeResult} mode={activeMode} />
     </div>
   </div>
 </div>

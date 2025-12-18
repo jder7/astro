@@ -1,8 +1,8 @@
 <script>
   import { get } from 'svelte/store';
-  import SummaryMainPoints from './SummaryMainPoints.svelte';
-  import SummaryAspects from './SummaryAspects.svelte';
-  import SummaryMoonCycle from './SummaryMoonCycle.svelte';
+  import HomeSummaryMainPoints from './HomeSummaryMainPoints.svelte';
+  import HomeSummaryAspects from './HomeSummaryAspects.svelte';
+  import HomeSummaryMoonCycle from './HomeSummaryMoonCycle.svelte';
   import { buildSummary } from '$lib/astro/summary';
   import { buildChartPayload } from '$lib/payloads';
   import { configStore } from '$lib/state/configStore';
@@ -69,10 +69,10 @@
   </div>
 
   <div class="grid gap-4">
-    <SummaryMainPoints summary={computedSummary} />
+    <HomeSummaryMainPoints summary={computedSummary} />
 
-    <SummaryAspects summary={computedSummary} />
+    <HomeSummaryAspects summary={computedSummary} />
 
-    <SummaryMoonCycle summary={computedSummary} mode={mode} />
+    <HomeSummaryMoonCycle summary={computedSummary} mode={mode} />
   </div>
 </div>

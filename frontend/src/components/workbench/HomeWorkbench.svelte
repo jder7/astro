@@ -6,9 +6,9 @@
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
   import { downloadBlob } from '$lib/utils/download';
-  import SummaryCard from '$components/home/SummaryCard.svelte';
-  import SvgCard from '$components/home/SvgCard.svelte';
-  import ReportCard from '$components/home/ReportCard.svelte';
+  import HomeSummaryCard from '$components/home/HomeSummaryCard.svelte';
+  import HomeSvgCard from '$components/home/HomeSvgCard.svelte';
+  import HomeReportCard from '$components/home/HomeReportCard.svelte';
   import ChartForm from './ChartForm.svelte';
 
   const pageId = 'home';
@@ -84,11 +84,11 @@
     </div>
 
     <div class="lg:col-span-2 space-y-6">
-      <SummaryCard summary={cachedSummary} apiResponse={apiResponse} mode={activeMode} />
+      <HomeSummaryCard summary={cachedSummary} apiResponse={apiResponse} mode={activeMode} />
 
-      <SvgCard svgMarkup={svgMarkup} loading={loading} mode={activeMode} />
+      <HomeSvgCard svgMarkup={svgMarkup} loading={loading} mode={activeMode} />
 
-      <ReportCard cachedReport={cachedReport} mode={activeMode} page={pageId} />
+      <HomeReportCard cachedReport={cachedReport} mode={activeMode} page={pageId} />
     </div>
   </div>
 </div>
