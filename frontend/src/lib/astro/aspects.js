@@ -4,6 +4,7 @@ export const ASPECT_ICONS = {
   square: '□',
   trine: '△',
   sextile: '⚹',
+  quintile: '⬠',
 };
 
 export const aspectIcon = (name) => {

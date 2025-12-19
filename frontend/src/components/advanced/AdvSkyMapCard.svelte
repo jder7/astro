@@ -5,7 +5,7 @@
   import CardHeader from '$components/shared/CardHeader.svelte';
 
   export let response = null;
-  let collapsed = false;
+  let collapsed = true;
 
   const shapePoint = ([key, point]) => ({
     key,

@@ -51,6 +51,19 @@ export function extractRanges(payload) {
   };
 }
 
+const normalizeLabel = (value) => String(value || '').trim().replace(/\s+/g, '_').toLowerCase();
+
+const buildPointMap = (subject = {}) => {
+  const map = new Map();
+  Object.values(subject || {}).forEach((value) => {
+    if (value && typeof value === 'object' && value.point_type === 'AstrologicalPoint') {
+      const key = normalizeLabel(value.name || value.id);
+      map.set(key, value);
+    }
+  });
+  return map;
+};
+
 export function extractSubjects(payload, mode = 'natal') {
   let primary = null;
   for (const getter of SUBJECT_SOURCES) {
@@ -118,17 +131,32 @@ const fallbackValue = (...values) => {
   return '';
 };
 
-export const simplifyAspect = (entry) => {
+export const simplifyAspect = (entry, ownerLabel = '') => {
   if (!entry || typeof entry !== 'object') return null;
   const name = fallbackValue(entry.name, entry.aspect, entry.id, entry.type, 'Aspect');
   const left = fallbackValue(entry.left, entry.first_point, entry.inner_point, entry.point_a, entry.planet_a);
   const right = fallbackValue(entry.right, entry.second_point, entry.outer_point, entry.point_b, entry.planet_b);
-  const orb = fallbackValue(entry.orb, entry.orb_value, entry.orb_value_deg);
-  return { name, left, right, orb };
+  const orb = fallbackValue(entry.orb, entry.orb_value, entry.orb_value_deg, entry.orbit, entry.diff);
+  const taggedLeft = ownerLabel && left ? `${left} (${ownerLabel})` : left;
+  const taggedRight = ownerLabel && right ? `${right} (${ownerLabel})` : right;
+  return { name, left: taggedLeft, right: taggedRight, orb, leftRef: left, rightRef: right, movement: entry.aspect_movement || entry.movement || '' };
 };
 
 export function extractAspects(payload) {
   const source = payload?.snapshot || payload || {};
+  const primaryName =
+    source.subject?.name ||
+    payload?.subject?.name ||
+    payload?.snapshot?.subject?.name ||
+    payload?.first_subject?.name ||
+    'Subject 1';
+  const secondaryName =
+    source.natal_subject?.name ||
+    payload?.natal_subject?.name ||
+    payload?.second_subject?.name ||
+    (payload?.first_subject && payload?.second_subject ? payload.second_subject.name : '') ||
+    'Subject 2';
+
   const aspectsRaw = source.aspects || payload?.aspects || [];
   const natalAspectsRaw = source.natal_aspects || payload?.natal_aspects || [];
   const majorAspects = Array.isArray(source.major_aspects) ? source.major_aspects : payload?.major_aspects || [];
@@ -136,10 +164,95 @@ export function extractAspects(payload) {
     ? source.natal_major_aspects
     : payload?.natal_major_aspects || [];
 
+  const subject1Data = source.subject || payload?.subject || payload?.snapshot?.subject || payload?.first_subject || {};
+  const subject2Data = source.natal_subject || payload?.natal_subject || payload?.second_subject || {};
+
+  const subject1PointMap = buildPointMap(subject1Data);
+  const subject2PointMap = buildPointMap(subject2Data);
+
+  const findSign = (name, owner = '1') => {
+    const key = normalizeLabel(name);
+    if (!key) return '';
+    if (owner === '2') {
+      return subject2PointMap.get(key)?.sign || subject1PointMap.get(key)?.sign || '';
+    }
+    return subject1PointMap.get(key)?.sign || subject2PointMap.get(key)?.sign || '';
+  };
+
+  const isRelationship = aspectsRaw && typeof aspectsRaw === 'object' && !Array.isArray(aspectsRaw);
+  const synastryAspectsRaw = isRelationship && Array.isArray(aspectsRaw.aspects) ? aspectsRaw.aspects : [];
+  const subject1AspectsRaw = isRelationship && Array.isArray(aspectsRaw.first_subject) ? aspectsRaw.first_subject : [];
+  const subject2AspectsRaw = isRelationship && Array.isArray(aspectsRaw.second_subject) ? aspectsRaw.second_subject : [];
+
+  const mapRelationshipAspect = (entry, ownerTagLeft = '', ownerTagRight = '') => {
+    if (!entry || typeof entry !== 'object') return null;
+    const leftRaw = entry.p1_name || entry.left || entry.point_a || entry.first_point;
+    const rightRaw = entry.p2_name || entry.right || entry.point_b || entry.second_point;
+    const left = leftRaw ? `${leftRaw}${entry.p1_owner ? ` (${entry.p1_owner})` : ownerTagLeft ? ` (${ownerTagLeft})` : ''}` : '';
+    const right = rightRaw
+      ? `${rightRaw}${entry.p2_owner ? ` (${entry.p2_owner})` : ownerTagRight ? ` (${ownerTagRight})` : ''}`
+      : '';
+    const orb = fallbackValue(entry.orbit, entry.diff, entry.orb, entry.orb_value, entry.orb_value_deg);
+    const movement = entry.aspect_movement || entry.movement || '';
+    const signLeft = findSign(leftRaw, '1');
+    const signRight = findSign(rightRaw, '2');
+    return {
+      name: fallbackValue(entry.aspect, entry.name, 'Aspect'),
+      left,
+      right,
+      leftRef: leftRaw,
+      rightRef: rightRaw,
+      orb,
+      leftOwner: '1',
+      rightOwner: '2',
+      signLeft,
+      signRight,
+      movement,
+    };
+  };
+
+  const mapAspect = (entry, ownerLeft = '1', ownerRight = '1') => {
+    if (!entry || typeof entry !== 'object') return null;
+    const base = simplifyAspect(entry);
+    const signLeft = findSign(base.leftRef, ownerLeft);
+    const signRight = findSign(base.rightRef, ownerRight);
+    return {
+      ...base,
+      leftOwner: ownerLeft,
+      rightOwner: ownerRight,
+      signLeft,
+      signRight,
+    };
+  };
+
+  const subject1Aspects = isRelationship
+    ? subject1AspectsRaw.map((a) => mapRelationshipAspect(a, '1', '')).filter(Boolean)
+    : Array.isArray(aspectsRaw)
+      ? aspectsRaw.map((a) => mapAspect(a, '1', '1')).filter(Boolean)
+      : [];
+  const subject2Aspects = isRelationship
+    ? subject2AspectsRaw.map((a) => mapRelationshipAspect(a, '', '2')).filter(Boolean)
+    : Array.isArray(natalAspectsRaw)
+      ? natalAspectsRaw.map((a) => mapAspect(a, '2', '2')).filter(Boolean)
+      : [];
+  const synastryAspects = synastryAspectsRaw
+    .map((a) => (isRelationship ? mapRelationshipAspect(a) : mapAspect(a, '1', '2')))
+    .filter(Boolean);
+
   return {
-    aspects: Array.isArray(aspectsRaw) ? aspectsRaw.map(simplifyAspect).filter(Boolean) : [],
-    natalAspects: Array.isArray(natalAspectsRaw) ? natalAspectsRaw.map(simplifyAspect).filter(Boolean) : [],
-    majorAspects: Array.isArray(majorAspects) ? majorAspects : [],
-    natalMajorAspects: Array.isArray(natalMajorAspects) ? natalMajorAspects : [],
+    subject1: {
+      name: primaryName,
+      aspects: subject1Aspects,
+      majorAspects: Array.isArray(majorAspects) ? majorAspects : [],
+    },
+    subject2: {
+      name: secondaryName,
+      aspects: subject2Aspects,
+      majorAspects: Array.isArray(natalMajorAspects) ? natalMajorAspects : [],
+    },
+    synastry: {
+      aspects: synastryAspects,
+      majorAspects: [],
+    },
   };
 }

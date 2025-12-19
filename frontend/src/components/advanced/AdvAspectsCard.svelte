@@ -3,15 +3,17 @@
   import MajorAspectIcon from '$components/shared/MajorAspectIcon.svelte';
   import AdvAspectMatrix from '$components/advanced/AdvAspectMatrix.svelte';
   import CardHeader from '$components/shared/CardHeader.svelte';
-  import { extractAspects } from '$lib/astro/advanced';
+  import { extractAspects, extractSubjects, collectPoints } from '$lib/astro/advanced';
   import { configStore } from '$lib/state/configStore';
-  import { POINT_SYMBOLS } from '$lib/astro/signs';
+  import { POINT_SYMBOLS, signSymbol } from '$lib/astro/signs';
+  import { aspectIcon, aspectColorClass } from '$lib/astro/aspects';
 
   export let response = null;
   export let mode = 'natal';
-  let collapsed = false;
+  let collapsed = true;
 
   const normalizeLabel = (label) => String(label || '').trim().replace(/\s+/g, '_').toLowerCase();
+  const stripOwner = (value) => String(value || '').replace(/\s*\([^)]*\)\s*/g, '').trim();
 
   const formatPatternParts = (pattern) => {
     if (!pattern) return { name: 'Pattern', detail: '' };
@@ -22,19 +24,38 @@
   };
 
   $: aspectData = extractAspects(response || {});
-  $: aspects = aspectData.aspects || [];
-  $: natalAspects = aspectData.natalAspects || [];
-  $: majorAspects = aspectData.majorAspects || [];
-  $: natalMajorAspects = aspectData.natalMajorAspects || [];
+  $: subject1 = aspectData.subject1 || { name: 'Subject 1', aspects: [], majorAspects: [] };
+  $: subject2 = aspectData.subject2 || { name: 'Subject 2', aspects: [], majorAspects: [] };
+  $: synastry = aspectData.synastry || { aspects: [], majorAspects: [] };
+  $: aspects = subject1.aspects || [];
+  $: natalAspects = subject2.aspects || [];
+  $: synAspects = synastry.aspects || [];
+  $: majorAspects = subject1.majorAspects || [];
+  $: natalMajorAspects = subject2.majorAspects || [];
   $: activeSet = new Set((get(configStore).active_points || []).map((point) => normalizeLabel(point)));
+  $: subjects = extractSubjects(response, mode);
+  $: primarySubject = response?.subject || response?.snapshot?.subject || response?.first_subject || subjects.primary || {};
+  $: secondarySubject =
+    response?.natal_subject || response?.snapshot?.natal_subject || response?.second_subject || subjects.natal || {};
+  $: subject1Points = collectPoints(primarySubject || {}).points || {};
+  $: subject2Points = collectPoints(secondarySubject || {}).points || {};
+
+  const findPoint = (label, owner = '1') => {
+    const norm = normalizeLabel(stripOwner(label));
+    if (!norm) return {};
+    if (owner === '2') return subject2Points[norm] || subject1Points[norm] || {};
+    return subject1Points[norm] || subject2Points[norm] || {};
+  };
 
   const filterAspectsByActive = (entries) =>
     (entries || []).filter((aspect) => {
       if (!aspect || !activeSet.size) return Boolean(aspect);
       const leftKey = normalizeLabel(aspect.left);
       const rightKey = normalizeLabel(aspect.right);
+      const leftPlain = normalizeLabel(stripOwner(aspect.left));
+      const rightPlain = normalizeLabel(stripOwner(aspect.right));
       if (!leftKey || !rightKey) return false;
-      return activeSet.has(leftKey) && activeSet.has(rightKey);
+      return (activeSet.has(leftKey) || activeSet.has(leftPlain)) && (activeSet.has(rightKey) || activeSet.has(rightPlain));
     });
 
   $: filteredAspects = filterAspectsByActive(aspects);
@@ -44,9 +65,15 @@
     if (!entry) return null;
     const base = entry.left || '—';
     const other = entry.right || '—';
-    const baseIcon = POINT_SYMBOLS[normalizeLabel(base)] || '';
-    const otherIcon = POINT_SYMBOLS[normalizeLabel(other)] || '';
+    const baseOwner = entry.leftOwner || '1';
+    const otherOwner = entry.rightOwner || (mode === 'relationship' ? '2' : baseOwner);
+    const baseSign = entry.signLeft || findPoint(base, baseOwner).sign;
+    const otherSign = entry.signRight || findPoint(other, otherOwner).sign;
+    const baseIcon = POINT_SYMBOLS[normalizeLabel(stripOwner(base))] || '';
+    const otherIcon = POINT_SYMBOLS[normalizeLabel(stripOwner(other))] || '';
     const aspectLabel = entry.name || entry.aspect || 'Aspect';
+    const aspectGlyph = aspectIcon(aspectLabel);
+    const aspectCls = aspectColorClass(aspectLabel);
     const orb =
       typeof entry.orb === 'number'
         ? `${entry.orb.toFixed(2)}°`
@@ -59,14 +86,20 @@
       typeof entry.orb === 'number'
         ? entry.orb
         : Number.parseFloat(String(entry.orb || '').replace('°', ''));
+    const movement = entry.movement || entry.aspect_movement || '';
     return {
       baseIcon,
       base,
+      baseSign: baseSign ? signSymbol(baseSign) : '',
       otherIcon,
       other,
+      otherSign: otherSign ? signSymbol(otherSign) : '',
       aspect: aspectLabel,
+      aspectGlyph,
+      aspectCls,
       orb: orb || '—',
       orbValue: Number.isFinite(orbValue) ? orbValue : Number.POSITIVE_INFINITY,
+      movement,
     };
   };
 
@@ -76,6 +109,9 @@
       if (!a || !b) return 0;
       if (column === 'orb') {
         return (a.orbValue - b.orbValue) * dir;
+      }
+      if (column === 'movement') {
+        return String(a.movement || '').localeCompare(String(b.movement || '')) * dir;
       }
       return String(a[column] || '').localeCompare(String(b[column] || '')) * dir;
     });
@@ -92,6 +128,7 @@
 
   $: currentRows = sortBy(filteredAspects.map(formatAspectRow).filter(Boolean), sortState.column, sortState.direction);
   $: natalRows = sortBy(filteredNatalAspects.map(formatAspectRow).filter(Boolean), sortState.column, sortState.direction);
+  $: synRows = sortBy((synAspects || []).map(formatAspectRow).filter(Boolean), sortState.column, sortState.direction);
 </script>
 
 <div class="flowbite-card space-y-4">
@@ -171,32 +208,63 @@
             {/if}
           </div>
 
-          <CardHeader label="Aspects" badge={filteredAspects.length + filteredNatalAspects.length} />
+          <CardHeader label="Aspects" badge={filteredAspects.length + filteredNatalAspects.length + synAspects.length} />
 
-          {#if currentRows.length}
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm min-w-[520px]" id="adv-aspects-current-table">
-                <thead class="text-xs text-slate-400">
-                  <tr>
-                    <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('base')}>Base</th>
-                    <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('aspect')}>Aspect</th>
-                    <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('other')}>Other</th>
-                    <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('orb')}>Orb</th>
-                  </tr>
+        {#if currentRows.length}
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[520px]" id="adv-aspects-current-table">
+              <thead class="text-xs text-slate-400">
+                <tr>
+                  <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('base')}>From</th>
+                  <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('aspect')}>Aspect</th>
+                  <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('other')}>To</th>
+                  <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('movement')}>Movement</th>
+                  <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('orb')}>Orb</th>
+                </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-800">
                   {#each currentRows as aspect}
                     <tr>
-                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.baseIcon} {aspect.base}</td>
-                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.aspect}</td>
-                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.otherIcon} {aspect.other}</td>
+                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.baseIcon} {aspect.base} {aspect.baseSign}</td>
+                      <td class={`py-2 pr-3 whitespace-nowrap ${aspect.aspectCls}`}>{aspect.aspectGlyph} {aspect.aspect}</td>
+                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.otherIcon} {aspect.other} {aspect.otherSign}</td>
+                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.movement || '—'}</td>
+                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.orb}</td>
+                    </tr>
+                  {/each}
+                </tbody>
+            </table>
+          </div>
+        {/if}
+        {#if synAspects.length}
+          <div class="space-y-2">
+            <p class="text-xs text-slate-400">Synastry</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm min-w-[520px]" id="adv-aspects-synastry-table">
+                <thead class="text-xs text-slate-400">
+                  <tr>
+                    <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('base')}>From</th>
+                    <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('aspect')}>Aspect</th>
+                    <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('other')}>To</th>
+                    <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('movement')}>Movement</th>
+                    <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('orb')}>Orb</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                  {#each synRows as aspect}
+                    <tr>
+                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.baseIcon} {aspect.base} {aspect.baseSign}</td>
+                      <td class={`py-2 pr-3 whitespace-nowrap ${aspect.aspectCls}`}>{aspect.aspectGlyph} {aspect.aspect}</td>
+                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.otherIcon} {aspect.other} {aspect.otherSign}</td>
+                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.movement || '—'}</td>
                       <td class="py-2 pr-3 whitespace-nowrap">{aspect.orb}</td>
                     </tr>
                   {/each}
                 </tbody>
               </table>
             </div>
-          {/if}
+          </div>
+        {/if}
 
           {#if natalRows.length}
             <div class="space-y-2">
@@ -205,18 +273,20 @@
                 <table class="w-full text-sm min-w-[520px]" id="adv-aspects-natal-table">
                   <thead class="text-xs text-slate-400">
                     <tr>
-                      <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('base')}>Base</th>
+                      <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('base')}>From</th>
                       <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('aspect')}>Aspect</th>
-                      <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('other')}>Other</th>
+                      <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('other')}>To</th>
+                      <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('movement')}>Movement</th>
                       <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('orb')}>Orb</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-800">
                     {#each natalRows as aspect}
                       <tr>
-                        <td class="py-2 pr-3 whitespace-nowrap">{aspect.baseIcon} {aspect.base}</td>
-                        <td class="py-2 pr-3 whitespace-nowrap">{aspect.aspect}</td>
-                        <td class="py-2 pr-3 whitespace-nowrap">{aspect.otherIcon} {aspect.other}</td>
+                        <td class="py-2 pr-3 whitespace-nowrap">{aspect.baseIcon} {aspect.base} {aspect.baseSign}</td>
+                        <td class={`py-2 pr-3 whitespace-nowrap ${aspect.aspectCls}`}>{aspect.aspectGlyph} {aspect.aspect}</td>
+                        <td class="py-2 pr-3 whitespace-nowrap">{aspect.otherIcon} {aspect.other} {aspect.otherSign}</td>
+                        <td class="py-2 pr-3 whitespace-nowrap">{aspect.movement || '—'}</td>
                         <td class="py-2 pr-3 whitespace-nowrap">{aspect.orb}</td>
                       </tr>
                     {/each}

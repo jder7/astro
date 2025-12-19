@@ -9,7 +9,7 @@
   export let mode = 'natal';
   export let onRange = null;
   export let loading = false;
-  let collapsed = false;
+  let collapsed = true;
 
   const formatSnapshot = (snap) => {
     const ts = toDate(snap?.timestamp);
