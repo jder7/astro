@@ -18,6 +18,7 @@
     Default: '#94a3b8',
   };
   const HAND_COLORS = ['#38bdf8', '#34d399'];
+  const withAlpha = (hex, alpha = '26') => (hex ? `${hex}${alpha}` : `${ELEMENT_HEX.Default}${alpha}`);
 
   const clampHour = (n) => Math.max(0, Math.min(24, n));
   const wrapOffset = (value, hours) => {
@@ -230,6 +231,26 @@
 
   {#if normalized.length}
     <div class="relative w-full max-w-[640px] mx-auto bg-slate-900/70 border border-slate-800 rounded-2xl p-3">
+      {#if selectedSummary}
+        <div class="absolute top-3 left-3 flex items-center gap-2">
+          <span
+            class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold text-slate-50 shadow-sm"
+            style={`background:${(ELEMENT_HEX[selectedSummary.element] || ELEMENT_HEX.Default)}22; border:1px solid ${(ELEMENT_HEX[selectedSummary.element] || ELEMENT_HEX.Default)}55;`}
+          >
+            <span aria-hidden="true">{ELEMENT_ICON[selectedSummary.element] || ELEMENT_ICON.Default}</span>
+            <span>{selectedSummary.element || '—'}</span>
+          </span>
+        </div>
+        <div class="absolute top-3 right-3 flex items-center gap-2">
+          <span
+            class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold text-slate-50 shadow-sm"
+            style={`background:${withAlpha(ELEMENT_HEX[selectedSummary.element] || ELEMENT_HEX.Default, '26')}; border:1px solid ${(ELEMENT_HEX[selectedSummary.element] || ELEMENT_HEX.Default)}55;`}
+          >
+            <span aria-hidden="true">{QUALITY_ICON[selectedSummary.quality] || ''}</span>
+            <span>{selectedSummary.quality || '—'}</span>
+          </span>
+        </div>
+      {/if}
       <div class="relative">
         <svg viewBox="0 0 420 420" class="w-full h-auto" id="asc-clock-svg">
           {#each normalized as range, discIdx}
@@ -341,7 +362,16 @@
 
           {#if normalized.length === 1 && summaries[0]}
             <g transform="translate(210 210)" id="asc-summary-single">
-              <rect id="asc-summary-box" x="-82" y="-28" width="164" height="56" rx="10" fill="rgba(15,23,42,0.8)" stroke={ELEMENT_HEX[summaries[0].element] || ELEMENT_HEX.Default} />
+              <rect
+                id="asc-summary-box"
+                x="-82"
+                y="-28"
+                width="164"
+                height="56"
+                rx="10"
+                fill={withAlpha(ELEMENT_HEX[summaries[0].element] || ELEMENT_HEX.Default)}
+                stroke={ELEMENT_HEX[summaries[0].element] || ELEMENT_HEX.Default}
+              />
               <g font-size="10" fill={ELEMENT_HEX[summaries[0].element] || ELEMENT_HEX.Default}>
                 <text id="asc-summary-sign" x="-56" y="-2" text-anchor="middle" font-size="16">
                   {signSymbol(summaries[0].sign) || summaries[0].sign}
@@ -358,7 +388,16 @@
             {#each normalized as _, i}
               {#if summaries[i]}
                 <g transform={`translate(${i === 0 ? 80 : 340} 390)`} id={`asc-summary-${i}`}>
-                  <rect id={`asc-summary-box-${i}`} x="-78" y="-26" width="156" height="52" rx="10" fill="rgba(15,23,42,0.8)" stroke={HAND_COLORS[i] || HAND_COLORS[0]} />
+                  <rect
+                    id={`asc-summary-box-${i}`}
+                    x="-78"
+                    y="-26"
+                    width="156"
+                    height="52"
+                    rx="10"
+                    fill={withAlpha(ELEMENT_HEX[summaries[i].element] || ELEMENT_HEX.Default)}
+                    stroke={HAND_COLORS[i] || HAND_COLORS[0]}
+                  />
                   <g font-size="10" fill={HAND_COLORS[i] || HAND_COLORS[0]}>
                     <text id={`asc-summary-sign-${i}`} x="-56" y="0" text-anchor="middle" font-size="20">
                       {signSymbol(summaries[i].sign) || summaries[i].sign}
