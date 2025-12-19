@@ -23,6 +23,7 @@ class PtolemaicAspectConfiguration:
     geometry: str
     orb: str
     construction: str
+    description: str
 
 
 @dataclass(frozen=True)
@@ -67,6 +68,7 @@ class PtolemaicAspect:
             "geometry": cfg.geometry,
             "orb": cfg.orb,
             "construction": cfg.construction,
+            "description": cfg.description,
             "points": list(self.points),
             "links": [link.to_dict() for link in self.links],
             "structure": self.structure or {},
@@ -78,6 +80,7 @@ PTOLEMAIC_ASPECTS: tuple[NormalAspect, ...] = (
     NormalAspect("sextile", 60.0, 4.0, "✺"),
     NormalAspect("square", 90.0, 6.0, "□"),
     NormalAspect("trine", 120.0, 6.0, "△"),
+    NormalAspect("quincunx", 150.0, 3.0, "⚻"),
     NormalAspect("opposition", 180.0, 6.0, "☍"),
 )
 
@@ -96,6 +99,7 @@ PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
         geometry="Clustered within ~30° (often one sign) with overlapping 0° links.",
         orb="Planets within ~5–10° of each other across the cluster.",
         construction="Conjunction-series bundle occupying one tight sector.",
+        description="Soul pod or karmic bundle concentrated in one slice of the chart; a chorus of voices singing one theme.",
     ),
     PtolemaicAspectConfiguration(
         id="t_square",
@@ -106,6 +110,7 @@ PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
         geometry="Opposition capped by two 90° squares, forming a T spine.",
         orb="Squares/opposition typically ±8–10°.",
         construction="A ↔ B opposition with C square to both (C = focal).",
+        description="Cosmic lever that presses toward the focal planet; tension seeking breakthrough and mastery.",
     ),
     PtolemaicAspectConfiguration(
         id="grand_trine",
@@ -116,6 +121,18 @@ PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
         geometry="Three 120° links in an equilateral triangle.",
         orb="Trines usually ±6–8° (often ~±7°).",
         construction="A–B–C all 120° apart forming a closed triangle.",
+        description="Elemental circuit where energy flows effortlessly; gifts and talents that ask to be awakened consciously.",
+    ),
+    PtolemaicAspectConfiguration(
+        id="yod",
+        name="Yod (Finger of God)",
+        planets="3 planets",
+        aspects=("sextile", "quincunx"),
+        aspects_label="Sextile + Quincunxes",
+        geometry="Two 150° quincunxes converging on an apex, with the base planets sextile.",
+        orb="Quincunx typically ±2–3°; sextile ±4–6°.",
+        construction="Apex point quincunx to both base planets, which are sextile to each other.",
+        description="A fated finger pointing toward a singular mission; awkward adjustments birthing a precise calling.",
     ),
     PtolemaicAspectConfiguration(
         id="kite",
@@ -126,6 +143,7 @@ PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
         geometry="Grand Trine with a fourth point opposing one trine point and sextile to the other two.",
         orb="Trines ~±6–8°, opposition ~±8–10°, sextiles ~±5–6°.",
         construction="A–B–C trines, with D opposite A and sextile B and C (kite spine and sides).",
+        description="A grand trine given a tailwind; latent grace made directional through a compelling axis.",
     ),
     PtolemaicAspectConfiguration(
         id="grand_cross",
@@ -136,6 +154,7 @@ PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
         geometry="Four points every 90°: two oppositions plus four squares.",
         orb="Squares/oppositions typically ±8–10°.",
         construction="A↔C and B↔D oppositions; each is square to its neighbors.",
+        description="Four-way crossroads of will; crucible of tests that forges resilience and integration of polarities.",
     ),
     PtolemaicAspectConfiguration(
         id="grand_sextile",
@@ -146,6 +165,7 @@ PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
         geometry="Hexagram/Star of David: alternating 60° and 120° points.",
         orb="Sextiles ±5–6°; trines ±6–8°.",
         construction="Two interlaced Grand Trines linked by six sextiles.",
+        description="Star-of-David resonance; a merkaba-like lattice inviting flow between worlds and effortless synergy.",
     ),
     PtolemaicAspectConfiguration(
         id="mystic_rectangle",
@@ -156,6 +176,7 @@ PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
         geometry="Two oppositions stitched by trines and sextiles into a rectangle.",
         orb="Oppositions ±8–10°; trines 6–8°; sextiles 5–6°.",
         construction="A↔C and B↔D; A sextile D & trine B, C sextile B & trine D.",
+        description="An envelope of grace containing polarity; tension held within a harmonious frame for inspired service.",
     ),
     PtolemaicAspectConfiguration(
         id="trapeze",
@@ -166,6 +187,7 @@ PTOLEMAIC_PATTERNS: tuple[PtolemaicAspectConfiguration, ...] = (
         geometry="Three sextiles in a row with an opposition across the open ends.",
         orb="Sextiles ±5–6°; opposition ±8–10°.",
         construction="A sextile B sextile C sextile D, with A↔D in opposition.",
+        description="A rocking cradle that can soothe or stir; supportive links framing a singular axis to resolve.",
     ),
 )
 
@@ -436,6 +458,45 @@ class PtolemaicAspectCalculator:
             )
         return matches
 
+    def _match_yod(self, keys: list[str], points: dict[str, dict], pair_map: dict) -> list[PtolemaicAspect]:
+        matches: list[PtolemaicAspect] = []
+        seen: set[frozenset[str]] = set()
+        config = next(p for p in PTOLEMAIC_PATTERNS if p.id == "yod")
+        for a, b, c in combinations(keys, 3):
+            combos = [(a, b, c), (b, a, c), (c, a, b)]
+            for apex, base1, base2 in combos:
+                sextile = self._get_aspect_info(base1, base2, "sextile", points, pair_map)
+                q1 = self._get_aspect_info(apex, base1, "quincunx", points, pair_map)
+                q2 = self._get_aspect_info(apex, base2, "quincunx", points, pair_map)
+                if not (
+                    sextile
+                    and sextile["type"] == "sextile"
+                    and q1
+                    and q2
+                    and q1["type"] == q2["type"] == "quincunx"
+                ):
+                    continue
+                key_set = frozenset((apex, base1, base2))
+                if key_set in seen:
+                    continue
+                seen.add(key_set)
+                base_pair = tuple(sorted((base1, base2)))
+                links = [
+                    self._make_link(*base_pair, sextile),
+                    self._make_link(apex, base1, q1),
+                    self._make_link(apex, base2, q2),
+                ]
+                matches.append(
+                    PtolemaicAspect(
+                        configuration=config,
+                        points=tuple(sorted(key_set)),
+                        links=tuple(links),
+                        structure={"apex": apex, "base": base_pair},
+                    )
+                )
+                break
+        return matches
+
     def _match_kite(self, keys: list[str], points: dict[str, dict], pair_map: dict) -> list[PtolemaicAspect]:
         matches: list[PtolemaicAspect] = []
         seen: set[frozenset[str]] = set()
@@ -678,6 +739,7 @@ class PtolemaicAspectCalculator:
             self._match_stellium,
             self._match_t_square,
             self._match_grand_trine,
+            self._match_yod,
             self._match_kite,
             self._match_grand_cross,
             self._match_grand_sextile,

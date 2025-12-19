@@ -29,6 +29,12 @@
   $: secondValue = { ...state.relationship.second, date: toDate(state.relationship.second), time: toTime(state.relationship.second) };
   let showConfig = false;
 
+  function confirmReset() {
+    if (window.confirm('Reset inputs? This will clear all fields.')) {
+      resetInputs();
+    }
+  }
+
   function submit(event) {
     event.preventDefault();
     dispatch('submit', { mode: state.mode });
@@ -60,7 +66,7 @@
           class="icon-button"
           aria-label="Reset inputs"
           title="Reset inputs"
-          on:click={resetInputs}
+          on:click={confirmReset}
         >
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16M10 11v6m4-6v6M6 7h12l-1 13H7L6 7Z" />

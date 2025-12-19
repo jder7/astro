@@ -114,6 +114,12 @@ function simplifyAspect(entry) {
   };
 }
 
+const normalizeAspectsArray = (entry) => {
+  if (Array.isArray(entry)) return entry;
+  if (entry && typeof entry === 'object' && Array.isArray(entry.aspects)) return entry.aspects;
+  return [];
+};
+
 export function buildSummary(mode, response, birthParts, transitParts) {
   const sections = [];
   const ranges = collectRanges(response || {});
@@ -123,8 +129,8 @@ export function buildSummary(mode, response, birthParts, transitParts) {
 
   if (mode === 'natal' && response?.subject) {
     sections.push({ meta: buildMeta(response.subject, 'Natal'), points: extractPoints(response.subject) });
-    rawAspects = Array.isArray(response.aspects) ? response.aspects : null;
-    aspects = response.aspects.map(simplifyAspect).filter(Boolean);
+    rawAspects = normalizeAspectsArray(response.aspects);
+    aspects = rawAspects.map(simplifyAspect).filter(Boolean);
   } else if ((mode === 'transit' || mode === 'natal_transit') && response?.snapshot) {
     const snap = response.snapshot;
     if (snap.subject) {
@@ -133,8 +139,8 @@ export function buildSummary(mode, response, birthParts, transitParts) {
     if (snap.natal_subject) {
       sections.push({ meta: buildMeta(snap.natal_subject, 'Natal'), points: extractPoints(snap.natal_subject) });
     }
-    rawAspects = Array.isArray(snap.aspects) ? snap.aspects : null;
-    aspects = snap.aspects.map(simplifyAspect).filter(Boolean);
+    rawAspects = normalizeAspectsArray(snap.aspects);
+    aspects = rawAspects.map(simplifyAspect).filter(Boolean);
   } else if (mode === 'relationship' && response) {
     if (response.first_subject) {
       sections.push({ meta: buildMeta(response.first_subject, 'Partner A'), points: extractPoints(response.first_subject) });
@@ -142,8 +148,8 @@ export function buildSummary(mode, response, birthParts, transitParts) {
     if (response.second_subject) {
       sections.push({ meta: buildMeta(response.second_subject, 'Partner B'), points: extractPoints(response.second_subject) });
     }
-    rawAspects = Array.isArray(response.aspects) ? response.aspects : null;
-    aspects = response.aspects.map(simplifyAspect).filter(Boolean);
+    rawAspects = normalizeAspectsArray(response.aspects);
+    aspects = rawAspects.map(simplifyAspect).filter(Boolean);
   }
 
   const context = {

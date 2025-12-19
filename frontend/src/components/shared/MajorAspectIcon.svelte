@@ -89,6 +89,37 @@
           <path d="M30 42 Q44 48 58 42" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.3" stroke-dasharray="5 3" />
         `
       ),
+      yod: wrap(
+        'yod',
+        `
+          <linearGradient id="yod-spine" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#a855f7" stop-opacity="0.85" />
+          </linearGradient>
+          <linearGradient id="yod-base" x1="0%" y1="50%" x2="100%" y2="50%">
+            <stop offset="0%" stop-color="#facc15" stop-opacity="0.85" />
+            <stop offset="100%" stop-color="#fb7185" stop-opacity="0.9" />
+          </linearGradient>
+          <radialGradient id="yod-halo" cx="50%" cy="20%" r="60%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.65" />
+            <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.05" />
+          </radialGradient>
+        `,
+        `
+          <polygon points="44,10 20,68 68,68" fill="url(#yod-halo)" stroke="rgba(56, 189, 248, 0.5)" stroke-width="2.1" stroke-linejoin="round" />
+          <path d="M44 16 L26 64" stroke="url(#yod-spine)" stroke-width="2.8" stroke-linecap="round" />
+          <path d="M44 16 L62 64" stroke="url(#yod-spine)" stroke-width="2.8" stroke-linecap="round" />
+          <path d="M26 64 L62 64" stroke="url(#yod-base)" stroke-width="2.6" stroke-linecap="round" />
+          <path d="M30 56 Q44 48 58 56" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.4" stroke-dasharray="4 3" />
+          <polygon points="44,20 30,64 58,64" fill="none" stroke="rgba(168, 85, 247, 0.5)" stroke-width="1.5" stroke-dasharray="3 3" />
+          <g fill="#fef3c7" stroke="#facc15" stroke-width="1.6">
+            <circle cx="26" cy="64" r="5.3" />
+            <circle cx="62" cy="64" r="5.3" />
+          </g>
+          <circle cx="44" cy="16" r="6.4" fill="#a855f7" stroke="#c084fc" stroke-width="2" />
+          <circle cx="44" cy="34" r="3.8" fill="#38bdf8" stroke="#7dd3fc" stroke-width="1.4" opacity="0.9" />
+        `
+      ),
       kite: wrap(
         'kite',
         `
