@@ -2,16 +2,9 @@
   import { get } from 'svelte/store';
   import { configStore } from '$lib/state/configStore';
   import { signSymbol, signAbbrev, signName, POINT_ICONS } from '$lib/astro/signs';
+  import { aspectColorClass, aspectIcon } from '$lib/astro/aspects';
 
   export let summary = { sections: [], aspects: [], rawAspects: [] };
-
-  const ASPECT_ICONS = {
-    conjunction: '☌',
-    opposition: '☍',
-    square: '□',
-    trine: '△',
-    sextile: '⚹',
-  };
 
   const normalizeLabel = (label) => String(label || '').trim().replace(/\s+/g, '_').toLowerCase();
 
@@ -52,8 +45,8 @@
       const rightDeg = rightPoint?.degree || asp.right_degree || '—';
       const aspectName = asp.name || asp.aspect || 'Aspect';
       const aspectKey = (aspectName || '').toLowerCase();
-      const icon = ASPECT_ICONS[aspectKey] || '✦';
-      const iconColor = aspectKey === 'opposition' || aspectKey === 'square' ? 'text-rose-400' : 'text-emerald-300';
+      const icon = aspectIcon(aspectName);
+      const iconColor = aspectColorClass(aspectName);
       const leftIcon = iconForLabel(leftLabel);
       const rightIcon = iconForLabel(rightLabel);
       const orbValRaw = Number.isFinite(asp.orb_value) ? asp.orb_value : Number(String(asp.orb || '').replace('°', ''));

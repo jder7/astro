@@ -1,0 +1,48 @@
+{
+    "asc_moon_sun_range_enabled": true,
+    "config": {
+        "perspective": "Apparent Geocentric",
+        "zodiac_type": "Sidereal",
+        "sidereal_mode": "KRISHNAMURTI",
+        "house_system": "P",
+        "theme": "dark",
+        "active_points": [
+            "sun",
+            "moon",
+            "mercury",
+            "venus",
+            "mars",
+            "jupiter",
+            "saturn",
+            "ascendant"
+        ]
+    },
+    "birth": null,
+    "moment": null,
+    "first": {
+        "name": "Partner A",
+        "year": 1990,
+        "month": 1,
+        "day": 1,
+        "hour": 12,
+        "minute": 0,
+        "lat": 52.3702,
+        "lng": 4.8952,
+        "tz_str": "Europe/Amsterdam",
+        "city": "Amsterdam",
+        "nation": "NL"
+    },
+    "second": {
+        "name": "Partner B",
+        "year": 2025,
+        "month": 12,
+        "day": 19,
+        "hour": 10,
+        "minute": 17,
+        "lat": 40.7128,
+        "lng": 24.006,
+        "tz_str": "America/New_York",
+        "city": "New York",
+        "nation": "US"
+    }
+}

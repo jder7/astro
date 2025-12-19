@@ -2,7 +2,7 @@
   import { get } from 'svelte/store';
   import MajorAspectIcon from '$components/shared/MajorAspectIcon.svelte';
   import AdvAspectMatrix from '$components/advanced/AdvAspectMatrix.svelte';
-  import CompactRow from '$components/shared/CompactRow.svelte';
+  import CardHeader from '$components/shared/CardHeader.svelte';
   import { extractAspects } from '$lib/astro/advanced';
   import { configStore } from '$lib/state/configStore';
   import { POINT_SYMBOLS } from '$lib/astro/signs';
@@ -124,10 +124,10 @@
         <p class="text-sm text-slate-400">Generate any mode to view aspects and configurations.</p>
       {:else}
         <div class="space-y-4">
-          <AdvAspectMatrix {response} />
+          <AdvAspectMatrix {response} mode={mode} />
 
           <div id="adv-aspects-major-configs" class="space-y-2">
-            <CompactRow label="Major configurations" badge={majorAspects.length + natalMajorAspects.length} />
+            <CardHeader label="Major configurations" badge={majorAspects.length + natalMajorAspects.length} />
             {#if majorAspects.length}
               <div class="space-y-1">
                 <p class="text-xs text-slate-400">Current chart</p>
@@ -171,7 +171,7 @@
             {/if}
           </div>
 
-          <CompactRow label="Aspects" badge={filteredAspects.length + filteredNatalAspects.length} />
+          <CardHeader label="Aspects" badge={filteredAspects.length + filteredNatalAspects.length} />
 
           {#if currentRows.length}
             <div class="overflow-x-auto">

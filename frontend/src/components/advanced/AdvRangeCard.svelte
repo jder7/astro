@@ -3,7 +3,7 @@
   import { formatDateLabel, formatDateShort, toDate } from '$lib/astro/format';
   import { POINT_SYMBOLS, signName, signSymbol } from '$lib/astro/signs';
   import RangeForm from '$components/workbench/RangeForm.svelte';
-  import CompactRow from '$components/shared/CompactRow.svelte';
+  import CardHeader from '$components/shared/CardHeader.svelte';
 
   export let rangeResult = null;
   export let mode = 'natal';
@@ -85,7 +85,7 @@
       <div id="adv-range-results" class="space-y-3">
         {#if entries.length}
           {#each entries as entry}
-            <CompactRow label={entry.label} value={entry.time || '—'}>
+            <CardHeader label={entry.label} value={entry.time || '—'}>
               <svelte:fragment slot="right">
                 <div class="flex items-center gap-2 flex-wrap justify-end">
                   {#each entry.placements as placement}
@@ -99,7 +99,7 @@
                   {/each}
                 </div>
               </svelte:fragment>
-            </CompactRow>
+            </CardHeader>
           {/each}
         {:else}
           <p class="text-sm text-slate-400">Pick a window and tap Visualize to see each stop along the way.</p>

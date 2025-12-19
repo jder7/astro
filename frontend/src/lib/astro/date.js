@@ -37,6 +37,18 @@ export function formatDateLabel(value) {
   });
 }
 
+export function formatDateLabelWithDay(value) {
+  const date = toDate(value);
+  if (!date) return '';
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    weekday: 'short',
+  });
+}
+
 export function formatDateShort(value) {
   const date = toDate(value);
   if (!date) return '';

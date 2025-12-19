@@ -2,7 +2,7 @@
   import { formatDegree } from '$lib/astro/format';
   import { collectPoints, extractSubjects, formatHouseName } from '$lib/astro/advanced';
   import { POINT_SYMBOLS, signName, signSymbol } from '$lib/astro/signs';
-  import CompactRow from '$components/shared/CompactRow.svelte';
+  import CardHeader from '$components/shared/CardHeader.svelte';
 
   export let response = null;
   let collapsed = false;
@@ -63,7 +63,7 @@
         <p class="text-sm text-slate-400">Generate a chart to see point and house placements.</p>
       {:else}
         <div class="space-y-3">
-          <CompactRow label="Points" badge={pointRows.length} />
+          <CardHeader label="Points" badge={pointRows.length} />
           {#if pointRows.length}
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm">
@@ -97,7 +97,7 @@
         </div>
 
         <div class="space-y-3">
-          <CompactRow label="Houses" badge={houseRows.length} />
+          <CardHeader label="Houses" badge={houseRows.length} />
           {#if houseRows.length}
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm">
@@ -130,7 +130,7 @@
 
         {#if natalPointRows.length || natalHouseRows.length}
           <div class="space-y-3">
-          <CompactRow label="Natal overlay" badge={natalPointRows.length + natalHouseRows.length} />
+          <CardHeader label="Natal overlay" badge={natalPointRows.length + natalHouseRows.length} />
             {#if natalPointRows.length}
               <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">

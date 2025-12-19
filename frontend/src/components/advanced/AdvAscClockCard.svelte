@@ -2,7 +2,7 @@
   import { formatDateLabel, toDate } from '$lib/astro/format';
   import { extractRanges } from '$lib/astro/advanced';
   import { signName, signSymbol } from '$lib/astro/signs';
-  import CompactRow from '$components/shared/CompactRow.svelte';
+  import CardHeader from '$components/shared/CardHeader.svelte';
 
   export let response = null;
   let collapsed = false;
@@ -45,11 +45,10 @@
       {:else}
         {#each ranges as range}
             <div class="space-y-2">
-              <CompactRow
+              <CardHeader
                 label={range.label || range.id || 'Ascendant window'}
                 value={`Anchor: ${formatDateLabel(range.anchor) || formatDateLabel(toDate(range.entries?.[0]?.start))}`}
                 badge={`${(range.entries || []).length} stops`}
-                alignTop={true}
               />
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm">

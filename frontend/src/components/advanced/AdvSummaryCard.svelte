@@ -1,9 +1,9 @@
 <script>
   import ElementSigil from '$components/shared/ElementSigil.svelte';
   import MajorAspectIcon from '$components/shared/MajorAspectIcon.svelte';
-  import CompactRow from '$components/shared/CompactRow.svelte';
+  import CardHeader from '$components/shared/CardHeader.svelte';
   import { formatDecimalDegree, ucfirst } from '$lib/astro/format';
-  import { formatDateLabel, formatDateShort, toDate } from '$lib/astro/date';
+  import { formatDateLabel, formatDateLabelWithDay, formatDateShort, toDate } from '$lib/astro/date';
   import { DAY_RULERS, ELEMENT_ICON, POINT_SYMBOLS, QUALITY_ICON, signName, signSymbol } from '$lib/astro/signs';
   import { computeDecan, extractAspects, extractRanges, extractSubjects } from '$lib/astro/advanced';
 
@@ -321,7 +321,7 @@
     return blocks
       .filter((block) => block.subject)
       .map((block) => {
-        const timestampLabel = formatDateLabel(block.subject.iso_formatted_local_datetime || block.subject.timestamp);
+        const timestampLabel = formatDateLabelWithDay(block.subject.iso_formatted_local_datetime || block.subject.timestamp);
         const locationLabel = [block.subject.city, block.subject.nation].filter(Boolean).join(', ');
         const { rows, sigil } = buildSummaryRows(block.subject, block.key);
         return {
@@ -358,7 +358,7 @@
               {#if summaryBlocks.length > 1}
                 <p class="text-xs uppercase tracking-[0.2em] font-semibold text-slate-300">{block.label}</p>
               {/if}
-              <CompactRow label="Moment" value={block.timestampLabel || 'Requested datetime'}>
+              <CardHeader label="Moment" value={block.timestampLabel || 'Requested datetime'}>
                 <svelte:fragment slot="right">
                   <div class="flex items-center gap-3 flex-wrap justify-end">
                     <div class="text-right">
@@ -379,7 +379,7 @@
                     </div>
                   </div>
                 </svelte:fragment>
-              </CompactRow>
+              </CardHeader>
 
               <div class="space-y-3">
                 {#each block.rows as row}
