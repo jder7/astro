@@ -1,10 +1,15 @@
 <script>
+  import ElementSigil from '$components/shared/ElementSigil.svelte';
   import { toDate } from '$lib/astro/date';
   import { signSymbol, signName, QUALITY_ICON, ELEMENT_ICON } from '$lib/astro/signs';
 
   export let ranges = [];
+  export let subjectElements = {};
 
   const HOUR_MS = 60 * 60 * 1000;
+  const VIEWBOX_SIZE = 420;
+  const SVG_CENTER = VIEWBOX_SIZE / 2;
+  const SIGIL_SIZE = 72;
   const ELEMENT_HEX = {
     Fire: '#fb7185',
     Earth: '#eab308',
@@ -53,31 +58,35 @@
     const spanMs = endWindow.getTime() - startWindow.getTime();
     return range.entries.flatMap((entry) => {
       const dur = entry.end.getTime() - entry.start.getTime();
-      return [0, 1, 2].map((dec) => {
-        const decStart = new Date(entry.start.getTime() + (dur / 3) * dec);
-        const decEnd = new Date(entry.start.getTime() + (dur / 3) * (dec + 1));
-        const clampStart = Math.max(decStart.getTime(), startWindow.getTime());
-        const clampEnd = Math.min(decEnd.getTime(), endWindow.getTime());
-        if (clampEnd <= clampStart) return null;
-        const startFrac = (clampStart - startWindow.getTime()) / spanMs;
-        const endFrac = (clampEnd - startWindow.getTime()) / spanMs;
-        const startAngle = -Math.PI / 2 + startFrac * Math.PI * 2;
-        const endAngle = -Math.PI / 2 + endFrac * Math.PI * 2;
-        const midAngle = (startAngle + endAngle) / 2;
-        const element = entry.element || 'Default';
-        return {
-          entry,
-          dec,
-          element,
-          quality: entry.quality,
-          sign: entry.sign,
-          startAngle,
-          endAngle,
-          midAngle,
-          startTime: decStart,
-          endTime: decEnd,
-        };
-      }).filter(Boolean);
+      const segments = [0, 1, 2]
+        .map((dec) => {
+          const decStart = new Date(entry.start.getTime() + (dur / 3) * dec);
+          const decEnd = new Date(entry.start.getTime() + (dur / 3) * (dec + 1));
+          const clampStart = Math.max(decStart.getTime(), startWindow.getTime());
+          const clampEnd = Math.min(decEnd.getTime(), endWindow.getTime());
+          if (clampEnd <= clampStart) return null;
+          const startFrac = (clampStart - startWindow.getTime()) / spanMs;
+          const endFrac = (clampEnd - startWindow.getTime()) / spanMs;
+          const startAngle = -Math.PI / 2 + startFrac * Math.PI * 2;
+          const endAngle = -Math.PI / 2 + endFrac * Math.PI * 2;
+          const midAngle = (startAngle + endAngle) / 2;
+          const element = entry.element || 'Default';
+          return {
+            entry,
+            dec,
+            element,
+            quality: entry.quality,
+            sign: entry.sign,
+            startAngle,
+            endAngle,
+            midAngle,
+            startTime: decStart,
+            endTime: decEnd,
+          };
+        })
+        .filter(Boolean);
+      const firstVisible = segments[0] || null;
+      return segments.map((seg) => ({ ...seg, showSign: seg.dec === 0 || seg === firstVisible }));
     });
   };
 
@@ -107,6 +116,38 @@
     };
   });
   $: summaries = activeSlices.map((_, i) => summaryFor(i));
+  $: selectedRangeIdx = highlight.rangeIdx >= 0 && highlight.rangeIdx < normalized.length ? highlight.rangeIdx : normalized.length ? 0 : -1;
+  $: selectedSummary = selectedRangeIdx !== -1 ? summaries[selectedRangeIdx] : null;
+  $: baseSigil = subjectElements || {};
+  $: sigilPayload = {
+    sunElement: baseSigil.sunElement || '',
+    moonElement: baseSigil.moonElement || '',
+    dayElement: baseSigil.dayElement || '',
+    dayRulerKey: baseSigil.dayRulerKey || '',
+    ascElement: (selectedSummary && selectedSummary.element) || baseSigil.ascElement || '',
+  };
+  $: hasSigilPayload = Boolean(
+    sigilPayload.sunElement || sigilPayload.moonElement || sigilPayload.dayElement || sigilPayload.ascElement
+  );
+  $: sigilTargetSlice = selectedRangeIdx !== -1 ? activeSlices[selectedRangeIdx] : null;
+  $: sigilRing = selectedRangeIdx !== -1 ? ringConfig(selectedRangeIdx) : null;
+  $: sigilPosition =
+    sigilTargetSlice && sigilRing
+      ? (() => {
+          const midAngle = (sigilTargetSlice.startAngle + sigilTargetSlice.endAngle) / 2;
+          const radius = (sigilRing.outer + sigilRing.inner) / 2;
+          return {
+            x: SVG_CENTER + radius * Math.cos(midAngle),
+            y: SVG_CENTER + radius * Math.sin(midAngle),
+          };
+        })()
+      : null;
+  $: sigilPositionPercent = sigilPosition
+    ? {
+        left: (sigilPosition.x / VIEWBOX_SIZE) * 100,
+        top: (sigilPosition.y / VIEWBOX_SIZE) * 100,
+      }
+    : null;
 
   const arcPath = (cx, cy, r, start, end) => {
     const large = end - start > Math.PI ? 1 : 0;
@@ -189,179 +230,173 @@
 
   {#if normalized.length}
     <div class="relative w-full max-w-[640px] mx-auto bg-slate-900/70 border border-slate-800 rounded-2xl p-3">
-      <svg viewBox="0 0 420 420" class="w-full h-auto" id="asc-clock-svg">
-        {#each normalized as range, idx}
-          {#if range}
-            {#each decanSegments[idx] as decanSeg, decanSegIdx}
-              {#if decanSeg}
-                <path
-                  id={`asc-segment-${idx}-${decanSegIdx}`}
-                  d={contourPath(ringConfig(idx).outer, ringConfig(idx).inner, decanSeg.startAngle, decanSeg.endAngle)}
-                  stroke={`${(ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default)}55`}
-                  stroke-width="0.5"
-                  fill={`${(ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default)}12`}
-                  opacity="0.5"
-                  on:click={() => clickSegment(idx, decanSeg)}
-                  style="cursor:pointer"
-                />
-                <path
-                  id={`asc-segment-contour-${idx}-${decanSegIdx}`}
-                  d={contourPath(ringConfig(idx).outer, ringConfig(idx).inner, decanSeg.startAngle, decanSeg.endAngle)}
-                  stroke={ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default}
-                  stroke-width="0.3"
-                  fill="none"
-                  opacity="1"
-                  pointer-events="none"
-                />
-                <line
-                  id={`asc-segment-start-outer-${idx}-${decanSegIdx}`}
-                  x1={210 + ringConfig(idx).outer * Math.cos(decanSeg.startAngle)}
-                  y1={210 + ringConfig(idx).outer * Math.sin(decanSeg.startAngle)}
-                  x2={210 + (ringConfig(idx).outer + (idx === 0 && decanSegIdx === 13 ? 8 : 14)) * Math.cos(decanSeg.startAngle)}
-                  y2={210 + (ringConfig(idx).outer + (idx === 0 && decanSegIdx === 13 ? 8 : 14)) * Math.sin(decanSeg.startAngle)}
-                  stroke={`${(ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default)}66`}
-                  stroke-width={idx === 0 && decanSegIdx === 13 ? 0.6 : 1}
-                  stroke-dasharray="3 3"
-                />
-                <line
-                  id={`asc-segment-start-inner-${idx}-${decanSegIdx}`}
-                  x1={210 + ringConfig(idx).inner * Math.cos(decanSeg.startAngle)}
-                  y1={210 + ringConfig(idx).inner * Math.sin(decanSeg.startAngle)}
-                  x2={210 + (ringConfig(idx).inner - 12) * Math.cos(decanSeg.startAngle)}
-                  y2={210 + (ringConfig(idx).inner - 12) * Math.sin(decanSeg.startAngle)}
-                  stroke={`${(ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default)}55`}
-                  stroke-width="0.6"
-                  stroke-dasharray="2 3"
-                />
-                {#if decanSegIdx === 0 || decanSeg.dec === 0}
-                  <line
-                    id={`asc-segment-span-${idx}-${decanSegIdx}`}
-                    x1={210 + (ringConfig(idx).outer + 6) * Math.cos(decanSeg.startAngle)}
-                    y1={210 + (ringConfig(idx).outer + 6) * Math.sin(decanSeg.startAngle)}
-                    x2={210 + (ringConfig(idx).inner - 6) * Math.cos(decanSeg.startAngle)}
-                    y2={210 + (ringConfig(idx).inner - 6) * Math.sin(decanSeg.startAngle)}
-                    stroke="rgba(255,255,255,0.12)"
-                    stroke-width="0.9"
-                    stroke-dasharray="1 4"
+      <div class="relative">
+        <svg viewBox="0 0 420 420" class="w-full h-auto" id="asc-clock-svg">
+          {#each normalized as range, discIdx}
+            {#if range}
+              {#each decanSegments[discIdx] as decanSeg, decanSegIdx}
+                {#if decanSeg}
+                  <path
+                    id={`asc-segment-${discIdx}-${decanSegIdx}`}
+                    d={contourPath(ringConfig(discIdx).outer, ringConfig(discIdx).inner, decanSeg.startAngle, decanSeg.endAngle)}
+                    stroke={`${(ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default)}55`}
+                    stroke-width="0.8"
+                    fill={`${(ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default)}12`}
+                    opacity="0.5"
+                    on:click={() => clickSegment(discIdx, decanSeg)}
+                    style="cursor:pointer"
                   />
+                  <path
+                    id={`asc-segment-contour-${discIdx}-${decanSegIdx}`}
+                    d={contourPath(ringConfig(discIdx).outer, ringConfig(discIdx).inner, decanSeg.startAngle, decanSeg.endAngle)}
+                    stroke={ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default}
+                    stroke-width="0.8"
+                    fill="none"
+                    opacity="0.5"
+                    pointer-events="none"
+                  />
+                  
+                  {#if decanSegIdx === 0 || decanSeg.dec === 0}
+                    <line
+                      id={`asc-segment-start-${discIdx}-${decanSegIdx}`}
+                      x1={210 + (ringConfig(discIdx).outer + 6) * Math.cos(decanSeg.startAngle)}
+                      y1={210 + (ringConfig(discIdx).outer + 6) * Math.sin(decanSeg.startAngle)}
+                      x2={210 + (ringConfig(discIdx).inner - 6) * Math.cos(decanSeg.startAngle)}
+                      y2={210 + (ringConfig(discIdx).inner - 6) * Math.sin(decanSeg.startAngle)}
+                      stroke={ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default}
+                      stroke-width="0.9"
+                      stroke-dasharray="1 3"
+                    />
+                  {/if}
+                {#if decanSeg.showSign}
+                  <text
+                    id={`asc-sign-${discIdx}-${decanSegIdx}`}
+                    x={210 + (ringConfig(discIdx).outer + ringConfig(discIdx).inner) / 2 * Math.cos((decanSeg.startAngle * 2 + decanSeg.midAngle) / 3)}
+                    y={210 + (ringConfig(discIdx).outer + ringConfig(discIdx).inner) / 2 * Math.sin((decanSeg.startAngle * 2 + decanSeg.midAngle) / 3)}
+                    text-anchor="middle"
+                      dominant-baseline="central"
+                      font-size={discIdx === 0 ? "12" : "10"}
+                      fill={ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default}
+                      font-weight="700"
+                    >
+                      {signSymbol(decanSeg.sign) || decanSeg.sign}
+                    </text>
+                  {/if}
+                  {#if discIdx === 0}
+                    <text
+                      id={`asc-time-start-${discIdx}-${decanSegIdx}`}
+                      x={210 + (ringConfig(discIdx).outer + 24) * Math.cos(decanSeg.startAngle)}
+                      y={(decanSegIdx === 0 ? 220 : 210) + (ringConfig(discIdx).outer + 24) * Math.sin(decanSeg.startAngle)}
+                      text-anchor="middle"
+                      dominant-baseline="central"
+                      font-size="7"
+                      fill="rgba(226,232,240,0.78)"
+                    >
+                      {formatTime(decanSeg.startTime)}
+                    </text>
+                  {:else}
+                    <text
+                      id={`asc-time-start-${discIdx}-${decanSegIdx}`}
+                      x={210 + (ringConfig(discIdx).inner - 12) * Math.cos(decanSeg.startAngle)}
+                      y={(decanSegIdx === 0 ? 215 : 210) + (ringConfig(discIdx).inner - 12) * Math.sin(decanSeg.startAngle)}
+                      text-anchor="middle"
+                      dominant-baseline="central"
+                      font-size="5"
+                      fill="rgba(226,232,240,0.72)"
+                    >
+                      {formatTime(decanSeg.startTime)}
+                    </text>
+                  {/if}
                 {/if}
-                <line
-                  id={`asc-decan-divider-${idx}-${decanSegIdx}`}
-                  x1={210 + (ringConfig(idx).outer) * Math.cos(decanSeg.midAngle)}
-                  y1={210 + (ringConfig(idx).outer) * Math.sin(decanSeg.midAngle)}
-                  x2={210 + (ringConfig(idx).inner) * Math.cos(decanSeg.midAngle)}
-                  y2={210 + (ringConfig(idx).inner) * Math.sin(decanSeg.midAngle)}
-                  stroke="rgba(255,255,255,0.7)"
-                  stroke-width="0.6"
-                  stroke-dasharray="2 3"
+              {/each}
+
+              {#if activeSlices[discIdx]}
+                <path
+                  id={`asc-hand-${discIdx}`}
+                  d={arcPath(210, 210, ringConfig(discIdx).hand, activeSlices[discIdx].startAngle, activeSlices[discIdx].endAngle)}
+                  stroke={HAND_COLORS[discIdx] || HAND_COLORS[0]}
+                  stroke-width="8"
+                  fill="none"
+                  stroke-linecap="round"
                 />
-                {#if decanSeg.dec === 0}
-                  <text
-                    id={`asc-sign-${idx}-${decanSegIdx}`}
-                    x={210 + (ringConfig(idx).outer + ringConfig(idx).inner) / 2 * Math.cos((decanSeg.startAngle * 2 + decanSeg.midAngle) / 3)}
-                    y={210 + (ringConfig(idx).outer + ringConfig(idx).inner) / 2 * Math.sin((decanSeg.startAngle * 2 + decanSeg.midAngle) / 3)}
-                    text-anchor="middle"
-                    dominant-baseline="central"
-                    font-size={idx === 0 ? "12" : "10"}
-                    fill={ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default}
-                    font-weight="700"
-                  >
-                    {signSymbol(decanSeg.sign) || decanSeg.sign}
-                  </text>
-                {/if}
-                {#if idx === 0}
-                  <text
-                    id={`asc-time-start-${idx}-${decanSegIdx}`}
-                    x={210 + (ringConfig(idx).outer + 24) * Math.cos(decanSeg.startAngle)}
-                    y={210 + (ringConfig(idx).outer + 24) * Math.sin(decanSeg.startAngle)}
-                    text-anchor="middle"
-                    dominant-baseline="central"
-                    font-size="7"
-                    fill="rgba(226,232,240,0.78)"
-                  >
-                    {formatTime(decanSeg.startTime)}
-                  </text>
-                {:else}
-                  <text
-                    id={`asc-time-start-${idx}-${decanSegIdx}`}
-                    x={210 + (ringConfig(idx).inner - 12) * Math.cos(decanSeg.startAngle)}
-                    y={210 + (ringConfig(idx).inner - 12) * Math.sin(decanSeg.startAngle)}
-                    text-anchor="middle"
-                    dominant-baseline="central"
-                    font-size="6"
-                    fill="rgba(226,232,240,0.72)"
-                  >
-                    {formatTime(decanSeg.startTime)}
-                  </text>
-                {/if}
+                <line
+                  id={`asc-hand-tick-${discIdx}`}
+                  x1="210"
+                  y1="210"
+                  x2={210 + ringConfig(discIdx).hand * Math.cos(activeSlices[discIdx].startAngle)}
+                  y2={210 + ringConfig(discIdx).hand * Math.sin(activeSlices[discIdx].startAngle)}
+                  stroke={HAND_COLORS[discIdx] || HAND_COLORS[0]}
+                  stroke-width="2"
+                />
+                <circle
+                  id={`asc-hand-dot-${discIdx}`}
+                  cx={210 + ringConfig(discIdx).hand * Math.cos(activeSlices[discIdx].startAngle)}
+                  cy={210 + ringConfig(discIdx).hand * Math.sin(activeSlices[discIdx].startAngle)}
+                  r="4"
+                  fill={HAND_COLORS[discIdx] || HAND_COLORS[0]}
+                />
               {/if}
-            {/each}
-
-            {#if activeSlices[idx]}
-              <path
-                id={`asc-hand-${idx}`}
-                d={arcPath(210, 210, ringConfig(idx).hand, activeSlices[idx].startAngle, activeSlices[idx].endAngle)}
-                stroke={HAND_COLORS[idx] || HAND_COLORS[0]}
-                stroke-width="8"
-                fill="none"
-                stroke-linecap="round"
-              />
-              <line
-                id={`asc-hand-tick-${idx}`}
-                x1="210"
-                y1="210"
-                x2={210 + ringConfig(idx).hand * Math.cos(activeSlices[idx].startAngle)}
-                y2={210 + ringConfig(idx).hand * Math.sin(activeSlices[idx].startAngle)}
-                stroke={HAND_COLORS[idx] || HAND_COLORS[0]}
-                stroke-width="2"
-              />
-              <circle
-                id={`asc-hand-dot-${idx}`}
-                cx={210 + ringConfig(idx).hand * Math.cos(activeSlices[idx].startAngle)}
-                cy={210 + ringConfig(idx).hand * Math.sin(activeSlices[idx].startAngle)}
-                r="4"
-                fill={HAND_COLORS[idx] || HAND_COLORS[0]}
-              />
-            {/if}
-          {/if}
-        {/each}
-
-        {#if normalized.length === 1 && summaries[0]}
-          <g transform="translate(210 210)" id="asc-summary-single">
-            <rect id="asc-summary-box" x="-82" y="-28" width="164" height="56" rx="10" fill="rgba(15,23,42,0.8)" stroke={ELEMENT_HEX[summaries[0].element] || ELEMENT_HEX.Default} />
-            <g font-size="10" fill={ELEMENT_HEX[summaries[0].element] || ELEMENT_HEX.Default}>
-              <text id="asc-summary-sign" x="-56" y="-2" text-anchor="middle" font-size="16">
-                {signSymbol(summaries[0].sign) || summaries[0].sign}
-              </text>
-              <text id="asc-summary-name" x="4" y="0" text-anchor="middle" font-size="10">
-                {signName(summaries[0].sign)} · {summaries[0].time}
-              </text>
-              <text id="asc-summary-meta" x="4" y="14" text-anchor="middle" font-size="9" fill="#cbd5e1">
-                {summaries[0].decLabel} · {summaries[0].orb} · {(QUALITY_ICON[summaries[0].quality] || '') + (summaries[0].quality ? ` ${summaries[0].quality}` : '')} · {ELEMENT_ICON[summaries[0].element] || ELEMENT_ICON.Default}
-              </text>
-            </g>
-          </g>
-        {:else if normalized.length > 1}
-          {#each normalized as _, i}
-            {#if summaries[i]}
-              <g transform={`translate(${i === 0 ? 80 : 340} 390)`} id={`asc-summary-${i}`}>
-                <rect id={`asc-summary-box-${i}`} x="-78" y="-26" width="156" height="52" rx="10" fill="rgba(15,23,42,0.8)" stroke={HAND_COLORS[i] || HAND_COLORS[0]} />
-                <g font-size="10" fill={HAND_COLORS[i] || HAND_COLORS[0]}>
-                  <text id={`asc-summary-sign-${i}`} x="-56" y="0" text-anchor="middle" font-size="20">
-                    {signSymbol(summaries[i].sign) || summaries[i].sign}
-                  </text>
-                  <text id={`asc-summary-name-${i}`} x="4" y="0" text-anchor="middle" font-size="12">
-                    {signName(summaries[i].sign)} · {summaries[i].time}
-                  </text>
-                  <text id={`asc-summary-meta-${i}`} x="4" y="14" text-anchor="middle" font-size="9" fill="#cbd5e1">
-                    {summaries[i].decLabel} · {summaries[i].orb} · {(QUALITY_ICON[summaries[i].quality] || '') + (summaries[i].quality ? ` ${summaries[i].quality}` : '')} · {ELEMENT_ICON[summaries[i].element] || ELEMENT_ICON.Default}
-                  </text>
-                </g>
-              </g>
             {/if}
           {/each}
+
+          {#if normalized.length === 1 && summaries[0]}
+            <g transform="translate(210 210)" id="asc-summary-single">
+              <rect id="asc-summary-box" x="-82" y="-28" width="164" height="56" rx="10" fill="rgba(15,23,42,0.8)" stroke={ELEMENT_HEX[summaries[0].element] || ELEMENT_HEX.Default} />
+              <g font-size="10" fill={ELEMENT_HEX[summaries[0].element] || ELEMENT_HEX.Default}>
+                <text id="asc-summary-sign" x="-56" y="-2" text-anchor="middle" font-size="16">
+                  {signSymbol(summaries[0].sign) || summaries[0].sign}
+                </text>
+                <text id="asc-summary-name" x="4" y="0" text-anchor="middle" font-size="10">
+                  {signName(summaries[0].sign)} · {summaries[0].time}
+                </text>
+                <text id="asc-summary-meta" x="4" y="14" text-anchor="middle" font-size="9" fill="#cbd5e1">
+                  {summaries[0].decLabel} · {summaries[0].orb} · {(QUALITY_ICON[summaries[0].quality] || '') + (summaries[0].quality ? ` ${summaries[0].quality}` : '')} · {ELEMENT_ICON[summaries[0].element] || ELEMENT_ICON.Default}
+                </text>
+              </g>
+            </g>
+          {:else if normalized.length > 1}
+            {#each normalized as _, i}
+              {#if summaries[i]}
+                <g transform={`translate(${i === 0 ? 80 : 340} 390)`} id={`asc-summary-${i}`}>
+                  <rect id={`asc-summary-box-${i}`} x="-78" y="-26" width="156" height="52" rx="10" fill="rgba(15,23,42,0.8)" stroke={HAND_COLORS[i] || HAND_COLORS[0]} />
+                  <g font-size="10" fill={HAND_COLORS[i] || HAND_COLORS[0]}>
+                    <text id={`asc-summary-sign-${i}`} x="-56" y="0" text-anchor="middle" font-size="20">
+                      {signSymbol(summaries[i].sign) || summaries[i].sign}
+                    </text>
+                    <text id={`asc-summary-name-${i}`} x="4" y="0" text-anchor="middle" font-size="12">
+                      {signName(summaries[i].sign)} · {summaries[i].time}
+                    </text>
+                    <text id={`asc-summary-meta-${i}`} x="4" y="14" text-anchor="middle" font-size="9" fill="#cbd5e1">
+                      {summaries[i].decLabel} · {summaries[i].orb} · {(QUALITY_ICON[summaries[i].quality] || '') + (summaries[i].quality ? ` ${summaries[i].quality}` : '')} · {ELEMENT_ICON[summaries[i].element] || ELEMENT_ICON.Default}
+                    </text>
+                  </g>
+                </g>
+              {/if}
+            {/each}
+          {/if}
+        </svg>
+
+        {#if sigilPositionPercent && hasSigilPayload}
+          <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div
+              class="transition-all duration-300"
+              style={`position:absolute; left:${sigilPositionPercent.left}%; top:${sigilPositionPercent.top}%; transform:translate(-50%,-50%);`}
+            >
+              {#key JSON.stringify(sigilPayload)}
+                <ElementSigil
+                  size={SIGIL_SIZE}
+                  compact={true}
+                  sunElement={sigilPayload.sunElement}
+                  moonElement={sigilPayload.moonElement}
+                  dayElement={sigilPayload.dayElement}
+                  ascElement={sigilPayload.ascElement}
+                  dayRulerKey={sigilPayload.dayRulerKey}
+                />
+              {/key}
+            </div>
+          </div>
         {/if}
-      </svg>
+      </div>
     </div>
 
     <div class="flex flex-wrap gap-2 text-xs text-slate-200">
