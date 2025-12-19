@@ -31,9 +31,10 @@ export const DAY_RULERS = {
 
 export const ELEMENT_ICON = {
   Fire: '🔥',
-  Earth: '🌍',
-  Air: '🌬️',
+  Earth: '⛰️',
+  Air: '💨',
   Water: '💧',
+  Default: '✨'
 };
 
 export const QUALITY_ICON = {

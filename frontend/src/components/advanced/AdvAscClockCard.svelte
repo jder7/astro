@@ -3,6 +3,7 @@
   import { extractRanges } from '$lib/astro/advanced';
   import { signName, signSymbol } from '$lib/astro/signs';
   import CardHeader from '$components/shared/CardHeader.svelte';
+  import AscClock from './AscClock.svelte';
 
   export let response = null;
   let collapsed = true;
@@ -43,13 +44,15 @@
       {#if !response || !ranges.length}
         <p class="text-sm text-slate-400">Generate a chart to see the ascendant clock and hourly breakdown.</p>
       {:else}
+        <AscClock ranges={ranges} />
+
         {#each ranges as range}
-            <div class="space-y-2">
-              <CardHeader
-                label={range.label || range.id || 'Ascendant window'}
-                value={`Anchor: ${formatDateLabel(range.anchor) || formatDateLabel(toDate(range.entries?.[0]?.start))}`}
-                badge={`${(range.entries || []).length} stops`}
-              />
+          <div class="space-y-2">
+            <CardHeader
+              label={range.label || range.id || 'Ascendant window'}
+              value={`Anchor: ${formatDateLabel(range.anchor) || formatDateLabel(toDate(range.entries?.[0]?.start))}`}
+              badge={`${(range.entries || []).length} stops`}
+            />
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm">
                 <thead class="text-slate-400">
