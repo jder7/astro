@@ -1,6 +1,7 @@
 <script>
   import ElementSigil from '$components/shared/ElementSigil.svelte';
   import MajorAspectIcon from '$components/shared/MajorAspectIcon.svelte';
+  import CompactRow from '$components/shared/CompactRow.svelte';
   import { formatDecimalDegree, ucfirst } from '$lib/astro/format';
   import { formatDateLabel, formatDateShort, toDate } from '$lib/astro/date';
   import { DAY_RULERS, ELEMENT_ICON, POINT_SYMBOLS, QUALITY_ICON, signName, signSymbol } from '$lib/astro/signs';
@@ -257,7 +258,7 @@
       }),
       buildPointRow({
         subject,
-        label: dayRulerKey ? ucfirst(dayRulerKey) : 'Day Ruler',
+        label: dayRulerKey ? ucfirst(dayRulerKey) + ' (Day Ruler)' : 'Day Ruler',
         icon: POINT_SYMBOLS[dayRulerKey] || '★',
         point: dayPoint,
         id: `summary-row-${subjectId}-day-ruler`,
@@ -357,30 +358,28 @@
               {#if summaryBlocks.length > 1}
                 <p class="text-xs uppercase tracking-[0.2em] font-semibold text-slate-300">{block.label}</p>
               {/if}
-              <div class="compact-row">
-                <div>
-                  <p class="compact-label">Moment</p>
-                  <p class="compact-value">{block.timestampLabel || 'Requested datetime'}</p>
-                </div>
-                <div class="ml-auto flex items-center gap-3">
-                  <div class="text-right">
-                    <p class="compact-label">Location</p>
-                    <p class="compact-value">{block.locationLabel || 'Unknown'}</p>
+              <CompactRow label="Moment" value={block.timestampLabel || 'Requested datetime'}>
+                <svelte:fragment slot="right">
+                  <div class="flex items-center gap-3 flex-wrap justify-end">
+                    <div class="text-right">
+                      <p class="compact-label">Location</p>
+                      <p class="compact-value">{block.locationLabel || 'Unknown'}</p>
+                    </div>
+                    <div id={`summary-sigil-${block.key}`} class="shrink-0">
+                      <ElementSigil
+                        id={`summary-sigil-svg-${block.key}`}
+                        size={56}
+                        compact={true}
+                        sunElement={block.sigil?.sunElement}
+                        moonElement={block.sigil?.moonElement}
+                        ascElement={block.sigil?.ascElement}
+                        dayElement={block.sigil?.dayElement}
+                        dayRulerKey={block.sigil?.dayRulerKey}
+                      />
+                    </div>
                   </div>
-                  <div id={`summary-sigil-${block.key}`} class="shrink-0">
-                    <ElementSigil
-                      id={`summary-sigil-svg-${block.key}`}
-                      size={56}
-                      compact={true}
-                      sunElement={block.sigil?.sunElement}
-                      moonElement={block.sigil?.moonElement}
-                      ascElement={block.sigil?.ascElement}
-                      dayElement={block.sigil?.dayElement}
-                      dayRulerKey={block.sigil?.dayRulerKey}
-                    />
-                  </div>
-                </div>
-              </div>
+                </svelte:fragment>
+              </CompactRow>
 
               <div class="space-y-3">
                 {#each block.rows as row}

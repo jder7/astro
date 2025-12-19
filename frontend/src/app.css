@@ -36,7 +36,13 @@ body {
 }
 
 .page-shell {
-  @apply max-w-6xl mx-auto px-4 sm:px-6;
+  @apply w-full max-w-full mx-auto px-4 sm:px-6;
+}
+
+@media (min-width: 1024px) {
+  .page-shell {
+    @apply max-w-6xl;
+  }
 }
 
 .glass-card {
@@ -109,6 +115,7 @@ body {
 
 .compact-row {
   @apply flex items-center justify-between gap-3 bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-2;
+  flex-wrap: wrap;
 }
 
 .compact-label {
