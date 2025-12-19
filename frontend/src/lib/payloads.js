@@ -121,13 +121,14 @@ export function buildReportPayload(mode, state, config) {
   const moment = payload.moment || transitPayload.moment || null;
 
   const kind = mode === 'transit' ? 'SUBJECT' : 'NATAL';
+  const includeAspects = mode === 'relationship' ? true : Boolean(config?.include_aspects);
   return {
     ...payload,
     birth,
     ...(mode === 'transit' || mode === 'natal_transit' ? { moment } : {}),
     mode,
     kind,
-    include_aspects: Boolean(config?.include_aspects),
+    include_aspects: includeAspects,
     max_aspects: 48,
   };
 }

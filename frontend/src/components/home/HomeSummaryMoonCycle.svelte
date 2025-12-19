@@ -34,7 +34,12 @@
     };
   };
 
-  $: moonParts = mode === 'natal' ? summary.context?.birthParts : summary.context?.transitParts || summary.context?.birthParts;
+  $: moonParts =
+    mode === 'natal'
+      ? summary.context?.birthParts
+      : mode === 'relationship'
+        ? summary.context?.firstParts || summary.context?.birthParts
+        : summary.context?.transitParts || summary.context?.birthParts;
   $: console.info('[summary] moon input', {
     mode,
     birthParts: summary.context?.birthParts,
@@ -47,7 +52,7 @@
   $: barStyle = `width:${moonPercent}%;background:${
     isWaning ? 'linear-gradient(90deg, #f472b6, #f87171)' : 'linear-gradient(90deg, #38bdf8, #6366f1)'
   }`;
-  $: moonTitle = mode === 'natal' ? 'Moon cycle at birth' : 'Moon cycle at moment';
+  $: moonTitle = mode === 'relationship' ? 'Moon cycle (Partner A)' : mode === 'natal' ? 'Moon cycle at birth' : 'Moon cycle at moment';
 </script>
 
 <div class="border border-slate-800 rounded-2xl p-4 bg-slate-950/40 space-y-2">

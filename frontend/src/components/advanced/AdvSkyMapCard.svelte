@@ -7,17 +7,21 @@
   export let response = null;
   let collapsed = true;
 
-  const shapePoint = ([key, point]) => ({
-    key,
-    label: point.name || key,
-    icon: POINT_SYMBOLS[key] || '★',
-    sign: signName(point.sign),
-    signIcon: signSymbol(point.sign),
-    element: point.element || '',
-    quality: point.quality || '',
-    degree: Number.isFinite(point.position) ? formatDegree(point.position) : '',
-    house: formatHouseName(point.house),
-  });
+  const shapePoint = ([key, point]) => {
+    const retro = point?.retrograde ? 'Rx' : '';
+    return {
+      key,
+      label: point.name || key,
+      icon: POINT_SYMBOLS[key] || '★',
+      sign: signName(point.sign),
+      signIcon: signSymbol(point.sign),
+      element: point.element || '',
+      quality: point.quality || '',
+      degree: Number.isFinite(point.position) ? formatDegree(point.position) : '',
+      house: formatHouseName(point.house),
+      retro,
+    };
+  };
 
   const shapeHouse = ([key, house]) => ({
     key,
@@ -75,6 +79,7 @@
                     <th class="py-2 pr-3 text-left">Quality</th>
                     <th class="py-2 pr-3 text-left">Degree</th>
                     <th class="py-2 pr-3 text-left">House</th>
+                    <th class="py-2 pr-3 text-left">Retro</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-800">
@@ -86,6 +91,7 @@
                       <td class="py-2 pr-3">{row.quality || '—'}</td>
                       <td class="py-2 pr-3">{row.degree || '—'}</td>
                       <td class="py-2 pr-3">{row.house || '—'}</td>
+                      <td class="py-2 pr-3">{row.retro || '—'}</td>
                     </tr>
                   {/each}
                 </tbody>
@@ -147,12 +153,13 @@
                   <tbody class="divide-y divide-slate-800">
                     {#each natalPointRows as row}
                       <tr>
-                        <td class="py-2 pr-3">{row.icon} {row.label}</td>
-                        <td class="py-2 pr-3">{row.sign} {row.signIcon}</td>
-                        <td class="py-2 pr-3">{row.element || '—'}</td>
-                        <td class="py-2 pr-3">{row.quality || '—'}</td>
-                        <td class="py-2 pr-3">{row.degree || '—'}</td>
-                        <td class="py-2 pr-3">{row.house || '—'}</td>
+                      <td class="py-2 pr-3">{row.icon} {row.label}</td>
+                      <td class="py-2 pr-3">{row.sign} {row.signIcon}</td>
+                      <td class="py-2 pr-3">{row.element || '—'}</td>
+                      <td class="py-2 pr-3">{row.quality || '—'}</td>
+                      <td class="py-2 pr-3">{row.degree || '—'}</td>
+                      <td class="py-2 pr-3">{row.house || '—'}</td>
+                      <td class="py-2 pr-3">{row.retro || '—'}</td>
                       </tr>
                     {/each}
                   </tbody>

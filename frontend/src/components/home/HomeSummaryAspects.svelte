@@ -7,6 +7,7 @@
   export let summary = { sections: [], aspects: [], rawAspects: [] };
 
   const normalizeLabel = (label) => String(label || '').trim().replace(/\s+/g, '_').toLowerCase();
+  const normalizePointKey = (label) => normalizeLabel(label).replace(/_?\([^)]*\)$/, '').replace(/__+/g, '_');
 
   const iconForLabel = (label) => {
     if (!label) return '✦';
@@ -32,8 +33,8 @@
     const enriched = (source || []).map((asp) => {
       const leftLabel = asp.left || '—';
       const rightLabel = asp.right || '—';
-      const leftKey = normalizeLabel(leftLabel);
-      const rightKey = normalizeLabel(rightLabel);
+      const leftKey = normalizePointKey(leftLabel);
+      const rightKey = normalizePointKey(rightLabel);
       const leftPoint = pointIndex.get(leftKey);
       const rightPoint = pointIndex.get(rightKey);
       if (activeSet.size && (!activeSet.has(leftKey) || !activeSet.has(rightKey))) return null;

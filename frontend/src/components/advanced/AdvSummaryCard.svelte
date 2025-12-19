@@ -158,7 +158,8 @@
     const elementDisplay = element ? [ELEMENT_ICON[element], element].filter(Boolean).join(' ') : '—';
     const decanLabel = decan ? `${formatOrdinal(decan)} Dec.` : '—';
     const degreeLabel = formatDecimalDegree(degreeValue);
-    const extra = extras || '';
+    const rx = source?.retrograde || current?.retrograde ? 'Rx' : '';
+    const extra = [extras, rx].filter(Boolean).join(' · ');
     return {
       type: 'point',
       id,

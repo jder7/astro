@@ -120,12 +120,51 @@ const normalizeAspectsArray = (entry) => {
   return [];
 };
 
+const parsePartsFromSubject = (subject) => {
+  if (!subject || typeof subject !== 'object') return null;
+  let { year, month, day, hour, minute } = subject;
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+    const iso = subject.iso_formatted_local_datetime || subject.iso_formatted_utc_datetime;
+    const parsed = iso ? new Date(iso) : null;
+    if (parsed && !Number.isNaN(parsed.getTime())) {
+      year = parsed.getUTCFullYear();
+      month = parsed.getUTCMonth() + 1;
+      day = parsed.getUTCDate();
+      hour = parsed.getUTCHours();
+      minute = parsed.getUTCMinutes();
+    }
+  }
+  if (![year, month, day].every((v) => Number.isFinite(v))) return null;
+  return {
+    year,
+    month,
+    day,
+    hour: Number.isFinite(hour) ? hour : 0,
+    minute: Number.isFinite(minute) ? minute : 0,
+  };
+};
+
+const normalizeRelationshipAspects = (resp) => {
+  if (!resp) return [];
+  if (Array.isArray(resp.synastry)) return resp.synastry;
+  if (resp.synastry && Array.isArray(resp.synastry.rows)) return resp.synastry.rows;
+  if (resp.synastry && Array.isArray(resp.synastry.aspects)) return resp.synastry.aspects;
+  if (resp.aspects && typeof resp.aspects === 'object' && !Array.isArray(resp.aspects)) {
+    if (Array.isArray(resp.aspects.aspects)) return resp.aspects.aspects;
+    if (Array.isArray(resp.aspects.synastry)) return resp.aspects.synastry;
+  }
+  if (Array.isArray(resp.aspects)) return resp.aspects;
+  return [];
+};
+
 export function buildSummary(mode, response, birthParts, transitParts) {
   const sections = [];
   const ranges = collectRanges(response || {});
   let aspects = [];
 
   let rawAspects = null;
+  let firstParts = null;
+  let secondParts = null;
 
   if (mode === 'natal' && response?.subject) {
     sections.push({ meta: buildMeta(response.subject, 'Natal'), points: extractPoints(response.subject) });
@@ -144,19 +183,23 @@ export function buildSummary(mode, response, birthParts, transitParts) {
   } else if (mode === 'relationship' && response) {
     if (response.first_subject) {
       sections.push({ meta: buildMeta(response.first_subject, 'Partner A'), points: extractPoints(response.first_subject) });
+      firstParts = parsePartsFromSubject(response.first_subject);
     }
     if (response.second_subject) {
       sections.push({ meta: buildMeta(response.second_subject, 'Partner B'), points: extractPoints(response.second_subject) });
+      secondParts = parsePartsFromSubject(response.second_subject);
     }
-    rawAspects = normalizeAspectsArray(response.aspects);
+    rawAspects = normalizeRelationshipAspects(response);
     aspects = rawAspects.map(simplifyAspect).filter(Boolean);
   }
 
   const context = {
     birth: birthParts ? formatDateTime(birthParts) : '',
     transit: transitParts ? formatDateTime(transitParts) : '',
-    birthParts: birthParts || null,
+    birthParts: birthParts || firstParts || null,
     transitParts: transitParts || null,
+    firstParts: firstParts,
+    secondParts: secondParts,
   };
 
   return { sections, ranges, aspects, context, rawAspects };
