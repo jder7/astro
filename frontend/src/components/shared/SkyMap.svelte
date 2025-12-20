@@ -1,9 +1,21 @@
 <script>
   import ElementSigil from '$components/shared/ElementSigil.svelte';
-  import { ELEMENT_HEX, ELEMENT_ICON, QUALITY_ICON, POINT_SYMBOLS, signName, signSymbol, DAY_RULERS } from '$lib/astro/signs';
+  import { formatDegree } from '$lib/astro/format';
+  import {
+    ELEMENT_HEX,
+    ELEMENT_ICON,
+    QUALITY_ICON,
+    POINT_SYMBOLS,
+    signName,
+    signSymbol,
+    DAY_RULERS,
+    houseLabel,
+    houseRoman,
+  } from '$lib/astro/signs';
 
   export let ranges = [];
   export let pointsByRangeId = {};
+  export let housesByRangeId = {};
 
   const uid = `sky-${Math.random().toString(36).slice(2, 8)}`;
   const HOUR_MS = 60 * 60 * 1000;
@@ -353,7 +365,19 @@
     });
   };
 
-  function buildPlanetDisc({ cx, cy, radii, rangeKey, pointsByRangeId, signLookup, currentSeg, anchor, sunPolarity, centerSignMeta, defs }) {
+  function buildPlanetDisc({
+    cx,
+    cy,
+    radii,
+    rangeKey,
+    pointsByRangeId,
+    signLookup,
+    currentSeg,
+    anchor,
+    sunPolarity,
+    centerSignMeta,
+    defs,
+  }) {
     const rangePoints = pointsByRangeId?.[rangeKey] || pointsByRangeId?.default || {};
     const bandOuter = radii.segmentOuter - 2;
     const bandInner = Math.max(radii.element - 10, radii.polarity + 8);
@@ -452,8 +476,82 @@
     return { points, sun };
   }
 
+  const houseAngle = (house, signLookup) => {
+    const pointLike = {
+      sign: house?.sign,
+      position: house?.position ?? ((house?.abs_pos ?? null) !== null ? ((house.abs_pos % 30) + 30) % 30 : null),
+    };
+    const viaSign = resolvePointAngleFromSegments(pointLike, signLookup);
+    if (Number.isFinite(viaSign)) return viaSign;
+    if (typeof house?.abs_pos === 'number') {
+      const baseStart = -90 - 15; // align abs_pos 0 (Aries start) with our segment start
+      return normalizeAngle(baseStart + house.abs_pos);
+    }
+    return null;
+  };
+
+  const buildHouseRing = (houses, radii, cx, cy, signLookup, defs, rangeKey) => {
+    const ringRadius = (radii.segmentOuter + radii.element) / 2;
+    const tickInner = ringRadius - 22;
+    const tickOuter = ringRadius + 20;
+    const labelR = ringRadius - 14;
+
+    const resolveHouseNum = (house, key, fallbackIdx) => {
+      if (typeof house?.house_num === 'number') return house.house_num;
+      const fromHouse = String(house?.house || house?.name || '').match(/(\d+)/);
+      if (fromHouse) return Number(fromHouse[1]);
+      const fromKey = String(key || '').match(/(\d+)/);
+      if (fromKey) return Number(fromKey[1]);
+      return fallbackIdx;
+    };
+
+    const entries = Object.entries(houses || {})
+      .map(([key, house], idx) => ({ key, house, idx }))
+      .filter((h) => h.house);
+
+    const withAngles = entries
+      .map(({ key, house, num, idx }) => {
+        const angle = houseAngle(house, signLookup);
+        if (!Number.isFinite(angle)) return null;
+        return { key, house, num, angle, idx };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.angle - b.angle);
+
+    if (!withAngles.length) return null;
+
+    const ticks = withAngles.map((entry, arrIdx) => {
+      const start = polarToCartesian(cx, cy, tickInner, entry.angle);
+      const end = polarToCartesian(cx, cy, tickOuter, entry.angle);
+      const arcStart = entry.angle + 5;
+      const arcEnd = arcStart + 8;
+      const pathId = `house-label-${uid}-${rangeKey || 'default'}-${arrIdx}`;
+      defs.push({ type: 'path', id: pathId, d: describeArc(cx, cy, labelR, arcStart, arcEnd) });
+      const degree =
+        typeof entry.house?.position === 'number'
+          ? formatDegree(entry.house.position)
+          : typeof entry.house?.abs_pos === 'number'
+            ? formatDegree((entry.house.abs_pos % 30 + 30) % 30)
+            : '';
+      const houseNum = resolveHouseNum(entry.house, entry.key, entry.idx + 1);
+      const labelValue = houseRoman(houseNum) || String(houseNum);
+      const title = `${houseLabel(entry.house?.house || entry.key)} · ${signName(entry.house?.sign)}${degree ? ` @ ${degree}` : ''}`;
+      return {
+        x1: start.x,
+        y1: start.y,
+        x2: end.x,
+        y2: end.y,
+        label: labelValue,
+        pathId,
+        title,
+      };
+    });
+
+    return { ringRadius, ticks };
+  };
+
   function buildSkyMapLayer(range, opts = {}) {
-    const { cx, cy, layerIndex = 0, layerCount = 1, defs = [], pointsByRangeId = {}, rotationOffset = 0 } = opts;
+    const { cx, cy, layerIndex = 0, layerCount = 1, defs = [], pointsByRangeId = {}, housesByRangeId = {}, rotationOffset = 0 } = opts;
     if (!range) return null;
     const entries = (Array.isArray(range.entries) ? range.entries : [])
       .map((entry) => {
@@ -525,6 +623,7 @@
 
     const currentSeg = segments[0];
     const rangePoints = pointsByRangeId[rangeKey] || pointsByRangeId.default || {};
+    const rangeHouses = housesByRangeId[rangeKey] || housesByRangeId.default || {};
     const sunPoint = pickPoint(rangePoints, 'sun') || {};
     const sunElement = sunPoint.element || currentSeg?.element || 'Fire';
     const sunQuality = sunPoint.quality || currentSeg?.quality || 'Cardinal';
@@ -547,6 +646,7 @@
       centerSignMeta,
       defs,
     });
+    const houseRing = buildHouseRing(rangeHouses, radii, cx, cy, signLookup, defs, rangeKey);
     const sunLabel = centerSignMeta?.name || signName(currentSeg?.sign) || 'Sun';
     const anchorLabel = formatDateTimeShort(anchor);
     const qualityIcon = QUALITY_ICON[sunQuality] || '';
@@ -584,6 +684,7 @@
       elementQualityDisc,
       polarityDisc,
       planetDisc,
+      houseRing,
       outlines,
       cx,
       cy,
@@ -604,7 +705,7 @@
     cy: 270,
   };
 
-  function buildSkyMap(sunRanges, pointsByRangeId) {
+  function buildSkyMap(sunRanges, pointsByRangeId, housesByRangeId) {
     const ranges = pickSkyRanges(sunRanges);
     if (!ranges.length) return emptySky;
     const layerCount = Math.min(2, ranges.length);
@@ -645,6 +746,7 @@
         layerCount,
         defs,
         pointsByRangeId,
+        housesByRangeId,
         rotationOffset,
       });
       if (layer) {
@@ -674,7 +776,7 @@
   }
 
   $: normalizedRanges = pickSkyRanges((ranges || []).map(normalizeSunRange).filter(Boolean));
-  $: sky = buildSkyMap(normalizedRanges, pointsByRangeId || {});
+  $: sky = buildSkyMap(normalizedRanges, pointsByRangeId || {}, housesByRangeId || {});
   $: ({ layers, defs, accent, legends, centerChips, size, layerCount, cx, cy } = sky || emptySky);
 </script>
 
@@ -759,6 +861,26 @@
                 {entry.symbol}
               </text>
             {/each}
+
+            {#if layer.houseRing}
+              <circle
+                cx={layer.cx}
+                cy={layer.cy}
+                r={layer.houseRing.ringRadius}
+                fill="none"
+                stroke="rgba(148,163,184,0.28)"
+                stroke-width="1.1"
+              />
+              {#each layer.houseRing.ticks as tick}
+                <g>
+                  <line x1={tick.x1} y1={tick.y1} x2={tick.x2} y2={tick.y2} stroke="rgba(148,163,184,0.5)" stroke-width="1.1" />
+                  <text class="adv-sky-house-label">
+                    <title>{tick.title}</title>
+                    <textPath href={`#${tick.pathId}`} startOffset="35%" text-anchor="middle">{tick.label}</textPath>
+                  </text>
+                </g>
+              {/each}
+            {/if}
 
             {#if layer.planetDisc.sun}
               <g class="adv-sky-sun" transform={`translate(${layer.planetDisc.sun.x} ${layer.planetDisc.sun.y}) rotate(-90)`}>
@@ -1023,6 +1145,13 @@
     font-size: 0.6rem;
     letter-spacing: 0.08em;
     fill: rgba(148, 163, 184, 0.9);
+  }
+
+  .adv-sky-house-label {
+    font-size: 0.45rem;
+    letter-spacing: 0.06em;
+    fill: rgba(242, 239, 32, 0.9);
+    font-weight: 700;
   }
 
   .adv-sky-element {

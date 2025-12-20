@@ -34,6 +34,15 @@
     }
   };
 
+  const addHousesForRange = (map, id, subjectData) => {
+    const key = normalizeRangeId(id);
+    if (!key || !subjectData) return;
+    const collected = collectPoints(subjectData).houses || {};
+    if (Object.keys(collected).length) {
+      map[key] = collected;
+    }
+  };
+
   const shapePoint = ([key, point]) => {
     const retro = point?.retrograde ? 'Rx' : '';
     return {
@@ -90,6 +99,26 @@
     }
     return map;
   })();
+  $: housesByRangeId = (() => {
+    const map = {};
+    addHousesForRange(map, 'transit', response?.snapshot?.subject);
+    addHousesForRange(map, 'natal', response?.snapshot?.natal_subject);
+    if (!response?.snapshot) {
+      addHousesForRange(map, 'natal', response?.subject);
+    }
+    addHousesForRange(map, 'first', response?.first_subject);
+    addHousesForRange(map, 'second', response?.second_subject);
+    sunRanges.forEach((range, idx) => {
+      const key = normalizeRangeId(range.id || range.label || `range-${idx}`);
+      if (key && !map[key]) {
+        map[key] = primaryPoints.houses || {};
+      }
+    });
+    if (Object.keys(primaryPoints.houses || {}).length) {
+      map.default = primaryPoints.houses;
+    }
+    return map;
+  })();
 </script>
 
 <div class="flowbite-card space-y-4">
@@ -117,7 +146,7 @@
         <p class="text-sm text-slate-400">Generate a chart to see point and house placements.</p>
       {:else}
         {#if sunRanges.length}
-          <SkyMap ranges={sunRanges} pointsByRangeId={pointsByRangeId} />
+          <SkyMap ranges={sunRanges} pointsByRangeId={pointsByRangeId} housesByRangeId={housesByRangeId} />
         {:else}
           <p class="text-sm text-slate-400">No Sun ranges returned for this chart.</p>
         {/if}

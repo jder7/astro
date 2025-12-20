@@ -153,3 +153,67 @@ export const ACTIVE_POINTS = [
 ];
 
 export const DEFAULT_ACTIVE_KEYS = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'ascendant'];
+
+const HOUSE_NAMES = {
+  house_1: 'First House',
+  house_2: 'Second House',
+  house_3: 'Third House',
+  house_4: 'Fourth House',
+  house_5: 'Fifth House',
+  house_6: 'Sixth House',
+  house_7: 'Seventh House',
+  house_8: 'Eighth House',
+  house_9: 'Ninth House',
+  house_10: 'Tenth House',
+  house_11: 'Eleventh House',
+  house_12: 'Twelfth House',
+  first_house: 'First House',
+  second_house: 'Second House',
+  third_house: 'Third House',
+  fourth_house: 'Fourth House',
+  fifth_house: 'Fifth House',
+  sixth_house: 'Sixth House',
+  seventh_house: 'Seventh House',
+  eighth_house: 'Eighth House',
+  ninth_house: 'Ninth House',
+  tenth_house: 'Tenth House',
+  eleventh_house: 'Eleventh House',
+  twelfth_house: 'Twelfth House',
+};
+
+const HOUSE_ROMAN = {
+  1: 'I',
+  2: 'II',
+  3: 'III',
+  4: 'IV',
+  5: 'V',
+  6: 'VI',
+  7: 'VII',
+  8: 'VIII',
+  9: 'IX',
+  10: 'X',
+  11: 'XI',
+  12: 'XII',
+};
+
+const normalizeHouseKey = (value) => String(value || '').trim().toLowerCase();
+
+export const houseLabel = (houseKey) => {
+  const key = normalizeHouseKey(houseKey);
+  if (!key) return 'House';
+  if (HOUSE_NAMES[key]) return HOUSE_NAMES[key];
+  const match = key.match(/(\d+)/);
+  if (match) {
+    const num = Number(match[1]);
+    if (HOUSE_ROMAN[num]) return `${HOUSE_ROMAN[num]} House`;
+  }
+  return houseKey || 'House';
+};
+
+export const houseRoman = (houseKeyOrNum) => {
+  const num = Number(houseKeyOrNum);
+  if (Number.isFinite(num) && HOUSE_ROMAN[num]) return HOUSE_ROMAN[num];
+  const match = normalizeHouseKey(houseKeyOrNum).match(/(\d+)/);
+  if (match && HOUSE_ROMAN[Number(match[1])]) return HOUSE_ROMAN[Number(match[1])];
+  return '';
+};
