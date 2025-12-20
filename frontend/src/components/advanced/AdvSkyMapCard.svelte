@@ -1,7 +1,7 @@
 <script>
   import { formatDegree } from '$lib/astro/format';
   import { collectPoints, extractRanges, extractSubjects, formatHouseName } from '$lib/astro/advanced';
-  import { POINT_SYMBOLS, signName, signSymbol } from '$lib/astro/signs';
+  import { ELEMENT_HEX, ELEMENT_ICON, POINT_SYMBOLS, QUALITY_ICON, houseRoman, signName, signSymbol } from '$lib/astro/signs';
   import { configStore } from '$lib/state/configStore';
   import SkyMap from '$components/shared/SkyMap.svelte';
   import CardHeader from '$components/shared/CardHeader.svelte';
@@ -45,6 +45,7 @@
 
   const shapePoint = ([key, point]) => {
     const retro = point?.retrograde ? 'Rx' : '';
+    const elementColor = ELEMENT_HEX[point.element] || ELEMENT_HEX.Default;
     return {
       key,
       label: point.name || key,
@@ -52,29 +53,37 @@
       sign: signName(point.sign),
       signIcon: signSymbol(point.sign),
       element: point.element || '',
+    elementIcon: ELEMENT_ICON[point.element] || '',
       quality: point.quality || '',
+    qualityIcon: QUALITY_ICON[point.quality] || '',
       degree: Number.isFinite(point.position) ? formatDegree(point.position) : '',
       house: formatHouseName(point.house),
       retro,
+      elementColor,
     };
   };
 
   const shapeHouse = ([key, house]) => ({
     key,
-    label: formatHouseName(house.house || house.name || key),
+    label: houseRoman(house.house || house.name || key) || formatHouseName(house.house || house.name || key),
     sign: signName(house.sign),
     signIcon: signSymbol(house.sign),
     element: house.element || '',
+  elementIcon: ELEMENT_ICON[house.element] || '',
     quality: house.quality || '',
+  qualityIcon: QUALITY_ICON[house.quality] || '',
     degree: Number.isFinite(house.position) ? formatDegree(house.position) : '',
+  elementColor: ELEMENT_HEX[house.element] || ELEMENT_HEX.Default,
   });
 
   $: subjects = extractSubjects(response, mode);
   $: primaryPoints = collectPoints(subjects.primary || {});
   $: natalPoints = collectPoints(subjects.natal || {});
-  $: pointRows = Object.entries(primaryPoints.points || {}).map(shapePoint);
+  $: filteredPrimaryPoints = filterPointsByActive(primaryPoints.points, activeSet);
+  $: pointRows = Object.entries(filteredPrimaryPoints || {}).map(shapePoint);
   $: houseRows = Object.entries(primaryPoints.houses || {}).map(shapeHouse);
-  $: natalPointRows = Object.entries(natalPoints.points || {}).map(shapePoint);
+  $: filteredNatalPoints = filterPointsByActive(natalPoints.points, activeSet);
+  $: natalPointRows = Object.entries(filteredNatalPoints || {}).map(shapePoint);
   $: natalHouseRows = Object.entries(natalPoints.houses || {}).map(shapeHouse);
   $: sunRanges = extractRanges(response).sun || [];
   $: activeSet = new Set(($configStore?.active_points || []).map(normalizePointKey));
@@ -119,6 +128,9 @@
     }
     return map;
   })();
+
+  const primaryAccent = '#22d3ee';
+  const secondaryAccent = '#c084fc';
 </script>
 
 <div class="flowbite-card space-y-4">
@@ -151,78 +163,13 @@
           <p class="text-sm text-slate-400">No Sun ranges returned for this chart.</p>
         {/if}
 
-        <div class="space-y-3">
-          <CardHeader label="Points" badge={pointRows.length} />
-          {#if pointRows.length}
-            <div class="overflow-x-auto">
-              <table class="min-w-full text-sm">
-                <thead class="text-slate-400">
-                  <tr>
-                    <th class="py-2 pr-3 text-left">Body</th>
-                    <th class="py-2 pr-3 text-left">Sign</th>
-                    <th class="py-2 pr-3 text-left">Element</th>
-                    <th class="py-2 pr-3 text-left">Quality</th>
-                    <th class="py-2 pr-3 text-left">Degree</th>
-                    <th class="py-2 pr-3 text-left">House</th>
-                    <th class="py-2 pr-3 text-left">Retro</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-800">
-                  {#each pointRows as row}
-                    <tr>
-                      <td class="py-2 pr-3">{row.icon} {row.label}</td>
-                      <td class="py-2 pr-3">{row.sign} {row.signIcon}</td>
-                      <td class="py-2 pr-3">{row.element || '—'}</td>
-                      <td class="py-2 pr-3">{row.quality || '—'}</td>
-                      <td class="py-2 pr-3">{row.degree || '—'}</td>
-                      <td class="py-2 pr-3">{row.house || '—'}</td>
-                      <td class="py-2 pr-3">{row.retro || '—'}</td>
-                    </tr>
-                  {/each}
-                </tbody>
-              </table>
-            </div>
-          {:else}
-            <p class="text-sm text-slate-400">No points returned.</p>
-          {/if}
-        </div>
-
-        <div class="space-y-3">
-          <CardHeader label="Houses" badge={houseRows.length} />
-          {#if houseRows.length}
-            <div class="overflow-x-auto">
-              <table class="min-w-full text-sm">
-                <thead class="text-slate-400">
-                  <tr>
-                    <th class="py-2 pr-3 text-left">House</th>
-                    <th class="py-2 pr-3 text-left">Sign</th>
-                    <th class="py-2 pr-3 text-left">Element</th>
-                    <th class="py-2 pr-3 text-left">Quality</th>
-                    <th class="py-2 pr-3 text-left">Degree</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-800">
-                  {#each houseRows as row}
-                    <tr>
-                      <td class="py-2 pr-3">{row.label}</td>
-                      <td class="py-2 pr-3">{row.sign} {row.signIcon}</td>
-                      <td class="py-2 pr-3">{row.element || '—'}</td>
-                      <td class="py-2 pr-3">{row.quality || '—'}</td>
-                      <td class="py-2 pr-3">{row.degree || '—'}</td>
-                    </tr>
-                  {/each}
-                </tbody>
-              </table>
-            </div>
-          {:else}
-            <p class="text-sm text-slate-400">No houses returned.</p>
-          {/if}
-        </div>
-
-        {#if natalPointRows.length || natalHouseRows.length}
+        <div class="space-y-5">
           <div class="space-y-3">
-          <CardHeader label="Natal overlay" badge={natalPointRows.length + natalHouseRows.length} />
-            {#if natalPointRows.length}
+            <div class="flex items-center gap-2">
+              <span class="subject-badge" style={`--badge:${primaryAccent};`}>{subjects.primary?.name || 'Subject 1'}</span>
+              <CardHeader label="Points" badge={pointRows.length} />
+            </div>
+            {#if pointRows.length}
               <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                   <thead class="text-slate-400">
@@ -233,26 +180,33 @@
                       <th class="py-2 pr-3 text-left">Quality</th>
                       <th class="py-2 pr-3 text-left">Degree</th>
                       <th class="py-2 pr-3 text-left">House</th>
+                      <th class="py-2 pr-3 text-left">Retro</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-800">
-                    {#each natalPointRows as row}
+                    {#each pointRows as row}
                       <tr>
-                      <td class="py-2 pr-3">{row.icon} {row.label}</td>
-                      <td class="py-2 pr-3">{row.sign} {row.signIcon}</td>
-                      <td class="py-2 pr-3">{row.element || '—'}</td>
-                      <td class="py-2 pr-3">{row.quality || '—'}</td>
-                      <td class="py-2 pr-3">{row.degree || '—'}</td>
-                      <td class="py-2 pr-3">{row.house || '—'}</td>
-                      <td class="py-2 pr-3">{row.retro || '—'}</td>
+                        <td class="py-2 pr-3">{row.icon} {row.label}</td>
+                        <td class="py-2 pr-3" style={`color:${row.elementColor}`}>{row.sign} {row.signIcon}</td>
+                        <td class="py-2 pr-3">
+                          <span style={`color:${row.elementColor}`}>{row.elementIcon} {row.element || '—'}</span>
+                        </td>
+                        <td class="py-2 pr-3">{row.qualityIcon} {row.quality || '—'}</td>
+                        <td class="py-2 pr-3">{row.degree || '—'}</td>
+                        <td class="py-2 pr-3">{row.house || '—'}</td>
+                        <td class="py-2 pr-3">{row.retro || '—'}</td>
                       </tr>
                     {/each}
                   </tbody>
                 </table>
               </div>
+            {:else}
+              <p class="text-sm text-slate-400">No points returned.</p>
             {/if}
+          </div>
 
-            {#if natalHouseRows.length}
+          <div class="space-y-3">
+            {#if houseRows.length}
               <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                   <thead class="text-slate-400">
@@ -265,22 +219,117 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-800">
-                    {#each natalHouseRows as row}
+                    {#each houseRows as row}
                       <tr>
                         <td class="py-2 pr-3">{row.label}</td>
-                        <td class="py-2 pr-3">{row.sign} {row.signIcon}</td>
-                        <td class="py-2 pr-3">{row.element || '—'}</td>
-                        <td class="py-2 pr-3">{row.quality || '—'}</td>
+                        <td class="py-2 pr-3" style={`color:${row.elementColor}`}>{row.sign} {row.signIcon}</td>
+                        <td class="py-2 pr-3">
+                          <span style={`color:${row.elementColor}`}>{row.elementIcon} {row.element || '—'}</span>
+                        </td>
+                        <td class="py-2 pr-3">{row.qualityIcon} {row.quality || '—'}</td>
                         <td class="py-2 pr-3">{row.degree || '—'}</td>
                       </tr>
                     {/each}
                   </tbody>
                 </table>
               </div>
+            {:else}
+              <p class="text-sm text-slate-400">No houses returned.</p>
             {/if}
+          </div>
+        </div>
+
+        {#if (natalPointRows.length || natalHouseRows.length) && subjects.natal}
+          <div class="space-y-5">
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
+                <span class="subject-badge" style={`--badge:${secondaryAccent};`}>{subjects.natal?.name || 'Subject 2'}</span>
+                <CardHeader label="Points" badge={natalPointRows.length} />
+              </div>
+              {#if natalPointRows.length}
+                <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead class="text-slate-400">
+                    <tr>
+                      <th class="py-2 pr-3 text-left">Body</th>
+                      <th class="py-2 pr-3 text-left">Sign</th>
+                      <th class="py-2 pr-3 text-left">Element</th>
+                      <th class="py-2 pr-3 text-left">Quality</th>
+                      <th class="py-2 pr-3 text-left">Degree</th>
+                      <th class="py-2 pr-3 text-left">House</th>
+                      <th class="py-2 pr-3 text-left">Retro</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-800">
+                    {#each natalPointRows as row}
+                      <tr>
+                          <td class="py-2 pr-3">{row.icon} {row.label}</td>
+                          <td class="py-2 pr-3" style={`color:${row.elementColor}`}>{row.sign} {row.signIcon}</td>
+                          <td class="py-2 pr-3">
+                            <span style={`color:${row.elementColor}`}>{row.elementIcon} {row.element || '—'}</span>
+                          </td>
+                          <td class="py-2 pr-3">{row.qualityIcon} {row.quality || '—'}</td>
+                          <td class="py-2 pr-3">{row.degree || '—'}</td>
+                          <td class="py-2 pr-3">{row.house || '—'}</td>
+                          <td class="py-2 pr-3">{row.retro || '—'}</td>
+                        </tr>
+                      {/each}
+                    </tbody>
+                  </table>
+                </div>
+              {:else}
+                <p class="text-sm text-slate-400">No points returned.</p>
+              {/if}
+            </div>
+
+            <div class="space-y-3">
+              {#if natalHouseRows.length}
+                <div class="overflow-x-auto">
+                  <table class="min-w-full text-sm">
+                    <thead class="text-slate-400">
+                      <tr>
+                        <th class="py-2 pr-3 text-left">House</th>
+                        <th class="py-2 pr-3 text-left">Sign</th>
+                        <th class="py-2 pr-3 text-left">Element</th>
+                        <th class="py-2 pr-3 text-left">Quality</th>
+                        <th class="py-2 pr-3 text-left">Degree</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800">
+                      {#each natalHouseRows as row}
+                        <tr>
+                          <td class="py-2 pr-3">{row.label}</td>
+                          <td class="py-2 pr-3" style={`color:${row.elementColor}`}>{row.sign} {row.signIcon}</td>
+                          <td class="py-2 pr-3">
+                            <span style={`color:${row.elementColor}`}>{row.elementIcon} {row.element || '—'}</span>
+                          </td>
+                          <td class="py-2 pr-3">{row.qualityIcon} {row.quality || '—'}</td>
+                          <td class="py-2 pr-3">{row.degree || '—'}</td>
+                        </tr>
+                      {/each}
+                    </tbody>
+                  </table>
+                </div>
+              {/if}
+            </div>
           </div>
         {/if}
       {/if}
     </div>
   {/if}
 </div>
+
+<style>
+  .subject-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #e2f3ff;
+    background: color-mix(in srgb, var(--badge, #22d3ee) 32%, rgba(15, 23, 42, 0.85));
+    border: 1px solid color-mix(in srgb, var(--badge, #22d3ee) 45%, rgba(255, 255, 255, 0.1));
+  }
+</style>
