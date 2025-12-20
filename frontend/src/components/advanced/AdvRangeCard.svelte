@@ -40,7 +40,9 @@
 
   const resolveCadence = (granularity) => {
     const norm = String(granularity || '').toLowerCase();
-    return norm === 'month' ? 'month' : 'day';
+    if (norm === 'month') return 'month';
+    if (norm === 'hour' || norm === 'minute') return 'hour';
+    return 'day';
   };
 
   const computeMoonIllumination = (subject = {}, moon = {}) => {
@@ -93,25 +95,44 @@
     const dayPoint = dayKey ? pickPoint(points, dayKey) : null;
     const sunPoint = pickPoint(points, 'sun');
     const ascPoint = pickPoint(points, 'ascendant');
-    const toneSource = cadence === 'month' ? sunPoint : cadence === 'hour' ? ascPoint || dayPoint || sunPoint : dayPoint || sunPoint;
-    const element = toneSource?.element || 'Default';
+
+    let toneSource = null;
+    let element = 'Default';
+    let sourceLabel = 'Cadence';
+
+    if (cadence === 'month') {
+      toneSource = sunPoint;
+      element = sunPoint?.element || 'Default';
+      sourceLabel = `Sun cadence (${signName(sunPoint?.sign) || '—'})`;
+    } else if (cadence === 'hour') {
+      toneSource = ascPoint;
+      element = ascPoint?.element || 'Default';
+      sourceLabel = `Asc cadence (${signName(ascPoint?.sign) || '—'})`;
+    } else {
+      toneSource = dayPoint;
+      element = dayPoint?.element || 'Default';
+      sourceLabel = `Day ruler (${signName(dayPoint?.sign) || '—'})`;
+    }
+
     const tone = ELEMENT_HEX[element] || ELEMENT_HEX.Default || '#38bdf8';
-    const sourceLabel =
-      cadence === 'month'
-        ? `Sun-led cadence (${signName(sunPoint?.sign) || '—'})`
-        : cadence === 'hour'
-          ? `Ascendant tone (${signName(ascPoint?.sign) || '—'})`
-          : `Day ruler (${signName(dayPoint?.sign) || '—'})`;
-    return { tone, element, sourceLabel, dayKey, dayPoint, sunPoint, ascPoint };
+    return { tone, element, sourceLabel, dayKey, dayPoint, sunPoint, ascPoint, toneSource };
   };
 
-  const buildSigilProps = (points, dayKey) => ({
-    sunElement: pickPoint(points, 'sun')?.element || '',
-    moonElement: pickPoint(points, 'moon')?.element || '',
-    dayElement: dayKey ? pickPoint(points, dayKey)?.element || '' : '',
-    ascElement: pickPoint(points, 'ascendant')?.element || '',
-    dayRulerKey: dayKey || '',
-  });
+  const buildSigilProps = (points, dayKey, cadence) => {
+    const sunElement = pickPoint(points, 'sun')?.element || '';
+    const moonElement = pickPoint(points, 'moon')?.element || '';
+    const dayElement = dayKey ? pickPoint(points, dayKey)?.element || '' : '';
+    const ascElement = pickPoint(points, 'ascendant')?.element || '';
+
+    if (cadence === 'hour') {
+      return { sunElement, moonElement, dayElement, ascElement, dayRulerKey: dayKey || '' };
+    }
+    if (cadence === 'day') {
+      return { sunElement, moonElement, dayElement, ascElement: '', dayRulerKey: dayKey || '' };
+    }
+    // Month cadence: ignore ascendant and moon to highlight solar/day tone.
+    return { sunElement, moonElement: '', dayElement, ascElement: '', dayRulerKey: dayKey || '' };
+  };
 
   const formatSnapshot = (snap, idx, cadence) => {
     const ts = toDate(snap?.timestamp);
@@ -141,7 +162,7 @@
       tone,
       placements,
       aspects: buildAspectList(snap?.major_aspects || []),
-      sigil: buildSigilProps(points, tone.dayKey),
+      sigil: buildSigilProps(points, tone.dayKey, cadence),
       countLabel: `Stop ${idx + 1}`,
     };
   };
@@ -215,7 +236,9 @@
                   <p class="range-time">{entry.time || '—'}</p>
                 </div>
                 <div class="range-badges">
-                  <span class="accent-badge">{entry.countLabel}</span>
+                  <div class="range-sigil-head">
+                    <ElementSigil {...entry.sigil} size={64} compact className="range-sigil-figure" />
+                  </div>
                   <span class="badge">{entry.tone.sourceLabel}</span>
                 </div>
               </div>
@@ -279,11 +302,6 @@
                       {/each}
                     </div>
                   {/if}
-                </div>
-
-                <div class="range-sigil">
-                  <ElementSigil {...entry.sigil} size={76} compact className="range-sigil-figure" />
-                  <p class="micro-label text-center text-slate-400 mt-1">Elemental cadence</p>
                 </div>
               </div>
             </div>
@@ -371,6 +389,16 @@
     gap: 6px;
     flex-wrap: wrap;
     justify-content: flex-end;
+  }
+
+  .range-sigil-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 12px;
+    background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--tone, #38bdf8) 10%, transparent), transparent 70%);
+    border: 1px dashed color-mix(in srgb, var(--tone, #38bdf8) 35%, #0f172a);
   }
 
   .range-card-body {

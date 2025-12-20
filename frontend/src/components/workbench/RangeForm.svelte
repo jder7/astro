@@ -37,6 +37,16 @@
     next.setMonth(next.getMonth() + months);
     return next;
   };
+  const toParts = (date) =>
+    date instanceof Date && Number.isFinite(date.getTime())
+      ? {
+          year: date.getFullYear(),
+          month: date.getMonth() + 1,
+          day: date.getDate(),
+          hour: date.getHours(),
+          minute: date.getMinutes(),
+        }
+      : null;
 
   $: state = $rangeStore;
   $: transit = $inputStore?.transit || {};
@@ -92,17 +102,21 @@
   };
 
   const quickSet = (label) => {
-    const start = toDateObj(startDateTime) || new Date();
+    const now = new Date();
+    let end = new Date(now);
     if (label === 'day') {
-      syncEnd(new Date(start.getTime() + 24 * 60 * 60 * 1000));
+      end = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     } else if (label === 'month') {
-      syncEnd(addMonths(start, 1));
+      end = addMonths(now, 1);
     } else if (label === 'three_months') {
-      syncEnd(addMonths(start, 3));
+      end = addMonths(now, 3);
     } else if (label === 'year') {
-      const next = new Date(start);
-      next.setFullYear(start.getFullYear() + 1);
-      syncEnd(next);
+      end.setFullYear(now.getFullYear() + 1);
+    }
+    const startParts = toParts(now);
+    const endParts = toParts(end);
+    if (startParts && endParts) {
+      updateRange({ start: startParts, end: endParts });
     }
   };
 </script>
