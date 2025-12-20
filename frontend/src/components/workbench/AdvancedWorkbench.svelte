@@ -70,7 +70,8 @@
       const cfg = { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
       const range = get(rangeStore);
       const payload = buildRangePayload(state, cfg, range, state.mode !== 'transit');
-      rangeResult = await requestTransitRange(payload);
+      const result = await requestTransitRange(payload);
+      rangeResult = { ...result, granularity: payload.granularity };
       status = `Range computed (${rangeResult.snapshots?.length || 0} snapshots).`;
     } catch (err) {
       errorMessage = err?.message || 'Failed to run range request.';

@@ -43,6 +43,14 @@ export const QUALITY_ICON = {
   Mutable: '🔁',
 };
 
+export const ELEMENT_HEX = {
+  Fire: '#fb7185',
+  Earth: '#eab308',
+  Air: '#34d399',
+  Water: '#60a5fa',
+  Default: '#94a3b8',
+};
+
 const FULL = {
   aries: '♈︎',
   taurus: '♉︎',

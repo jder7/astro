@@ -135,14 +135,16 @@ export function buildReportPayload(mode, state, config) {
 
 export function buildRangePayload(state, config, range, includeNatal = true) {
   const normalizedConfig = normalizeConfig(config);
-  const moment = normalizeMoment(state?.transit, defaultTransit);
+  const startMoment = normalizeMoment(range?.start, state?.transit || defaultTransit);
+  const moment = normalizeMoment(startMoment, defaultTransit);
   const end = normalizeMoment(range?.end, { ...moment, day: (moment.day || 1) + 1 });
   const birth = includeNatal && state?.mode !== 'transit' ? normalizeBirth(state?.birth, defaultBirth) : null;
+  const granularity = String(range?.granularity || 'hour').toLowerCase();
 
   return {
     asc_moon_sun_range_enabled: Boolean(config?.asc_moon_sun_range_enabled),
     include_aspects: Boolean(range?.include_aspects ?? config?.include_aspects),
-    granularity: range?.granularity || 'HOUR',
+    granularity,
     moment,
     end,
     birth,

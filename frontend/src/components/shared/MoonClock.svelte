@@ -1,7 +1,7 @@
 <script>
   import ElementSigil from '$components/shared/ElementSigil.svelte';
   import { toDate } from '$lib/astro/date';
-  import { signSymbol, signName, QUALITY_ICON, ELEMENT_ICON } from '$lib/astro/signs';
+  import { signSymbol, signName, QUALITY_ICON, ELEMENT_ICON, ELEMENT_HEX } from '$lib/astro/signs';
 
   export let ranges = [];
   export let subjectElements = {};
@@ -10,13 +10,6 @@
   const VIEWBOX_SIZE = 420;
   const SVG_CENTER = VIEWBOX_SIZE / 2;
   const SIGIL_SIZE = 72;
-  const ELEMENT_HEX = {
-    Fire: '#fb7185',
-    Earth: '#eab308',
-    Air: '#34d399',
-    Water: '#60a5fa',
-    Default: '#94a3b8',
-  };
   const HAND_COLORS = ['#38bdf8', '#34d399'];
   const withAlpha = (hex, alpha = '26') => (hex ? `${hex}${alpha}` : `${ELEMENT_HEX.Default}${alpha}`);
 
@@ -35,6 +28,22 @@
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
 
+  const formatDayMonth = (value) => {
+    const d = toDate(value);
+    if (!d) return '';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const illuminationDisplay = (entry) => {
+    const val = entry?.illumination_percentage ?? entry?.illumination;
+    if (typeof val === 'number') return `${val.toFixed(1)}%`;
+    if (typeof val === 'string') return val;
+    return '';
+  };
+
+  const phaseIconFor = (entry) => entry?.phase_icon || entry?.lunar_phase_icon || entry?.phase_emoji || entry?.phaseEmoji || '🌙';
+  const phaseLabelFor = (entry) => entry?.phase || entry?.lunar_phase || entry?.moon_phase || '';
+
   const normalizeRange = (range) => {
     const anchor = safeDate(range?.anchor) || safeDate(range?.entries?.[0]?.start) || new Date();
     const entries =
@@ -47,7 +56,7 @@
         })
         .filter(Boolean) || [];
     return {
-      label: range?.label || range?.id || 'Ascendant',
+      label: range?.label || range?.id || 'Moon cycle',
       anchor,
       entries,
     };
@@ -93,7 +102,7 @@
 
   const ringConfig = (idx) => (idx === 0 ? { outer: 170, inner: 120, hand: 165 } : { outer: 110, inner: 70, hand: 105 });
 
-  let windowHours = 12;
+  let windowHours = 24 * 7 * 2; // default 2 weeks
   let offsets = [];
   let highlight = { rangeIdx: -1, sign: null };
 
@@ -122,10 +131,10 @@
   $: baseSigil = subjectElements || {};
   $: sigilPayload = {
     sunElement: baseSigil.sunElement || '',
-    moonElement: baseSigil.moonElement || '',
+    moonElement: (selectedSummary && selectedSummary.element) || baseSigil.moonElement || '',
     dayElement: baseSigil.dayElement || '',
     dayRulerKey: baseSigil.dayRulerKey || '',
-    ascElement: (selectedSummary && selectedSummary.element) || baseSigil.ascElement || '',
+    ascElement: null, // during a day ascendant element can be any element
   };
   $: hasSigilPayload = Boolean(
     sigilPayload.sunElement || sigilPayload.moonElement || sigilPayload.dayElement || sigilPayload.ascElement
@@ -214,7 +223,7 @@
 <div class="space-y-3">
   <div class="flex items-center justify-between gap-3 flex-wrap">
     <div>
-      <p class="text-xs uppercase tracking-[0.2em] text-cyan-200/80 font-semibold">Ascendant clock</p>
+      <p class="text-xs uppercase tracking-[0.2em] text-cyan-200/80 font-semibold">Lunar clock</p>
       <p class="text-sm text-slate-300">
         {#if normalized[0]}
           {formatTime(normalized[0].anchor)} (anchor)
@@ -224,8 +233,8 @@
       </p>
     </div>
     <div class="flex items-center gap-2">
-      <button class="button-ghost" type="button" aria-pressed={windowHours === 12} on:click={() => (windowHours = 12)}>Next 12h</button>
-      <button class="button-ghost" type="button" aria-pressed={windowHours === 24} on:click={() => (windowHours = 24)}>Next 24h</button>
+      <button class="button-ghost" type="button" aria-pressed={windowHours === 24 * 7 * 2} on:click={() => (windowHours = 24 * 7 * 2)}>Next 2w</button>
+      <button class="button-ghost" type="button" aria-pressed={windowHours === 24 * 7 * 4} on:click={() => (windowHours = 24 * 7 * 4)}>Next 4w</button>
     </div>
   </div>
 
@@ -290,19 +299,49 @@
                     />
                   {/if}
                 {#if decanSeg.showSign}
+                  {@const labelX = 210 + (ringConfig(discIdx).outer + ringConfig(discIdx).inner) / 2 * Math.cos((decanSeg.startAngle * 2 + decanSeg.midAngle) / 3)}
+                  {@const labelY = 210 + (ringConfig(discIdx).outer + ringConfig(discIdx).inner) / 2 * Math.sin((decanSeg.startAngle * 2 + decanSeg.midAngle) / 3)}
+                  {@const dateLabel = formatDayMonth(decanSeg.startTime)}
+                  {@const illumLabel = illuminationDisplay(decanSeg.entry)}
+                  {@const phaseIcon = phaseIconFor(decanSeg.entry)}
+                  {@const phaseLabel = phaseLabelFor(decanSeg.entry)}
                   <text
-                    id={`asc-sign-${discIdx}-${decanSegIdx}`}
-                    x={210 + (ringConfig(discIdx).outer + ringConfig(discIdx).inner) / 2 * Math.cos((decanSeg.startAngle * 2 + decanSeg.midAngle) / 3)}
-                    y={210 + (ringConfig(discIdx).outer + ringConfig(discIdx).inner) / 2 * Math.sin((decanSeg.startAngle * 2 + decanSeg.midAngle) / 3)}
+                    id={`moon-sign-${discIdx}-${decanSegIdx}`}
+                    x={labelX}
+                    y={labelY}
                     text-anchor="middle"
+                    dominant-baseline="central"
+                    font-size={discIdx === 0 ? "12" : "10"}
+                    fill={ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default}
+                    font-weight="700"
+                  >
+                    {signSymbol(decanSeg.sign) || decanSeg.sign}
+                  </text>
+                  {#if dateLabel}
+                    <text
+                      x={labelX}
+                      y={labelY + 12}
+                      text-anchor="middle"
                       dominant-baseline="central"
-                      font-size={discIdx === 0 ? "12" : "10"}
-                      fill={ELEMENT_HEX[decanSeg.element] || ELEMENT_HEX.Default}
-                      font-weight="700"
+                      font-size="7"
+                      fill="rgba(226,232,240,0.82)"
                     >
-                      {signSymbol(decanSeg.sign) || decanSeg.sign}
+                      {dateLabel}
                     </text>
                   {/if}
+                  {#if illumLabel || phaseIcon || phaseLabel}
+                    <text
+                      x={labelX}
+                      y={labelY + 22}
+                      text-anchor="middle"
+                      dominant-baseline="central"
+                      font-size="7"
+                      fill="rgba(226,232,240,0.9)"
+                    >
+                      {phaseIcon} {phaseLabel} {illumLabel}
+                    </text>
+                  {/if}
+                {/if}
                   {#if discIdx === 0}
                     <text
                       id={`asc-time-start-${discIdx}-${decanSegIdx}`}
@@ -313,7 +352,7 @@
                       font-size="7"
                       fill="rgba(226,232,240,0.78)"
                     >
-                      {formatTime(decanSeg.startTime)}
+                      {formatDayMonth(decanSeg.startTime)} {formatTime(decanSeg.startTime)}
                     </text>
                   {:else}
                     <text
@@ -325,7 +364,7 @@
                       font-size="5"
                       fill="rgba(226,232,240,0.72)"
                     >
-                      {formatTime(decanSeg.startTime)}
+                      {formatDayMonth(decanSeg.startTime)} {formatTime(decanSeg.startTime)}
                     </text>
                   {/if}
                 {/if}

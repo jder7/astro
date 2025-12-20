@@ -1,8 +1,9 @@
 <script>
   import { formatDateLabel, toDate } from '$lib/astro/format';
-  import { extractRanges } from '$lib/astro/advanced';
-  import { signName, signSymbol } from '$lib/astro/signs';
+  import { extractRanges, extractSubjects } from '$lib/astro/advanced';
+  import { DAY_RULERS, signName, signSymbol } from '$lib/astro/signs';
   import CardHeader from '$components/shared/CardHeader.svelte';
+  import MoonClock from '$components/shared/MoonClock.svelte';
 
   export let response = null;
   let collapsed = true;
@@ -17,6 +18,19 @@
   });
 
   $: ranges = extractRanges(response).moon || [];
+  $: subjects = extractSubjects(response);
+  $: primarySubject = subjects?.primary || null;
+  $: moonAnchor = toDate(ranges?.[0]?.anchor || primarySubject?.iso_formatted_local_datetime || primarySubject?.timestamp);
+  $: dayRulerKey = moonAnchor ? DAY_RULERS[moonAnchor.getDay()] : '';
+  $: subjectElements = primarySubject
+    ? {
+        sunElement: primarySubject.sun?.element || '',
+        moonElement: primarySubject.moon?.element || '',
+        dayElement: dayRulerKey ? primarySubject?.[dayRulerKey]?.element || '' : '',
+        dayRulerKey: dayRulerKey || '',
+        ascElement: primarySubject.moon?.element || '',
+      }
+    : null;
 </script>
 
 <div class="flowbite-card space-y-4">
@@ -43,6 +57,7 @@
       {#if !response || !ranges.length}
         <p class="text-sm text-slate-400">Generate a chart to see the lunar clock, next sign, and month-long breakdown.</p>
       {:else}
+        <MoonClock ranges={ranges} subjectElements={subjectElements} />
         {#each ranges as range}
           <div class="space-y-2">
             <CardHeader

@@ -85,7 +85,7 @@ All fields are optional thanks to defaults.
 
 ### Range add-ons (Ascendant, Moon, Sun)
 
-- Set `ascMoonSunRangeEnabled: true` on natal, transit, transit-range, or relationship requests to include `ascendantDayRange`, `moonMonthRange`, and `sunYearRange` in the response.
+- Set `ascMoonSunRangeEnabled: true` on natal or transit requests to include `ascendantDayRange`, `moonMonthRange`, and `sunYearRange` in the response.
 - Ascendant ranges cover a +/-12h window (hourly granularity). Moon ranges sweep ~1 month. Sun ranges sweep ~1 year with minute-level ingress timestamps.
 - Dual modes return both ranges (e.g., natal + transit or both partners). Entries include start/end, sign, element, quality, decan, and orb (where relevant).
 
@@ -189,8 +189,7 @@ Compute a **sequence of transit snapshots** between two datetimes.
   - `config`: `ChartConfig` (optional).
   - `ascMoonSunRangeEnabled` *(optional, default false)*: include ascendant, Moon, and Sun sweeps around the start moment.
 - **Response**: `TransitRangeResponse`
-  - `snapshots`: list of `TransitSnapshot` (same structure as `/api/transit`, including `major_aspects` and optional `natal_major_aspects`).
-  - `ascendantDayRange`, `moonMonthRange`, `sunYearRange` *(optional)*: sweeps around the requested start moment (and natal, when provided).
+  - `snapshots`: list of transit-only snapshots (timestamp, subject, aspects, and major aspects).
 
 ---
 

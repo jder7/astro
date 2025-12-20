@@ -729,27 +729,35 @@ class TransitRangeRequest(BaseModel):
     )
 
 
-class TransitRangeResponse(BaseModel):
+class TransitRangeSnapshot(BaseModel):
     """
-    Response for the /transit-range endpoint.
+    Simplified snapshot for the /transit-range endpoint (transit only).
     """
 
-    ascendant_day_range: List[AscendantDayRange] = Field(
-        default_factory=list,
-        serialization_alias="ascendantDayRange",
-        description="Ascendant sweeps around the start moment (and natal when provided) when enabled.",
+    timestamp: datetime = Field(
+        ...,
+        description="Local datetime (with timezone) corresponding to this transit snapshot.",
     )
-    moon_month_range: List[MoonMonthRange] = Field(
-        default_factory=list,
-        serialization_alias="moonMonthRange",
-        description="Moon sign sweeps around the start moment (and natal when provided) when enabled.",
+    subject: dict = Field(
+        ...,
+        description="Transit subject (sky at this moment) as JSON.",
     )
-    sun_year_range: List[SunYearRange] = Field(
+    aspects: List[NormalAspectEntry] = Field(
         default_factory=list,
-        serialization_alias="sunYearRange",
-        description="Sun sign sweeps around the start moment (and natal when provided) when enabled.",
+        description="Standard aspects returned by Kerykeion for the transit subject.",
     )
-    snapshots: List[TransitSnapshot]
+    major_aspects: List[PtolemaicPatternAspect] = Field(
+        default_factory=list,
+        description="High-level Ptolemaic configurations computed for the transit subject.",
+    )
+
+
+class TransitRangeResponse(BaseModel):
+    """
+    Response for the /transit-range endpoint (transit-only snapshots).
+    """
+
+    snapshots: List[TransitRangeSnapshot]
 
 
 class ReportRequest(BaseModel):
