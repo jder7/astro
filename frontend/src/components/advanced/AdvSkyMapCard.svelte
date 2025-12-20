@@ -1,11 +1,38 @@
 <script>
   import { formatDegree } from '$lib/astro/format';
-  import { collectPoints, extractSubjects, formatHouseName } from '$lib/astro/advanced';
+  import { collectPoints, extractRanges, extractSubjects, formatHouseName } from '$lib/astro/advanced';
   import { POINT_SYMBOLS, signName, signSymbol } from '$lib/astro/signs';
+  import { configStore } from '$lib/state/configStore';
+  import SkyMap from '$components/shared/SkyMap.svelte';
   import CardHeader from '$components/shared/CardHeader.svelte';
 
   export let response = null;
+  export let mode = 'natal';
   let collapsed = true;
+
+  const normalizePointKey = (value) =>
+    String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_]+/g, '');
+
+  const normalizeRangeId = (value) => (typeof value === 'string' ? value.toLowerCase() : null);
+
+  const filterPointsByActive = (points, activeSet) => {
+    if (!points || typeof points !== 'object' || !activeSet || !activeSet.size) return points || {};
+    return Object.fromEntries(Object.entries(points).filter(([key]) => activeSet.has(normalizePointKey(key))));
+  };
+
+  const addPointsForRange = (map, id, subjectData, activeSet) => {
+    const key = normalizeRangeId(id);
+    if (!key || !subjectData) return;
+    const collected = collectPoints(subjectData).points || {};
+    const filtered = filterPointsByActive(collected, activeSet);
+    if (Object.keys(filtered).length) {
+      map[key] = filtered;
+    }
+  };
 
   const shapePoint = ([key, point]) => {
     const retro = point?.retrograde ? 'Rx' : '';
@@ -33,13 +60,36 @@
     degree: Number.isFinite(house.position) ? formatDegree(house.position) : '',
   });
 
-  $: subjects = extractSubjects(response);
+  $: subjects = extractSubjects(response, mode);
   $: primaryPoints = collectPoints(subjects.primary || {});
   $: natalPoints = collectPoints(subjects.natal || {});
   $: pointRows = Object.entries(primaryPoints.points || {}).map(shapePoint);
   $: houseRows = Object.entries(primaryPoints.houses || {}).map(shapeHouse);
   $: natalPointRows = Object.entries(natalPoints.points || {}).map(shapePoint);
   $: natalHouseRows = Object.entries(natalPoints.houses || {}).map(shapeHouse);
+  $: sunRanges = extractRanges(response).sun || [];
+  $: activeSet = new Set(($configStore?.active_points || []).map(normalizePointKey));
+  $: pointsByRangeId = (() => {
+    const map = {};
+    addPointsForRange(map, 'transit', response?.snapshot?.subject, activeSet);
+    addPointsForRange(map, 'natal', response?.snapshot?.natal_subject, activeSet);
+    if (!response?.snapshot) {
+      addPointsForRange(map, 'natal', response?.subject, activeSet);
+    }
+    addPointsForRange(map, 'first', response?.first_subject, activeSet);
+    addPointsForRange(map, 'second', response?.second_subject, activeSet);
+    sunRanges.forEach((range, idx) => {
+      const key = normalizeRangeId(range.id || range.label || `range-${idx}`);
+      if (key && !map[key]) {
+        addPointsForRange(map, key, subjects.primary, activeSet);
+      }
+    });
+    const primaryFiltered = filterPointsByActive(primaryPoints.points, activeSet);
+    if (Object.keys(primaryFiltered).length) {
+      map.default = primaryFiltered;
+    }
+    return map;
+  })();
 </script>
 
 <div class="flowbite-card space-y-4">
@@ -66,6 +116,12 @@
       {#if !response}
         <p class="text-sm text-slate-400">Generate a chart to see point and house placements.</p>
       {:else}
+        {#if sunRanges.length}
+          <SkyMap ranges={sunRanges} pointsByRangeId={pointsByRangeId} />
+        {:else}
+          <p class="text-sm text-slate-400">No Sun ranges returned for this chart.</p>
+        {/if}
+
         <div class="space-y-3">
           <CardHeader label="Points" badge={pointRows.length} />
           {#if pointRows.length}
