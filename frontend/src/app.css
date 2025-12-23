@@ -379,6 +379,11 @@ label {
   min-width: 0;
 }
 
+.card-head-inline {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
 .card-head-actions {
   display: flex;
   flex-wrap: wrap;

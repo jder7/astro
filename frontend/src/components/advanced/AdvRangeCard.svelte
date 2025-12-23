@@ -189,13 +189,13 @@
 </script>
 
 <div class="flowbite-card space-y-4" id="adv-range-panel">
-  <div class="flex items-center justify-between gap-3 flex-wrap">
+  <div class="card-head">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Future vision</p>
       <h2>Range explorer</h2>
       <p class="text-xs text-slate-400">Transit and dual modes only.</p>
     </div>
-    <div class="flex items-center gap-2 flex-wrap justify-end">
+    <div class="card-head-actions">
       <span class="accent-badge">{cadenceLabel}</span>
       {#if entries.length}
         <span class="badge">{entries.length} stops</span>

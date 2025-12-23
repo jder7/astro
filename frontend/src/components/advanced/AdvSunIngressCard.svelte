@@ -20,22 +20,24 @@
 </script>
 
 <div class="flowbite-card space-y-4">
-  <div class="flex items-center justify-between gap-3">
+  <div class="card-head card-head-inline">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Sun</p>
       <h2>Ingresses</h2>
     </div>
-    <button
-      type="button"
-      class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-800 bg-slate-900/70 text-slate-200 hover:border-cyan-400 hover:text-white transition"
-      on:click={() => (collapsed = !collapsed)}
-      aria-expanded={!collapsed}
-      aria-controls="adv-sun-ingress-panel"
-    >
-      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d={collapsed ? 'M6 9l6 6 6-6' : 'M18 15l-6-6-6 6'} />
-      </svg>
-    </button>
+    <div class="card-head-actions">
+      <button
+        type="button"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-800 bg-slate-900/70 text-slate-200 hover:border-cyan-400 hover:text-white transition"
+        on:click={() => (collapsed = !collapsed)}
+        aria-expanded={!collapsed}
+        aria-controls="adv-sun-ingress-panel"
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d={collapsed ? 'M6 9l6 6 6-6' : 'M18 15l-6-6-6 6'} />
+        </svg>
+      </button>
+    </div>
   </div>
 
   {#if !collapsed}

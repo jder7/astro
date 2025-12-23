@@ -132,12 +132,12 @@
 </script>
 
 <div class="flowbite-card space-y-4">
-  <div class="flex items-center justify-between gap-3">
+  <div class="card-head card-head-inline">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Synthesis</p>
       <h2>Aspects Summary</h2>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="card-head-actions">
       {#if response}
         <span class="badge capitalize">{mode}</span>
       {/if}

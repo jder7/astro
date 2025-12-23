@@ -338,14 +338,16 @@
 </script>
 
 <div class="flowbite-card space-y-4">
-  <div class="flex items-center justify-between gap-3">
+  <div class="card-head">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Overview</p>
       <h2>Summary</h2>
     </div>
-    {#if response}
-      <span class="badge capitalize">{mode}</span>
-    {/if}
+    <div class="card-head-actions">
+      {#if response}
+        <span class="badge capitalize">{mode}</span>
+      {/if}
+    </div>
   </div>
 
   <div id="adv-summary-panel" class="space-y-4">

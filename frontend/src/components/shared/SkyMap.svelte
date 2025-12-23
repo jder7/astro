@@ -1049,6 +1049,7 @@
     display: grid;
     place-items: center;
     pointer-events: none;
+    margin-top: 0;
   }
 
   .adv-sky-center-dual {
@@ -1179,11 +1180,12 @@
     }
 
     .adv-sky-center {
-      inset: auto 0 0 0;
+      position: static;
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      padding: 0 0.6rem 0.7rem;
+      padding: 0 0.2rem 0.2rem;
+      margin-top: 0.6rem;
     }
 
     .adv-sky-center-dual {

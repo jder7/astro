@@ -3,13 +3,13 @@
 </script>
 
 <div class="flowbite-card space-y-3">
-  <div class="flex items-center justify-between">
+  <div class="card-head">
     <p class="section-title text-xs">SVG output</p>
     {#if svgMarkup}
       <span class="badge">Live render</span>
     {/if}
   </div>
-<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4" aria-live="polite" id="adv-svg-panel">
+  <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 min-w-0" aria-live="polite" id="adv-svg-panel">
     {#if svgMarkup}
       {@html svgMarkup}
     {:else}
