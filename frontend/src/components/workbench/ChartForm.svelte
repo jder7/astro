@@ -41,10 +41,10 @@
   }
 </script>
 
-<form class="space-y-5" on:submit|preventDefault={submit} id="chart-form">
-  <div class="glass-card p-4 space-y-4" id="mode-panel">
-    <div class="flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
+<form class="space-y-5 min-w-0" on:submit|preventDefault={submit} id="chart-form">
+  <div class="glass-card p-4 space-y-4 min-w-0" id="mode-panel">
+    <div class="mode-panel-head">
+      <div class="mode-panel-actions">
         <button
           type="button"
           class="icon-button"
@@ -73,7 +73,7 @@
           </svg>
         </button>
       </div>
-      <div class="flex items-center gap-2 mode-legend">
+      <div class="mode-panel-legend">
         <span class="legend-dot" aria-hidden="true"></span>
         <p class="text-xs text-slate-400">
           <span class="badge">{modes.find((m) => m.key === state.mode)?.label}</span>
@@ -81,7 +81,7 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-4 gap-2 mode-grid">
+    <div class="grid gap-2 mode-grid min-w-0">
       {#each modes as mode}
         <button
           type="button"

@@ -56,12 +56,12 @@
 </script>
 
 <div class="border border-slate-800 rounded-2xl p-4 bg-slate-950/40 space-y-2">
-  <div class="flex items-center justify-between gap-3">
-    <div class="flex items-center gap-2">
+  <div class="card-row">
+    <div class="flex items-center gap-2 min-w-0">
       <span class="text-xl" aria-hidden="true">{moonInfo?.icon || '🌖'}</span>
-      <div>
+      <div class="min-w-0">
         <p class="text-[11px] uppercase tracking-[0.2em] text-cyan-200/80 font-semibold">{moonTitle}</p>
-        <p class="text-sm text-slate-200">
+        <p class="text-sm text-slate-200 break-words">
           {moonInfo
             ? `${moonInfo.name} · ${moonInfo.ageText} · ${moonPercent}% illumination`
             : 'Generate a chart to see moon cycle'}

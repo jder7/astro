@@ -53,12 +53,12 @@
 </script>
 
 <div class="flowbite-card space-y-4" id="summary-card">
-  <div class="flex items-center justify-between gap-3">
+  <div class="card-head">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Summary</p>
       <h2>Highlights</h2>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="card-head-actions">
       {#if computedSummary.context?.birth}
         <span class="badge">Birth: {computedSummary.context.birth}</span>
       {/if}

@@ -83,13 +83,13 @@
 </script>
 
 <div class="page-shell pb-12" id="advanced-workbench">
-  <div class="grid lg:grid-cols-3 gap-6">
+  <div id="advanced-chart-inputs" class="grid lg:grid-cols-3 gap-6">
     <div class="space-y-4">
       <ChartForm on:submit={generateChart} />
       <AdvStatusCard {status} {errorMessage} loading={loading} ready={Boolean(apiResponse)} />
     </div>
 
-    <div class="lg:col-span-2 space-y-4">
+    <div id="advanced-chart-results" class="lg:col-span-2 space-y-4">
       <AdvSummaryCard response={apiResponse} mode={activeMode} />
 
       <AdvSkyMapCard response={apiResponse} mode={activeMode} />

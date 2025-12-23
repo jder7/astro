@@ -1,5 +1,6 @@
 <script>
   export let active = 'home';
+  let menuOpen = false;
 
   const isDev = import.meta.env.DEV;
   const hrefFor = (key) => {
@@ -18,25 +19,40 @@
 </script>
 
 <nav class="page-shell nav-shell" id="nav-bar">
-  <div class="nav-brand">
-    <div class="brand-mark">
-      <span class="font-display text-lg">✺</span>
+  <div class="nav-top">
+    <div class="nav-brand">
+      <div class="brand-mark">
+        <span class="font-display text-lg">✺</span>
+      </div>
+      <div>
+        <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Astrology Toolkit</p>
+        <p class="font-display text-xl leading-tight">Astro</p>
+      </div>
     </div>
-    <div>
-      <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Astrology Toolkit</p>
-      <p class="font-display text-xl leading-tight">Astro</p>
-    </div>
+    <button
+      type="button"
+      class="nav-toggle sm:hidden"
+      aria-label="Toggle menu"
+      aria-controls="nav-links"
+      aria-expanded={menuOpen}
+      on:click={() => (menuOpen = !menuOpen)}
+    >
+      <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d={menuOpen ? 'M6 6l12 12M18 6L6 18' : 'M4 6h16M4 12h16M4 18h16'} />
+      </svg>
+    </button>
   </div>
-  <div class="nav-links">
+  <div class={`nav-links ${menuOpen ? 'is-open' : ''}`} id="nav-links">
     {#each links as link}
       <a
         class={`nav-link ${active === link.key ? 'active' : ''}`}
         href={link.href}
         aria-current={active === link.key ? 'page' : undefined}
+        on:click={() => (menuOpen = false)}
       >
         {link.label}
       </a>
     {/each}
-    <a class="nav-link" href="/legacy/home.html">Legacy</a>
+    <a class="nav-link" href="/legacy/home.html" on:click={() => (menuOpen = false)}>Legacy</a>
   </div>
 </nav>

@@ -92,16 +92,16 @@
 </script>
 
 <div class="border border-slate-800 rounded-2xl p-4 bg-slate-950/40 space-y-2">
-  <div class="flex items-center justify-between">
+  <div class="card-row">
     <p class="text-[11px] uppercase tracking-[0.2em] text-cyan-200/80 font-semibold">Top aspects</p>
     <span class="badge">Top {topAspects.length}</span>
   </div>
   {#if topAspects.length}
     <div class="space-y-2">
       {#each topAspects as aspect}
-        <div class="flex items-center gap-2 text-sm text-slate-100">
+        <div class="flex flex-wrap items-start gap-2 text-sm text-slate-100 min-w-0">
           <span class="text-xs text-slate-400">{aspect.label}</span>
-          <span class="font-semibold flex flex-wrap items-center gap-1">
+          <span class="font-semibold flex flex-wrap items-center gap-1 min-w-0">
             <span>{aspect.leftText}</span>
             <span>in</span>
             <span class={aspect.iconColor}>{aspect.icon}</span>

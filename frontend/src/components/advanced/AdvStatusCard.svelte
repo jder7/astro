@@ -7,7 +7,7 @@
   export let panelId = 'adv-status-panel';
 </script>
 
-<div id={panelId} class="flowbite-card flex items-center justify-between">
+<div id={panelId} class="flowbite-card flex flex-wrap items-center justify-between gap-3">
   <div>
     <p class="section-title text-xs">{title}</p>
     <p class="text-sm text-slate-200">{status || 'Idle'}</p>

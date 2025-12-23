@@ -1172,4 +1172,51 @@
     font-weight: 700;
     fill: #0b172a;
   }
+
+  @media (max-width: 640px) {
+    .adv-sky-stage {
+      padding: 0.6rem;
+    }
+
+    .adv-sky-center {
+      inset: auto 0 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 0.6rem 0.7rem;
+    }
+
+    .adv-sky-center-dual {
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .adv-sky-chip-slot {
+      width: 100%;
+    }
+
+    .adv-sky-chip {
+      width: min(100%, 18rem);
+      max-width: 100%;
+    }
+
+    .adv-sky-element-badge {
+      top: 0.5rem;
+      left: 0.5rem;
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+    }
+
+    .adv-sky-element-badge-right {
+      right: 0.5rem;
+    }
+
+    .adv-sky-summary-badge {
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 68px;
+      height: 68px;
+    }
+  }
 </style>

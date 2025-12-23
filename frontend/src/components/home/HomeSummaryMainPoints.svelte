@@ -23,9 +23,9 @@
       {#each order as target}
         {@const point = mainPointMap.get(target.toLowerCase())}
         {#if point}
-          <div class="flex items-center gap-2 text-sm font-semibold text-slate-100">
+          <div class="flex flex-wrap items-start gap-2 text-sm font-semibold text-slate-100 min-w-0">
             <span aria-hidden="true">{point.icon || POINT_SYMBOLS[target.toLowerCase()] || '★'}</span>
-            <span>{point.label || target} · in {signName(point.sign)} {signSymbol(point.sign)} · @ {point.degree || '—'}</span>
+            <span class="min-w-0 break-words">{point.label || target} · in {signName(point.sign)} {signSymbol(point.sign)} · @ {point.degree || '—'}</span>
           </div>
         {/if}
       {/each}

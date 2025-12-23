@@ -64,10 +64,10 @@
 </script>
 
 <div class="page-shell pb-12" id="home-workbench">
-  <div class="grid lg:grid-cols-3 gap-6">
-    <div class="space-y-4">
+  <div id="home-chart-inputs" class="grid lg:grid-cols-3 gap-6">
+    <div class="space-y-4 min-w-0">
       <ChartForm on:submit={generateChart} />
-      <div class="flowbite-card flex items-center justify-between">
+      <div class="flowbite-card flex flex-wrap items-center justify-between gap-3">
         <div>
           <p class="text-sm text-cyan-200/80 font-semibold">Status</p>
           <p class="text-sm text-slate-200">{status || 'Idle'}</p>
@@ -83,7 +83,7 @@
       </div>
     </div>
 
-    <div class="lg:col-span-2 space-y-6">
+    <div id="home-chart-results" class="lg:col-span-2 space-y-6 min-w-0">
       <HomeSummaryCard summary={cachedSummary} apiResponse={apiResponse} mode={activeMode} />
 
       <HomeSvgCard svgMarkup={svgMarkup} loading={loading} mode={activeMode} />

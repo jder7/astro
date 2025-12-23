@@ -67,12 +67,12 @@
 </script>
 
 <div class="flowbite-card space-y-4" id="svg-card">
-  <div class="flex items-center justify-between gap-3 flex-wrap">
+  <div class="card-head">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">SVG output</p>
       <h2>Chart preview</h2>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="card-head-actions">
       <button class="button-ghost" type="button" on:click={downloadPdf} disabled={!svgMarkup || loading}>
         <span aria-hidden="true">📄</span> PDF
       </button>
@@ -87,10 +87,10 @@
       {/if}
     </div>
   </div>
-  <div class="relative rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+  <div class="relative rounded-2xl border border-slate-800 bg-slate-950/60 p-4 min-w-0">
     {#if svgMarkup}
-      <div class="flex justify-center overflow-x-auto">
-        <div class="shrink-0" style="width: 720px; max-width: 100%;" aria-live="polite">
+      <div class="flex justify-center overflow-x-auto min-w-0">
+        <div class="svg-stage" aria-live="polite">
           {@html svgMarkup}
         </div>
       </div>
@@ -131,7 +131,18 @@
   {/if}
 </div>
 
-  <style>
+<style>
+  .svg-stage {
+    width: 100%;
+    max-width: 720px;
+  }
+
+  :global(#svg-card .svg-stage svg) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
   :global(.modal-backdrop.zoom-full) {
     position: fixed;
     inset: 0;

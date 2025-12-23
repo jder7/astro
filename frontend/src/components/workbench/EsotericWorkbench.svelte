@@ -86,7 +86,7 @@
     </div>
 
     <div class="lg:col-span-2 space-y-4">
-      <div class="glass-card p-4 flex items-center justify-between">
+      <div class="glass-card p-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p class="section-title text-xs">Status</p>
           <p class="text-sm text-slate-200">{status || 'Idle'}</p>

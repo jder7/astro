@@ -70,12 +70,12 @@
 </script>
 
 <div class="flowbite-card space-y-4" id="report-card">
-  <div class="flex items-center justify-between gap-3 flex-wrap">
+  <div class="card-head">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Full report</p>
       <h2>{reportTitle}</h2>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="card-head-actions">
       <button class="button-ghost" type="button" on:click={generateReport} disabled={reportLoading}>
         {reportLoading ? 'Loading…' : 'Load report'}
       </button>
@@ -84,9 +84,9 @@
       </button>
     </div>
   </div>
-  <div class="flex items-center justify-between gap-3">
+  <div class="card-row">
     <p class="text-sm text-slate-400">Uses the same payload as the chart.</p>
-    <div class="flex items-center gap-2">
+    <div class="card-row-actions">
       <button class="button-ghost" type="button" on:click={copyReport} disabled={!reportMarkdown}>
         <span aria-hidden="true">📝</span>{copied ? 'Copied' : 'Copy'}
       </button>
