@@ -87,6 +87,13 @@
         ? entry.orb
         : Number.parseFloat(String(entry.orb || '').replace('°', ''));
     const movement = entry.movement || entry.aspect_movement || '';
+    const movementLower = String(movement || '').toLowerCase();
+    const movementClass =
+      movementLower.includes('applying')
+        ? 'text-emerald-300'
+        : movementLower.includes('separating')
+          ? 'text-rose-300'
+          : '';
     return {
       baseIcon,
       base,
@@ -100,6 +107,7 @@
       orb: orb || '—',
       orbValue: Number.isFinite(orbValue) ? orbValue : Number.POSITIVE_INFINITY,
       movement,
+      movementClass,
     };
   };
 
@@ -228,7 +236,7 @@
                       <td class="py-2 pr-3 whitespace-nowrap">{aspect.baseIcon} {aspect.base} {aspect.baseSign}</td>
                       <td class={`py-2 pr-3 whitespace-nowrap ${aspect.aspectCls}`}>{aspect.aspectGlyph} {aspect.aspect}</td>
                       <td class="py-2 pr-3 whitespace-nowrap">{aspect.otherIcon} {aspect.other} {aspect.otherSign}</td>
-                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.movement || '—'}</td>
+                      <td class={`py-2 pr-3 whitespace-nowrap ${aspect.movementClass || ''}`}>{aspect.movement || '—'}</td>
                       <td class="py-2 pr-3 whitespace-nowrap">{aspect.orb}</td>
                     </tr>
                   {/each}
@@ -256,7 +264,7 @@
                       <td class="py-2 pr-3 whitespace-nowrap">{aspect.baseIcon} {aspect.base} {aspect.baseSign}</td>
                       <td class={`py-2 pr-3 whitespace-nowrap ${aspect.aspectCls}`}>{aspect.aspectGlyph} {aspect.aspect}</td>
                       <td class="py-2 pr-3 whitespace-nowrap">{aspect.otherIcon} {aspect.other} {aspect.otherSign}</td>
-                      <td class="py-2 pr-3 whitespace-nowrap">{aspect.movement || '—'}</td>
+                      <td class={`py-2 pr-3 whitespace-nowrap ${aspect.movementClass || ''}`}>{aspect.movement || '—'}</td>
                       <td class="py-2 pr-3 whitespace-nowrap">{aspect.orb}</td>
                     </tr>
                   {/each}
@@ -286,7 +294,7 @@
                         <td class="py-2 pr-3 whitespace-nowrap">{aspect.baseIcon} {aspect.base} {aspect.baseSign}</td>
                         <td class={`py-2 pr-3 whitespace-nowrap ${aspect.aspectCls}`}>{aspect.aspectGlyph} {aspect.aspect}</td>
                         <td class="py-2 pr-3 whitespace-nowrap">{aspect.otherIcon} {aspect.other} {aspect.otherSign}</td>
-                        <td class="py-2 pr-3 whitespace-nowrap">{aspect.movement || '—'}</td>
+                        <td class={`py-2 pr-3 whitespace-nowrap ${aspect.movementClass || ''}`}>{aspect.movement || '—'}</td>
                         <td class="py-2 pr-3 whitespace-nowrap">{aspect.orb}</td>
                       </tr>
                     {/each}

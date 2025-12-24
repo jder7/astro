@@ -1,7 +1,7 @@
 <script>
   import { formatDateLabel, toDate } from '$lib/astro/format';
   import { extractRanges, extractSubjects } from '$lib/astro/advanced';
-  import { DAY_RULERS, signName, signSymbol } from '$lib/astro/signs';
+  import { DAY_RULERS, ELEMENT_HEX, ELEMENT_ICON, QUALITY_ICON, signName, signSymbol } from '$lib/astro/signs';
   import CardHeader from '$components/shared/CardHeader.svelte';
   import MoonClock from '$components/shared/MoonClock.svelte';
 
@@ -14,7 +14,10 @@
     sign: signName(entry.sign),
     signIcon: signSymbol(entry.sign),
     element: entry.element || '',
+    elementIcon: ELEMENT_ICON[entry.element] || '',
+    elementStyle: `color: ${ELEMENT_HEX[entry.element] || ELEMENT_HEX.Default};`,
     quality: entry.quality || '',
+    qualityIcon: QUALITY_ICON[entry.quality] || '',
   });
 
   $: ranges = extractRanges(response).moon || [];
@@ -84,8 +87,12 @@
                       <td class="py-2 pr-3">{entry.start || '—'}</td>
                       <td class="py-2 pr-3">{entry.end || '—'}</td>
                       <td class="py-2 pr-3">{entry.sign} {entry.signIcon}</td>
-                      <td class="py-2 pr-3">{entry.element || '—'}</td>
-                      <td class="py-2 pr-3">{entry.quality || '—'}</td>
+                      <td class="py-2 pr-3">
+                        <span style={entry.elementStyle}>
+                          {entry.elementIcon} {entry.element || '—'}
+                        </span>
+                      </td>
+                      <td class="py-2 pr-3">{entry.qualityIcon} {entry.quality || '—'}</td>
                     </tr>
                   {/each}
                 </tbody>

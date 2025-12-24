@@ -53,6 +53,5 @@
         {link.label}
       </a>
     {/each}
-    <a class="nav-link" href="/legacy/home.html" on:click={() => (menuOpen = false)}>Legacy</a>
   </div>
 </nav>

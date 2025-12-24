@@ -213,7 +213,6 @@
       <p class="text-xs text-slate-400">Transit and dual modes only.</p>
     </div>
     <div class="card-head-actions">
-      <span class="accent-badge">{cadenceLabel}</span>
       {#if entries.length}
         <span class="badge">{entries.length} stops</span>
       {/if}
