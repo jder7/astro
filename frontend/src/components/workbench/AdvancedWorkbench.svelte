@@ -7,7 +7,7 @@
   import { inputStore } from '$lib/state/inputStore';
   import { rangeStore } from '$lib/state/rangeStore';
   
-  import AdvStatusCard from '$components/advanced/AdvStatusCard.svelte';
+  import StatusCard from '$components/shared/StatusCard.svelte';
   import AdvSummaryCard from '$components/advanced/AdvSummaryCard.svelte';
   import AdvAspectsCard from '$components/advanced/AdvAspectsCard.svelte';
   import AdvRangeCard from '$components/advanced/AdvRangeCard.svelte';
@@ -86,7 +86,14 @@
   <div id="advanced-chart-inputs" class="grid lg:grid-cols-3 gap-6">
     <div class="space-y-4 min-w-0">
       <ChartForm on:submit={generateChart} />
-      <AdvStatusCard {status} {errorMessage} loading={loading} ready={Boolean(apiResponse)} />
+      <StatusCard
+        id="advanced-status"
+        label="Status"
+        statusText={status}
+        errorMessage={errorMessage}
+        loading={loading}
+        ready={Boolean(apiResponse)}
+      />
     </div>
 
     <div id="advanced-chart-results" class="lg:col-span-2 space-y-4 min-w-0">

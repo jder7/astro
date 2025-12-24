@@ -9,6 +9,7 @@
   import HomeSummaryCard from '$components/home/HomeSummaryCard.svelte';
   import HomeSvgCard from '$components/home/HomeSvgCard.svelte';
   import HomeReportCard from '$components/home/HomeReportCard.svelte';
+  import StatusCard from '$components/shared/StatusCard.svelte';
   import ChartForm from './ChartForm.svelte';
 
   const pageId = 'home';
@@ -67,20 +68,15 @@
   <div id="home-chart-inputs" class="grid lg:grid-cols-3 gap-6">
     <div class="space-y-4 min-w-0">
       <ChartForm on:submit={generateChart} />
-      <div class="flowbite-card flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p class="text-sm text-cyan-200/80 font-semibold">Status</p>
-          <p class="text-sm text-slate-200">{status || 'Idle'}</p>
-          {#if errorMessage}
-            <p class="text-sm text-rose-300">{errorMessage}</p>
-          {/if}
-        </div>
-        {#if loading}
-          <span class="badge">Working…</span>
-        {:else if svgMarkup}
-          <span class="badge">Ready</span>
-        {/if}
-      </div>
+      <StatusCard
+        id="home-status"
+        label="Status"
+        labelClass="text-sm text-cyan-200/80 font-semibold"
+        statusText={status}
+        errorMessage={errorMessage}
+        loading={loading}
+        ready={Boolean(svgMarkup)}
+      />
     </div>
 
     <div id="home-chart-results" class="lg:col-span-2 space-y-6 min-w-0">

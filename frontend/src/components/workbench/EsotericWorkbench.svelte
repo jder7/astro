@@ -1,11 +1,13 @@
 <script>
   import { get } from 'svelte/store';
-  import { buildSummary, classesForPoint } from '$lib/astro/summary';
+  import { buildSummary } from '$lib/astro/summary';
   import { requestChart, requestReport } from '$lib/api/client';
   import { buildChartPayload, buildReportPayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
+  import EsotericSummaryCard from '$components/esoteric/EsotericSummaryCard.svelte';
+  import StatusCard from '$components/shared/StatusCard.svelte';
   import ChartForm from './ChartForm.svelte';
 
   const pageId = 'esoteric';
@@ -80,67 +82,34 @@
 </script>
 
 <div class="page-shell pb-12" id="esoteric-workbench">
-  <div class="grid lg:grid-cols-3 gap-6">
-    <div class="space-y-4">
+  <div id="esoteric-chart-inputs" class="grid lg:grid-cols-3 gap-6">
+    <div class="space-y-4 min-w-0">
       <ChartForm on:submit={generateChart} />
+      <StatusCard
+        label="Status"
+        statusText={status}
+        errorMessage={errorMessage}
+        loading={loading}
+        ready={Boolean(svgMarkup)}
+        readyLabel="Chart ready"
+      />
     </div>
 
-    <div class="lg:col-span-2 space-y-4">
-      <div class="glass-card p-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p class="section-title text-xs">Status</p>
-          <p class="text-sm text-slate-200">{status || 'Idle'}</p>
-          {#if errorMessage}
-            <p class="text-sm text-rose-300">{errorMessage}</p>
-          {/if}
-        </div>
-        {#if loading}
-          <span class="badge">Working…</span>
-        {:else if svgMarkup}
-          <span class="badge">Chart ready</span>
-        {/if}
-      </div>
+    <div class="lg:col-span-2 space-y-4 min-w-0" id="esoteric-chart-results">
+      <EsotericSummaryCard {summary} />
 
-      {#if summary.sections && summary.sections.length}
-        {#each summary.sections as section}
-          <div class="glass-card p-4 space-y-3" id={`summary-section-${(section?.meta?.title || 'section').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
-            <div class="flex items-center justify-between flex-wrap gap-2">
-              <div>
-                <p class="section-title text-xs">{section.meta?.title}</p>
-                <p class="text-sm text-slate-300">
-                  {[section.meta?.datetime, section.meta?.tz].filter(Boolean).join(' • ') || '—'}
-                </p>
-                {#if section.meta?.location}
-                  <p class="text-xs text-slate-400">{section.meta.location}</p>
-                {/if}
-              </div>
-              <span class="badge">{section.points?.length || 0} points</span>
-            </div>
-
-            <div class="grid sm:grid-cols-2 gap-3">
-              {#each section.points || [] as point}
-                <div class="border border-slate-800 rounded-xl p-3 bg-slate-900/60">
-                  <div class="flex items-center justify-between">
-                    <p class="font-semibold">{point.label}</p>
-                    <span class={`text-xs ${classesForPoint(point)}`}>
-                      {point.emoji ? `${point.emoji} ` : ''}{point.element || ''}
-                    </span>
-                  </div>
-                  <p class="text-lg font-display">{point.sign} {point.degree}</p>
-                  <p class="text-xs text-slate-400">{point.quality || '—'} • {point.decan ? `Decan ${point.decan}` : 'No decan data'}</p>
-                </div>
-              {/each}
-            </div>
+      <div class="flowbite-card space-y-3">
+        <div class="card-head">
+          <div>
+            <p class="text-sm text-cyan-200/80 font-semibold">Reports</p>
+            <h2>Esoteric insights</h2>
           </div>
-        {/each}
-      {/if}
-
-      <div class="glass-card p-4 space-y-3">
-        <div class="flex items-center gap-3">
-          <button class="button-primary" type="button" on:click={generateReport} disabled={loading}>Generate report</button>
-          {#if report}
-            <span class="badge">Cached</span>
-          {/if}
+          <div class="card-head-actions">
+            <button class="button-primary" type="button" on:click={generateReport} disabled={loading}>Generate report</button>
+            {#if report}
+              <span class="badge">Cached</span>
+            {/if}
+          </div>
         </div>
         <p class="text-sm text-slate-400">Uses the same payload as the chart.</p>
       </div>
