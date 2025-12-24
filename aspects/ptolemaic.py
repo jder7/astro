@@ -392,7 +392,30 @@ class PtolemaicAspectCalculator:
                     structure={"cluster": tuple(sorted(unique_keys))},
                 )
             )
-        return matches
+        return self._dedupe_stellium_clusters(matches)
+
+    @staticmethod
+    def _dedupe_stellium_clusters(matches: list[PtolemaicAspect]) -> list[PtolemaicAspect]:
+        if not matches:
+            return []
+        retained: list[tuple[frozenset[str], PtolemaicAspect]] = []
+        for match in sorted(matches, key=lambda m: (-len(m.points), m.points)):
+            match_set = frozenset(match.points)
+            skip = False
+            replaced: list[tuple[frozenset[str], PtolemaicAspect]] = []
+            for existing_set, existing in retained:
+                if match_set.issubset(existing_set):
+                    skip = True
+                    break
+                if existing_set.issubset(match_set):
+                    replaced.append((existing_set, existing))
+            if skip:
+                continue
+            if replaced:
+                for entry in replaced:
+                    retained.remove(entry)
+            retained.append((match_set, match))
+        return [match for _, match in retained]
 
     def _match_t_square(self, keys: list[str], points: dict[str, dict], pair_map: dict) -> list[PtolemaicAspect]:
         matches: list[PtolemaicAspect] = []

@@ -103,11 +103,11 @@
     if (cadence === 'month') {
       toneSource = sunPoint;
       element = sunPoint?.element || 'Default';
-      sourceLabel = `Sun cadence (${signName(sunPoint?.sign) || '—'})`;
+      sourceLabel = `Sun (${signName(sunPoint?.sign) || '—'})`;
     } else if (cadence === 'hour') {
       toneSource = ascPoint;
       element = ascPoint?.element || 'Default';
-      sourceLabel = `Asc cadence (${signName(ascPoint?.sign) || '—'})`;
+      sourceLabel = `Asc (${signName(ascPoint?.sign) || '—'})`;
     } else {
       toneSource = dayPoint;
       element = dayPoint?.element || 'Default';
@@ -118,20 +118,37 @@
     return { tone, element, sourceLabel, dayKey, dayPoint, sunPoint, ascPoint, toneSource };
   };
 
-  const buildSigilProps = (points, dayKey, cadence) => {
-    const sunElement = pickPoint(points, 'sun')?.element || '';
-    const moonElement = pickPoint(points, 'moon')?.element || '';
-    const dayElement = dayKey ? pickPoint(points, dayKey)?.element || '' : '';
-    const ascElement = pickPoint(points, 'ascendant')?.element || '';
+  const resolveElement = (points, key, aliases = []) => {
+    const primary = pickPoint(points, key);
+    if (primary?.element) return primary.element;
+    for (const alias of aliases) {
+      const alt = pickPoint(points, alias);
+      if (alt?.element) return alt.element;
+    }
+    return '';
+  };
+
+  const buildSigilProps = (points, tone, cadence) => {
+    const dayKey = tone?.dayKey;
+    const sunElement = resolveElement(points, 'sun');
+    const moonElement = resolveElement(points, 'moon');
+    const dayElement = dayKey
+      ? resolveElement(points, dayKey) || tone?.dayPoint?.element || ''
+      : tone?.dayPoint?.element || '';
+    const dayRulerKey = dayKey || '';
 
     if (cadence === 'hour') {
-      return { sunElement, moonElement, dayElement, ascElement, dayRulerKey: dayKey || '' };
+      const ascElement =
+        resolveElement(points, 'ascendant', ['asc']) || tone?.ascPoint?.element || '';
+      return { sunElement, moonElement, dayElement, ascElement, dayRulerKey };
     }
+
     if (cadence === 'day') {
-      return { sunElement, moonElement, dayElement, ascElement: '', dayRulerKey: dayKey || '' };
+      return { sunElement, moonElement, dayElement, ascElement: '', dayRulerKey };
     }
-    // Month cadence: ignore ascendant and moon to highlight solar/day tone.
-    return { sunElement, moonElement: '', dayElement, ascElement: '', dayRulerKey: dayKey || '' };
+
+    // Month cadence: include sun + day only.
+    return { sunElement, moonElement: '', dayElement, ascElement: '', dayRulerKey };
   };
 
   const formatSnapshot = (snap, idx, cadence) => {
@@ -162,7 +179,7 @@
       tone,
       placements,
       aspects: buildAspectList(snap?.major_aspects || []),
-      sigil: buildSigilProps(points, tone.dayKey, cadence),
+      sigil: buildSigilProps(points, tone, cadence),
       countLabel: `Stop ${idx + 1}`,
     };
   };
@@ -184,7 +201,7 @@
     : 'Set start and end to see duration.';
   $: cadence = resolveCadence(rangeResult?.granularity || $rangeStore?.granularity);
   $: cadenceLabel =
-    cadence === 'month' ? 'Month cadence · Sun-led' : cadence === 'day' ? 'Day cadence · Day ruler' : 'Hour cadence · Asc tone';
+    cadence === 'month' ? 'Month · Sun-led' : cadence === 'day' ? 'Day · Day ruler' : 'Hour · Asc tone';
   $: entries = ordered.map((snap, idx) => formatSnapshot(snap, idx, cadence));
 </script>
 
@@ -236,10 +253,10 @@
                   <p class="range-time">{entry.time || '—'}</p>
                 </div>
                 <div class="range-badges">
+                  <span class="badge range-badge-label">{entry.tone.sourceLabel}</span>
                   <div class="range-sigil-head">
-                    <ElementSigil {...entry.sigil} size={64} compact className="range-sigil-figure" />
+                    <ElementSigil {...entry.sigil} size={50} compact className="range-sigil-figure" />
                   </div>
-                  <span class="badge">{entry.tone.sourceLabel}</span>
                 </div>
               </div>
 
@@ -356,11 +373,15 @@
   .range-card-head {
     position: relative;
     z-index: 1;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    display: grid;
     gap: 10px;
-    flex-wrap: wrap;
+  }
+
+  @media (min-width: 640px) {
+    .range-card-head {
+      grid-template-columns: 1fr auto;
+      align-items: start;
+    }
   }
 
   .range-kicker {
@@ -385,10 +406,12 @@
 
   .range-badges {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
     gap: 6px;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
+    align-self: flex-start;
   }
 
   .range-sigil-head {
@@ -399,6 +422,11 @@
     border-radius: 12px;
     background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--tone, #38bdf8) 10%, transparent), transparent 70%);
     border: 1px dashed color-mix(in srgb, var(--tone, #38bdf8) 35%, #0f172a);
+  }
+
+  .range-badge-label {
+    font-size: 10px;
+    padding: 2px 6px;
   }
 
   .range-card-body {

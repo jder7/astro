@@ -124,6 +124,24 @@ class TestPtolemaicPatterns(unittest.TestCase):
         ids = {m.configuration.id for m in matches}
         self.assertNotIn("stellium", ids)
 
+    def test_stellium_dedupes_nested_clusters(self):
+        subject = {
+            "p1": {"abs_pos": 0.0},
+            "p2": {"abs_pos": 5.0},
+            "p3": {"abs_pos": 10.0},
+            "p4": {"abs_pos": 15.0},
+            "p5": {"abs_pos": 100.0},
+            "p6": {"abs_pos": 110.0},
+            "p7": {"abs_pos": 120.0},
+            "active_points": ["p1", "p2", "p3", "p4", "p5", "p6", "p7"],
+        }
+        matches = compute_ptolemaic_patterns(subject, active_points=subject["active_points"])
+        stelliums = [m for m in matches if m.configuration.id == "stellium"]
+        sizes = sorted(len(m.points) for m in stelliums)
+        self.assertEqual(sizes, [3, 4])
+        sets = [set(m.points) for m in stelliums]
+        self.assertTrue(all(not a.issubset(b) for a in sets for b in sets if a != b))
+
     def test_t_square_boundary(self):
         subject = {
             "a": {"abs_pos": 0.0},
