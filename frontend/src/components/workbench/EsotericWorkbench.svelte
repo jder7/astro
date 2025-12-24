@@ -1,7 +1,7 @@
 <script>
   import { get } from 'svelte/store';
   import { buildSummary } from '$lib/astro/summary';
-  import { requestChart, requestReport } from '$lib/api/client';
+  import { requestChartData, requestReport } from '$lib/api/client';
   import { buildChartPayload, buildReportPayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
@@ -15,7 +15,6 @@
 
   let status = '';
   let errorMessage = '';
-  let svgMarkup = '';
   let apiResponse = null;
   let summary = emptySummary;
   let report = null;
@@ -29,14 +28,12 @@
     const cfg = { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
     const { birthParts, transitParts } = buildChartPayload(activeMode, state, cfg);
 
-    svgMarkup = chartCache.svg || '';
     apiResponse = chartCache.response || null;
     summary =
       chartCache.summary ||
       (chartCache.response ? buildSummary(activeMode, chartCache.response, birthParts, transitParts) : emptySummary);
     report = (cached.report && cached.report.report) || cached.report || report;
   } else {
-    svgMarkup = '';
     apiResponse = null;
     summary = emptySummary;
     report = null;
@@ -50,11 +47,10 @@
     const cfg = { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
     const { payload, birthParts, transitParts } = buildChartPayload(state.mode, state, cfg);
     try {
-      const { json, svg } = await requestChart(state.mode, payload);
+      const json = await requestChartData(state.mode, payload);
       apiResponse = json;
-      svgMarkup = svg;
       summary = buildSummary(state.mode, json, birthParts, transitParts);
-      setCacheEntry(pageId, state.mode, 'chart', { svg, response: json, summary });
+      setCacheEntry(pageId, state.mode, 'chart', { response: json, summary });
       status = 'Chart generated successfully.';
     } catch (err) {
       errorMessage = err?.message || 'Failed to generate chart.';
@@ -90,7 +86,7 @@
         statusText={status}
         errorMessage={errorMessage}
         loading={loading}
-        ready={Boolean(svgMarkup)}
+        ready={Boolean(apiResponse)}
         readyLabel="Chart ready"
       />
     </div>

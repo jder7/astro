@@ -54,7 +54,7 @@ async function postPdf(path, payload) {
   return res.blob();
 }
 
-export async function requestChart(mode, payload) {
+export async function requestChartDataAndSvg(mode, payload) {
   if (mode === 'natal') {
     const [json, svg] = await Promise.all([
       postJson('/api/natal', payload),
@@ -84,6 +84,22 @@ export async function requestChart(mode, payload) {
     postSvg('/api/svg/synastry', { ...payload, grid_view: false }),
   ]);
   return { json, svg };
+}
+
+export async function requestChartData(mode, payload) {
+  if (mode === 'natal') {
+    return postJson('/api/natal', payload);
+  }
+
+  if (mode === 'transit') {
+    return postJson('/api/transit', payload);
+  }
+
+  if (mode === 'natal_transit') {
+    return postJson('/api/transit', payload);
+  }
+
+  return postJson('/api/relationship', payload);
 }
 
 export async function requestReport(payload) {

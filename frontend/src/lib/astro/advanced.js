@@ -142,6 +142,13 @@ export const simplifyAspect = (entry, ownerLabel = '') => {
   return { name, left: taggedLeft, right: taggedRight, orb, leftRef: left, rightRef: right, movement: entry.aspect_movement || entry.movement || '' };
 };
 
+const pickArray = (...values) => {
+  for (const val of values) {
+    if (Array.isArray(val)) return val;
+  }
+  return [];
+};
+
 export function extractAspects(payload) {
   const source = payload?.snapshot || payload || {};
   const primaryName =
@@ -159,10 +166,30 @@ export function extractAspects(payload) {
 
   const aspectsRaw = source.aspects || payload?.aspects || [];
   const natalAspectsRaw = source.natal_aspects || payload?.natal_aspects || [];
-  const majorAspects = Array.isArray(source.major_aspects) ? source.major_aspects : payload?.major_aspects || [];
-  const natalMajorAspects = Array.isArray(source.natal_major_aspects)
-    ? source.natal_major_aspects
-    : payload?.natal_major_aspects || [];
+  const majorAspects = pickArray(
+    source.major_aspects,
+    source.majorAspects,
+    source.subject?.major_aspects,
+    source.subject?.majorAspects,
+    payload?.major_aspects,
+    payload?.majorAspects,
+    payload?.subject?.major_aspects,
+    payload?.subject?.majorAspects,
+    payload?.snapshot?.subject?.major_aspects,
+    payload?.snapshot?.subject?.majorAspects
+  );
+  const natalMajorAspects = pickArray(
+    source.natal_major_aspects,
+    source.natalMajorAspects,
+    source.natal_subject?.major_aspects,
+    source.natal_subject?.majorAspects,
+    payload?.natal_major_aspects,
+    payload?.natalMajorAspects,
+    payload?.natal_subject?.major_aspects,
+    payload?.natal_subject?.majorAspects,
+    payload?.snapshot?.natal_subject?.major_aspects,
+    payload?.snapshot?.natal_subject?.majorAspects
+  );
 
   const subject1Data = source.subject || payload?.subject || payload?.snapshot?.subject || payload?.first_subject || {};
   const subject2Data = source.natal_subject || payload?.natal_subject || payload?.second_subject || {};
@@ -240,15 +267,17 @@ export function extractAspects(payload) {
     .filter(Boolean);
 
   return {
+    majorAspects,
+    natalMajorAspects,
     subject1: {
       name: primaryName,
       aspects: subject1Aspects,
-      majorAspects: Array.isArray(majorAspects) ? majorAspects : [],
+      majorAspects,
     },
     subject2: {
       name: secondaryName,
       aspects: subject2Aspects,
-      majorAspects: Array.isArray(natalMajorAspects) ? natalMajorAspects : [],
+      majorAspects: natalMajorAspects,
     },
     synastry: {
       aspects: synastryAspects,

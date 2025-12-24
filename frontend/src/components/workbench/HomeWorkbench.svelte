@@ -1,6 +1,6 @@
 <script>
   import { get } from 'svelte/store';
-  import { requestChart, requestChartPdf } from '$lib/api/client';
+  import { requestChartDataAndSvg, requestChartPdf } from '$lib/api/client';
   import { buildChartPayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
@@ -49,7 +49,7 @@
     const cfg = get(configStore);
     const { payload } = buildChartPayload(state.mode, state, cfg);
     try {
-      const { json, svg } = await requestChart(state.mode, payload);
+      const { json, svg } = await requestChartDataAndSvg(state.mode, payload);
       apiResponse = json;
       svgMarkup = svg;
       setCacheEntry(pageId, state.mode, 'chart', { svg, response: json });

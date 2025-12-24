@@ -1,6 +1,6 @@
 <script>
   import { get } from 'svelte/store';
-  import { requestChart, requestTransitRange } from '$lib/api/client';
+  import { requestChartData, requestTransitRange } from '$lib/api/client';
   import { buildChartPayload, buildRangePayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
@@ -21,7 +21,6 @@
 
   let status = '';
   let errorMessage = '';
-  let svgMarkup = '';
   let apiResponse = null;
   let rangeResult = null;
   let loading = false;
@@ -32,10 +31,8 @@
   $: if (cached) {
     const chartCache = cached.chart || {};
 
-    svgMarkup = chartCache.svg || '';
     apiResponse = chartCache.response || null;
   } else {
-    svgMarkup = '';
     apiResponse = null;
   }
 
@@ -47,10 +44,9 @@
     const cfg = { ...get(configStore), asc_moon_sun_range_enabled: true, include_aspects: true };
     const { payload } = buildChartPayload(state.mode, state, cfg);
     try {
-      const { json, svg } = await requestChart(state.mode, payload);
+      const json = await requestChartData(state.mode, payload);
       apiResponse = json;
-      svgMarkup = svg;
-      setCacheEntry(pageId, state.mode, 'chart', { svg, response: json });
+      setCacheEntry(pageId, state.mode, 'chart', { response: json });
       status = 'Chart generated successfully.';
     } catch (err) {
       errorMessage = err?.message || 'Failed to generate chart.';
