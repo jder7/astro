@@ -147,7 +147,7 @@
   });
 </script>
 
-<div class="flowbite-card space-y-4" id="esoteric-summary-card">
+<div class="flowbite-card space-y-4" id="esoteric-summary-card" tabindex="-1">
   <div class="card-head">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Summary</p>

@@ -21,6 +21,7 @@
   let summary = emptySummary;
   let report = null;
   let loading = false;
+  let chartResultKey = 0;
 
   $: activeMode = $inputStore.mode;
   $: cached = $cacheStore.byPage?.[pageId]?.byMode?.[activeMode];
@@ -55,6 +56,7 @@
       setCacheEntry(pageId, state.mode, 'chart', { response: json, summary });
       await tick();
       animateCards();
+      chartResultKey += 1;
       status = 'Chart generated successfully.';
     } catch (err) {
       errorMessage = err?.message || 'Failed to generate chart.';
@@ -84,8 +86,14 @@
 <div class="page-shell pb-12" id="esoteric-workbench">
   <div id="esoteric-chart-inputs" class="grid lg:grid-cols-3 gap-6">
     <div class="space-y-4 min-w-0">
-      <ChartForm on:submit={generateChart} />
+      <ChartForm
+        on:submit={generateChart}
+        resultsReady={Boolean(apiResponse)}
+        resultKey={chartResultKey}
+        focusTargetId="esoteric-status"
+      />
       <StatusCard
+        id="esoteric-status"
         label="Status"
         statusText={status}
         errorMessage={errorMessage}

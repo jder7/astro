@@ -52,7 +52,7 @@
   $: console.info('[summary] card computed', computedSummary);
 </script>
 
-<div class="flowbite-card space-y-4" id="summary-card">
+<div class="flowbite-card space-y-4" id="summary-card" tabindex="-1">
   <div class="card-head">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Summary</p>

@@ -12,7 +12,7 @@
   export let readyLabel = 'Ready';
 </script>
 
-<div id={id || undefined} class="flowbite-card space-y-3">
+<div id={id || undefined} class="flowbite-card space-y-3" tabindex="-1">
   <div class="card-head">
     <div>
       <p class={labelClass}>{label}</p>

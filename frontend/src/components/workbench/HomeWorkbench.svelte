@@ -23,6 +23,7 @@
   let cachedSummary = null;
   let cachedReport = null;
   let loading = false;
+  let chartResultKey = 0;
 
   $: activeMode = $inputStore.mode;
   $: cached = $cacheStore.byPage?.[pageId]?.byMode?.[activeMode];
@@ -57,6 +58,7 @@
       setCacheEntry(pageId, state.mode, 'chart', { svg, response: json });
       await tick();
       animateCards();
+      chartResultKey += 1;
       status = 'Chart generated successfully.';
     } catch (err) {
       errorMessage = err?.message || 'Failed to generate chart.';
@@ -71,7 +73,12 @@
 <div class="page-shell pb-12" id="home-workbench">
   <div id="home-chart-inputs" class="grid lg:grid-cols-3 gap-6">
     <div class="space-y-4 min-w-0">
-      <ChartForm on:submit={generateChart} />
+      <ChartForm
+        on:submit={generateChart}
+        resultsReady={Boolean(apiResponse)}
+        resultKey={chartResultKey}
+        focusTargetId="home-status"
+      />
       <StatusCard
         id="home-status"
         label="Status"

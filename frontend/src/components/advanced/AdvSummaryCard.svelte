@@ -337,7 +337,7 @@
   })();
 </script>
 
-<div class="flowbite-card space-y-4">
+<div class="flowbite-card space-y-4" id="advanced-summary-card" tabindex="-1">
   <div class="card-head">
     <div>
       <p class="text-sm text-cyan-200/80 font-semibold">Overview</p>
