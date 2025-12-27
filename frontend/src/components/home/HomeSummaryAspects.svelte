@@ -82,10 +82,7 @@
 
     const filtered = enriched.filter(Boolean);
 
-    filtered.sort((a, b) => {
-      if (a.involvesSun !== b.involvesSun) return a.involvesSun ? -1 : 1;
-      return a.orbVal - b.orbVal;
-    });
+    filtered.sort((a, b) => a.orbVal - b.orbVal);
 
     return filtered.slice(0, 7);
   })();

@@ -58,7 +58,7 @@ function extractPoints(subject) {
     .filter(Boolean);
 }
 
-function buildMeta(subject, fallbackLabel) {
+function buildMeta(subject, fallbackLabel, contextKey = '') {
   const date = subject?.iso_formatted_local_datetime || subject?.iso_formatted_utc_datetime;
   const tz = subject?.tz_str;
   const location = [subject?.city, subject?.nation].filter(Boolean).join(', ');
@@ -67,6 +67,7 @@ function buildMeta(subject, fallbackLabel) {
     datetime: date || '',
     tz,
     location,
+    contextKey,
   };
 }
 
@@ -167,26 +168,26 @@ export function buildSummary(mode, response, birthParts, transitParts) {
   let secondParts = null;
 
   if (mode === 'natal' && response?.subject) {
-    sections.push({ meta: buildMeta(response.subject, 'Natal'), points: extractPoints(response.subject) });
+    sections.push({ meta: buildMeta(response.subject, 'Natal', 'birth'), points: extractPoints(response.subject) });
     rawAspects = normalizeAspectsArray(response.aspects);
     aspects = rawAspects.map(simplifyAspect).filter(Boolean);
   } else if ((mode === 'transit' || mode === 'natal_transit') && response?.snapshot) {
     const snap = response.snapshot;
     if (snap.subject) {
-      sections.push({ meta: buildMeta(snap.subject, 'Transit sky'), points: extractPoints(snap.subject) });
+      sections.push({ meta: buildMeta(snap.subject, 'Transit sky', 'transit'), points: extractPoints(snap.subject) });
     }
     if (snap.natal_subject) {
-      sections.push({ meta: buildMeta(snap.natal_subject, 'Natal'), points: extractPoints(snap.natal_subject) });
+      sections.push({ meta: buildMeta(snap.natal_subject, 'Natal', 'birth'), points: extractPoints(snap.natal_subject) });
     }
     rawAspects = normalizeAspectsArray(snap.aspects);
     aspects = rawAspects.map(simplifyAspect).filter(Boolean);
   } else if (mode === 'relationship' && response) {
     if (response.first_subject) {
-      sections.push({ meta: buildMeta(response.first_subject, 'Partner A'), points: extractPoints(response.first_subject) });
+      sections.push({ meta: buildMeta(response.first_subject, 'Partner A', 'first'), points: extractPoints(response.first_subject) });
       firstParts = parsePartsFromSubject(response.first_subject);
     }
     if (response.second_subject) {
-      sections.push({ meta: buildMeta(response.second_subject, 'Partner B'), points: extractPoints(response.second_subject) });
+      sections.push({ meta: buildMeta(response.second_subject, 'Partner B', 'second'), points: extractPoints(response.second_subject) });
       secondParts = parsePartsFromSubject(response.second_subject);
     }
     rawAspects = normalizeRelationshipAspects(response);

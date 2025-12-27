@@ -95,7 +95,7 @@
       />
     </div>
 
-    <div class="lg:col-span-2 space-y-4 min-w-0" id="esoteric-chart-results">
+    <div class="lg:col-span-2 space-y-6 min-w-0" id="esoteric-chart-results">
       <EsotericSummaryCard {summary} />
 
       <div class="flowbite-card space-y-3">
