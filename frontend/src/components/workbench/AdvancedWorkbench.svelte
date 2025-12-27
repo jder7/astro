@@ -1,11 +1,13 @@
 <script>
   import { get } from 'svelte/store';
+  import { tick } from 'svelte';
   import { requestChartData, requestTransitRange } from '$lib/api/client';
   import { buildChartPayload, buildRangePayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
   import { rangeStore } from '$lib/state/rangeStore';
+  import { animateCards } from '$lib/animations/pageTransitions';
   
   import StatusCard from '$components/shared/StatusCard.svelte';
   import AdvSummaryCard from '$components/advanced/AdvSummaryCard.svelte';
@@ -47,6 +49,8 @@
       const json = await requestChartData(state.mode, payload);
       apiResponse = json;
       setCacheEntry(pageId, state.mode, 'chart', { response: json });
+      await tick();
+      animateCards();
       status = 'Chart generated successfully.';
     } catch (err) {
       errorMessage = err?.message || 'Failed to generate chart.';

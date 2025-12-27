@@ -1,8 +1,9 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
   import SubjectFields from '../forms/SubjectFields.svelte';
   import ConfigPanel from './ConfigPanel.svelte';
   import { inputStore, resetInputs, setMode, updateBirth, updateRelationship, updateTransit } from '$lib/state/inputStore';
+  import { animateCards } from '$lib/animations/pageTransitions';
 
   const dispatch = createEventDispatcher();
   const modes = [
@@ -33,6 +34,12 @@
     if (window.confirm('Reset inputs? This will clear all fields.')) {
       resetInputs();
     }
+  }
+
+  async function handleModeChange(nextMode) {
+    setMode(nextMode);
+    await tick();
+    animateCards();
   }
 
   function submit(event) {
@@ -86,7 +93,7 @@
         <button
           type="button"
           class={`mode-pill ${state.mode === mode.key ? 'active' : ''}`}
-          on:click={() => setMode(mode.key)}
+          on:click={() => handleModeChange(mode.key)}
           aria-label={mode.label}
           aria-pressed={state.mode === mode.key}
         >

@@ -1,5 +1,6 @@
 <script>
   import { get } from 'svelte/store';
+  import { tick } from 'svelte';
   import { buildSummary } from '$lib/astro/summary';
   import { requestChartData, requestReport } from '$lib/api/client';
   import { buildChartPayload, buildReportPayload } from '$lib/payloads';
@@ -7,6 +8,7 @@
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
   import EsotericSummaryCard from '$components/esoteric/EsotericSummaryCard.svelte';
+  import { animateCards } from '$lib/animations/pageTransitions';
   import StatusCard from '$components/shared/StatusCard.svelte';
   import ChartForm from './ChartForm.svelte';
 
@@ -51,6 +53,8 @@
       apiResponse = json;
       summary = buildSummary(state.mode, json, birthParts, transitParts);
       setCacheEntry(pageId, state.mode, 'chart', { response: json, summary });
+      await tick();
+      animateCards();
       status = 'Chart generated successfully.';
     } catch (err) {
       errorMessage = err?.message || 'Failed to generate chart.';

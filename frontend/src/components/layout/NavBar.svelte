@@ -1,5 +1,6 @@
 <script>
   export let active = 'home';
+  export let onNavigate = null;
   let menuOpen = false;
 
   const isDev = import.meta.env.DEV;
@@ -48,7 +49,12 @@
         class={`nav-link ${active === link.key ? 'active' : ''}`}
         href={link.href}
         aria-current={active === link.key ? 'page' : undefined}
-        on:click={() => (menuOpen = false)}
+        on:click={(event) => {
+          menuOpen = false;
+          if (typeof onNavigate === 'function') {
+            onNavigate(event, link.href);
+          }
+        }}
       >
         {link.label}
       </a>

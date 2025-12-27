@@ -1,11 +1,13 @@
 <script>
   import { get } from 'svelte/store';
+  import { tick } from 'svelte';
   import { requestChartDataAndSvg, requestChartPdf } from '$lib/api/client';
   import { buildChartPayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
   import { downloadBlob } from '$lib/utils/download';
+  import { animateCards } from '$lib/animations/pageTransitions';
   import HomeSummaryCard from '$components/home/HomeSummaryCard.svelte';
   import HomeSvgCard from '$components/home/HomeSvgCard.svelte';
   import HomeReportCard from '$components/home/HomeReportCard.svelte';
@@ -53,6 +55,8 @@
       apiResponse = json;
       svgMarkup = svg;
       setCacheEntry(pageId, state.mode, 'chart', { svg, response: json });
+      await tick();
+      animateCards();
       status = 'Chart generated successfully.';
     } catch (err) {
       errorMessage = err?.message || 'Failed to generate chart.';
