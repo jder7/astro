@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowJs": true,
+    "checkJs": false,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["svelte"],
+    "baseUrl": "./",
+    "paths": {
+      "$lib/*": ["src/lib/*"],
+      "$components/*": ["src/components/*"],
+      "$routes/*": ["src/routes/*"]
+    }
+  },
+  "include": ["src/**/*", "index.html", "advanced.html", "esoteric.html"],
+  "exclude": ["node_modules", "dist"]
+}

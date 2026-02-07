@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>401 · Access Required</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #0b1218;
+        --bg-soft: #121a22;
+        --accent: #ffb347;
+        --accent-2: #ff7a18;
+        --text: #f7f5f2;
+        --muted: #b7b0a6;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, rgba(255, 179, 71, 0.28), transparent 50%),
+          radial-gradient(circle at 20% 80%, rgba(255, 122, 24, 0.3), transparent 45%),
+          var(--bg);
+        color: var(--text);
+        font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+        display: grid;
+        place-items: center;
+        padding: 32px 20px;
+      }
+      .card {
+        width: min(720px, 100%);
+        background: linear-gradient(140deg, rgba(18, 26, 34, 0.92), rgba(14, 20, 28, 0.96));
+        border: 1px solid rgba(255, 179, 71, 0.35);
+        border-radius: 24px;
+        padding: 36px;
+        box-shadow: 0 18px 45px rgba(6, 10, 14, 0.45);
+        position: relative;
+        overflow: hidden;
+      }
+      .halo {
+        position: absolute;
+        inset: -40% auto auto -10%;
+        width: 280px;
+        height: 280px;
+        background: radial-gradient(circle, rgba(255, 179, 71, 0.25), transparent 65%);
+        opacity: 0.7;
+      }
+      h1 {
+        font-size: clamp(2.4rem, 6vw, 4.8rem);
+        margin: 0 0 8px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .subtitle {
+        font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+        color: var(--muted);
+        margin: 0 0 24px;
+      }
+      .code {
+        font-size: 6rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin: 0 0 12px;
+        text-shadow: 0 6px 18px rgba(255, 122, 24, 0.35);
+      }
+      .actions {
+        margin-top: 24px;
+        display: grid;
+        gap: 12px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 179, 71, 0.12);
+        border: 1px solid rgba(255, 179, 71, 0.4);
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-size: 0.95rem;
+        color: var(--text);
+      }
+      .email-slot {
+        font-weight: 600;
+        color: var(--accent);
+        letter-spacing: 0.02em;
+      }
+      .reveal-button {
+        appearance: none;
+        border: 1px solid rgba(255, 179, 71, 0.5);
+        background: rgba(255, 179, 71, 0.08);
+        color: var(--text);
+        font: inherit;
+        padding: 6px 12px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+      .reveal-button:hover {
+        border-color: rgba(255, 179, 71, 0.85);
+        transform: translateY(-1px);
+      }
+      @media (max-width: 560px) {
+        .card {
+          padding: 28px 22px;
+        }
+        .code {
+          font-size: 4.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="halo" aria-hidden="true"></div>
+      <p class="code">401</p>
+      <h1>Access Required</h1>
+      <p class="subtitle">This space is protected. Please authenticate to continue.</p>
+      <div class="actions">
+        <div class="pill">
+          <span>Need access?</span>
+          <span class="email-slot" data-email></span>
+          <button class="reveal-button" type="button" data-reveal>Reveal</button>
+        </div>
+        <div class="pill">
+          <span>Tip:</span>
+          <span>Use your issued credentials or request access.</span>
+        </div>
+      </div>
+    </main>
+    <script>
+      (() => {
+        const emailTarget = document.querySelector('[data-email]');
+        const revealButton = document.querySelector('[data-reveal]');
+        if (!emailTarget || !revealButton) return;
+        const parts = [
+          106, 100, 101, 114, 46, 98, 114, 111, 116, 104, 101, 114, 115, 46, 116, 109,
+          64, 103, 109, 97, 105, 108, 46, 99, 111, 109,
+        ];
+        const email = parts.map((code) => String.fromCharCode(code)).join('');
+        emailTarget.textContent = 'Contact available';
+        revealButton.addEventListener('click', () => {
+          emailTarget.textContent = email;
+          revealButton.disabled = true;
+          revealButton.textContent = 'Shown';
+        });
+      })();
+    </script>
+  </body>
+</html>

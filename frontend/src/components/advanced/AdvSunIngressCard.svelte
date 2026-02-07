@@ -1,0 +1,100 @@
+<script>
+  import { formatDateLabel, toDate } from '$lib/astro/format';
+  import { extractPointRanges } from '$lib/astro/advanced';
+  import { ELEMENT_HEX, ELEMENT_ICON, QUALITY_ICON, signName, signSymbol } from '$lib/astro/signs';
+  import CardHeader from '$components/shared/CardHeader.svelte';
+
+  export let response = null;
+  export let onRequestTimeRangeSweeps = null;
+  export let loading = false;
+  let collapsed = true;
+
+  const mapEntry = (entry) => ({
+    start: formatDateLabel(entry.start || entry.timestamp),
+    end: formatDateLabel(entry.end),
+    sign: signName(entry.sign),
+    signIcon: signSymbol(entry.sign),
+    element: entry.element || '',
+    elementIcon: ELEMENT_ICON[entry.element] || '',
+    elementStyle: `color: ${ELEMENT_HEX[entry.element] || ELEMENT_HEX.Default};`,
+    quality: entry.quality || '',
+    qualityIcon: QUALITY_ICON[entry.quality] || '',
+  });
+
+  $: ranges = extractPointRanges(response, 'sun') || [];
+
+  $: if (!collapsed && response && onRequestTimeRangeSweeps && !ranges.length) {
+    onRequestTimeRangeSweeps('sun');
+  }
+</script>
+
+<div class="flowbite-card space-y-4">
+  <div class="card-head card-head-inline">
+    <div>
+      <p class="text-sm text-cyan-200/80 font-semibold">Sun</p>
+      <h2>Ingresses</h2>
+    </div>
+    <div class="card-head-actions">
+      <button
+        type="button"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-800 bg-slate-900/70 text-slate-200 hover:border-cyan-400 hover:text-white transition"
+        on:click={() => (collapsed = !collapsed)}
+        aria-expanded={!collapsed}
+        aria-controls="adv-sun-ingress-panel"
+        aria-label={collapsed ? 'Expand sun ingress panel' : 'Collapse sun ingress panel'}
+      >
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d={collapsed ? 'M6 9l6 6 6-6' : 'M18 15l-6-6-6 6'} />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  {#if !collapsed}
+    <div id="adv-sun-ingress-panel" class="space-y-4">
+      {#if !response}
+        <p class="text-sm text-slate-400">Generate a chart to see the Sun's upcoming sign changes.</p>
+      {:else if !ranges.length}
+        <p class="text-sm text-slate-400">{loading ? 'Loading sun ingress range...' : 'Range data not loaded yet.'}</p>
+      {:else}
+            {#each ranges as range}
+          <div class="space-y-2">
+            <CardHeader
+              label={range.label || range.id || 'Solar track'}
+              value={`Anchor: ${formatDateLabel(range.anchor) || formatDateLabel(toDate(range.entries?.[0]?.start))}`}
+              badge={`${(range.entries || []).length} stops`}
+            />
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="text-slate-400">
+                  <tr>
+                    <th class="py-2 pr-3 text-left">Start</th>
+                    <th class="py-2 pr-3 text-left">End</th>
+                    <th class="py-2 pr-3 text-left">Sign</th>
+                    <th class="py-2 pr-3 text-left">Element</th>
+                    <th class="py-2 pr-3 text-left">Quality</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                  {#each (range.entries || []).map(mapEntry) as entry}
+                    <tr>
+                      <td class="py-2 pr-3">{entry.start || '—'}</td>
+                      <td class="py-2 pr-3">{entry.end || '—'}</td>
+                      <td class="py-2 pr-3">{entry.sign} {entry.signIcon}</td>
+                      <td class="py-2 pr-3">
+                        <span style={entry.elementStyle}>
+                          {entry.elementIcon} {entry.element || '—'}
+                        </span>
+                      </td>
+                      <td class="py-2 pr-3">{entry.qualityIcon} {entry.quality || '—'}</td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {/each}
+      {/if}
+    </div>
+  {/if}
+</div>

@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+*.patch
+_inspiration/
+specs/
+frontend/node_modules/
+frontend/dist/
+roadmap.txt
+secrets/
