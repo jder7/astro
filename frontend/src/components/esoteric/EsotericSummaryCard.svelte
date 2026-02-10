@@ -1,5 +1,8 @@
 <script>
   import ElementSigil from '$components/shared/ElementSigil.svelte';
+  import ShareLinkButton from '$components/shared/ShareLinkButton.svelte';
+  import { inputStore } from '$lib/state/inputStore';
+  import { formatNameWithGender } from '$lib/utils/gender';
   import { DAY_RULERS, ELEMENT_ICON, QUALITY_ICON, POINT_SYMBOLS, signName, signSymbol } from '$lib/astro/signs';
   import { DECAN_META, ELEMENT_PLANE_NUMBERS, QUALITY_MAP } from '$lib/astro/esotericMeta';
   import { formatOrdinal, ucfirst } from '$lib/astro/format';
@@ -61,6 +64,16 @@
     if (title.includes('partner a')) return summary.context?.firstParts || null;
     if (title.includes('partner b')) return summary.context?.secondParts || null;
     return null;
+  };
+
+  $: inputState = $inputStore;
+
+  const resolveGenderForSection = (section) => {
+    const key = section?.meta?.contextKey;
+    if (key === 'birth') return inputState?.birth?.gender || '';
+    if (key === 'first') return inputState?.relationship?.first?.gender || '';
+    if (key === 'second') return inputState?.relationship?.second?.gender || '';
+    return '';
   };
 
   const getDayRulerKey = (parts) => {
@@ -139,6 +152,8 @@
     const dayKey = getDayRulerKey(parts);
     const pointMap = buildPointMap(section.points || []);
     const dayPoint = dayKey ? pointMap.get(dayKey) : null;
+    const title = section?.meta?.title || 'Chart';
+    const gender = resolveGenderForSection(section);
     const sigil = {
       sunElement: pointMap.get('sun')?.element || '',
       moonElement: pointMap.get('moon')?.element || '',
@@ -152,7 +167,7 @@
     };
     return {
       id: `eso-summary-${slugify(section?.meta?.title)}`,
-      title: section?.meta?.title || 'Chart',
+      title: formatNameWithGender(title, gender) || title,
       dateLabel: formatDateLabel(parts, section?.meta?.datetime),
       dayLabel: dayKey ? ucfirst(dayKey) : '--',
       rows: buildRows(pointMap, dayKey),
@@ -169,6 +184,7 @@
     </div>
     <div class="card-head-actions">
       <span class="badge">{summary.sections?.length || 0} sections</span>
+      <ShareLinkButton label="Share" />
     </div>
   </div>
 

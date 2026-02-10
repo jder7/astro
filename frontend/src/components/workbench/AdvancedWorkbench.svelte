@@ -1,13 +1,17 @@
 <script>
   import { get } from 'svelte/store';
-  import { tick } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { requestChartData, requestTimeRangeSweeps, requestTransitRange } from '$lib/api/client';
   import { buildChartPayload, buildRangePayload, buildTimeRangeSweepsRequest } from '$lib/payloads';
   import { extractPointSignRanges } from '$lib/astro/advanced';
+  import { toDate } from '$lib/astro/date';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
-  import { inputStore } from '$lib/state/inputStore';
+  import { inputStore, updateTransitWithNavigation } from '$lib/state/inputStore';
   import { rangeStore } from '$lib/state/rangeStore';
+  import { saveHistoryForState } from '$lib/state/subjectHistoryStore';
+  import { applyShareParamsFromUrl, clearShareParams, hasShareParams } from '$lib/utils/shareParams';
+  import { showToast } from '$lib/state/toastStore';
   import { animateCards } from '$lib/animations/pageTransitions';
 
   import StatusCard from '$components/shared/StatusCard.svelte';
@@ -142,7 +146,9 @@
     status = '';
     errorMessage = '';
     loading = true;
+    clearShareParams();
     const state = get(inputStore);
+    saveHistoryForState(state);
     const cfg = { ...get(configStore), asc_moon_sun_range_enabled: false, include_aspects: true };
     timeRangeSweepsResponse = null;
     timeRangeSweepsLoading = { ascendant: false, moon: false, sun: false };
@@ -184,6 +190,37 @@
       rangeLoading = false;
     }
   }
+
+  const handleNavigateRangeEntry = async (entry) => {
+    const targetDate = toDate(entry?.timestamp);
+    if (!targetDate) return;
+    const patch = {
+      year: targetDate.getFullYear(),
+      month: targetDate.getMonth() + 1,
+      day: targetDate.getDate(),
+      hour: targetDate.getHours(),
+      minute: targetDate.getMinutes(),
+    };
+    if (entry?.subject) {
+      if (Number.isFinite(Number(entry.subject.lat))) patch.lat = entry.subject.lat;
+      if (Number.isFinite(Number(entry.subject.lng))) patch.lng = entry.subject.lng;
+      if (entry.subject.tz_str) patch.tz_str = entry.subject.tz_str;
+      if (entry.subject.city) patch.city = entry.subject.city;
+      if (entry.subject.nation) patch.nation = entry.subject.nation;
+    }
+    updateTransitWithNavigation(patch, { push: true });
+    await tick();
+    await generateChart();
+  };
+
+  onMount(async () => {
+    if (!hasShareParams()) return;
+    const { applied } = applyShareParamsFromUrl();
+    if (!applied) return;
+    await tick();
+    await generateChart();
+    showToast('Loaded shared inputs and generated.');
+  });
 </script>
 
 <div class="page-shell pb-12" id="advanced-workbench">
@@ -242,7 +279,13 @@
       <AdvAspectsCard response={responseWithTimeRangeSweeps} mode={activeMode} />
 
       {#if activeMode !== 'relationship'}
-        <AdvRangeCard rangeResult={rangeResult} mode={activeMode} onRange={runRange} loading={rangeLoading} />
+        <AdvRangeCard
+          rangeResult={rangeResult}
+          mode={activeMode}
+          onRange={runRange}
+          onNavigate={handleNavigateRangeEntry}
+          loading={rangeLoading}
+        />
       {/if}
     </div>
   </div>

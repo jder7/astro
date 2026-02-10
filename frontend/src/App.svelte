@@ -7,6 +7,7 @@
   import HomePage from '$routes/HomePage.svelte';
   import { getTheme } from '$lib/theme';
   import { animatePageIn, animatePageOut } from '$lib/animations/pageTransitions';
+  import Toast from '$components/shared/Toast.svelte';
 
   export let page = 'home';
   const routes = { home: HomePage, advanced: AdvancedPage, esoteric: EsotericPage, education: EducationPage };
@@ -54,6 +55,7 @@
   <main class="flex-1">
     <svelte:component this={Current} />
   </main>
+  <Toast />
   <footer class="page-shell pb-10 text-sm text-slate-500">
           <span>Astro App</span>
           <span>— powered by</span>

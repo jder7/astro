@@ -6,6 +6,8 @@
   import { configStore } from '$lib/state/configStore';
   import { normalizePointKey } from '$lib/astro/pointRays';
   import { EsotericRaySpectrumUtils } from '$lib/astro/esotericRaySpectrumUtils';
+  import { inputStore } from '$lib/state/inputStore';
+  import { formatNameWithGender } from '$lib/utils/gender';
 
   export let debug = true;
 
@@ -128,6 +130,13 @@
   $: filteredSecondaryPoints = filterPointsByActive(secondaryPoints.points, activeSet);
   $: activePointKeys = Object.keys(filteredPrimaryPoints || {}).map(normalizePointKey);
   $: isMultiMode = Boolean(subjects.natal) && (mode === 'natal_transit' || mode === 'relationship');
+  $: inputState = $inputStore;
+  $: primaryGender =
+    mode === 'relationship' ? inputState?.relationship?.first?.gender : mode === 'natal' ? inputState?.birth?.gender : '';
+  $: secondaryGender =
+    mode === 'relationship' ? inputState?.relationship?.second?.gender : mode === 'natal_transit' ? inputState?.birth?.gender : '';
+  $: primaryLabel = formatNameWithGender(subjects.primary?.name || 'Subject 1', primaryGender) || subjects.primary?.name || 'Subject 1';
+  $: secondaryLabel = formatNameWithGender(subjects.natal?.name || 'Subject 2', secondaryGender) || subjects.natal?.name || 'Subject 2';
   $: dayRulerPrimary = EsotericRaySpectrumUtils.getDayRulerKey(subjects.primary);
   $: dayRulerSecondary = EsotericRaySpectrumUtils.getDayRulerKey(subjects.natal);
 
@@ -161,8 +170,8 @@
 
   $: pointData = (() => {
     const entries = [
-      ...buildPointEntries(filteredPrimaryPoints, '1', subjects.primary?.name || 'Subject 1'),
-      ...(isMultiMode ? buildPointEntries(filteredSecondaryPoints, '2', subjects.natal?.name || 'Subject 2') : []),
+      ...buildPointEntries(filteredPrimaryPoints, '1', primaryLabel),
+      ...(isMultiMode ? buildPointEntries(filteredSecondaryPoints, '2', secondaryLabel) : []),
     ];
     const result = entries
       .map(({ key, point, ownerKey, ownerLabel }) => {

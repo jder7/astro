@@ -3,6 +3,8 @@
   import { configStore } from '$lib/state/configStore';
   import { signSymbol, signAbbrev, signName, POINT_ICONS } from '$lib/astro/signs';
   import { aspectColorClass, aspectIcon } from '$lib/astro/aspects';
+  import { inputStore } from '$lib/state/inputStore';
+  import { formatNameWithGender } from '$lib/utils/gender';
 
   export let summary = { sections: [], aspects: [], rawAspects: [] };
   export let mode = 'natal';
@@ -37,6 +39,15 @@
   };
 
   $: activeSet = new Set((get(configStore).active_points || []).map((p) => normalizeLabel(p)));
+  $: inputState = $inputStore;
+
+  const resolveGenderForSection = (section) => {
+    const key = section?.meta?.contextKey;
+    if (key === 'birth') return inputState?.birth?.gender || '';
+    if (key === 'first') return inputState?.relationship?.first?.gender || '';
+    if (key === 'second') return inputState?.relationship?.second?.gender || '';
+    return '';
+  };
 
   const buildTopAspects = (source, pointIndex) => {
     const enriched = (source || []).map((asp) => {
@@ -122,10 +133,15 @@
     }
     const sections = (summary.sections || []).filter((section) => Array.isArray(section.aspects) && section.aspects.length);
     if (sections.length) {
-      return sections.map((section) => ({
-        title: section?.meta?.title || section?.meta?.contextKey || 'Top aspects',
-        aspects: buildTopAspects(section.aspects, buildPointIndex(section)),
-      }));
+      return sections.map((section) => {
+        const baseTitle = section?.meta?.title || section?.meta?.contextKey || 'Top aspects';
+        const gender = resolveGenderForSection(section);
+        const title = formatNameWithGender(baseTitle, gender) || baseTitle;
+        return {
+          title,
+          aspects: buildTopAspects(section.aspects, buildPointIndex(section)),
+        };
+      });
     }
     const fallbackSource = summary.rawAspects || summary.aspects || [];
     return [

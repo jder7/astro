@@ -2,6 +2,7 @@
   import HomeSummaryMainPoints from './HomeSummaryMainPoints.svelte';
   import HomeSummaryAspects from './HomeSummaryAspects.svelte';
   import { buildSummary } from '$lib/astro/summary';
+  import ShareLinkButton from '$components/shared/ShareLinkButton.svelte';
   export let summary = { sections: [], ranges: [], aspects: [], context: {}, rawAspects: [] };
   export let apiResponse = null;
   export let mode = 'natal';
@@ -47,6 +48,7 @@
       {#if computedSummary.context?.transit}
         <span class="badge">Transit: {computedSummary.context.transit}</span>
       {/if}
+      <ShareLinkButton label="Share" />
     </div>
   </div>
 

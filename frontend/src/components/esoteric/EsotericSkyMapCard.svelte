@@ -5,6 +5,8 @@
   import { getRayColorHex, getSignEssentialQuality, getSignRays } from '$lib/astro/rays';
   import { EsotericRaySpectrumUtils } from '$lib/astro/esotericRaySpectrumUtils';
   import { configStore } from '$lib/state/configStore';
+  import { inputStore } from '$lib/state/inputStore';
+  import { formatNameWithGender } from '$lib/utils/gender';
   import CardHeader from '$components/shared/CardHeader.svelte';
   import EsotericRayConfigPanel from '$components/esoteric/EsotericRayConfigPanel.svelte';
   import EsotericRaySpectrum from '$components/esoteric/EsotericRaySpectrum.svelte';
@@ -83,6 +85,16 @@
   $: natalPointRows = Object.entries(filteredNatalPoints || {}).map(shapePoint);
   $: hasSecondarySubject = Boolean(subjects.natal);
   $: stateLabel = STATE_OPTIONS.find((opt) => opt.value === rayState)?.label || 'State';
+  $: inputState = $inputStore;
+  $: primaryGender =
+    mode === 'relationship' ? inputState?.relationship?.first?.gender : mode === 'natal' ? inputState?.birth?.gender : '';
+  $: secondaryGender =
+    mode === 'relationship' ? inputState?.relationship?.second?.gender : mode === 'natal_transit' ? inputState?.birth?.gender : '';
+  $: primaryLabel = formatNameWithGender(subjects.primary?.name || 'Subject 1', primaryGender) || subjects.primary?.name || 'Subject 1';
+  $: secondaryLabel =
+    formatNameWithGender(subjects.natal?.name || (mode === 'relationship' ? 'Subject 2' : 'Natal'), secondaryGender) ||
+    subjects.natal?.name ||
+    (mode === 'relationship' ? 'Subject 2' : 'Natal');
 
   const primaryAccent = '#22d3ee';
   const secondaryAccent = '#c084fc';
@@ -175,7 +187,7 @@
 
           <div class="space-y-3">
             <div class="flex items-center gap-2">
-              <span class="subject-badge" style={`--badge:${primaryAccent};`}>{subjects.primary?.name || 'Subject 1'}</span>
+              <span class="subject-badge" style={`--badge:${primaryAccent};`}>{primaryLabel}</span>
               <CardHeader label="Points" badge={pointRows.length} />
             </div>
             {#if pointRows.length}
@@ -228,9 +240,7 @@
             {#if natalPointRows.length}
               <div class="space-y-3">
                 <div class="flex items-center gap-2">
-                  <span class="subject-badge" style={`--badge:${secondaryAccent};`}>
-                    {subjects.natal?.name || (mode === 'relationship' ? 'Subject 2' : 'Natal')}
-                  </span>
+                  <span class="subject-badge" style={`--badge:${secondaryAccent};`}>{secondaryLabel}</span>
                   <CardHeader label="Points" badge={natalPointRows.length} />
                 </div>
                 {#if natalPointRows.length}

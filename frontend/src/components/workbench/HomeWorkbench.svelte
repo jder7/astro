@@ -1,11 +1,14 @@
 <script>
   import { get } from 'svelte/store';
-  import { tick } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { requestChartDataAndSvg, requestChartPdf } from '$lib/api/client';
   import { buildChartPayload } from '$lib/payloads';
   import { cacheStore, setCacheEntry } from '$lib/state/cacheStore';
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
+  import { saveHistoryForState } from '$lib/state/subjectHistoryStore';
+  import { applyShareParamsFromUrl, clearShareParams, hasShareParams } from '$lib/utils/shareParams';
+  import { showToast } from '$lib/state/toastStore';
   import { downloadBlob } from '$lib/utils/download';
   import { animateCards } from '$lib/animations/pageTransitions';
   import HomeSummaryCard from '$components/home/HomeSummaryCard.svelte';
@@ -54,7 +57,9 @@
     status = '';
     errorMessage = '';
     loading = true;
+    clearShareParams();
     const state = get(inputStore);
+    saveHistoryForState(state);
     const cfg = get(configStore);
     const { payload, birthParts, transitParts } = buildChartPayload(state.mode, state, cfg);
     try {
@@ -80,6 +85,14 @@
     }
   }
 
+  onMount(async () => {
+    if (!hasShareParams()) return;
+    const { applied } = applyShareParamsFromUrl();
+    if (!applied) return;
+    await tick();
+    await generateChart();
+    showToast('Loaded shared inputs and generated.');
+  });
 </script>
 
 <div class="page-shell pb-12" id="home-workbench">

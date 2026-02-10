@@ -11,6 +11,7 @@
   export let rangeResult = null;
   export let mode = 'natal';
   export let onRange = null;
+  export let onNavigate = null;
   export let loading = false;
   let collapsed = true;
 
@@ -188,6 +189,8 @@
       id: `range-entry-${idx}-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-') || idx}`,
       label,
       time,
+      timestamp: snap?.timestamp,
+      subject: snap?.subject || null,
       weekday,
       cadence,
       tone,
@@ -268,6 +271,16 @@
                 </div>
                 <div class="range-badges">
                   <span class="badge range-badge-label">{entry.tone.sourceLabel}</span>
+                  {#if typeof onNavigate === 'function'}
+                    <button
+                      type="button"
+                      class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1 text-[11px] font-semibold text-slate-100 hover:border-cyan-400 hover:text-white transition"
+                      on:click={() => onNavigate(entry)}
+                    >
+                      <span>Navigate</span>
+                      <span aria-hidden="true">→</span>
+                    </button>
+                  {/if}
                   <div class="range-sigil-head">
                     <ElementSigil {...entry.sigil} size={50} compact className="range-sigil-figure" />
                   </div>

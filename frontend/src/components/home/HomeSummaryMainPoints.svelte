@@ -1,6 +1,8 @@
 <script>
   import { signSymbol, signName, POINT_SYMBOLS } from '$lib/astro/signs';
   import HomeSummaryMoonCycle from './HomeSummaryMoonCycle.svelte';
+  import { inputStore } from '$lib/state/inputStore';
+  import { formatNameWithGender } from '$lib/utils/gender';
 
   export let summary = { sections: [], points: [] };
   export let mode = 'natal';
@@ -11,6 +13,7 @@
 
   $: resolvedBirthParts = birthParts || summary?.context?.birthParts || null;
   $: resolvedTransitParts = transitParts || summary?.context?.transitParts || null;
+  $: inputState = $inputStore;
 
   const resolvePartsForSection = (section) => {
     const contextKey = section?.meta?.contextKey;
@@ -33,6 +36,14 @@
     return label ? `Moon cycle · ${label}` : '';
   };
 
+  const resolveGenderForSection = (section) => {
+    const key = section?.meta?.contextKey;
+    if (key === 'birth') return inputState?.birth?.gender || '';
+    if (key === 'first') return inputState?.relationship?.first?.gender || '';
+    if (key === 'second') return inputState?.relationship?.second?.gender || '';
+    return '';
+  };
+
   $: sectionsData = (() => {
     const sections = Array.isArray(summary.sections) ? summary.sections : [];
     return sections.map((section) => {
@@ -53,8 +64,10 @@
       {#each sectionsData as section, index}
         <div class="space-y-2">
           {#if section.meta?.title || section.meta?.contextKey}
+            {@const baseTitle = section.meta?.title || section.meta?.contextKey}
+            {@const gender = resolveGenderForSection(section)}
             <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-400">
-              <span>{section.meta?.title || section.meta?.contextKey}</span>
+              <span>{formatNameWithGender(baseTitle, gender) || baseTitle}</span>
               {#if section.meta?.datetime}
                 <span class="text-[11px] tracking-[0.12em] text-slate-500">{section.meta.datetime}</span>
               {/if}

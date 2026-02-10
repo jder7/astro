@@ -5,16 +5,20 @@
   import { isMobileStore } from '$lib/state/mediaStore';
   import MajorAspectsList from '$components/shared/MajorAspectsList.svelte';
   import CardHeader from '$components/shared/CardHeader.svelte';
+  import ShareLinkButton from '$components/shared/ShareLinkButton.svelte';
   import { formatDecimalDegree, formatModeLabel, formatOrdinal, ucfirst } from '$lib/astro/format';
   import { formatDateLabel, formatDateLabelWithDay, formatDateShort, toDate } from '$lib/astro/date';
   import { DAY_RULERS, ELEMENT_ICON, POINT_SYMBOLS, QUALITY_ICON, signName, signSymbol } from '$lib/astro/signs';
   import { computeDecan, extractAspects, extractPointRanges, extractSubjects } from '$lib/astro/advanced';
+  import { inputStore } from '$lib/state/inputStore';
+  import { formatNameWithGender } from '$lib/utils/gender';
 
   export let response = null;
   export let mode = 'natal';
   export let resultKey = 0;
 
   $: isMobile = $isMobileStore;
+  $: inputState = $inputStore;
 
   const resolveCurrentEntry = (range) => {
     if (!range || !Array.isArray(range.entries) || !range.entries.length) return { current: null, next: null, anchor: null };
@@ -276,12 +280,23 @@
     return blocks
       .filter((block) => block.subject)
       .map((block) => {
+        const gender =
+          block.key === 'partner-a'
+            ? inputState?.relationship?.first?.gender
+            : block.key === 'partner-b'
+              ? inputState?.relationship?.second?.gender
+              : block.key === 'natal'
+                ? inputState?.birth?.gender
+                : mode === 'natal' && block.key === 'primary'
+                  ? inputState?.birth?.gender
+                  : '';
+        const displayLabel = formatNameWithGender(block.label, gender) || block.label;
         const timestampLabel = formatDateLabelWithDay(block.subject.iso_formatted_local_datetime || block.subject.timestamp);
         const locationLabel = [block.subject.city, block.subject.nation].filter(Boolean).join(', ');
         const { rows, sigil } = buildSummaryRows(block.subject, block.key);
         return {
           key: block.key,
-          label: block.label,
+          label: displayLabel,
           subject: block.subject,
           timestampLabel,
           locationLabel,
@@ -302,6 +317,7 @@
       {#if response}
         <span class="badge">{formatModeLabel(mode)}</span>
       {/if}
+      <ShareLinkButton label="Share" />
     </div>
   </div>
 

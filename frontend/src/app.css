@@ -85,7 +85,7 @@ body {
 }
 
 .button-ghost {
-  @apply inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-800 text-slate-200 hover:border-slate-600 hover:text-white;
+  @apply inline-flex items-center gap-2 px-2 py-2 rounded-xl border border-slate-800 text-slate-200 hover:border-slate-600 hover:text-white;
   border-color: color-mix(in srgb, var(--accent, #06b6d4) 18%, #1e293b 82%);
 }
 

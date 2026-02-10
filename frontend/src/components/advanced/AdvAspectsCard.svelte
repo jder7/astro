@@ -11,6 +11,8 @@
   import { POINT_SYMBOLS, signSymbol } from '$lib/astro/signs';
   import { aspectIcon, aspectColorClass } from '$lib/astro/aspects';
   import { formatModeLabel } from '$lib/astro/format';
+  import { inputStore } from '$lib/state/inputStore';
+  import { formatNameWithGender } from '$lib/utils/gender';
 
   export let response = null;
   export let mode = 'natal';
@@ -68,8 +70,20 @@
   });
   $: majorAspects = subject1.majorAspects || [];
   $: natalMajorAspects = subject2.majorAspects || [];
-  $: subject1Label = mode === 'relationship' ? subject1.name || 'Partner A' : 'Current chart';
-  $: subject2Label = mode === 'relationship' ? subject2.name || 'Partner B' : 'Natal';
+  $: inputState = $inputStore;
+  $: subject1Gender = mode === 'relationship' ? inputState?.relationship?.first?.gender : '';
+  $: subject2Gender =
+    mode === 'relationship' ? inputState?.relationship?.second?.gender : mode === 'natal_transit' ? inputState?.birth?.gender : '';
+  $: subject1Label =
+    mode === 'relationship'
+      ? formatNameWithGender(subject1.name || 'Partner A', subject1Gender) || subject1.name || 'Partner A'
+      : 'Current chart';
+  $: subject2Label =
+    mode === 'relationship'
+      ? formatNameWithGender(subject2.name || 'Partner B', subject2Gender) || subject2.name || 'Partner B'
+      : mode === 'natal_transit'
+        ? formatNameWithGender(subject2.name || 'Natal', subject2Gender) || subject2.name || 'Natal'
+        : 'Natal';
   $: activeSet = new Set((get(configStore).active_points || []).map((point) => normalizeLabel(point)));
   $: subjects = extractSubjects(response, mode);
   $: primarySubject = response?.subject || response?.snapshot?.subject || response?.first_subject || subjects.primary || {};
