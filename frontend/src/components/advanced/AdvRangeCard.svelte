@@ -268,19 +268,20 @@
                   <p class="range-kicker">{entry.weekday || 'Snapshot'}</p>
                   <p class="range-date">{entry.label}</p>
                   <p class="range-time">{entry.time || '—'}</p>
-                </div>
-                <div class="range-badges">
-                  <span class="badge range-badge-label">{entry.tone.sourceLabel}</span>
                   {#if typeof onNavigate === 'function'}
                     <button
                       type="button"
-                      class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1 text-[11px] font-semibold text-slate-100 hover:border-cyan-400 hover:text-white transition"
+                      class="range-navigate-button inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1 text-[11px] font-semibold text-slate-100 hover:border-cyan-400 hover:text-white transition"
                       on:click={() => onNavigate(entry)}
+                      data-action="range-navigate"
                     >
-                      <span>Navigate</span>
+                      <span>Open this time</span>
                       <span aria-hidden="true">→</span>
                     </button>
                   {/if}
+                </div>
+                <div class="range-badges">
+                  <span class="badge range-badge-label">{entry.tone.sourceLabel}</span>
                   <div class="range-sigil-head">
                     <ElementSigil {...entry.sigil} size={50} compact className="range-sigil-figure" />
                   </div>

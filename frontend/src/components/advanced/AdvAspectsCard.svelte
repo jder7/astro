@@ -22,7 +22,7 @@
   let showMajorAspects = true;
   let movementFilter = 'both';
   let hideAscendantAspects = false;
-  let showMatrices = true;
+  let showMatrices = false;
   $: orbLimit = Number.isFinite(Number(maxOrb)) ? Number(maxOrb) : 10;
 
   const normalizeLabel = (label) => String(label || '').trim().replace(/\s+/g, '_').toLowerCase();
