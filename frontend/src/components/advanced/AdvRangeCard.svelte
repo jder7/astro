@@ -1,5 +1,6 @@
 <script>
   import { collectPoints } from '$lib/astro/advanced';
+  import { aspectIcon } from '$lib/astro/aspects';
   import { formatDateLabel, formatDateShort, formatModeLabel, toDate } from '$lib/astro/format';
   import { DAY_RULERS, ELEMENT_HEX, ELEMENT_ICON, POINT_SYMBOLS, signName, signSymbol } from '$lib/astro/signs';
   import { rangeStore } from '$lib/state/rangeStore';
@@ -82,12 +83,36 @@
     };
   };
 
-  const buildAspectList = (patterns = []) =>
+  const buildAspectTooltip = (pattern = {}, points = {}) => {
+    const links = Array.isArray(pattern?.links) ? pattern.links : [];
+    return links
+      .map((link) => {
+        const pair = Array.isArray(link?.pair) ? link.pair : [];
+        const left = pair[0];
+        const right = pair[1];
+        if (!left || !right) return '';
+        const leftKey = normalizeKey(left);
+        const rightKey = normalizeKey(right);
+        const leftPoint = pickPoint(points, leftKey) || {};
+        const rightPoint = pickPoint(points, rightKey) || {};
+        const leftIcon = POINT_SYMBOLS[leftKey] || '';
+        const rightIcon = POINT_SYMBOLS[rightKey] || '';
+        const leftSign = signSymbol(leftPoint?.sign) || '';
+        const rightSign = signSymbol(rightPoint?.sign) || '';
+        const glyph = aspectIcon(link?.type || '');
+        return `${leftIcon}${leftSign} ${glyph} ${rightIcon}${rightSign}`.trim();
+      })
+      .filter(Boolean)
+      .join(' · ');
+  };
+
+  const buildAspectList = (patterns = [], points = {}) =>
     patterns
       .slice(0, 3)
       .map((pattern) => ({
         id: pattern.id || 'generic',
         label: pattern.name || pattern.geometry || 'Aspect pattern',
+        tooltip: buildAspectTooltip(pattern, points),
       }))
       .filter((entry) => entry.label);
 
@@ -195,7 +220,7 @@
       cadence,
       tone,
       placements,
-      aspects: buildAspectList(snap?.major_aspects || []),
+      aspects: buildAspectList(snap?.major_aspects || [], points),
       sigil: buildSigilProps(points, tone, cadence),
       countLabel: `Stop ${idx + 1}`,
     };
@@ -340,7 +365,7 @@
                   {#if entry.aspects.length}
                     <div class="aspect-row compact" aria-label="Transit aspect patterns">
                       {#each entry.aspects as aspect, idx (`${aspect.id}-${idx}`)}
-                        <span class="aspect-chip">
+                        <span class="aspect-chip range-aspect-chip" title={aspect.tooltip || undefined}>
                           <MajorAspectIcon patternId={aspect.id} size={22} />
                           {aspect.label}
                         </span>
@@ -597,6 +622,10 @@
     border: 1px solid rgba(14, 165, 233, 0.32);
     font-size: 12px;
     color: #c7d2fe;
+  }
+
+  .range-aspect-chip {
+    cursor: help;
   }
 
 

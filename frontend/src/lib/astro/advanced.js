@@ -209,6 +209,12 @@ export function extractAspects(payload, mode = 'natal') {
     synastrySource?.aspects_list,
     synastrySource?.aspect_list
   );
+  const synastryMajorAspects = pickArray(
+    source.synastry_major_aspects,
+    source.synastryMajorAspects,
+    payload?.synastry_major_aspects,
+    payload?.synastryMajorAspects
+  );
   const subject1AspectsRaw = isRelationship ? (Array.isArray(aspectsRaw) ? aspectsRaw : []) : [];
   const subject2AspectsRaw = isRelationship ? (Array.isArray(natalAspectsRaw) ? natalAspectsRaw : []) : [];
   const synastryUsesOwners = synastryAspectsRaw.some(
@@ -284,7 +290,7 @@ export function extractAspects(payload, mode = 'natal') {
     },
     synastry: {
       aspects: synastryAspects,
-      majorAspects: [],
+      majorAspects: synastryMajorAspects,
     },
   };
 }

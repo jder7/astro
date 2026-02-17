@@ -6,6 +6,7 @@ import re
 
 from kerykeion import AspectsFactory  # type: ignore
 
+from service.aspects.ptolemaic import compute_major_aspects as compute_ptolemaic_major_aspects
 from service.schemas import BirthData, ChartConfig
 from .config import ensure_config
 from .subjects import build_subject
@@ -415,6 +416,130 @@ def extract_aspect_rows(aspects_data: dict, include_owner: bool = False) -> list
         return (1, 9999.0, idx)
 
     return [row for _, row in sorted(enumerate(rows), key=lambda pair: sort_key(pair[1], pair[0]))]
+
+
+def _normalize_major_point_key(value: str) -> str:
+    key = _normalize_point_key(value)
+    return key.replace("-", "_")
+
+
+def _collect_synastry_points(subject_data: dict, owner_prefix: str, active_allowed: set[str]) -> tuple[dict, list[str]]:
+    points: dict[str, dict] = {}
+    active_points: list[str] = []
+    for raw_key, raw_point in (subject_data or {}).items():
+        if not isinstance(raw_point, dict):
+            continue
+        abs_pos = raw_point.get("abs_pos")
+        try:
+            abs_pos_val = float(abs_pos)
+        except (TypeError, ValueError):
+            continue
+        norm_key = _normalize_major_point_key(raw_key)
+        if not norm_key:
+            continue
+        if active_allowed and norm_key not in active_allowed:
+            continue
+        combined_key = f"{owner_prefix}__{norm_key}"
+        points[combined_key] = dict(raw_point, abs_pos=abs_pos_val)
+        active_points.append(combined_key)
+    return points, active_points
+
+
+def _decode_synastry_key(value: str) -> tuple[Optional[str], str]:
+    norm = _normalize_major_point_key(value)
+    if not norm:
+        return None, ""
+    if norm.startswith("first__"):
+        return "1", norm.split("__", 1)[1]
+    if norm.startswith("second__"):
+        return "2", norm.split("__", 1)[1]
+    if "__" in norm:
+        prefix, base = norm.split("__", 1)
+        if prefix == "first":
+            return "1", base
+        if prefix == "second":
+            return "2", base
+    return None, norm
+
+
+def compute_synastry_major_aspects(
+    first_subject_data: dict,
+    second_subject_data: dict,
+    active_points: Optional[list[str]] = None,
+) -> list[dict]:
+    """
+    Compute owner-aware major patterns across two combined subjects.
+    """
+    active_allowed = {_normalize_major_point_key(point) for point in active_points or [] if point}
+    first_points, first_active = _collect_synastry_points(first_subject_data, "first", active_allowed)
+    second_points, second_active = _collect_synastry_points(second_subject_data, "second", active_allowed)
+    if not first_points or not second_points:
+        return []
+
+    combined_subject = {
+        **first_points,
+        **second_points,
+        "active_points": first_active + second_active,
+    }
+    raw_patterns = compute_ptolemaic_major_aspects(
+        combined_subject,
+        active_points=combined_subject.get("active_points"),
+    )
+    if not raw_patterns:
+        return []
+
+    output: list[dict] = []
+    for pattern in raw_patterns:
+        points = pattern.get("points") if isinstance(pattern, dict) else None
+        if not isinstance(points, list) or not points:
+            continue
+        decoded_points: list[str] = []
+        point_owners: list[str] = []
+        for point_key in points:
+            owner, base_key = _decode_synastry_key(point_key)
+            if not owner or not base_key:
+                continue
+            decoded_points.append(base_key)
+            point_owners.append(owner)
+        if not decoded_points or not point_owners:
+            continue
+        owner_set = set(point_owners)
+        if owner_set != {"1", "2"}:
+            continue
+
+        links_raw = pattern.get("links") if isinstance(pattern, dict) else []
+        links_out: list[dict] = []
+        for link in links_raw if isinstance(links_raw, list) else []:
+            if not isinstance(link, dict):
+                continue
+            pair = link.get("pair")
+            if not isinstance(pair, list):
+                continue
+            clean_pair: list[str] = []
+            pair_owners: list[str] = []
+            for pair_key in pair:
+                owner, base_key = _decode_synastry_key(pair_key)
+                if not owner or not base_key:
+                    continue
+                clean_pair.append(base_key)
+                pair_owners.append(owner)
+            links_out.append(
+                {
+                    **link,
+                    "pair": clean_pair,
+                    "pair_owners": pair_owners,
+                }
+            )
+
+        output.append(
+            {
+                **pattern,
+                "points": decoded_points,
+                "point_owners": point_owners,
+                "links": links_out,
+            }
+        )
+    return output
 
 
 def compute_dual_chart_aspects(

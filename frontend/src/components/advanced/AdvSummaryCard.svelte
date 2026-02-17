@@ -88,6 +88,35 @@
     return Number.isFinite(computed) ? `${computed.toFixed(1)}%` : '';
   };
 
+  const parsePlanetsCount = (pattern) => {
+    const points = Array.isArray(pattern?.points) ? pattern.points.filter(Boolean) : [];
+    if (points.length) return points.length;
+    const fromLabel = Number.parseInt(String(pattern?.planets || '').match(/\d+/)?.[0] || '', 10);
+    return Number.isFinite(fromLabel) && fromLabel > 0 ? fromLabel : 0;
+  };
+
+  const majorScore = (pattern) => {
+    const links = Array.isArray(pattern?.links) ? pattern.links : [];
+    const orbSum = links.reduce((sum, link) => {
+      const value = Number(link?.orb);
+      return Number.isFinite(value) ? sum + Math.abs(value) : sum;
+    }, 0);
+    const planetsCount = parsePlanetsCount(pattern);
+    if (!planetsCount) return Number.POSITIVE_INFINITY;
+    return orbSum / planetsCount;
+  };
+
+  const topMajorPatterns = (patterns, limit = 7) =>
+    (Array.isArray(patterns) ? patterns : [])
+      .slice()
+      .sort((a, b) => {
+        const aScore = majorScore(a);
+        const bScore = majorScore(b);
+        if (aScore !== bScore) return aScore - bScore;
+        return String(a?.name || a?.id || '').localeCompare(String(b?.name || b?.id || ''));
+      })
+      .slice(0, limit);
+
   const buildPointRow = ({ subject, key, label, icon, current, point, id, extras }) => {
     const source = point || (key ? subject?.[key] : null) || null;
     const sign = source?.sign || current?.sign || '';
@@ -122,17 +151,24 @@
   $: sunRanges = extractPointRanges(response, 'sun') || [];
   $: aspectData = extractAspects(response || {}, mode);
   $: primary = subjects.primary || null;
+  $: isDualMode = mode === 'relationship' || mode === 'natal_transit';
+  $: synastryMajorAspects = topMajorPatterns(aspectData?.synastry?.majorAspects || [], 7);
 
   const resolveMajorAspects = (subject, subjectKey) => {
     if (!aspectData) return [];
     if (mode === 'relationship') {
-      if (subjectKey === 'partner-a') return aspectData.subject1?.majorAspects || [];
-      if (subjectKey === 'partner-b') return aspectData.subject2?.majorAspects || [];
+      if (subjectKey === 'partner-a') return topMajorPatterns(aspectData.subject1?.majorAspects || [], 7);
+      if (subjectKey === 'partner-b') return topMajorPatterns(aspectData.subject2?.majorAspects || [], 7);
     }
     if (mode === 'natal_transit') {
-      return subjectKey === 'natal' ? aspectData.natalMajorAspects || [] : aspectData.majorAspects || [];
+      return subjectKey === 'natal'
+        ? topMajorPatterns(aspectData.natalMajorAspects || [], 7)
+        : topMajorPatterns(aspectData.majorAspects || [], 7);
     }
-    return aspectData.majorAspects?.length ? aspectData.majorAspects : aspectData.natalMajorAspects || [];
+    return topMajorPatterns(
+      aspectData.majorAspects?.length ? aspectData.majorAspects : aspectData.natalMajorAspects || [],
+      7,
+    );
   };
 
   const buildSummaryRows = (subject, subjectKey) => {
@@ -305,6 +341,10 @@
         };
       });
   })();
+  $: synastryOwnerSubjects = {
+    '1': summaryBlocks?.[0]?.subject || primary || {},
+    '2': summaryBlocks?.[1]?.subject || subjects.natal || {},
+  };
 </script>
 
 <div class="flowbite-card space-y-4" id="advanced-summary-card" tabindex="-1">
@@ -326,9 +366,22 @@
       <p class="text-sm text-slate-400">Generate a chart to see the summary.</p>
     {:else}
       {#if summaryBlocks.length}
-        <div class="space-y-6">
+        {#if isDualMode}
+          <div id="adv-summary-synastry-major" class="summary-synastry-major space-y-2">
+            <CardHeader label="Synastry major aspects" badge={synastryMajorAspects.length} />
+            <MajorAspectsList
+              patterns={synastryMajorAspects}
+              subject={summaryBlocks?.[0]?.subject || primary || {}}
+              subjectsByOwner={synastryOwnerSubjects}
+              size={22}
+              emptyLabel="No synastry major aspects found."
+              id="summary-major-aspects-synastry"
+            />
+          </div>
+        {/if}
+        <div class="summary-subjects space-y-6">
           {#each summaryBlocks as block}
-            <div class="space-y-3">
+            <div class="summary-subject space-y-3">
               {#if summaryBlocks.length > 1}
                 <p class="text-xs uppercase tracking-[0.2em] font-semibold text-slate-300">{block.label}</p>
               {/if}

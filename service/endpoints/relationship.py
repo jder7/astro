@@ -1,7 +1,14 @@
 from fastapi import APIRouter
 
 from service.schemas import RelationshipRequest, RelationshipResponse
-from service.utils import compute_dual_chart_aspects, compute_major_aspects, compute_normal_aspects, ensure_config, filter_aspects_model
+from service.utils import (
+    compute_dual_chart_aspects,
+    compute_major_aspects,
+    compute_normal_aspects,
+    compute_synastry_major_aspects,
+    ensure_config,
+    filter_aspects_model,
+)
 
 router = APIRouter(tags=["relationship"])
 
@@ -29,6 +36,7 @@ async def relationship(payload: RelationshipRequest) -> RelationshipResponse:
     second_aspects = compute_normal_aspects(second_subject, active_points=cfg.active_points)
     first_major = compute_major_aspects(first_dict, active_points=cfg.active_points)
     second_major = compute_major_aspects(second_dict, active_points=cfg.active_points)
+    synastry_major_aspects = compute_synastry_major_aspects(first_dict, second_dict, cfg.active_points)
     return RelationshipResponse(
         first_subject=first_dict,
         second_subject=second_dict,
@@ -37,4 +45,5 @@ async def relationship(payload: RelationshipRequest) -> RelationshipResponse:
         natal_aspects=second_aspects,
         natal_major_aspects=second_major,
         synastry=aspects_dump,
+        synastry_major_aspects=synastry_major_aspects,
     )

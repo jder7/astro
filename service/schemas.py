@@ -282,6 +282,12 @@ class PtolemaicAspectLink(BaseModel):
 
     type: str = Field(..., description="Aspect type between the two points.")
     pair: list[str] = Field(..., description="Ordered pair of point keys involved in the link.")
+    pair_owners: list[str] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("pair_owners", "pairOwners"),
+        serialization_alias="pairOwners",
+        description="Owner tags aligned with `pair` values (`1` or `2`) when available.",
+    )
     orb: float = Field(..., description="Orb difference for this link.")
     difference: float = Field(..., description="Angular difference in degrees.")
 
@@ -300,6 +306,12 @@ class PtolemaicPatternAspect(BaseModel):
     orb: str = Field(..., description="Typical orb allowances description.")
     construction: str = Field(..., description="How the pattern is constructed.")
     points: list[str] = Field(..., description="Ordered point keys participating in the pattern.")
+    point_owners: list[str] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("point_owners", "pointOwners"),
+        serialization_alias="pointOwners",
+        description="Owner tags aligned with `points` (`1` or `2`) when available.",
+    )
     links: list[PtolemaicAspectLink] = Field(..., description="Edges between points with aspect metadata.")
     structure: dict = Field(default_factory=dict, description="Optional structure hints (axes, triples, chains, etc.).")
 
@@ -554,6 +566,11 @@ class TransitSnapshot(BaseModel):
     synastry: Optional[dict] = Field(
         default=None,
         description="Dual-chart synastry aspects between the transit and natal subjects when provided.",
+    )
+    synastry_major_aspects: List[PtolemaicPatternAspect] = Field(
+        default_factory=list,
+        serialization_alias="synastryMajorAspects",
+        description="Cross-subject Ptolemaic configurations between transit and natal subjects when provided.",
     )
 
 
@@ -825,6 +842,11 @@ class RelationshipResponse(BaseModel):
     synastry: dict = Field(
         ...,
         description="Raw DualChartAspectsModel from Kerykeion serialized to JSON.",
+    )
+    synastry_major_aspects: List[PtolemaicPatternAspect] = Field(
+        default_factory=list,
+        serialization_alias="synastryMajorAspects",
+        description="Cross-subject Ptolemaic configurations between first and second subjects.",
     )
 
 

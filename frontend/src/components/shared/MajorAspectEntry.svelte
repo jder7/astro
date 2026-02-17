@@ -12,6 +12,7 @@
 
   export let pattern = null;
   export let placements = '';
+  export let ownerLabels = {};
   export let size = 22;
   export let textClass = 'text-xs text-slate-200';
 
@@ -41,14 +42,12 @@
       .replace(/\s+/g, '_')
       .replace(/[^a-z0-9_]+/g, '');
 
-  const formatPattern = (entry) => {
+  const formatPattern = (entry, entryPoints = '', compactPoints = '') => {
     if (!entry || typeof entry !== 'object') return { name: 'Pattern', short: '' };
     const name = entry.name || entry.id || entry.geometry || 'Pattern';
-    const points = Array.isArray(entry.points) ? entry.points.join(', ') : '';
-    const entryPoints = Array.isArray(entry.points) ? entry.points.map((p) => capitalise(p)).join(' · ') : '';
     const desc = entry.geometry || entry.aspects_label || entry.aspectsLabel || entry.planets || '';
-    
-    return { name, short: [entryPoints, desc].filter(Boolean).join(' · '), entryPoints };
+
+    return { name, short: [compactPoints, desc].filter(Boolean).join(' · '), entryPoints };
   };
 
   const toList = (value) => {
@@ -64,6 +63,24 @@
   };
 
   const pointIcon = (value) => POINT_SYMBOLS[normalizePointKey(value)] || '✶';
+  const isMobileViewport = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+
+  const resolveOwnerLabel = (owner) => {
+    const key = String(owner || '').trim();
+    if (!key) return '';
+    return ownerLabels?.[key] || ownerLabels?.[Number(key)] || '';
+  };
+
+  const truncateOwner = (label) => {
+    const value = String(label || '');
+    return value.length > 7 ? `${value.slice(0, 5)}..` : value;
+  };
+
+  const ownerSuffix = (owner, compact = false) => {
+    const label = resolveOwnerLabel(owner);
+    if (!label) return '';
+    return compact ? ` (${label})` : ` (${truncateOwner(label)})`;
+  };
 
   const prefersReducedMotion = () =>
     typeof window !== 'undefined' &&
@@ -140,14 +157,19 @@
     if (event.key === 'Escape') close();
   };
 
-  $: formatted = formatPattern(pattern);
-  $: displayDetail = placements || formatted.short;
-  $: tooltip = formatted.short ? `${formatted.name} · ${formatted.short}` : formatted.name;
   $: patternId = pattern?.id || 'generic';
   $: aspectList = toList(pattern?.aspects);
   $: pointList = toList(pattern?.points);
+  $: pointOwners = toList(pattern?.point_owners || pattern?.pointOwners);
+  $: entryPointsDetail = pointList.map((name, idx) => `${capitalise(name)}${ownerSuffix(pointOwners[idx], false)}`).join(' · ');
+  $: entryPointsCompact = pointList.map((name) => capitalise(name)).join(' · ');
+  $: tooltipPoints = pointList.map((name, idx) => `${capitalise(name)}${ownerSuffix(pointOwners[idx], true)}`).join(' · ');
+  $: formatted = formatPattern(pattern, entryPointsDetail, entryPointsCompact);
+  $: displayDetail = placements || formatted.short;
+  $: tooltipBody = tooltipPoints || formatted.short || placements;
+  $: tooltip = tooltipBody ? `${formatted.name} · ${tooltipBody}` : formatted.name;
   $: links = Array.isArray(pattern?.links) ? pattern.links : [];
-  $: planetChips = pointList.map((name) => ({ name, icon: pointIcon(name) }));
+  $: planetChips = pointList.map((name, idx) => ({ name, icon: pointIcon(name), owner: ownerSuffix(pointOwners[idx], false) }));
   $: aspectChips = aspectList.map((name) => ({ name }));
 </script>
 
@@ -156,6 +178,11 @@
   title={tooltip}
   role="button"
   tabindex="0"
+  on:click={() => {
+    if (isMobileViewport()) {
+      openPanel();
+    }
+  }}
   on:dblclick={openPanel}
   on:keydown={(event) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -229,7 +256,7 @@
                   {#each planetChips as planet}
                     <span class="major-aspect-chip major-aspect-zoom" role="presentation" on:mouseenter={zoomIn} on:mouseleave={zoomOut}>
                       <span class="major-aspect-chip-icon">{planet.icon}</span>
-                      <span>{capitalise(planet.name)}</span>
+                      <span>{capitalise(planet.name)}{planet.owner}</span>
                     </span>
                   {/each}
                 </div>
@@ -292,6 +319,7 @@
             <h4>Links</h4>
             <div class="major-aspect-links">
               {#each links as link}
+                {@const pairOwners = toList(link?.pair_owners || link?.pairOwners)}
                 <div class="major-aspect-link major-aspect-zoom" role="presentation" on:mouseenter={zoomIn} on:mouseleave={zoomOut}>
                   <div class="major-aspect-link-line">
                     <span class="major-aspect-link-aspect">
@@ -305,7 +333,7 @@
                         {/if}
                         <span class="major-aspect-link-point">
                           <span class="major-aspect-link-icon">{pointIcon(point)}</span>
-                          {capitalise(point)}
+                          {capitalise(point)}{ownerSuffix(pairOwners[idx], false)}
                         </span>
                       {/each}
                     </div>

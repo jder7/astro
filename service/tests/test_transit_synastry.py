@@ -35,11 +35,16 @@ class TestTransitSynastry(unittest.TestCase):
         self.assertIsNotNone(response.snapshot.synastry)
         self.assertIsInstance(response.snapshot.synastry, dict)
         self.assertIn("aspects", response.snapshot.synastry)
+        self.assertIsInstance(response.snapshot.synastry_major_aspects, list)
+        if response.snapshot.synastry_major_aspects:
+            first = response.snapshot.synastry_major_aspects[0]
+            self.assertIsInstance(first.point_owners, list)
 
     def test_synastry_none_without_birth(self):
         payload = TransitMomentRequest(moment=self.moment, birth=None)
         response = asyncio.run(transit_snapshot(payload))
         self.assertIsNone(response.snapshot.synastry)
+        self.assertEqual(response.snapshot.synastry_major_aspects, [])
 
 
 if __name__ == "__main__":

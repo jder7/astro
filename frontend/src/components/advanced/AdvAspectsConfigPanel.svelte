@@ -1,7 +1,7 @@
 <script>
   export let id = 'adv-aspects-config';
-  export let maxOrb = 10;
-  export let orbLimit = 10;
+  export let maxOrb = 3;
+  export let orbLimit = 3;
   export let showMajorAspects = true;
   export let movementFilter = 'both';
   export let hideAscendantAspects = false;

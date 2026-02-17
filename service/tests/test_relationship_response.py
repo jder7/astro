@@ -14,6 +14,10 @@ class TestRelationshipResponse(unittest.TestCase):
         data = response.model_dump()
         self.assertNotIn("point_sign_range", data)
         self.assertIsInstance(response.aspects, list)
+        self.assertIsInstance(response.synastry_major_aspects, list)
+        if response.synastry_major_aspects:
+            first_pattern = response.synastry_major_aspects[0]
+            self.assertIsInstance(first_pattern.point_owners, list)
 
 
 if __name__ == "__main__":

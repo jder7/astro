@@ -18,12 +18,14 @@
   export let mode = 'natal';
   let collapsed = true;
   let showConfig = false;
-  let maxOrb = 10;
+  let maxOrb = 3;
   let showMajorAspects = true;
   let movementFilter = 'both';
   let hideAscendantAspects = false;
   let showMatrices = false;
-  $: orbLimit = Number.isFinite(Number(maxOrb)) ? Number(maxOrb) : 10;
+  const SHOW_DEBUG_LOGS = false;
+  let majorFilterLogKey = '';
+  $: orbLimit = Number.isFinite(Number(maxOrb)) ? Number(maxOrb) : 3;
 
   const normalizeLabel = (label) => String(label || '').trim().replace(/\s+/g, '_').toLowerCase();
   const stripOwner = (value) => String(value || '').replace(/\s*\([^)]*\)\s*/g, '').trim();
@@ -54,6 +56,56 @@
     if (movementMode === 'separating') return movement.includes('separating');
     return true;
   };
+  const toList = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.filter(Boolean);
+    if (typeof value === 'string') return value.split(',').map((item) => item.trim()).filter(Boolean);
+    return [String(value)];
+  };
+  const evaluateMajorPatternFilters = (pattern, options = {}) => {
+    const {
+      activeSet: activeFilter = new Set(),
+      hideAscendantAspects: hideAsc = false,
+      orbLimit: maxOrbLimit = 3,
+    } = options;
+    if (!pattern || typeof pattern !== 'object') return { keep: false, reason: 'invalid_pattern' };
+    const points = toList(pattern.points).map((point) => normalizeLabel(point));
+    if (!points.length) return { keep: false, reason: 'no_points' };
+    if (activeFilter.size && points.some((point) => !activeFilter.has(point))) return { keep: false, reason: 'active_points' };
+    if (hideAsc && points.some((point) => point === 'asc' || point === 'ascendant')) {
+      return { keep: false, reason: 'asc_hidden' };
+    }
+    const links = Array.isArray(pattern.links) ? pattern.links : [];
+    if (!links.length) return { keep: false, reason: 'no_links' };
+    const linkOrbs = links.map((link) => Number(link?.orb));
+    const invalidOrb = linkOrbs.some((orb) => !Number.isFinite(orb));
+    if (invalidOrb) return { keep: false, reason: 'invalid_link_orb', linkOrbs };
+    const overLimit = linkOrbs.some((orb) => orb < 0 || orb > maxOrbLimit);
+    if (overLimit) return { keep: false, reason: 'orb_limit', linkOrbs };
+    return { keep: true, reason: 'kept', linkOrbs };
+  };
+
+  const bucketMajorPatterns = (patterns = [], options = {}) => {
+    const keptPatterns = [];
+    const kept = [];
+    const dropped = [];
+    (patterns || []).forEach((pattern) => {
+      const verdict = evaluateMajorPatternFilters(pattern, options);
+      const bucketEntry = {
+        id: pattern?.id || 'unknown',
+        name: pattern?.name || pattern?.id || 'Pattern',
+        reason: verdict.reason,
+        linkOrbs: verdict.linkOrbs || [],
+      };
+      if (verdict.keep) {
+        keptPatterns.push(pattern);
+        kept.push(bucketEntry);
+      } else {
+        dropped.push(bucketEntry);
+      }
+    });
+    return { keptPatterns, kept, dropped };
+  };
 
   $: aspectData = extractAspects(response || {}, mode);
   $: subject1 = aspectData.subject1 || { name: 'Subject 1', aspects: [], majorAspects: [] };
@@ -70,14 +122,10 @@
   });
   $: majorAspects = subject1.majorAspects || [];
   $: natalMajorAspects = subject2.majorAspects || [];
+  $: synastryMajorAspects = synastry.majorAspects || [];
   $: inputState = $inputStore;
-  $: subject1Gender = mode === 'relationship' ? inputState?.relationship?.first?.gender : '';
   $: subject2Gender =
     mode === 'relationship' ? inputState?.relationship?.second?.gender : mode === 'natal_transit' ? inputState?.birth?.gender : '';
-  $: subject1Label =
-    mode === 'relationship'
-      ? formatNameWithGender(subject1.name || 'Partner A', subject1Gender) || subject1.name || 'Partner A'
-      : 'Current chart';
   $: subject2Label =
     mode === 'relationship'
       ? formatNameWithGender(subject2.name || 'Partner B', subject2Gender) || subject2.name || 'Partner B'
@@ -91,6 +139,7 @@
     response?.natal_subject || response?.snapshot?.natal_subject || response?.second_subject || subjects.natal || {};
   $: subject1Points = collectPoints(primarySubject || {}).points || {};
   $: subject2Points = collectPoints(secondarySubject || {}).points || {};
+  $: synastryOwnerSubjects = { '1': primarySubject || {}, '2': secondarySubject || {} };
 
   const findPoint = (label, owner = '1') => {
     const norm = normalizeLabel(stripOwner(label));
@@ -112,7 +161,7 @@
 
   const filterAspectEntries = (
     entries,
-    { useActive = true, movementMode = 'both', hideAsc = false, orbLimit = 10 } = {},
+    { useActive = true, movementMode = 'both', hideAsc = false, orbLimit = 3 } = {},
   ) => {
     const base = useActive ? filterAspectsByActive(entries) : entries || [];
     const ascFiltered = hideAsc
@@ -208,9 +257,56 @@
 
   $: currentRows = sortBy(filteredAspects.map(formatAspectRow).filter(Boolean), sortState.column, sortState.direction);
   $: natalRows = sortBy(filteredNatalAspects.map(formatAspectRow).filter(Boolean), sortState.column, sortState.direction);
-  $: showSynastryPanel =
-    (mode === 'relationship' || mode === 'natal_transit') &&
-    (mode === 'relationship' || rawSynAspects.length || response?.synastry || response?.snapshot?.synastry);
+  $: isDualMode = mode === 'relationship' || mode === 'natal_transit';
+  $: majorFilterOptions = {
+    orbLimit,
+    hideAscendantAspects,
+    activeSet,
+  };
+  $: majorBuckets = bucketMajorPatterns(majorAspects, majorFilterOptions);
+  $: natalMajorBuckets = bucketMajorPatterns(natalMajorAspects, majorFilterOptions);
+  $: synastryMajorBuckets = bucketMajorPatterns(synastryMajorAspects, majorFilterOptions);
+  $: filteredMajorAspects = majorBuckets.keptPatterns;
+  $: filteredNatalMajorAspects = natalMajorBuckets.keptPatterns;
+  $: filteredSynastryMajorAspects = synastryMajorBuckets.keptPatterns;
+  $: {
+    const logKey = JSON.stringify({
+      orbLimit,
+      hideAscendantAspects,
+      activeSize: activeSet.size,
+      majorIn: majorAspects.length,
+      majorOut: filteredMajorAspects.length,
+      natalIn: natalMajorAspects.length,
+      natalOut: filteredNatalMajorAspects.length,
+      synIn: synastryMajorAspects.length,
+      synOut: filteredSynastryMajorAspects.length,
+    });
+    if (SHOW_DEBUG_LOGS && logKey !== majorFilterLogKey) {
+      majorFilterLogKey = logKey;
+      // Debug buckets for major-aspect filter behavior by panel section.
+      console.debug('[AdvAspectsCard][major-filter]', {
+        orbLimit,
+        hideAscendantAspects,
+        activePoints: Array.from(activeSet),
+        current: {
+          total: majorAspects.length,
+          kept: majorBuckets.kept,
+          dropped: majorBuckets.dropped,
+        },
+        natal: {
+          total: natalMajorAspects.length,
+          kept: natalMajorBuckets.kept,
+          dropped: natalMajorBuckets.dropped,
+        },
+        synastry: {
+          total: synastryMajorAspects.length,
+          kept: synastryMajorBuckets.kept,
+          dropped: synastryMajorBuckets.dropped,
+        },
+      });
+    }
+  }
+  $: showSynastryPanel = isDualMode;
 </script>
 
 <div class="flowbite-card space-y-4">
@@ -268,19 +364,19 @@
             />
           {/if}
 
-          {#if showMatrices}
+          {#if showMatrices && !isDualMode}
             <AdvAspectMatrix {response} mode={mode} hideSynastryMatrix={showSynastryPanel} maxOrb={orbLimit} />
           {/if}
 
-          {#if mode !== 'relationship' && showMajorAspects}
+          {#if !isDualMode && showMajorAspects}
             <div id="adv-aspects-major-configs" class="space-y-2">
-              <CardHeader label="Major configurations" badge={majorAspects.length + natalMajorAspects.length} />
-              {#if majorAspects.length}
+              <CardHeader label="Major configurations" badge={filteredMajorAspects.length + filteredNatalMajorAspects.length} />
+              {#if filteredMajorAspects.length}
                 <div class="space-y-1">
                   <p class="text-xs text-slate-400">Current chart</p>
                   <div id="adv-aspects-major-current" class="text-sm text-slate-200">
                     <MajorAspectsList
-                      patterns={majorAspects}
+                      patterns={filteredMajorAspects}
                       subject={primarySubject}
                       size={24}
                       textClass="text-sm text-slate-200"
@@ -290,12 +386,12 @@
                   </div>
                 </div>
               {/if}
-              {#if natalMajorAspects.length}
+              {#if filteredNatalMajorAspects.length}
                 <div class="space-y-1">
                   <p class="text-xs text-slate-400">Natal</p>
                   <div id="adv-aspects-major-natal" class="text-sm text-slate-200">
                     <MajorAspectsList
-                      patterns={natalMajorAspects}
+                      patterns={filteredNatalMajorAspects}
                       subject={secondarySubject}
                       size={24}
                       textClass="text-sm text-slate-200"
@@ -305,18 +401,18 @@
                   </div>
                 </div>
               {/if}
-              {#if !majorAspects.length && !natalMajorAspects.length}
+              {#if !filteredMajorAspects.length && !filteredNatalMajorAspects.length}
                 <p class="text-sm text-slate-400">No pattern matches returned.</p>
               {/if}
             </div>
           {/if}
 
-          <CardHeader label="Aspects" badge={filteredAspects.length + filteredNatalAspects.length + synAspects.length} />
+          <CardHeader
+            label="Aspects"
+            badge={isDualMode ? synAspects.length : filteredAspects.length + filteredNatalAspects.length + synAspects.length}
+          />
 
-        {#if currentRows.length}
-          {#if mode === 'relationship'}
-            <p class="text-xs text-slate-400">{subject1Label}</p>
-          {/if}
+        {#if !isDualMode && currentRows.length}
           <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[520px]" id="adv-aspects-current-table">
               <thead class="text-xs text-slate-400">
@@ -350,7 +446,7 @@
             </table>
           </div>
         {/if}
-          {#if natalRows.length}
+          {#if !isDualMode && natalRows.length}
             <div class="space-y-2">
               <p class="text-xs text-slate-400">{subject2Label}</p>
               <div class="overflow-x-auto">
@@ -388,7 +484,7 @@
             </div>
           {/if}
 
-          {#if !filteredAspects.length && !filteredNatalAspects.length}
+          {#if !isDualMode && !filteredAspects.length && !filteredNatalAspects.length}
             <p class="text-sm text-slate-400">No aspects found for the current active points.</p>
           {/if}
 
@@ -402,6 +498,21 @@
             {hideAscendantAspects}
           />
         {/if}
+
+          {#if isDualMode && showMajorAspects}
+            <div id="adv-aspects-synastry-major" class="adv-aspects-synastry-major space-y-2">
+              <CardHeader label="Synastry major aspects" badge={filteredSynastryMajorAspects.length} />
+              <MajorAspectsList
+                patterns={filteredSynastryMajorAspects}
+                subject={primarySubject}
+                subjectsByOwner={synastryOwnerSubjects}
+                size={24}
+                textClass="text-sm text-slate-200"
+                emptyLabel="No synastry major aspects found for the current filters."
+                id="adv-aspects-synastry-major-list"
+              />
+            </div>
+          {/if}
         </div>
       {/if}
     </div>

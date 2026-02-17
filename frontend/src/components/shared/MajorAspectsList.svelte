@@ -10,6 +10,7 @@
   export let emptyLabel = 'No major aspects found.';
   export let showEmpty = true;
   export let id = '';
+  export let subjectsByOwner = null;
 
   const normalizePointKey = (value) =>
     String(value || '')
@@ -25,6 +26,13 @@
     const target = normalizePointKey(key);
     const match = Object.entries(points).find(([name]) => normalizePointKey(name) === target);
     return match ? match[1] : null;
+  };
+
+  const toList = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.filter(Boolean);
+    if (typeof value === 'string') return value.split(',').map((item) => item.trim()).filter(Boolean);
+    return [String(value)];
   };
 
   const formatPointPlacement = (points, key) => {
@@ -60,24 +68,48 @@
     return acc;
   };
 
-  const buildEntries = (items, points) => {
+  const buildOwnerLabels = (ownerSubjects) => ({
+    '1': ownerSubjects?.['1']?.name || ownerSubjects?.[1]?.name || 'Subject 1',
+    '2': ownerSubjects?.['2']?.name || ownerSubjects?.[2]?.name || 'Subject 2',
+  });
+
+  const ownerValues = (pattern) =>
+    toList(pattern?.pointOwners || pattern?.point_owners).map((owner) => String(owner));
+
+  const resolvePointSource = (owner, fallback, ownerSubjects) => {
+    if (!owner) return fallback;
+    if (ownerSubjects?.[owner]) return ownerSubjects[owner];
+    if (ownerSubjects?.[Number(owner)]) return ownerSubjects[Number(owner)];
+    return fallback;
+  };
+
+  const buildEntries = (items, points, ownerSubjects) => {
     if (!Array.isArray(items) || !items.length) return [];
+    const labels = buildOwnerLabels(ownerSubjects);
     return items
       .map((pattern) => {
         const keys = Array.isArray(pattern.points) && pattern.points.length ? pattern.points : collectKeys(pattern.structure);
+        const owners = ownerValues(pattern);
         const uniq = [];
-        keys.forEach((val) => {
+        keys.forEach((val, idx) => {
           const norm = normalizePointKey(val);
-          if (norm && !uniq.includes(norm)) uniq.push(norm);
+          const owner = owners[idx] || '';
+          const identity = owner ? `${owner}:${norm}` : norm;
+          if (norm && !uniq.find((entry) => entry.identity === identity)) {
+            uniq.push({ key: norm, owner, identity });
+          }
         });
-        const placements = uniq.map((val) => formatPointPlacement(points, val)).filter(Boolean).join(' · ');
+        const placements = uniq
+          .map((entry) => formatPointPlacement(resolvePointSource(entry.owner, points, ownerSubjects), entry.key))
+          .filter(Boolean)
+          .join(' · ');
         if (!placements) return null;
-        return { pattern, placements };
+        return { pattern, placements, ownerLabels: labels };
       })
       .filter(Boolean);
   };
 
-  $: entries = buildEntries(patterns, subject || {});
+  $: entries = buildEntries(patterns, subject || {}, subjectsByOwner || null);
 </script>
 
 {#if entries.length}
@@ -86,6 +118,7 @@
       <MajorAspectEntry
         pattern={entry.pattern}
         placements={entry.placements}
+        ownerLabels={entry.ownerLabels}
         {size}
         {textClass}
       />
