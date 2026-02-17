@@ -526,6 +526,47 @@ class TransitMomentRequest(BaseModel):
     )
 
 
+class HousePlanetsMap(BaseModel):
+    """
+    House-indexed projected planets.
+
+    - Keys are house numbers 1..12.
+    - Values are ordered planet keys.
+    - All houses should be present; empty houses use [].
+    """
+
+    houses: dict[int, list[str]] = Field(
+        default_factory=lambda: {idx: [] for idx in range(1, 13)},
+        description="Projected planets per house number.",
+    )
+
+
+class TransitHouseProjections(BaseModel):
+    """
+    Transit planet projection map.
+    """
+
+    transit_into_natal: HousePlanetsMap = Field(
+        default_factory=HousePlanetsMap,
+        description="Transit planets projected into natal houses.",
+    )
+
+
+class RelationshipHouseProjections(BaseModel):
+    """
+    Bi-directional relationship house projection map.
+    """
+
+    first_into_second: HousePlanetsMap = Field(
+        default_factory=HousePlanetsMap,
+        description="First subject planets projected into second subject houses.",
+    )
+    second_into_first: HousePlanetsMap = Field(
+        default_factory=HousePlanetsMap,
+        description="Second subject planets projected into first subject houses.",
+    )
+
+
 class TransitSnapshot(BaseModel):
     """
     Single snapshot within a transit sequence.
@@ -571,6 +612,12 @@ class TransitSnapshot(BaseModel):
         default_factory=list,
         serialization_alias="synastryMajorAspects",
         description="Cross-subject Ptolemaic configurations between transit and natal subjects when provided.",
+    )
+    house_projections: Optional[TransitHouseProjections] = Field(
+        default=None,
+        validation_alias=AliasChoices("house_projections", "houseProjections"),
+        serialization_alias="houseProjections",
+        description="Transit+natal house projection payload when natal chart is provided.",
     )
 
 
@@ -847,6 +894,12 @@ class RelationshipResponse(BaseModel):
         default_factory=list,
         serialization_alias="synastryMajorAspects",
         description="Cross-subject Ptolemaic configurations between first and second subjects.",
+    )
+    house_projections: Optional[RelationshipHouseProjections] = Field(
+        default=None,
+        validation_alias=AliasChoices("house_projections", "houseProjections"),
+        serialization_alias="houseProjections",
+        description="Bi-directional house projections between first and second subjects.",
     )
 
 

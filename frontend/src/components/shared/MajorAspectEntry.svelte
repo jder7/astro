@@ -1,5 +1,5 @@
 <script>
-  import { tick } from 'svelte';
+  import { onDestroy, tick } from 'svelte';
   import { animate, stagger } from 'animejs';
   import MajorAspectIcon from '$components/shared/MajorAspectIcon.svelte';
   import AspectGlyphIcon from '$components/shared/AspectGlyphIcon.svelte';
@@ -13,6 +13,7 @@
   export let pattern = null;
   export let placements = '';
   export let ownerLabels = {};
+  export let pointMeta = {};
   export let size = 22;
   export let textClass = 'text-xs text-slate-200';
 
@@ -21,6 +22,8 @@
   let panelEl;
   let entryEl;
   let panelTop = 16;
+  let copyState = 'idle';
+  let copyResetTimer = null;
 
   const portal = (node) => {
     if (typeof document === 'undefined') return {};
@@ -81,6 +84,88 @@
     if (!label) return '';
     return compact ? ` (${label})` : ` (${truncateOwner(label)})`;
   };
+
+  const resolvePointMeta = (key, owner = '') => {
+    const norm = normalizePointKey(key);
+    const ownerKey = String(owner || '').trim();
+    const byOwner = ownerKey ? pointMeta?.[`${ownerKey}:${norm}`] : null;
+    if (byOwner) return byOwner;
+    return pointMeta?.[norm] || null;
+  };
+
+  const resetCopyStateSoon = () => {
+    if (copyResetTimer) clearTimeout(copyResetTimer);
+    copyResetTimer = setTimeout(() => {
+      copyState = 'idle';
+      copyResetTimer = null;
+    }, 1800);
+  };
+
+  const buildCopyPayload = () => {
+    const points = pointList.map((key, idx) => {
+      const owner = String(pointOwners[idx] || '');
+      const ownerLabel = resolveOwnerLabel(owner);
+      const meta = resolvePointMeta(key, owner) || {};
+      const item = { key };
+      if (ownerLabel) item.ownerLabel = ownerLabel;
+      if (meta?.sign) item.sign = meta.sign;
+      if (meta?.house !== null && meta?.house !== undefined && meta?.house !== '') item.house = meta.house;
+      return item;
+    });
+    const linksPayload = links.map((link) => {
+      const pairOwners = toList(link?.pair_owners || link?.pairOwners);
+      const pair = (link?.pair || []).map((key, idx) => {
+        const owner = String(pairOwners[idx] || '');
+        const ownerLabel = resolveOwnerLabel(owner);
+        const item = { key };
+        if (ownerLabel) item.ownerLabel = ownerLabel;
+        return item;
+      });
+      const entry = { type: link?.type || 'Aspect', pair };
+      if (Number.isFinite(Number(link?.orb))) entry.orb = Number(link.orb);
+      return entry;
+    });
+    const payload = {
+      pattern: {
+        id: pattern?.id || patternId,
+        name: formatted?.name || pattern?.name || 'Pattern',
+      },
+      points,
+      links: linksPayload,
+    };
+    if (aspectList.length) payload.pattern.aspects = [...aspectList];
+    return payload;
+  };
+
+  const copyDetails = async () => {
+    const text = JSON.stringify(buildCopyPayload(), null, 2);
+    try {
+      if (typeof navigator !== 'undefined' && navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else if (typeof document !== 'undefined') {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', 'true');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } else {
+        throw new Error('Clipboard unavailable');
+      }
+      copyState = 'copied';
+      resetCopyStateSoon();
+    } catch (err) {
+      copyState = 'error';
+      resetCopyStateSoon();
+    }
+  };
+
+  onDestroy(() => {
+    if (copyResetTimer) clearTimeout(copyResetTimer);
+  });
 
   const prefersReducedMotion = () =>
     typeof window !== 'undefined' &&
@@ -171,6 +256,7 @@
   $: links = Array.isArray(pattern?.links) ? pattern.links : [];
   $: planetChips = pointList.map((name, idx) => ({ name, icon: pointIcon(name), owner: ownerSuffix(pointOwners[idx], false) }));
   $: aspectChips = aspectList.map((name) => ({ name }));
+  $: copyButtonTitle = copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy details';
 </script>
 
 <div
@@ -218,7 +304,34 @@
             <MajorAspectIcon {patternId} size={256} className="major-aspect-icon--hero" />
           </div>
           <div>
-            <p class="major-aspect-kicker">Major configuration details panel</p>
+            <div class="major-aspect-kicker-row">
+              <p class="major-aspect-kicker">Major configuration details panel</p>
+              <div class="major-aspect-actions">
+                <button
+                  type="button"
+                  class="major-aspect-copy"
+                  on:click={copyDetails}
+                  aria-label={copyButtonTitle}
+                  title={copyButtonTitle}
+                >
+                  {#if copyState === 'copied'}
+                    <span aria-hidden="true">✓</span>
+                  {:else if copyState === 'error'}
+                    <span aria-hidden="true">!</span>
+                  {:else}
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path
+                        d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1Zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H10V7h9v14Z"
+                        fill="currentColor"
+                      ></path>
+                    </svg>
+                  {/if}
+                </button>
+                <button type="button" class="major-aspect-close" on:click={close} aria-label="Close details" title="Close details">
+                  ✕
+                </button>
+              </div>
+            </div>
             <h3 class="major-aspect-name">{formatted.name}</h3>
             {#if formatted.entryPoints}
               <p class="major-aspect-points">{formatted.entryPoints}</p>
@@ -228,9 +341,6 @@
             {/if}
           </div>
         </div>
-        <button type="button" class="major-aspect-close" on:click={close} aria-label="Close details">
-          Close
-        </button>
       </div>
 
       <div class="major-aspect-body">
@@ -429,6 +539,13 @@
     margin: 0;
   }
 
+  .major-aspect-kicker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
   .major-aspect-name {
     margin: 0.2rem 0 0;
     font-size: 1.3rem;
@@ -455,13 +572,43 @@
   }
 
   .major-aspect-close {
-    align-self: flex-start;
     border: 1px solid rgba(148, 163, 184, 0.35);
     background: rgba(15, 23, 42, 0.65);
     color: #e2e8f0;
     border-radius: 999px;
-    padding: 0.4rem 0.9rem;
-    font-size: 0.8rem;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 0.85rem;
+  }
+
+  .major-aspect-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .major-aspect-copy {
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    background: rgba(8, 47, 73, 0.45);
+    color: #bae6fd;
+    border-radius: 999px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .major-aspect-copy svg {
+    width: 15px;
+    height: 15px;
   }
 
   .major-aspect-body {

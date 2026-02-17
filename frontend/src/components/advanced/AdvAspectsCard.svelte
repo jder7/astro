@@ -85,6 +85,32 @@
     return { keep: true, reason: 'kept', linkOrbs };
   };
 
+  const parsePlanetsCount = (pattern) => {
+    const points = Array.isArray(pattern?.points) ? pattern.points.filter(Boolean) : [];
+    if (points.length) return points.length;
+    const fromLabel = Number.parseInt(String(pattern?.planets || '').match(/\d+/)?.[0] || '', 10);
+    return Number.isFinite(fromLabel) && fromLabel > 0 ? fromLabel : 0;
+  };
+
+  const majorScore = (pattern) => {
+    const links = Array.isArray(pattern?.links) ? pattern.links : [];
+    const orbSum = links.reduce((sum, link) => {
+      const value = Number(link?.orb);
+      return Number.isFinite(value) ? sum + Math.abs(value) : sum;
+    }, 0);
+    const planetsCount = parsePlanetsCount(pattern);
+    if (!planetsCount) return Number.POSITIVE_INFINITY;
+    return orbSum / planetsCount;
+  };
+
+  const sortMajorPatternsByScore = (patterns = []) =>
+    (Array.isArray(patterns) ? patterns : []).slice().sort((a, b) => {
+      const aScore = majorScore(a);
+      const bScore = majorScore(b);
+      if (aScore !== bScore) return aScore - bScore;
+      return String(a?.name || a?.id || '').localeCompare(String(b?.name || b?.id || ''));
+    });
+
   const bucketMajorPatterns = (patterns = [], options = {}) => {
     const keptPatterns = [];
     const kept = [];
@@ -266,9 +292,9 @@
   $: majorBuckets = bucketMajorPatterns(majorAspects, majorFilterOptions);
   $: natalMajorBuckets = bucketMajorPatterns(natalMajorAspects, majorFilterOptions);
   $: synastryMajorBuckets = bucketMajorPatterns(synastryMajorAspects, majorFilterOptions);
-  $: filteredMajorAspects = majorBuckets.keptPatterns;
-  $: filteredNatalMajorAspects = natalMajorBuckets.keptPatterns;
-  $: filteredSynastryMajorAspects = synastryMajorBuckets.keptPatterns;
+  $: filteredMajorAspects = sortMajorPatternsByScore(majorBuckets.keptPatterns);
+  $: filteredNatalMajorAspects = sortMajorPatternsByScore(natalMajorBuckets.keptPatterns);
+  $: filteredSynastryMajorAspects = sortMajorPatternsByScore(synastryMajorBuckets.keptPatterns);
   $: {
     const logKey = JSON.stringify({
       orbLimit,

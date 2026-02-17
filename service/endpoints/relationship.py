@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from service.schemas import RelationshipRequest, RelationshipResponse
 from service.utils import (
+    HouseProjectionEngine,
     compute_dual_chart_aspects,
     compute_major_aspects,
     compute_normal_aspects,
@@ -11,6 +12,7 @@ from service.utils import (
 )
 
 router = APIRouter(tags=["relationship"])
+projection_engine = HouseProjectionEngine()
 
 
 @router.post("/relationship", response_model=RelationshipResponse)
@@ -37,6 +39,7 @@ async def relationship(payload: RelationshipRequest) -> RelationshipResponse:
     first_major = compute_major_aspects(first_dict, active_points=cfg.active_points)
     second_major = compute_major_aspects(second_dict, active_points=cfg.active_points)
     synastry_major_aspects = compute_synastry_major_aspects(first_dict, second_dict, cfg.active_points)
+    house_projections = projection_engine.build_relationship_response(first_dict, second_dict, cfg.active_points)
     return RelationshipResponse(
         first_subject=first_dict,
         second_subject=second_dict,
@@ -46,4 +49,5 @@ async def relationship(payload: RelationshipRequest) -> RelationshipResponse:
         natal_major_aspects=second_major,
         synastry=aspects_dump,
         synastry_major_aspects=synastry_major_aspects,
+        house_projections=house_projections,
     )

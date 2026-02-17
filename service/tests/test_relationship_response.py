@@ -15,6 +15,9 @@ class TestRelationshipResponse(unittest.TestCase):
         self.assertNotIn("point_sign_range", data)
         self.assertIsInstance(response.aspects, list)
         self.assertIsInstance(response.synastry_major_aspects, list)
+        self.assertIsNotNone(response.house_projections)
+        self.assertEqual(set(response.house_projections.first_into_second.houses.keys()), set(range(1, 13)))
+        self.assertEqual(set(response.house_projections.second_into_first.houses.keys()), set(range(1, 13)))
         if response.synastry_major_aspects:
             first_pattern = response.synastry_major_aspects[0]
             self.assertIsInstance(first_pattern.point_owners, list)

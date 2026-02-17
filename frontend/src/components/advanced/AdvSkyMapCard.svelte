@@ -20,6 +20,28 @@
       .replace(/[^a-z0-9_]+/g, '');
 
   const normalizeRangeId = (value) => (typeof value === 'string' ? value.toLowerCase() : null);
+  const HOUSE_WORD_TO_NUM = {
+    first: 1,
+    second: 2,
+    third: 3,
+    fourth: 4,
+    fifth: 5,
+    sixth: 6,
+    seventh: 7,
+    eighth: 8,
+    ninth: 9,
+    tenth: 10,
+    eleventh: 11,
+    twelfth: 12,
+  };
+  const PLANET_KEYS = new Set(['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron']);
+
+  const pickFirst = (...values) => {
+    for (const value of values) {
+      if (value !== null && value !== undefined) return value;
+    }
+    return null;
+  };
 
   const filterPointsByActive = (points, activeSet) => {
     if (!points || typeof points !== 'object' || !activeSet || !activeSet.size) return points || {};
@@ -66,6 +88,7 @@
   };
 
   const shapeHouse = ([key, house]) => ({
+    num: houseNumFromValues(house?.house_num, house?.house, house?.name, key),
     key,
     label: houseRoman(house.house || house.name || key) || formatHouseName(house.house || house.name || key),
     sign: signName(house.sign),
@@ -78,17 +101,124 @@
   elementColor: ELEMENT_HEX[house.element] || ELEMENT_HEX.Default,
   });
 
+  const parseHousePlanetsMap = (value) => {
+    const raw = value?.houses && typeof value.houses === 'object' ? value.houses : value;
+    const out = {};
+    if (!raw || typeof raw !== 'object') return out;
+    Object.entries(raw).forEach(([key, list]) => {
+      const houseNum = Number(key);
+      if (!Number.isInteger(houseNum) || houseNum < 1 || houseNum > 12) return;
+      out[houseNum] = Array.isArray(list) ? list.map((item) => normalizePointKey(item)).filter(Boolean) : [];
+    });
+    return out;
+  };
+
+  const houseNumFromValues = (...values) => {
+    for (const value of values) {
+      const asNumber = Number(String(value ?? '').trim());
+      if (Number.isInteger(asNumber) && asNumber >= 1 && asNumber <= 12) return asNumber;
+      const raw = String(value || '')
+        .trim()
+        .toLowerCase();
+      if (!raw) continue;
+      const digitMatch = raw.match(/(\d+)/);
+      if (digitMatch) {
+        const parsed = Number(digitMatch[1]);
+        if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 12) return parsed;
+      }
+      for (const [word, num] of Object.entries(HOUSE_WORD_TO_NUM)) {
+        if (raw.includes(word)) return num;
+      }
+    }
+    return null;
+  };
+
+  const buildOwnPlanetsByHouse = (points = {}, activePlanetOrder = []) => {
+    const houses = Object.fromEntries(Array.from({ length: 12 }, (_, idx) => [idx + 1, []]));
+    const pointsByNorm = {};
+    Object.entries(points || {}).forEach(([key, point]) => {
+      const normKey = normalizePointKey(key);
+      if (!normKey || !PLANET_KEYS.has(normKey)) return;
+      pointsByNorm[normKey] = point;
+    });
+    const ordered = activePlanetOrder.filter((key) => PLANET_KEYS.has(key));
+    ordered.forEach((planetKey) => {
+      const point = pointsByNorm[planetKey];
+      if (!point || typeof point !== 'object') return;
+      const houseNum = houseNumFromValues(point.house_num, point.house);
+      if (!houseNum) return;
+      houses[houseNum].push(planetKey);
+    });
+    return houses;
+  };
+
+  const pointLabel = (key) =>
+    String(key || '')
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase())
+      .trim();
+
+  const buildPointMeta = (points = {}) => {
+    const out = {};
+    Object.entries(points || {}).forEach(([key, point]) => {
+      const normKey = normalizePointKey(key);
+      if (!normKey) return;
+      out[normKey] = {
+        icon: POINT_SYMBOLS[normKey] || '★',
+        name: point?.name || pointLabel(normKey),
+      };
+    });
+    return out;
+  };
+
+  const planetsForHouse = (map, houseNum) => {
+    const list = map?.[Number(houseNum)];
+    return Array.isArray(list) ? list : [];
+  };
+
+  const planetsIcons = (map, houseNum, pointMeta) =>
+    planetsForHouse(map, houseNum)
+      .map((key) => pointMeta?.[key]?.icon || POINT_SYMBOLS[key] || '★')
+      .join(' ');
+
+  const planetsTooltip = (map, houseNum, pointMeta) =>
+    planetsForHouse(map, houseNum)
+      .map((key) => `${pointMeta?.[key]?.icon || POINT_SYMBOLS[key] || '★'} ${pointMeta?.[key]?.name || pointLabel(key)}`)
+      .join(', ');
+
   $: subjects = extractSubjects(response, mode);
   $: primaryPoints = collectPoints(subjects.primary || {});
   $: natalPoints = collectPoints(subjects.natal || {});
   $: filteredPrimaryPoints = filterPointsByActive(primaryPoints.points, activeSet);
   $: pointRows = Object.entries(filteredPrimaryPoints || {}).map(shapePoint);
-  $: houseRows = Object.entries(primaryPoints.houses || {}).map(shapeHouse);
+  $: houseRows = Object.entries(primaryPoints.houses || {})
+    .map(shapeHouse)
+    .sort((a, b) => (a.num || 99) - (b.num || 99));
   $: filteredNatalPoints = filterPointsByActive(natalPoints.points, activeSet);
   $: natalPointRows = Object.entries(filteredNatalPoints || {}).map(shapePoint);
-  $: natalHouseRows = Object.entries(natalPoints.houses || {}).map(shapeHouse);
+  $: natalHouseRows = Object.entries(natalPoints.houses || {})
+    .map(shapeHouse)
+    .sort((a, b) => (a.num || 99) - (b.num || 99));
   $: sunRanges = extractPointRanges(response, 'sun') || [];
   $: activeSet = new Set(($configStore?.active_points || []).map(normalizePointKey));
+  $: activePlanetOrder = ($configStore?.active_points || []).map(normalizePointKey).filter((key) => PLANET_KEYS.has(key));
+  $: houseProjections = pickFirst(
+    response?.snapshot?.houseProjections,
+    response?.snapshot?.house_projections,
+    response?.houseProjections,
+    response?.house_projections
+  );
+  $: transitIntoNatal = parseHousePlanetsMap(pickFirst(houseProjections?.transitIntoNatal, houseProjections?.transit_into_natal));
+  $: firstIntoSecond = parseHousePlanetsMap(pickFirst(houseProjections?.firstIntoSecond, houseProjections?.first_into_second));
+  $: secondIntoFirst = parseHousePlanetsMap(pickFirst(houseProjections?.secondIntoFirst, houseProjections?.second_into_first));
+  $: primaryProjectedPlanets = mode === 'relationship' ? secondIntoFirst : {};
+  $: natalProjectedPlanets = mode === 'natal_transit' ? transitIntoNatal : mode === 'relationship' ? firstIntoSecond : {};
+  $: showPrimaryProjectedColumn = mode === 'relationship';
+  $: showNatalProjectedColumn = mode === 'natal_transit' || mode === 'relationship';
+  $: primaryOwnPlanets = buildOwnPlanetsByHouse(primaryPoints.points || {}, activePlanetOrder);
+  $: natalOwnPlanets = buildOwnPlanetsByHouse(natalPoints.points || {}, activePlanetOrder);
+  $: primaryPointMeta = buildPointMeta(primaryPoints.points || {});
+  $: natalPointMeta = buildPointMeta(natalPoints.points || {});
   $: pointsByRangeId = (() => {
     const map = {};
     addPointsForRange(map, 'transit', response?.snapshot?.subject, activeSet);
@@ -222,6 +352,10 @@
                     <tr>
                       <th class="py-2 pr-3 text-left">House</th>
                       <th class="py-2 pr-3 text-left">Sign</th>
+                      <th class="py-2 pr-3 text-left">Planets</th>
+                      {#if showPrimaryProjectedColumn}
+                        <th class="py-2 pr-3 text-left">Projected</th>
+                      {/if}
                       <th class="py-2 pr-3 text-left">Element</th>
                       <th class="py-2 pr-3 text-left">Quality</th>
                       <th class="py-2 pr-3 text-left">Degree</th>
@@ -232,6 +366,28 @@
                       <tr>
                         <td class="py-2 pr-3">{row.label}</td>
                         <td class="py-2 pr-3">{row.sign} {row.signIcon}</td>
+                        <td class="py-2 pr-3">
+                          {#if planetsForHouse(primaryOwnPlanets, row.num).length}
+                            {@const tooltip = planetsTooltip(primaryOwnPlanets, row.num, primaryPointMeta)}
+                            <span class="house-proj-icons" title={tooltip} aria-label={tooltip}>
+                              {planetsIcons(primaryOwnPlanets, row.num, primaryPointMeta)}
+                            </span>
+                          {:else}
+                            —
+                          {/if}
+                        </td>
+                        {#if showPrimaryProjectedColumn}
+                          <td class="py-2 pr-3">
+                            {#if planetsForHouse(primaryProjectedPlanets, row.num).length}
+                              {@const tooltip = planetsTooltip(primaryProjectedPlanets, row.num, natalPointMeta)}
+                              <span class="house-proj-icons" title={tooltip} aria-label={tooltip}>
+                                {planetsIcons(primaryProjectedPlanets, row.num, natalPointMeta)}
+                              </span>
+                            {:else}
+                              —
+                            {/if}
+                          </td>
+                        {/if}
                         <td class="py-2 pr-3">
                           <span style={`color:${row.elementColor}`}>{row.elementIcon} {row.element || '—'}</span>
                         </td>
@@ -299,6 +455,10 @@
                       <tr>
                         <th class="py-2 pr-3 text-left">House</th>
                         <th class="py-2 pr-3 text-left">Sign</th>
+                        <th class="py-2 pr-3 text-left">Planets</th>
+                        {#if showNatalProjectedColumn}
+                          <th class="py-2 pr-3 text-left">Projected</th>
+                        {/if}
                         <th class="py-2 pr-3 text-left">Element</th>
                         <th class="py-2 pr-3 text-left">Quality</th>
                         <th class="py-2 pr-3 text-left">Degree</th>
@@ -309,6 +469,28 @@
                         <tr>
                           <td class="py-2 pr-3">{row.label}</td>
                           <td class="py-2 pr-3" style={`color:${row.elementColor}`}>{row.sign} {row.signIcon}</td>
+                          <td class="py-2 pr-3">
+                            {#if planetsForHouse(natalOwnPlanets, row.num).length}
+                              {@const tooltip = planetsTooltip(natalOwnPlanets, row.num, natalPointMeta)}
+                              <span class="house-proj-icons" title={tooltip} aria-label={tooltip}>
+                                {planetsIcons(natalOwnPlanets, row.num, natalPointMeta)}
+                              </span>
+                            {:else}
+                              —
+                            {/if}
+                          </td>
+                          {#if showNatalProjectedColumn}
+                            <td class="py-2 pr-3">
+                              {#if planetsForHouse(natalProjectedPlanets, row.num).length}
+                                {@const tooltip = planetsTooltip(natalProjectedPlanets, row.num, primaryPointMeta)}
+                                <span class="house-proj-icons" title={tooltip} aria-label={tooltip}>
+                                  {planetsIcons(natalProjectedPlanets, row.num, primaryPointMeta)}
+                                </span>
+                              {:else}
+                                —
+                              {/if}
+                            </td>
+                          {/if}
                           <td class="py-2 pr-3">
                             <span style={`color:${row.elementColor}`}>{row.elementIcon} {row.element || '—'}</span>
                           </td>
@@ -340,5 +522,11 @@
     color: #e2f3ff;
     background: color-mix(in srgb, var(--badge, #22d3ee) 32%, rgba(15, 23, 42, 0.85));
     border: 1px solid color-mix(in srgb, var(--badge, #22d3ee) 45%, rgba(255, 255, 255, 0.1));
+  }
+
+  .house-proj-icons {
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    cursor: default;
   }
 </style>

@@ -36,6 +36,12 @@ class TestTransitSynastry(unittest.TestCase):
         self.assertIsInstance(response.snapshot.synastry, dict)
         self.assertIn("aspects", response.snapshot.synastry)
         self.assertIsInstance(response.snapshot.synastry_major_aspects, list)
+        self.assertIsNotNone(response.snapshot.house_projections)
+        self.assertTrue(hasattr(response.snapshot.house_projections, "transit_into_natal"))
+        self.assertEqual(
+            set(response.snapshot.house_projections.transit_into_natal.houses.keys()),
+            set(range(1, 13)),
+        )
         if response.snapshot.synastry_major_aspects:
             first = response.snapshot.synastry_major_aspects[0]
             self.assertIsInstance(first.point_owners, list)
@@ -45,6 +51,7 @@ class TestTransitSynastry(unittest.TestCase):
         response = asyncio.run(transit_snapshot(payload))
         self.assertIsNone(response.snapshot.synastry)
         self.assertEqual(response.snapshot.synastry_major_aspects, [])
+        self.assertIsNone(response.snapshot.house_projections)
 
 
 if __name__ == "__main__":

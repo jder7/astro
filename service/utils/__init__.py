@@ -13,6 +13,7 @@ from .formatting import format_degree, house_display, sign_display
 from .pdf import render_pdf_from_svg, render_report_text_pdf, render_structured_report_pdf, transform_report_text
 from .ranges import add_months, iter_range_datetimes, to_local_datetime
 from .reports import generate_report_content, generate_report_text, render_markdown_report
+from .house_projections import HouseProjectionEngine
 from .subjects import (
     build_subject,
     build_subject_block,
@@ -40,6 +41,7 @@ __all__ = [
     "format_degree",
     "generate_report_content",
     "generate_report_text",
+    "HouseProjectionEngine",
     "house_display",
     "iter_range_datetimes",
     "normalize_svg_colors",

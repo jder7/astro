@@ -4,6 +4,7 @@ from kerykeion import AspectsFactory  # type: ignore
 from service.schemas import TransitMomentRequest, TransitResponse, TransitSnapshot, BirthData
 from service.aspects.point_range import compute_point_sign_range
 from service.utils import (
+    HouseProjectionEngine,
     build_subject,
     compute_major_aspects,
     compute_normal_aspects,
@@ -14,6 +15,7 @@ from service.utils import (
 )
 
 router = APIRouter(tags=["transit"])
+projection_engine = HouseProjectionEngine()
 
 
 @router.post("/transit", response_model=TransitResponse)
@@ -57,6 +59,7 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
     natal_major_aspects = None
     synastry = None
     synastry_major_aspects = []
+    house_projections = None
     if payload.birth is not None:
         natal_subject = build_subject(payload.birth, cfg)
         natal_dict = natal_subject.model_dump(mode="json")
@@ -66,6 +69,7 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
         synastry_model = filter_aspects_model(synastry_model, cfg.active_points)
         synastry = synastry_model.model_dump(mode="json")
         synastry_major_aspects = compute_synastry_major_aspects(transit_dict, natal_dict, cfg.active_points)
+        house_projections = projection_engine.build_transit_response(transit_dict, natal_dict, cfg.active_points)
 
     timestamp = to_local_datetime(moment_birth)
     point_sign_range = []
@@ -104,6 +108,7 @@ async def transit_snapshot(payload: TransitMomentRequest) -> TransitResponse:
         natal_major_aspects=natal_major_aspects,
         synastry=synastry,
         synastry_major_aspects=synastry_major_aspects,
+        house_projections=house_projections,
         point_sign_range=point_sign_range,
     )
     return TransitResponse(snapshot=snapshot)

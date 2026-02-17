@@ -83,6 +83,18 @@
     return fallback;
   };
 
+  const resolveHouseValue = (point) => {
+    if (!point || typeof point !== 'object') return null;
+    const candidates = [point.house, point.house_number, point.houseNumber];
+    for (const value of candidates) {
+      if (value === null || value === undefined || value === '') continue;
+      const asNum = Number(value);
+      if (Number.isFinite(asNum)) return asNum;
+      return String(value);
+    }
+    return null;
+  };
+
   const buildEntries = (items, points, ownerSubjects) => {
     if (!Array.isArray(items) || !items.length) return [];
     const labels = buildOwnerLabels(ownerSubjects);
@@ -104,7 +116,18 @@
           .filter(Boolean)
           .join(' · ');
         if (!placements) return null;
-        return { pattern, placements, ownerLabels: labels };
+        const pointMeta = uniq.reduce((acc, entry) => {
+          const source = resolvePointSource(entry.owner, points, ownerSubjects);
+          const point = pickPoint(source, entry.key) || {};
+          const identity = entry.owner ? `${entry.owner}:${entry.key}` : entry.key;
+          acc[identity] = {
+            sign: point.sign || '',
+            house: resolveHouseValue(point),
+            ownerLabel: labels[entry.owner] || '',
+          };
+          return acc;
+        }, {});
+        return { pattern, placements, ownerLabels: labels, pointMeta };
       })
       .filter(Boolean);
   };
@@ -119,6 +142,7 @@
         pattern={entry.pattern}
         placements={entry.placements}
         ownerLabels={entry.ownerLabels}
+        pointMeta={entry.pointMeta}
         {size}
         {textClass}
       />

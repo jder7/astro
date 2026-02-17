@@ -36,6 +36,7 @@
   $: timeLabel = formatTime(value);
   $: datetimeDisplay = `${dateLabel || 'YYYY-MM-DD'} · ${timeLabel || 'HH:MM'}`;
   $: displayName = formatNameWithGender(nameValue, genderValue);
+  $: genderIcon = genderValue === 'female' ? '♀' : genderValue === 'male' ? '♂' : '-';
   $: historyEntries = $subjectHistoryStore || [];
   $: currentHistoryLabel = buildHistoryLabel(value);
   $: navState = $navigationStore;
@@ -147,7 +148,7 @@
             aria-label="Toggle gender options"
             on:click={() => (showGender = !showGender)}
           >
-            ♀
+            {genderIcon}
           </button>
         </div>
         <button
@@ -194,7 +195,7 @@
                 aria-label="Gender: Female"
                 on:click={() => onChange({ gender: 'female' })}
               >
-                F
+                ♀
               </button>
               <button
                 type="button"
@@ -207,7 +208,7 @@
                 aria-label="Gender: Male"
                 on:click={() => onChange({ gender: 'male' })}
               >
-                M
+                ♂
               </button>
             </div>
           </div>
