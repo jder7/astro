@@ -129,6 +129,27 @@ export const signAbbrev = (sign) => {
   return clean ? clean.slice(0, 3) : '—';
 };
 
+// Sign to element mapping
+export const SIGN_ELEMENTS = {
+  aries: 'Fire', ari: 'Fire',
+  taurus: 'Earth', tau: 'Earth',
+  gemini: 'Air', gem: 'Air',
+  cancer: 'Water', can: 'Water',
+  leo: 'Fire',
+  virgo: 'Earth', vir: 'Earth',
+  libra: 'Air', lib: 'Air',
+  scorpio: 'Water', sco: 'Water',
+  sagittarius: 'Fire', sag: 'Fire',
+  capricorn: 'Earth', cap: 'Earth',
+  aquarius: 'Air', aqu: 'Air',
+  pisces: 'Water', pis: 'Water',
+};
+
+export const signElement = (sign) => {
+  const clean = String(sign || '').trim().toLowerCase();
+  return SIGN_ELEMENTS[clean] || 'Default';
+};
+
 export const POINT_SYMBOLS = POINT_ICONS;
 
 export const ACTIVE_POINTS = [

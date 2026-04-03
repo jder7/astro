@@ -31,6 +31,24 @@ export const ASPECT_COLOR_CLASSES = {
   default: 'text-slate-300',
 };
 
+// Hex colors for SVG rendering (matching Tailwind classes)
+export const ASPECT_HEX_COLORS = {
+  opposition: '#fb7185',   // rose-400
+  square: '#fb7185',
+  semisquare: '#fb7185',
+  sesquiquadrate: '#fb7185',
+  quincunx: '#fb7185',
+  conjunction: '#6ee7b7',  // emerald-300
+  trine: '#6ee7b7',
+  sextile: '#6ee7b7',
+  quintile: '#6ee7b7',
+  biquintile: '#6ee7b7',
+  semisextile: '#6ee7b7',
+  septile: '#6ee7b7',
+  novile: '#6ee7b7',
+  default: '#cbd5e1',      // slate-300
+};
+
 export const ASPECT_MULTIPLIERS = {
   conjunction: 4,
   trine: 3,
@@ -56,6 +74,11 @@ export const aspectIcon = (name) => {
 export const aspectColorClass = (name) => {
   const key = String(name || '').trim().toLowerCase();
   return ASPECT_COLOR_CLASSES[key] || ASPECT_COLOR_CLASSES.default;
+};
+
+export const aspectHexColor = (name) => {
+  const key = String(name || '').trim().toLowerCase();
+  return ASPECT_HEX_COLORS[key] || ASPECT_HEX_COLORS.default;
 };
 
 export const aspectMultiplier = (name) => {

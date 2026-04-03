@@ -11,7 +11,12 @@
   export let showMatrices = true;
   export let movementFilter = 'both';
   export let hideAscendantAspects = false;
+  export let enabledAspects = null;  // Set of enabled aspect keys (optional)
+  export let onToggleAspect = null;  // Function to toggle single aspect
+  export let onToggleAll = null;     // Function to toggle all aspects
+  export let aspectKeyFn = null;     // Function to generate aspect key
   $: orbLimit = Number.isFinite(Number(maxOrb)) ? Number(maxOrb) : 10;
+  $: showToggles = enabledAspects !== null && onToggleAspect !== null;
 
   const normalize = (value) => String(value || '').trim().replace(/\s+/g, '_').toLowerCase();
   const stripOwner = (value) => String(value || '').replace(/\s*\([^)]*\)\s*/g, '').trim();
@@ -166,7 +171,11 @@
         : true,
     );
   $: formattedSyn = filteredSynAspects.map(formatAspect).filter(Boolean);
-  $: synRows = sortBy(formattedSyn.map(formatAspectRow).filter(Boolean), sortState.column, sortState.direction);
+  $: synRows = sortBy(formattedSyn.map((a, i) => ({ ...formatAspectRow(a), _original: filteredSynAspects[i], _idx: i })).filter(Boolean), sortState.column, sortState.direction);
+
+  // Check if all aspects are enabled
+  $: allEnabled = showToggles && enabledAspects && filteredSynAspects.length > 0 && 
+    filteredSynAspects.every((a, i) => enabledAspects.has(aspectKeyFn ? aspectKeyFn(a, i) : `${a.left}_${a.name}_${a.right}_${i}`));
 
 </script>
 
@@ -183,6 +192,17 @@
         <table class="w-full text-sm min-w-[520px]" id="adv-aspects-synastry-table">
           <thead class="text-xs text-slate-400">
             <tr>
+              {#if showToggles}
+                <th class="py-2 pr-2 text-center w-8">
+                  <input
+                    type="checkbox"
+                    checked={allEnabled}
+                    on:change={() => onToggleAll && onToggleAll(filteredSynAspects, !allEnabled)}
+                    title={allEnabled ? 'Hide all from skymap' : 'Show all in skymap'}
+                    class="w-3 h-3 accent-violet-500"
+                  />
+                </th>
+              {/if}
               <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('base')}>From</th>
               <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('aspect')}>Aspect</th>
               <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('other')}>To</th>
@@ -193,6 +213,17 @@
           <tbody class="divide-y divide-slate-800">
             {#each synRows as aspect}
               <tr>
+                {#if showToggles}
+                  <td class="py-2 pr-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={enabledAspects && enabledAspects.has(aspectKeyFn ? aspectKeyFn(aspect._original, aspect._idx) : `${aspect._original?.left}_${aspect._original?.name}_${aspect._original?.right}_${aspect._idx}`)}
+                      on:change={() => onToggleAspect && onToggleAspect(aspect._original, aspect._idx)}
+                      title="Toggle skymap visibility"
+                      class="w-3 h-3 accent-violet-500"
+                    />
+                  </td>
+                {/if}
                 <td class="py-2 pr-3 whitespace-nowrap">
                   <span title={`${aspect.base} ${aspect.baseSign}`.trim()}>
                     {aspect.baseIcon} {truncateText(aspect.base)} {aspect.baseSign}

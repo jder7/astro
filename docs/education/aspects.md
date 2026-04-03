@@ -84,6 +84,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 
 **Keywords:** fusion, concentration, “one instrument with two tones”, seed of a new cycle.
 
+**Core dynamic:** Connection; blend  
+**Impressions:** synergized, blended, infused, connected, influenced, activated, enhanced  
+**Integration:** initiated, acted upon, focalized, imbued, incorporated, implemented
+
 #### Detailed meaning and interpretation
 
 - **Natal:** Two planetary functions are fused into one dominant focus. It can feel like *power* (high coherence) or *overload* (too much of one theme) depending on the planets and houses involved.
@@ -118,6 +122,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 
 **Keywords:** opportunity, cooperation, helpful contacts, skills-in-development.
 
+**Core dynamic:** Opportunity; potential  
+**Impressions:** possible, opportune, open, inclined, ease, presented, latent, capable  
+**Integration:** realized, implemented, acknowledged, allowed, accepted, chosen, applied
+
 #### Detailed meaning and interpretation
 
 - **Natal:** Two functions cooperate easily, but the person often must **choose** to use the pathway (a sextile can sit dormant).
@@ -150,6 +158,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 **Angle:** 90° • **Orb:** ~6–8° • **Nature:** hard/dynamic.
 
 **Keywords:** friction, urgency, obstacle-as-teacher, action under pressure.
+
+**Core dynamic:** Challenge; unease  
+**Impressions:** blocked, restricted, challenged, difficult, different, exclusive, disharmonious  
+**Integration:** reconciled, harmonized, integrated, developed, adjusted, strengthened
 
 #### Detailed meaning and interpretation
 
@@ -184,6 +196,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 
 **Keywords:** ease, talent, support, natural affinity (risk: complacency).
 
+**Core dynamic:** Harmony; support  
+**Impressions:** harmonious, enriched, complementary, supportive, natural, flowing, easy  
+**Integration:** actualized, substantiated, appreciated, developed, made use of, valued
+
 #### Detailed meaning and interpretation
 
 - **Natal:** Gifts and effortless strengths. The danger is undervaluing them because they feel “normal.”
@@ -216,6 +232,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 **Angle:** 180° • **Orb:** ~6–8° • **Nature:** hard/polar.
 
 **Keywords:** projection, balance, axis tension, “two ends of one field.”
+
+**Core dynamic:** Disparity; duality  
+**Impressions:** polar, dual, tense, imbalanced, divided, mirrored, prompted, torn, distinct  
+**Integration:** balanced, united, settled, stabilized, made whole, bridged, mediated
 
 #### Detailed meaning and interpretation
 
@@ -250,6 +270,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 
 **Keywords:** adjacent contrast, small adjustments, “next step,” latent opportunity.
 
+**Core dynamic:** Transition; adaptation  
+**Impressions:** adjacent, subtle, offset, tentative, uneven, curious, incremental, preparatory  
+**Integration:** aligned, linked, sequenced, refined, coordinated, bridged, integrated
+
 #### Detailed meaning and interpretation
 
 - **Natal:** Two parts of life sit side-by-side but don’t naturally cooperate. You learn to link them by habit and sequencing.
@@ -280,6 +304,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 **Angle:** 150° • **Orb:** ~2–3° • **Nature:** minor but potent.
 
 **Keywords:** misfit, incompatibility, health/service, re-calibration, compartmentalization.
+
+**Core dynamic:** Mismatch; recalibration  
+**Impressions:** awkward, misfitting, strained, uncertain, compensatory, fragmented, uneasy, corrective  
+**Integration:** recalibrated, reorganized, adjusted, healed, streamlined, resourced, balanced
 
 #### Detailed meaning and interpretation
 
@@ -313,6 +341,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 
 **Keywords:** irritant, restlessness, persistent itch, small conflicts that accumulate.
 
+**Core dynamic:** Irritation; friction  
+**Impressions:** irritated, restless, pressured, prickly, uneasy, reactive, edgy, repetitive  
+**Integration:** corrected, regulated, disciplined, clarified, redirected, steadied, strengthened
+
 #### Detailed meaning and interpretation
 
 - **Natal:** A low-level friction that quietly shapes behavior. It becomes obvious through recurring micro-frustrations.
@@ -343,6 +375,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 **Angle:** 135° • **Orb:** ~1–2° • **Nature:** minor hard (8th-harmonic).
 
 **Keywords:** strain, external pressure, repeated bumps, reorientation.
+
+**Core dynamic:** Stress; realignment  
+**Impressions:** pressured, strained, overextended, disrupted, repetitive, destabilized, demanding  
+**Integration:** reoriented, restructured, repaired, prioritized, stabilized, mastered, consolidated
 
 #### Detailed meaning and interpretation
 
@@ -376,6 +412,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 
 **Keywords:** craft, ingenuity, design sense, specialized talent.
 
+**Core dynamic:** Creativity; craft  
+**Impressions:** inventive, inspired, skillful, nuanced, precise, elegant, expressive, exploratory  
+**Integration:** crafted, designed, practiced, perfected, articulated, produced, manifested
+
 #### Detailed meaning and interpretation
 
 - **Natal:** A precise gift—often technical, artistic or “how I do it better than average.” Feels like a signature style.
@@ -406,6 +446,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 
 **Keywords:** polished talent, creative delivery, collaborative mastery.
 
+**Core dynamic:** Mastery; expression  
+**Impressions:** refined, polished, expressive, collaborative, advanced, composed, purposeful, resonant  
+**Integration:** finalized, delivered, shared, demonstrated, mentored, elevated, embodied
+
 #### Detailed meaning and interpretation
 - **Natal:** A more *developed* or outward-facing form of the quintile: you can shape raw material into something refined.
 - **Transit:** Excellent for presentation, finishing work and making the “final version.”
@@ -435,6 +479,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 **Angle:** ~51°26′ (1/7 circle) • **Orb:** very tight (~1°) • **Nature:** mystical/fated.
 
 **Keywords:** synchronicity, non-linear turning points, “strange attraction,” destiny forks.
+
+**Core dynamic:** Destiny; attunement  
+**Impressions:** fated, intuitive, symbolic, uncanny, magnetic, non-linear, evocative, meaningful  
+**Integration:** discerned, trusted, aligned, consecrated, committed, grounded, integrated
 
 #### Detailed meaning and interpretation
 
@@ -467,6 +515,10 @@ These are **interpretive lenses**, not “rules.” Use them to describe *how th
 **Angle:** 40° (1/9 circle) • **Orb:** ~1–2° • **Nature:** subtle spiritual-developmental.
 
 **Keywords:** inner completion, quiet fruition, gestation, maturation.
+
+**Core dynamic:** Completion; maturation  
+**Impressions:** ripening, contemplative, quiet, fulfilled, softened, integrative, devotional, concluding  
+**Integration:** completed, assimilated, reconciled, released, blessed, stabilized, renewed
 
 #### Detailed meaning and interpretation
 

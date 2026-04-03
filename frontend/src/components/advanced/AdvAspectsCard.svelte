@@ -6,6 +6,7 @@
   import AdvAspectsConfigPanel from '$components/advanced/AdvAspectsConfigPanel.svelte';
   import CardHeader from '$components/shared/CardHeader.svelte';
   import ConfigIcon from '$components/visual/ConfigIcon.svelte';
+  import SkyMapAspects from '$components/shared/SkyMapAspects.svelte';
   import { extractAspects, extractSubjects, collectPoints } from '$lib/astro/advanced';
   import { configStore } from '$lib/state/configStore';
   import { POINT_SYMBOLS, signSymbol } from '$lib/astro/signs';
@@ -26,6 +27,73 @@
   const SHOW_DEBUG_LOGS = false;
   let majorFilterLogKey = '';
   $: orbLimit = Number.isFinite(Number(maxOrb)) ? Number(maxOrb) : 3;
+
+  // Track enabled aspects for skymap rendering (by unique key)
+  let userToggledAspects = null; // null means "use all", Set means user has toggled
+  let lastFilterKey = '';
+
+  // Generate unique key for an aspect
+  const aspectKey = (aspect, idx) => `${aspect.left || ''}_${aspect.name || ''}_${aspect.right || ''}_${idx}`;
+
+  // Toggle single aspect
+  const toggleAspect = (aspect, idx, allAspects) => {
+    const key = aspectKey(aspect, idx);
+    if (userToggledAspects === null) {
+      // First toggle - initialize from all aspects then toggle this one off
+      userToggledAspects = new Set((allAspects || []).map((a, i) => aspectKey(a, i)));
+    }
+    if (userToggledAspects.has(key)) {
+      userToggledAspects.delete(key);
+    } else {
+      userToggledAspects.add(key);
+    }
+    userToggledAspects = new Set(userToggledAspects); // trigger reactivity
+  };
+
+  // Toggle all aspects
+  const toggleAllAspects = (aspects, enable) => {
+    if (enable) {
+      userToggledAspects = new Set((aspects || []).map((a, i) => aspectKey(a, i)));
+    } else {
+      userToggledAspects = new Set();
+    }
+  };
+
+  // Check if aspect is enabled
+  const isAspectEnabled = (aspect, idx) => enabledAspects && enabledAspects.has(aspectKey(aspect, idx));
+
+  // Compute all aspects for the current mode
+  $: allCurrentAspects = isDualMode ? (synAspects || []) : [...(filteredAspects || []), ...(filteredNatalAspects || [])];
+
+  // Compute enabled aspects - if user hasn't toggled, all are enabled
+  $: enabledAspects = userToggledAspects !== null 
+    ? userToggledAspects 
+    : new Set(allCurrentAspects.map((a, i) => aspectKey(a, i)));
+
+  // Check if all aspects are enabled
+  $: allAspectsEnabled = (() => {
+    if (!enabledAspects || !allCurrentAspects.length) return false;
+    return allCurrentAspects.every((a, i) => enabledAspects.has(aspectKey(a, i)));
+  })();
+
+  // Check if there are any aspects to display the map
+  $: hasAnyAspects = allCurrentAspects.length > 0;
+
+  // Copy selected aspects to clipboard
+  let copyState = 'idle';
+  const copySelectedAspects = async () => {
+    const data = JSON.stringify(skyMapAspects, null, 2);
+    try {
+      await navigator.clipboard.writeText(data);
+      copyState = 'copied';
+      setTimeout(() => (copyState = 'idle'), 2000);
+    } catch (err) {
+      console.error('Failed to copy aspects:', err);
+      copyState = 'error';
+      setTimeout(() => (copyState = 'idle'), 2000);
+    }
+  };
+  $: copyButtonTitle = copyState === 'copied' ? 'Copied!' : copyState === 'error' ? 'Copy failed' : `Copy ${skyMapAspects.length} aspects`;
 
   const normalizeLabel = (label) => String(label || '').trim().replace(/\s+/g, '_').toLowerCase();
   const stripOwner = (value) => String(value || '').replace(/\s*\([^)]*\)\s*/g, '').trim();
@@ -71,7 +139,9 @@
     if (!pattern || typeof pattern !== 'object') return { keep: false, reason: 'invalid_pattern' };
     const points = toList(pattern.points).map((point) => normalizeLabel(point));
     if (!points.length) return { keep: false, reason: 'no_points' };
-    if (activeFilter.size && points.some((point) => !activeFilter.has(point))) return { keep: false, reason: 'active_points' };
+    if (activeFilter.size && points.some((point) => !activeFilter.has(point))) {
+      return { keep: false, reason: 'active_points' };
+    }
     if (hideAsc && points.some((point) => point === 'asc' || point === 'ascendant')) {
       return { keep: false, reason: 'asc_hidden' };
     }
@@ -81,7 +151,9 @@
     const invalidOrb = linkOrbs.some((orb) => !Number.isFinite(orb));
     if (invalidOrb) return { keep: false, reason: 'invalid_link_orb', linkOrbs };
     const overLimit = linkOrbs.some((orb) => orb < 0 || orb > maxOrbLimit);
-    if (overLimit) return { keep: false, reason: 'orb_limit', linkOrbs };
+    if (overLimit) {
+      return { keep: false, reason: 'orb_limit', linkOrbs };
+    }
     return { keep: true, reason: 'kept', linkOrbs };
   };
 
@@ -134,6 +206,7 @@
   };
 
   $: aspectData = extractAspects(response || {}, mode);
+  $: isDualMode = mode === 'relationship' || mode === 'natal_transit';
   $: subject1 = aspectData.subject1 || { name: 'Subject 1', aspects: [], majorAspects: [] };
   $: subject2 = aspectData.subject2 || { name: 'Subject 2', aspects: [], majorAspects: [] };
   $: synastry = aspectData.synastry || { aspects: [], majorAspects: [] };
@@ -165,7 +238,10 @@
     response?.natal_subject || response?.snapshot?.natal_subject || response?.second_subject || subjects.natal || {};
   $: subject1Points = collectPoints(primarySubject || {}).points || {};
   $: subject2Points = collectPoints(secondarySubject || {}).points || {};
+  $: subject1Houses = collectPoints(primarySubject || {}).houses || {};
+  $: subject2Houses = collectPoints(secondarySubject || {}).houses || {};
   $: synastryOwnerSubjects = { '1': primarySubject || {}, '2': secondarySubject || {} };
+  let useNatalFramework = false;
 
   const findPoint = (label, owner = '1') => {
     const norm = normalizeLabel(stripOwner(label));
@@ -176,7 +252,7 @@
 
   const filterAspectsByActive = (entries) =>
     (entries || []).filter((aspect) => {
-      if (!aspect || !activeSet.size) return Boolean(aspect);
+      if (!aspect || !activeSet || !activeSet.size) return Boolean(aspect);
       const leftKey = normalizeLabel(aspect.left);
       const rightKey = normalizeLabel(aspect.right);
       const leftPlain = normalizeLabel(stripOwner(aspect.left));
@@ -207,6 +283,28 @@
     hideAsc: hideAscendantAspects,
     orbLimit,
   });
+
+  // Reset user toggles when response changes
+  let lastResponseId = null;
+  $: {
+    const responseId = response ? JSON.stringify(response).slice(0, 100) : null;
+    if (lastResponseId !== null && lastResponseId !== responseId) {
+      userToggledAspects = null; // Reset to "all enabled"
+    }
+    lastResponseId = responseId;
+  }
+
+  // Reset user toggles when filter settings change
+  $: {
+    const filterKey = `${movementFilter}_${hideAscendantAspects}_${orbLimit}`;
+    if (lastFilterKey && lastFilterKey !== filterKey) {
+      userToggledAspects = null; // Reset to "all enabled"
+    }
+    lastFilterKey = filterKey;
+  }
+
+  // Prepare aspects for SkyMapAspects component (only enabled ones)
+  $: skyMapAspects = allCurrentAspects.filter((a, i) => enabledAspects.has(aspectKey(a, i)));
 
   const formatAspectRow = (entry) => {
     if (!entry) return null;
@@ -255,6 +353,7 @@
       orbValue: Number.isFinite(orbValue) ? orbValue : Number.POSITIVE_INFINITY,
       movement,
       movementClass,
+      _original: entry,  // preserve original for toggle
     };
   };
 
@@ -281,9 +380,8 @@
         : { column, direction: 'asc' };
   };
 
-  $: currentRows = sortBy(filteredAspects.map(formatAspectRow).filter(Boolean), sortState.column, sortState.direction);
-  $: natalRows = sortBy(filteredNatalAspects.map(formatAspectRow).filter(Boolean), sortState.column, sortState.direction);
-  $: isDualMode = mode === 'relationship' || mode === 'natal_transit';
+  $: currentRows = sortBy(filteredAspects.map((a, i) => ({ ...formatAspectRow(a), _idx: i })).filter(Boolean), sortState.column, sortState.direction);
+  $: natalRows = sortBy(filteredNatalAspects.map((a, i) => ({ ...formatAspectRow(a), _idx: i + filteredAspects.length })).filter(Boolean), sortState.column, sortState.direction);
   $: majorFilterOptions = {
     orbLimit,
     hideAscendantAspects,
@@ -295,6 +393,13 @@
   $: filteredMajorAspects = sortMajorPatternsByScore(majorBuckets.keptPatterns);
   $: filteredNatalMajorAspects = sortMajorPatternsByScore(natalMajorBuckets.keptPatterns);
   $: filteredSynastryMajorAspects = sortMajorPatternsByScore(synastryMajorBuckets.keptPatterns);
+  
+  // Count filtered items
+  $: filteredMajorCount = majorBuckets.dropped.length + natalMajorBuckets.dropped.length;
+  $: filteredAspectsCount = allCurrentAspects.length - skyMapAspects.length;
+  $: filteredBySettingsCount = isDualMode 
+    ? rawSynAspects.length - synAspects.length
+    : (aspects.length - filteredAspects.length) + (natalAspects.length - filteredNatalAspects.length);
   $: {
     const logKey = JSON.stringify({
       orbLimit,
@@ -390,13 +495,40 @@
             />
           {/if}
 
+          <!-- Sky Map Aspects Visualization -->
+          {#if hasAnyAspects}
+            <div class="skymap-aspects-wrapper">
+              <SkyMapAspects
+                aspects={skyMapAspects}
+                points={subject1Points}
+                houses={subject1Houses}
+                natalPoints={subject2Points}
+                natalHouses={subject2Houses}
+                {mode}
+                bind:useNatalFramework
+                debug={false}
+              />
+            </div>
+          {/if}
+
           {#if showMatrices && !isDualMode}
             <AdvAspectMatrix {response} mode={mode} hideSynastryMatrix={showSynastryPanel} maxOrb={orbLimit} />
           {/if}
 
           {#if !isDualMode && showMajorAspects}
             <div id="adv-aspects-major-configs" class="space-y-2">
-              <CardHeader label="Major configurations" badge={filteredMajorAspects.length + filteredNatalMajorAspects.length} />
+              <CardHeader label="Major configurations" badge={filteredMajorAspects.length + filteredNatalMajorAspects.length}>
+                <svelte:fragment slot="right">
+                  {#if filteredMajorCount > 0}
+                    <span
+                      class="badge-filtered"
+                      title="{filteredMajorCount} major aspect{filteredMajorCount > 1 ? 's' : ''} filtered by orb limit or active points"
+                    >
+                      {filteredMajorCount} filtered
+                    </span>
+                  {/if}
+                </svelte:fragment>
+              </CardHeader>
               {#if filteredMajorAspects.length}
                 <div class="space-y-1">
                   <p class="text-xs text-slate-400">Current chart</p>
@@ -433,16 +565,67 @@
             </div>
           {/if}
 
-          <CardHeader
+          <CardHeader id="adv-aspects-current-header"
             label="Aspects"
             badge={isDualMode ? synAspects.length : filteredAspects.length + filteredNatalAspects.length + synAspects.length}
-          />
+          >
+            <svelte:fragment slot="right">
+              <div class="flex items-center gap-2">
+                {#if filteredBySettingsCount > 0}
+                  <span
+                    class="badge-filtered"
+                    title="{filteredBySettingsCount} aspect{filteredBySettingsCount > 1 ? 's' : ''} filtered by orb limit, movement, or ascendant settings"
+                  >
+                    {filteredBySettingsCount} filtered
+                  </span>
+                {/if}
+                {#if filteredAspectsCount > 0}
+                  <span
+                    class="badge-filtered"
+                    title="{filteredAspectsCount} aspect{filteredAspectsCount > 1 ? 's' : ''} hidden from skymap"
+                  >
+                    {filteredAspectsCount} hidden
+                  </span>
+                {/if}
+                <button
+                  type="button"
+                  class="aspects-copy-btn"
+                  on:click={copySelectedAspects}
+                  disabled={!skyMapAspects.length}
+                  aria-label={copyButtonTitle}
+                  title={copyButtonTitle}
+                >
+                  {#if copyState === 'copied'}
+                    <span aria-hidden="true">✓</span>
+                  {:else if copyState === 'error'}
+                    <span aria-hidden="true">!</span>
+                  {:else}
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path
+                        d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1Zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H10V7h9v14Z"
+                        fill="currentColor"
+                      ></path>
+                    </svg>
+                  {/if}
+                </button>
+              </div>
+            </svelte:fragment>
+          </CardHeader>
 
         {#if !isDualMode && currentRows.length}
           <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[520px]" id="adv-aspects-current-table">
               <thead class="text-xs text-slate-400">
                 <tr>
+                  <th class="py-2 pr-2 text-center w-8">
+                    <input
+                      type="checkbox"
+                      checked={allAspectsEnabled}
+                      on:change={() => toggleAllAspects([...filteredAspects, ...filteredNatalAspects], !allAspectsEnabled)}
+                      title={allAspectsEnabled ? 'Hide all from skymap' : 'Show all in skymap'}
+                      class="w-3 h-3 accent-violet-500"
+                    />
+                  </th>
                   <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('base')}>From</th>
                   <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('aspect')}>Aspect</th>
                   <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('other')}>To</th>
@@ -453,6 +636,15 @@
                 <tbody class="divide-y divide-slate-800">
                   {#each currentRows as aspect}
                     <tr>
+                      <td class="py-2 pr-2 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isAspectEnabled(aspect._original, aspect._idx)}
+                          on:change={() => toggleAspect(aspect._original, aspect._idx, allCurrentAspects)}
+                          title={isAspectEnabled(aspect._original, aspect._idx) ? 'Hide from skymap' : 'Show in skymap'}
+                          class="w-3 h-3 accent-violet-500"
+                        />
+                      </td>
                       <td class="py-2 pr-3 whitespace-nowrap">
                         <span title={`${aspect.base} ${aspect.baseSign}`.trim()}>
                           {aspect.baseIcon} {truncateText(aspect.base)} {aspect.baseSign}
@@ -479,6 +671,7 @@
                 <table class="w-full text-sm min-w-[520px]" id="adv-aspects-natal-table">
                   <thead class="text-xs text-slate-400">
                     <tr>
+                      <th class="py-2 pr-2 text-center w-8"></th>
                       <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('base')}>From</th>
                       <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('aspect')}>Aspect</th>
                       <th class="py-2 pr-3 text-left cursor-pointer" on:click={() => onSort('other')}>To</th>
@@ -489,6 +682,15 @@
                   <tbody class="divide-y divide-slate-800">
                     {#each natalRows as aspect}
                       <tr>
+                        <td class="py-2 pr-2 text-center">
+                          <input
+                            type="checkbox"
+                            checked={isAspectEnabled(aspect._original, aspect._idx)}
+                            on:change={() => toggleAspect(aspect._original, aspect._idx, allCurrentAspects)}
+                            title={isAspectEnabled(aspect._original, aspect._idx) ? 'Hide from skymap' : 'Show in skymap'}
+                            class="w-3 h-3 accent-violet-500"
+                          />
+                        </td>
                         <td class="py-2 pr-3 whitespace-nowrap">
                           <span title={`${aspect.base} ${aspect.baseSign}`.trim()}>
                             {aspect.baseIcon} {truncateText(aspect.base)} {aspect.baseSign}
@@ -522,6 +724,10 @@
             {showMatrices}
             {movementFilter}
             {hideAscendantAspects}
+            {enabledAspects}
+            onToggleAspect={toggleAspect}
+            onToggleAll={toggleAllAspects}
+            aspectKeyFn={aspectKey}
           />
         {/if}
 
@@ -544,3 +750,49 @@
     </div>
   {/if}
 </div>
+
+<style>
+  .badge-filtered {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fca5a5;
+    background: rgba(220, 38, 38, 0.2);
+    border: 1px solid rgba(220, 38, 38, 0.4);
+    border-radius: 0.375rem;
+    cursor: help;
+  }
+
+  .aspects-copy-btn {
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    background: rgba(8, 47, 73, 0.45);
+    color: #bae6fd;
+    border-radius: 999px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+
+  .aspects-copy-btn:hover:not(:disabled) {
+    border-color: rgba(56, 189, 248, 0.8);
+    background: rgba(8, 47, 73, 0.7);
+  }
+
+  .aspects-copy-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .aspects-copy-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+</style>

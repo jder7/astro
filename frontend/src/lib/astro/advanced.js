@@ -95,7 +95,7 @@ export function collectPoints(subject) {
   Object.entries(subject || {}).forEach(([key, value]) => {
     if (value && typeof value === 'object' && value.point_type === 'AstrologicalPoint') {
       points[key] = value;
-    } else if (value && typeof value === 'object' && value.point_type === 'House') {
+    } else if (value && typeof value === 'object' && (value.point_type === 'House' || key.toLowerCase().includes('house'))) {
       houses[key] = value;
     }
   });
