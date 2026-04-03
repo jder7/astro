@@ -22,6 +22,15 @@
     --badge-text:${theme.badgeText};
   `;
 
+  // Page metadata for navbar
+  const pageInfo = {
+    home: { title: 'Home', description: 'Generate and explore astrological charts with ease' },
+    advanced: { title: 'Advanced Workbench', description: 'Pro controls for range sweeps, aspects filtering and richer summaries' },
+    esoteric: { title: 'Esoteric Analysis', description: 'Experiment with esoteric overlays.' },
+    education: { title: 'Education', description: 'Learn astrology fundamentals and advanced concepts' },
+  };
+  $: currentPageInfo = pageInfo[page] || pageInfo.home;
+
   let isNavigating = false;
 
   const handleNavigate = async (event, href) => {
@@ -51,7 +60,12 @@
 </script>
 
 <div class={`min-h-screen flex flex-col gap-4 ${theme.bgClass}`} style={themeVars} id="app-shell">
-  <NavBar active={page} onNavigate={handleNavigate} />
+  <NavBar 
+    active={page} 
+    onNavigate={handleNavigate}
+    pageTitle={currentPageInfo.title}
+    pageDescription={currentPageInfo.description}
+  />
   <main class="flex-1">
     <svelte:component this={Current} />
   </main>

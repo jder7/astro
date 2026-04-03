@@ -1,6 +1,8 @@
 <script>
   export let active = 'home';
   export let onNavigate = null;
+  export let pageTitle = '';
+  export let pageDescription = '';
   let menuOpen = false;
 
   const isDev = import.meta.env.DEV;
@@ -31,6 +33,18 @@
         <p class="font-display text-xl leading-tight">Astro</p>
       </div>
     </div>
+    
+    {#if pageTitle}
+      <div class="page-info hidden lg:flex items-center gap-3 ml-auto mr-4">
+        <div class="space-y-0.5">
+          <h1 class="text-lg font-semibold text-slate-100">{pageTitle}</h1>
+          {#if pageDescription}
+            <p class="text-xs text-slate-400 max-w-md line-clamp-1">{pageDescription}</p>
+          {/if}
+        </div>
+      </div>
+    {/if}
+    
     <button
       type="button"
       class="nav-toggle sm:hidden"
@@ -62,3 +76,16 @@
     {/each}
   </div>
 </nav>
+
+<style>
+  .page-info {
+    flex-shrink: 0;
+  }
+  
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
