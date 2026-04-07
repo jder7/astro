@@ -505,6 +505,8 @@
                 natalPoints={subject2Points}
                 natalHouses={subject2Houses}
                 {mode}
+                primarySubjectName={primarySubject?.name || subject1?.name || 'Subject 1'}
+                secondarySubjectName={secondarySubject?.name || subject2?.name || (mode === 'natal_transit' ? 'Natal' : 'Subject 2')}
                 bind:useNatalFramework
                 debug={false}
               />
@@ -761,7 +763,6 @@
     background: rgba(220, 38, 38, 0.2);
     border: 1px solid rgba(220, 38, 38, 0.4);
     border-radius: 0.375rem;
-    cursor: help;
   }
 
   .aspects-copy-btn {

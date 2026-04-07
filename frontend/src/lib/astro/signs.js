@@ -217,6 +217,46 @@ const HOUSE_ROMAN = {
   12: 'XII',
 };
 
+// House meanings for tooltips and descriptions
+export const HOUSE_MEANINGS = {
+  1: 'Self, Identity, Appearance',
+  2: 'Values, Possessions, Resources',
+  3: 'Communication, Siblings, Learning',
+  4: 'Home, Family, Roots',
+  5: 'Creativity, Romance, Children',
+  6: 'Health, Work, Service',
+  7: 'Partnerships, Marriage, Others',
+  8: 'Transformation, Shared Resources',
+  9: 'Philosophy, Travel, Higher Learning',
+  10: 'Career, Public Image, Authority',
+  11: 'Friends, Groups, Hopes',
+  12: 'Spirituality, Subconscious, Endings',
+};
+
+// Sign data with element, quality, polarity
+export const SIGNS = [
+  { key: 'ari', name: 'Aries', element: 'Fire', quality: 'Cardinal' },
+  { key: 'tau', name: 'Taurus', element: 'Earth', quality: 'Fixed' },
+  { key: 'gem', name: 'Gemini', element: 'Air', quality: 'Mutable' },
+  { key: 'can', name: 'Cancer', element: 'Water', quality: 'Cardinal' },
+  { key: 'leo', name: 'Leo', element: 'Fire', quality: 'Fixed' },
+  { key: 'vir', name: 'Virgo', element: 'Earth', quality: 'Mutable' },
+  { key: 'lib', name: 'Libra', element: 'Air', quality: 'Cardinal' },
+  { key: 'sco', name: 'Scorpio', element: 'Water', quality: 'Fixed' },
+  { key: 'sag', name: 'Sagittarius', element: 'Fire', quality: 'Mutable' },
+  { key: 'cap', name: 'Capricorn', element: 'Earth', quality: 'Cardinal' },
+  { key: 'aqu', name: 'Aquarius', element: 'Air', quality: 'Fixed' },
+  { key: 'pis', name: 'Pisces', element: 'Water', quality: 'Mutable' },
+];
+
+// Polarity by element
+export const POLARITY_BY_ELEMENT = {
+  Fire: { symbol: '➕', label: 'Expressive' },
+  Air: { symbol: '➕', label: 'Expressive' },
+  Earth: { symbol: '➖', label: 'Receptive' },
+  Water: { symbol: '➖', label: 'Receptive' },
+};
+
 const normalizeHouseKey = (value) => String(value || '').trim().toLowerCase();
 
 export const houseLabel = (houseKey) => {

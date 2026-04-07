@@ -1074,6 +1074,14 @@
     pointer-events: none;
   }
 
+  .adv-sky-chip-left {
+    justify-content: flex-start;
+  }
+
+  .adv-sky-chip-right {
+    justify-content: flex-end;
+  }
+
   .adv-sky-element-badge {
     position: absolute;
     top: 0.75rem;
@@ -1112,33 +1120,33 @@
 
   .adv-sky-chip {
     pointer-events: auto;
-    padding: 0.7rem 0.9rem;
-    border-radius: 0.95rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: 0.8rem;
     border: 1px solid rgba(125, 211, 252, 0.32);
     background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(8, 13, 26, 0.92));
     box-shadow: 0 12px 34px rgba(4, 7, 16, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.08);
-    max-width: 360px;
+    max-width: 280px;
     text-align: center;
   }
 
   .adv-sky-chip-title {
     margin: 0;
-    font-size: 0.7rem;
+    font-size: 0.62rem;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.15em;
     color: #7dd3fc;
   }
 
   .adv-sky-chip-main {
     margin: 0.15rem 0;
-    font-size: 1.05rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #e2f3ff;
   }
 
   .adv-sky-chip-meta {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.58rem;
     color: #cbd5e1;
   }
 
@@ -1205,10 +1213,11 @@
 
     .adv-sky-chip-slot {
       width: 100%;
+      justify-content: center;
     }
 
     .adv-sky-chip {
-      width: min(100%, 18rem);
+      width: min(100%, 15rem);
       max-width: 100%;
     }
 

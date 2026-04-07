@@ -625,7 +625,6 @@
   }
 
   .range-aspect-chip {
-    cursor: help;
   }
 
 

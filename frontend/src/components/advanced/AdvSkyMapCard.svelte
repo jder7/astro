@@ -4,6 +4,7 @@
   import { ELEMENT_HEX, ELEMENT_ICON, POINT_SYMBOLS, QUALITY_ICON, houseRoman, signName, signSymbol } from '$lib/astro/signs';
   import { configStore } from '$lib/state/configStore';
   import SkyMap from '$components/shared/SkyMap.svelte';
+  import SkyMapV2 from '$components/shared/SkyMapV2.svelte';
   import CardHeader from '$components/shared/CardHeader.svelte';
 
   export let response = null;
@@ -11,6 +12,8 @@
   export let onRequestTimeRangeSweeps = null;
   export let loading = false;
   let collapsed = true;
+  let useV2 = true;
+  let useNatalFramework = false;
 
   const normalizePointKey = (value) =>
     String(value || '')
@@ -264,6 +267,52 @@
   const primaryAccent = '#22d3ee';
   const secondaryAccent = '#c084fc';
 
+  // Build summary chip data for SkyMapV2
+  const buildChip = (pts, name, accent) => {
+    if (!pts || !Object.keys(pts).length) return null;
+    const sunKey = Object.keys(pts).find(k => normalizePointKey(k) === 'sun');
+    const sunPoint = sunKey ? pts[sunKey] : null;
+    if (!sunPoint) return null;
+    
+    const sunSign = sunPoint.sign || '';
+    const sunElement = sunPoint.element || '';
+    const sunQuality = sunPoint.quality || '';
+    const position = sunPoint.abs_pos ?? sunPoint.position ?? 0;
+    const orbDeg = ((position % 30) + 30) % 30;
+    
+    return {
+      title: name,
+      titleColor: accent,
+      main: `${POINT_SYMBOLS.sun || '☉'} ${signName(sunSign)} ${signSymbol(sunSign)} · ${orbDeg.toFixed(1)}°`,
+      meta: `${ELEMENT_ICON[sunElement] || ''} ${sunElement} · ${QUALITY_ICON[sunQuality] || ''} ${sunQuality}`,
+    };
+  };
+
+  $: v2PrimaryChip = (() => {
+    if (mode === 'relationship' && useNatalFramework) {
+      return buildChip(filteredNatalPoints, subjects.natal?.name || 'Subject 2', secondaryAccent);
+    }
+    return buildChip(filteredPrimaryPoints, subjects.primary?.name || 'Subject 1', primaryAccent);
+  })();
+
+  $: v2SecondaryChip = (() => {
+    if (mode === 'natal_transit') {
+      return buildChip(filteredNatalPoints, subjects.natal?.name || 'Natal', secondaryAccent);
+    }
+    if (mode === 'relationship') {
+      if (useNatalFramework) {
+        return buildChip(filteredPrimaryPoints, subjects.primary?.name || 'Subject 1', primaryAccent);
+      }
+      return buildChip(filteredNatalPoints, subjects.natal?.name || 'Subject 2', secondaryAccent);
+    }
+    return null;
+  })();
+
+  $: v2PrimaryOwnerName = subjects.primary?.name || 'Subject 1';
+  $: v2SecondaryOwnerName = subjects.natal?.name || (mode === 'natal_transit' ? 'Natal' : 'Subject 2');
+  $: v2PrimaryHousesLabel = `${v2PrimaryOwnerName} Houses`;
+  $: v2SecondaryHousesLabel = `${v2SecondaryOwnerName} Houses`;
+
   $: if (!collapsed && response && onRequestTimeRangeSweeps && !sunRanges.length) {
     onRequestTimeRangeSweeps('sun');
   }
@@ -296,7 +345,52 @@
       {#if !response}
         <p class="text-sm text-slate-400">Generate a chart to see point and house placements.</p>
       {:else}
-        {#if sunRanges.length}
+        <!-- Version toggle -->
+        <div class="flex items-center gap-2 mb-2">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" bind:checked={useV2} class="sr-only peer">
+            <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
+          </label>
+          <span class="text-xs text-slate-400">V2 (CCW)</span>
+        </div>
+
+	        {#if useV2}
+          {#if mode === 'relationship'}
+            <div id="skymapv2-framework-toggle" class="skymapv2-framework-toggle flex items-center gap-2 mb-2">
+              <button
+                type="button"
+                id="skymapv2-primary-houses-btn"
+                class={`skymapv2-framework-btn skymapv2-framework-btn-primary text-xs px-2 py-1 rounded border bg-slate-900/60 ${!useNatalFramework ? 'text-white border-cyan-400' : 'text-slate-300 border-slate-700'}`}
+                on:click={() => (useNatalFramework = false)}
+                aria-pressed={!useNatalFramework}
+              >
+                {v2PrimaryHousesLabel}
+              </button>
+              <button
+                type="button"
+                id="skymapv2-secondary-houses-btn"
+                class={`skymapv2-framework-btn skymapv2-framework-btn-secondary text-xs px-2 py-1 rounded border bg-slate-900/60 ${useNatalFramework ? 'text-white border-cyan-400' : 'text-slate-300 border-slate-700'}`}
+                on:click={() => (useNatalFramework = true)}
+                aria-pressed={useNatalFramework}
+              >
+                {v2SecondaryHousesLabel}
+              </button>
+            </div>
+          {/if}
+	          <SkyMapV2 
+	            points={filteredPrimaryPoints}
+	            houses={primaryPoints.houses || {}}
+	            natalPoints={filteredNatalPoints || {}}
+	            natalHouses={natalPoints.houses || {}}
+	            mode={mode}
+              bind:useNatalFramework
+              sunRanges={sunRanges}
+              primarySubjectName={v2PrimaryOwnerName}
+              secondarySubjectName={v2SecondaryOwnerName}
+	            primaryChip={v2PrimaryChip}
+	            secondaryChip={v2SecondaryChip}
+	          />
+        {:else if sunRanges.length}
           <SkyMap ranges={sunRanges} pointsByRangeId={pointsByRangeId} housesByRangeId={housesByRangeId} />
         {:else}
           <p class="text-sm text-slate-400">{loading ? 'Loading Sun ranges...' : 'No Sun ranges returned for this chart.'}</p>

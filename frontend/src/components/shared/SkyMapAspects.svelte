@@ -20,6 +20,8 @@
   export let mode = 'natal';
   export let useNatalFramework = false;
   export let debug = false;
+  export let primarySubjectName = 'Subject 1';
+  export let secondarySubjectName = 'Subject 2';
 
 
   // Geometry constants
@@ -118,6 +120,20 @@
 
   $: filteredPoints = filterPointsByActive(activePoints, activeSet);
   $: filteredDisplayPoints = isDualMode ? filterPointsByActive(displayPoints, activeSet) : {};
+
+  $: activePrimaryOwnerName = (() => {
+    if (isTransitMode) return secondarySubjectName || 'Natal';
+    if (isRelationshipMode) return useNatalFramework ? (secondarySubjectName || 'Subject 2') : (primarySubjectName || 'Subject 1');
+    return primarySubjectName || 'Subject';
+  })();
+  $: activeSecondaryOwnerName = (() => {
+    if (!isDualMode) return '';
+    if (isTransitMode) return `${primarySubjectName || 'Transit'} (Transit)`;
+    if (isRelationshipMode) return useNatalFramework ? (primarySubjectName || 'Subject 1') : (secondarySubjectName || 'Subject 2');
+    return secondarySubjectName || 'Subject 2';
+  })();
+  $: primaryHousesToggleLabel = `${primarySubjectName || 'Subject 1'} Houses`;
+  $: secondaryHousesToggleLabel = `${secondarySubjectName || 'Subject 2'} Houses`;
 
   // Build zodiac segments - each sign is 30° starting from 0° Aries
   // The wheel is oriented with ASC at 270° (9 o'clock), counterclockwise
@@ -383,8 +399,8 @@
         aspectName: aspect.name,
         leftName: aspect.left || leftKey,
         rightName: aspect.right || rightKey,
-        leftSource: p1.source === 'primary' ? (isTransitMode ? 'Natal' : 'Primary') : (isTransitMode ? 'Transit' : 'Secondary'),
-        rightSource: p2.source === 'primary' ? (isTransitMode ? 'Natal' : 'Primary') : (isTransitMode ? 'Transit' : 'Secondary'),
+        leftSource: p1.owner === 'primary' ? activePrimaryOwnerName : activeSecondaryOwnerName,
+        rightSource: p2.owner === 'primary' ? activePrimaryOwnerName : activeSecondaryOwnerName,
         orb: Number.isFinite(orbVal) ? orbVal : null,
         orbStr: Number.isFinite(orbVal) ? `${orbVal >= 0 ? '+' : ''}${orbVal.toFixed(2)}°` : '',
         glyph: aspectIcon(aspect.name),
@@ -424,24 +440,26 @@
 <div class="skymap-aspects-container">
   <!-- Toggle only for relationship mode (transit always uses natal houses) -->
   {#if isRelationshipMode}
-    <div class="skymap-aspects-toggle">
+    <div id="aspects-skymap-framework-toggle" class="skymap-aspects-toggle skymap-aspects-framework-toggle">
       <button
         type="button"
-        class="toggle-btn"
+        id="aspects-skymap-primary-houses-btn"
+        class="toggle-btn skymap-aspects-framework-btn skymap-aspects-framework-btn-primary"
         class:active={!useNatalFramework}
         on:click={toggleFramework}
         aria-pressed={!useNatalFramework}
       >
-        Primary Houses
+        {primaryHousesToggleLabel}
       </button>
       <button
         type="button"
-        class="toggle-btn"
+        id="aspects-skymap-secondary-houses-btn"
+        class="toggle-btn skymap-aspects-framework-btn skymap-aspects-framework-btn-secondary"
         class:active={useNatalFramework}
         on:click={toggleFramework}
         aria-pressed={useNatalFramework}
       >
-        Secondary Houses
+        {secondaryHousesToggleLabel}
       </button>
     </div>
   {/if}
@@ -624,7 +642,7 @@
             class="planet-glyph"
             font-size={planet.size * 0.9}
           >
-            <title>{planet.name} in {planet.sign} ({planet.position?.toFixed(1) || '—'}°){isDualMode ? ' [Primary]' : ''}</title>
+            <title>{planet.name} in {planet.sign} ({planet.position?.toFixed(1) || '—'}°) ({activePrimaryOwnerName})</title>
             {planet.glyph}
           </text>
         </g>
@@ -647,7 +665,7 @@
             class="planet-glyph secondary"
             font-size={planet.size * 0.85}
           >
-            <title>{planet.name} in {planet.sign} ({planet.position?.toFixed(1) || '—'}°) [Secondary]</title>
+            <title>{planet.name} in {planet.sign} ({planet.position?.toFixed(1) || '—'}°) ({activeSecondaryOwnerName})</title>
             {planet.glyph}
           </text>
         </g>
