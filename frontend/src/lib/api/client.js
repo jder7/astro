@@ -134,6 +134,14 @@ export async function requestReportPdf(payload) {
   return postPdf('/api/report/pdf', payload);
 }
 
+export async function requestWeeklyRaySchedule(payload) {
+  return postJson('/api/weekly-ray-schedule', payload);
+}
+
+export async function requestWeeklyRaySchedulePdf(payload) {
+  return postPdf('/api/weekly-ray-schedule/pdf', payload);
+}
+
 export async function requestGeoStatus() {
   return getJson('/api/geo/status');
 }

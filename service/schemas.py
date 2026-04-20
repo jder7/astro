@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Literal
 
-from pydantic import AliasChoices, BaseModel, Field, ConfigDict
+from pydantic import AliasChoices, BaseModel, Field, ConfigDict, model_validator
 
 from service.enums import (
     HouseSystem,
@@ -755,6 +755,236 @@ class TransitRangeResponse(BaseModel):
     """
 
     snapshots: List[TransitRangeSnapshot]
+
+
+class WeeklyScheduleSegment(BaseModel):
+    """
+    Generic time-bounded segment used by the weekly ray schedule.
+    """
+
+    start: datetime = Field(..., description="Segment start (inclusive), timezone-aware.")
+    end: datetime = Field(..., description="Segment end (exclusive), timezone-aware.")
+    ratio: float = Field(..., ge=0.0, le=1.0, description="Segment share within the parent interval.")
+    point_key: Optional[str] = Field(
+        default=None,
+        serialization_alias="pointKey",
+        description="Astro point key for this segment (e.g. 'ascendant', 'moon').",
+    )
+    label: Optional[str] = Field(default=None, description="Display label for this segment.")
+    sign: Optional[str] = Field(default=None, description="Sign label for this segment.")
+    sign_icon: Optional[str] = Field(
+        default=None,
+        serialization_alias="signIcon",
+        description="Sign icon/glyph.",
+    )
+    element: Optional[str] = Field(default=None, description="Element label when available.")
+    color: Optional[str] = Field(default=None, description="Primary display color for this segment.")
+    ray_colors: List[str] = Field(
+        default_factory=list,
+        serialization_alias="rayColors",
+        description="Ordered ray color list for this segment sign.",
+    )
+    phase: Optional[str] = Field(default=None, description="Moon phase label when available.")
+    illumination_percentage: Optional[float] = Field(
+        default=None,
+        serialization_alias="illuminationPercentage",
+        description="Moon illumination percentage when available.",
+    )
+
+
+class WeeklyScheduleComponent(BaseModel):
+    """
+    Point component used in hourly tooltips and card labels.
+    """
+
+    point_key: str = Field(..., serialization_alias="pointKey")
+    label: str = Field(..., description="Display label for the component point.")
+    sign: Optional[str] = Field(default=None, description="Sign label.")
+    sign_icon: Optional[str] = Field(default=None, serialization_alias="signIcon")
+    element: Optional[str] = Field(default=None, description="Element label.")
+    color: Optional[str] = Field(default=None, description="Primary component color.")
+    ray_colors: List[str] = Field(default_factory=list, serialization_alias="rayColors")
+    start: Optional[datetime] = Field(default=None, description="Optional segment start for this component.")
+    end: Optional[datetime] = Field(default=None, description="Optional segment end for this component.")
+
+
+class WeeklyScheduleCell(BaseModel):
+    """
+    One hourly cell in the weekly schedule matrix.
+    """
+
+    start: datetime = Field(..., description="Cell start datetime.")
+    end: datetime = Field(..., description="Cell end datetime.")
+    asc_segments: List[WeeklyScheduleSegment] = Field(
+        default_factory=list,
+        serialization_alias="ascSegments",
+        description="Ascendant segments within this hour (supports split hours).",
+    )
+    day_ruler_segment: List[WeeklyScheduleSegment] = Field(
+        default_factory=list,
+        serialization_alias="dayRulerSegment",
+        description="Day-ruler segment(s) active during this hour.",
+    )
+    sun_component: Optional[WeeklyScheduleComponent] = Field(
+        default=None,
+        serialization_alias="sunComponent",
+        description="Sun component at this hour.",
+    )
+    moon_component: Optional[WeeklyScheduleComponent] = Field(
+        default=None,
+        serialization_alias="moonComponent",
+        description="Moon component at this hour.",
+    )
+    has_element_sigil: bool = Field(
+        default=False,
+        serialization_alias="hasElementSigil",
+        description="True when all 4 elements are present across Sun/Moon/Day-ruler/Asc within the hour.",
+    )
+    sigil: dict = Field(default_factory=dict, description="Sigil payload compatible with frontend ElementSigil.")
+    tooltip: dict = Field(default_factory=dict, description="Tooltip payload with component details.")
+
+
+class WeeklyScheduleRow(BaseModel):
+    """
+    One hourly row in the weekly schedule matrix.
+    """
+
+    hour: int = Field(..., ge=0, le=23, description="Hour index in local time.")
+    label: str = Field(..., description="Display label for the row (HH:MM).")
+    cells: List[WeeklyScheduleCell] = Field(default_factory=list, description="Seven day cells for this hour.")
+
+
+class WeeklyScheduleDay(BaseModel):
+    """
+    One day column descriptor in the weekly schedule.
+    """
+
+    date: datetime = Field(..., description="Day start datetime (00:00 local).")
+    weekday: str = Field(..., description="Weekday display label.")
+    day_index: int = Field(..., serialization_alias="dayIndex", ge=0, le=6)
+    ruler_key: str = Field(..., serialization_alias="rulerKey", description="Day ruler point key.")
+    ruler_icon: str = Field(..., serialization_alias="rulerIcon", description="Day ruler icon.")
+    ruler_segments: List[WeeklyScheduleSegment] = Field(
+        default_factory=list,
+        serialization_alias="rulerSegments",
+        description="Day-ruler sign segments across 00:00 -> 24:00 local.",
+    )
+    aura_segments: List[WeeklyScheduleSegment] = Field(
+        default_factory=list,
+        serialization_alias="auraSegments",
+        description="Aura segments aligned with ruler segments for column rendering.",
+    )
+    has_ruler_split: bool = Field(
+        default=False,
+        serialization_alias="hasRulerSplit",
+        description="True when day ruler changes sign at least once during the day.",
+    )
+    moon_phase: Optional[str] = Field(
+        default=None,
+        serialization_alias="moonPhase",
+        description="Moon phase sampled for this day (local-time midpoint).",
+    )
+    moon_illumination_percentage: Optional[float] = Field(
+        default=None,
+        serialization_alias="moonIlluminationPercentage",
+        description="Moon illumination percentage sampled for this day (local-time midpoint).",
+    )
+    start: datetime = Field(..., description="Day start datetime.")
+    end: datetime = Field(..., description="Day end datetime.")
+
+
+class WeeklyScheduleWeekMeta(BaseModel):
+    """
+    Week metadata for the weekly ray schedule response.
+    """
+
+    start: datetime = Field(..., description="ISO week start (Monday 00:00 local).")
+    end: datetime = Field(..., description="ISO week end boundary (next Monday 00:00 local).")
+    tz: str = Field(..., description="IANA timezone used for schedule generation.")
+    default_window_start: int = Field(
+        default=6,
+        serialization_alias="defaultWindowStart",
+        ge=0,
+        le=23,
+        description="Default visible hour window start.",
+    )
+    default_window_end: int = Field(
+        default=20,
+        serialization_alias="defaultWindowEnd",
+        ge=1,
+        le=24,
+        description="Default visible hour window end (exclusive).",
+    )
+
+
+class WeeklyRayScheduleRequest(BaseModel):
+    """
+    Request payload for the weekly ray schedule.
+    """
+
+    mode: Mode = Field(
+        default=Mode.TRANSIT,
+        description="Supported modes: transit and natal_transit.",
+    )
+    moment: TransitMomentInput = Field(
+        default_factory=TransitMomentInput,
+        description="Transit moment used as weekly anchor.",
+    )
+    birth: Optional[BirthData] = Field(
+        default=None,
+        description="Optional natal data for natal_transit mode; schedule remains transit-driven.",
+    )
+    config: ChartConfig = Field(
+        default_factory=ChartConfig,
+        description="Chart configuration shared by schedule calculations.",
+    )
+
+
+class WeeklyRaySchedulePdfRequest(WeeklyRayScheduleRequest):
+    """
+    Request payload for weekly schedule PDF export.
+    """
+
+    hour_start: int = Field(
+        default=6,
+        serialization_alias="hourStart",
+        ge=0,
+        le=23,
+        description="Visible hour window start for PDF export.",
+    )
+    hour_end: int = Field(
+        default=20,
+        serialization_alias="hourEnd",
+        ge=1,
+        le=24,
+        description="Visible hour window end (exclusive) for PDF export.",
+    )
+
+    @model_validator(mode="after")
+    def _validate_window(self):
+        if self.hour_end <= self.hour_start:
+            raise ValueError("hour_end must be greater than hour_start.")
+        return self
+
+
+class WeeklyRayScheduleResponse(BaseModel):
+    """
+    Response payload for the weekly ray schedule.
+    """
+
+    week: WeeklyScheduleWeekMeta
+    sun_header_segments: List[WeeklyScheduleSegment] = Field(
+        default_factory=list,
+        serialization_alias="sunHeaderSegments",
+        description="Sun sign segments clipped to the week range.",
+    )
+    moon_header_segments: List[WeeklyScheduleSegment] = Field(
+        default_factory=list,
+        serialization_alias="moonHeaderSegments",
+        description="Moon sign segments clipped to the week range.",
+    )
+    days: List[WeeklyScheduleDay] = Field(default_factory=list, description="Seven day descriptors.")
+    rows: List[WeeklyScheduleRow] = Field(default_factory=list, description="24 hourly rows.")
 
 
 class ReportRequest(BaseModel):

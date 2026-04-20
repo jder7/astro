@@ -6,7 +6,8 @@ import re
 from typing import Optional
 
 from service.schemas import PointSignRange, PointSignRangeEntry, BirthData, ChartConfig, NextLunation
-from service.utils import ensure_config, build_subject_for_moment
+from service.utils.config import ensure_config
+from service.utils.subjects import build_subject_for_moment
 from service.utils.moon_utils import MoonPhaseUtils
 
 
@@ -180,6 +181,72 @@ class PointRangeCalculator:
             next_lunation=next_lunation,
         )
 
+    def compute_timeline(
+        self,
+        start: datetime,
+        end: datetime,
+    ) -> list[PointSignRangeEntry]:
+        """
+        Compute contiguous sign intervals for a point between start (inclusive)
+        and end (exclusive).
+        """
+        if start >= end:
+            return []
+
+        start_data = self._point_at(start)
+        current_sign = start_data.get("sign")
+        if not current_sign:
+            return []
+
+        speed_est = self._estimate_speed(start, start_data)
+        entries: list[PointSignRangeEntry] = []
+        cursor = start
+        current_data = start_data
+        guard = 0
+        max_segments = 4096
+
+        while cursor < end and guard < max_segments:
+            if not current_sign:
+                break
+            next_start = self._find_next_sign_start(cursor, current_sign, speed_est)
+            if next_start <= cursor:
+                next_start = cursor + timedelta(minutes=1)
+            segment_end = min(next_start, end)
+            if segment_end <= cursor:
+                break
+
+            phase_info = self.phase_utils.phase_info(cursor) if self.phase_utils else {}
+            entry = PointSignRangeEntry(
+                start=_round_to_minute(cursor),
+                end=_round_to_minute(segment_end),
+                sign=current_sign,
+                sign_num=current_data.get("sign_num"),
+                element=current_data.get("element"),
+                quality=current_data.get("quality"),
+                emoji=current_data.get("emoji"),
+                phase=phase_info.get("phase"),
+                phase_emoji=phase_info.get("phase_emoji"),
+                illumination_percentage=phase_info.get("illumination_percentage"),
+            )
+
+            if entry.start < entry.end:
+                if entries and entries[-1].sign == entry.sign and entries[-1].end >= entry.start:
+                    entries[-1].end = entry.end
+                else:
+                    entries.append(entry)
+
+            cursor = segment_end
+            if cursor >= end:
+                break
+            probe_dt = cursor + timedelta(minutes=1)
+            if probe_dt > end:
+                probe_dt = cursor
+            current_data = self._point_at(probe_dt)
+            current_sign = current_data.get("sign")
+            guard += 1
+
+        return entries
+
     def _point_at(self, dt: datetime) -> dict:
         subject = build_subject_for_moment(self.base, dt, self.point_cfg)
         payload = subject.model_dump(mode="json") if subject else {}
@@ -296,3 +363,14 @@ def compute_point_sign_range(
         label=label,
         entries_count=entries_count,
     )
+
+
+def compute_point_sign_timeline(
+    base: BirthData,
+    config: Optional[ChartConfig],
+    start: datetime,
+    end: datetime,
+    point_key: str,
+) -> list[PointSignRangeEntry]:
+    calc = PointRangeCalculator(base=base, point_key=point_key, config=config)
+    return calc.compute_timeline(start=start, end=end)

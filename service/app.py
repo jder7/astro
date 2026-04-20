@@ -16,6 +16,7 @@ from service.endpoints.time_range_sweeps import router as ranges_router
 from service.endpoints.svg_chart import router as svg_chart_router
 from service.endpoints.report import router as report_router
 from service.endpoints.relationship import router as relationship_router
+from service.endpoints.weekly_ray_schedule import router as weekly_ray_schedule_router
 from service.endpoints.geolocation import router as geolocation_router
 from service.endpoints.education import router as education_router
 from service.endpoints.geolocation import init_geo_status
@@ -192,6 +193,7 @@ app.include_router(transit_range_router, prefix=API_PREFIX)
 app.include_router(ranges_router, prefix=API_PREFIX)
 app.include_router(report_router, prefix=API_PREFIX)
 app.include_router(relationship_router, prefix=API_PREFIX)
+app.include_router(weekly_ray_schedule_router, prefix=API_PREFIX)
 app.include_router(svg_chart_router, prefix=API_PREFIX)
 app.include_router(geolocation_router, prefix=API_PREFIX)
 app.include_router(education_router, prefix=API_PREFIX)

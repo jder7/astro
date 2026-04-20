@@ -10,6 +10,7 @@ function merge(initialValue, storedValue) {
 
 export function createPersistedStore(key, initialValue) {
   let startValue = initialValue;
+  let storageDisabled = false;
   if (isBrowser) {
     try {
       const raw = window.localStorage.getItem(key);
@@ -27,10 +28,19 @@ export function createPersistedStore(key, initialValue) {
 
   if (isBrowser) {
     store.subscribe((value) => {
+      if (storageDisabled) return;
       try {
         window.localStorage.setItem(key, JSON.stringify(value));
       } catch (err) {
         console.warn(`[store] Failed to persist state for ${key}`, err);
+        if (err?.name === 'QuotaExceededError') {
+          storageDisabled = true;
+          try {
+            window.localStorage.removeItem(key);
+          } catch (cleanupErr) {
+            console.warn(`[store] Failed to cleanup storage for ${key}`, cleanupErr);
+          }
+        }
       }
     });
   }

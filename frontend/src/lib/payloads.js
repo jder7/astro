@@ -187,3 +187,34 @@ export function buildTimeRangeSweepsRequest(mode, state, config, targets = []) {
     config: payload.config,
   };
 }
+
+const clampHour = (value, fallback) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, Math.min(24, Math.floor(parsed)));
+};
+
+export function buildWeeklyRaySchedulePayload(mode, state, config) {
+  const safeMode = mode === 'natal_transit' ? 'natal_transit' : 'transit';
+  const { payload } = buildChartPayload(safeMode, state, config);
+  return {
+    mode: safeMode,
+    moment: payload.moment,
+    birth: safeMode === 'natal_transit' ? payload.birth || null : null,
+    config: payload.config,
+  };
+}
+
+export function buildWeeklyRaySchedulePdfPayload(mode, state, config, hourWindow = { start: 6, end: 20 }) {
+  const base = buildWeeklyRaySchedulePayload(mode, state, config);
+  const hourStart = clampHour(hourWindow?.start, 6);
+  const hourEnd = clampHour(hourWindow?.end, 20);
+  const safeStart = Math.max(0, Math.min(23, hourStart));
+  let safeEnd = Math.max(1, Math.min(24, hourEnd));
+  if (safeEnd <= safeStart) safeEnd = Math.min(24, safeStart + 1);
+  return {
+    ...base,
+    hour_start: safeStart,
+    hour_end: safeEnd,
+  };
+}

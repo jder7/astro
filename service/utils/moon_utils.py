@@ -5,7 +5,8 @@ from datetime import timedelta
 from typing import Optional
 
 from service.schemas import BirthData, ChartConfig, NextLunation
-from service.utils import ensure_config, build_subject_for_moment
+from service.utils.config import ensure_config
+from service.utils.subjects import build_subject_for_moment
 
 
 class MoonPhaseUtils:

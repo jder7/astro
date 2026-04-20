@@ -12,6 +12,7 @@
   import { showToast } from '$lib/state/toastStore';
   import EsotericSummaryCard from '$components/esoteric/EsotericSummaryCard.svelte';
   import EsotericSkyMapCard from '$components/esoteric/EsotericSkyMapCard.svelte';
+  import EsotericWeeklyRayScheduleCard from '$components/esoteric/EsotericWeeklyRayScheduleCard.svelte';
   import { animateCards } from '$lib/animations/pageTransitions';
   import StatusCard from '$components/shared/StatusCard.svelte';
   import ChartForm from './ChartForm.svelte';
@@ -105,6 +106,10 @@
       <EsotericSummaryCard {summary} />
 
       <EsotericSkyMapCard response={apiResponse} mode={activeMode} />
+
+      {#if activeMode === 'transit' || activeMode === 'natal_transit'}
+        <EsotericWeeklyRayScheduleCard mode={activeMode} chartReady={Boolean(apiResponse)} resultKey={chartResultKey} />
+      {/if}
 
       <!-- Reports card removed per request -->
     </div>
