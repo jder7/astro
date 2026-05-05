@@ -12,6 +12,7 @@ from service.endpoints.health import router as health_router
 from service.endpoints.natal import router as natal_router
 from service.endpoints.transit import router as transit_router
 from service.endpoints.transit_range import router as transit_range_router
+from service.endpoints.aspect_spans import router as aspect_spans_router
 from service.endpoints.time_range_sweeps import router as ranges_router
 from service.endpoints.svg_chart import router as svg_chart_router
 from service.endpoints.report import router as report_router
@@ -190,6 +191,7 @@ app.include_router(health_router, prefix=API_PREFIX)
 app.include_router(natal_router, prefix=API_PREFIX)
 app.include_router(transit_router, prefix=API_PREFIX)
 app.include_router(transit_range_router, prefix=API_PREFIX)
+app.include_router(aspect_spans_router, prefix=API_PREFIX)
 app.include_router(ranges_router, prefix=API_PREFIX)
 app.include_router(report_router, prefix=API_PREFIX)
 app.include_router(relationship_router, prefix=API_PREFIX)

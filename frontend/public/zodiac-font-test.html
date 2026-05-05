@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zodiac Font Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: system-ui, sans-serif;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: #94a3b8;
+      max-width: 860px;
+      line-height: 1.5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #cbd5e1;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(30, 41, 59, 0.7);
+    }
+
+    .sample {
+      font-size: 32px;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .font-name {
+      font-size: 13px;
+      color: #f8fafc;
+      font-weight: 700;
+    }
+
+    .stack {
+      margin-top: 4px;
+      color: #64748b;
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .system-ui { font-family: system-ui, sans-serif; }
+    .apple-symbols { font-family: "Apple Symbols", serif; }
+    .menlo { font-family: Menlo, Monaco, Consolas, monospace; }
+    .times { font-family: "Times New Roman", Times, serif; }
+    .georgia { font-family: Georgia, serif; }
+    .arial { font-family: Arial, Helvetica, sans-serif; }
+    .cambria { font-family: Cambria, "Cambria Math", serif; }
+    .segoe-symbol { font-family: "Segoe UI Symbol", sans-serif; }
+    .segoe-ui { font-family: "Segoe UI", sans-serif; }
+    .segoe-emoji { font-family: "Segoe UI Emoji", sans-serif; }
+    .lucida { font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif; }
+    .ms-gothic { font-family: "MS Gothic", "Yu Gothic", sans-serif; }
+    .noto-symbols-2 { font-family: "Noto Sans Symbols 2", sans-serif; }
+    .noto-symbols { font-family: "Noto Sans Symbols", sans-serif; }
+    .noto-sans { font-family: "Noto Sans", sans-serif; }
+    .noto-serif { font-family: "Noto Serif", serif; }
+    .noto-emoji { font-family: "Noto Color Emoji", emoji; }
+    .roboto { font-family: Roboto, sans-serif; }
+    .droid { font-family: "Droid Sans", sans-serif; }
+    .liberation { font-family: "Liberation Sans", "Liberation Serif", sans-serif; }
+    .dejavu { font-family: "DejaVu Sans", sans-serif; }
+    .dejavu-serif { font-family: "DejaVu Serif", serif; }
+    .freefont { font-family: "FreeSans", "FreeSerif", sans-serif; }
+    .cantarell { font-family: Cantarell, sans-serif; }
+    .ubuntu { font-family: Ubuntu, sans-serif; }
+    .twemoji { font-family: "Twemoji Mozilla", emoji; }
+    .symbola { font-family: Symbola, serif; }
+    .emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", emoji; }
+    .app-stack {
+      font-family:
+        "Apple Symbols",
+        "Segoe UI Symbol",
+        "Noto Sans Symbols 2",
+        "Noto Sans Symbols",
+        Menlo,
+        Monaco,
+        Consolas,
+        "DejaVu Sans",
+        "Symbola",
+        monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>Zodiac Font Test</h1>
+  <p>
+    Compare each row visually, then inspect a glyph in DevTools and check the
+    rendered font. Chrome exposes it in the Computed panel under Rendered Fonts.
+    The text row uses U+FE0E. The emoji row uses U+FE0F.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Font stack</th>
+        <th>Plain Unicode</th>
+        <th>Text presentation</th>
+        <th>Emoji presentation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="font-name">App stack</div>
+          <div class="stack">Apple Symbols, Segoe UI Symbol, Noto Sans Symbols 2, Menlo...</div>
+        </td>
+        <td class="sample app-stack">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample app-stack">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample app-stack">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">System UI</div><div class="stack">system-ui</div></td>
+        <td class="sample system-ui">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample system-ui">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample system-ui">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Apple Symbols</div><div class="stack">macOS / iOS if available</div></td>
+        <td class="sample apple-symbols">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample apple-symbols">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample apple-symbols">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Menlo / Monaco / Consolas</div><div class="stack">common monospace fallback</div></td>
+        <td class="sample menlo">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample menlo">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample menlo">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Segoe UI Symbol</div><div class="stack">Windows if available</div></td>
+        <td class="sample segoe-symbol">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample segoe-symbol">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample segoe-symbol">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Segoe UI</div><div class="stack">Windows UI font</div></td>
+        <td class="sample segoe-ui">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample segoe-ui">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample segoe-ui">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Segoe UI Emoji</div><div class="stack">Windows emoji font</div></td>
+        <td class="sample segoe-emoji">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample segoe-emoji">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample segoe-emoji">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Lucida Sans Unicode</div><div class="stack">older Windows symbol coverage</div></td>
+        <td class="sample lucida">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample lucida">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample lucida">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Cambria / Cambria Math</div><div class="stack">Windows serif/math fonts</div></td>
+        <td class="sample cambria">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample cambria">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample cambria">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">MS Gothic / Yu Gothic</div><div class="stack">Windows CJK fonts</div></td>
+        <td class="sample ms-gothic">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample ms-gothic">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample ms-gothic">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Noto Sans Symbols 2</div><div class="stack">Android/Linux if available</div></td>
+        <td class="sample noto-symbols-2">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample noto-symbols-2">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample noto-symbols-2">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Noto Sans Symbols</div><div class="stack">Linux/Android symbol fallback</div></td>
+        <td class="sample noto-symbols">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample noto-symbols">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample noto-symbols">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Noto Sans</div><div class="stack">Android/Linux UI font</div></td>
+        <td class="sample noto-sans">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample noto-sans">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample noto-sans">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Noto Serif</div><div class="stack">Linux/Android serif fallback</div></td>
+        <td class="sample noto-serif">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample noto-serif">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample noto-serif">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Roboto</div><div class="stack">Android/ChromeOS common UI font</div></td>
+        <td class="sample roboto">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample roboto">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample roboto">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Droid Sans</div><div class="stack">older Android fallback</div></td>
+        <td class="sample droid">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample droid">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample droid">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Noto Color Emoji</div><div class="stack">Android/Linux emoji font</div></td>
+        <td class="sample noto-emoji">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample noto-emoji">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample noto-emoji">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">DejaVu Sans</div><div class="stack">common Linux font</div></td>
+        <td class="sample dejavu">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample dejavu">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample dejavu">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">DejaVu Serif</div><div class="stack">common Linux serif font</div></td>
+        <td class="sample dejavu-serif">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample dejavu-serif">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample dejavu-serif">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Liberation Sans / Serif</div><div class="stack">Linux metric-compatible fonts</div></td>
+        <td class="sample liberation">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample liberation">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample liberation">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">FreeSans / FreeSerif</div><div class="stack">GNU FreeFont</div></td>
+        <td class="sample freefont">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample freefont">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample freefont">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Cantarell</div><div class="stack">GNOME default UI font</div></td>
+        <td class="sample cantarell">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample cantarell">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample cantarell">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Ubuntu</div><div class="stack">Ubuntu desktop font</div></td>
+        <td class="sample ubuntu">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample ubuntu">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample ubuntu">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Twemoji Mozilla</div><div class="stack">Firefox/Linux emoji fallback where installed</div></td>
+        <td class="sample twemoji">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample twemoji">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample twemoji">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Times New Roman</div><div class="stack">serif fallback test</div></td>
+        <td class="sample times">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample times">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample times">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Georgia</div><div class="stack">cross-platform serif</div></td>
+        <td class="sample georgia">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample georgia">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample georgia">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Arial / Helvetica</div><div class="stack">common sans fallback</div></td>
+        <td class="sample arial">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample arial">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample arial">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+      <tr>
+        <td><div class="font-name">Emoji fonts</div><div class="stack">Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji</div></td>
+        <td class="sample emoji">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</td>
+        <td class="sample emoji">♈︎ ♉︎ ♊︎ ♋︎ ♌︎ ♍︎ ♎︎ ♏︎ ♐︎ ♑︎ ♒︎ ♓︎</td>
+        <td class="sample emoji">♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

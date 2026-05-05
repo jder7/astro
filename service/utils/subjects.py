@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 from typing import Optional
 
 from kerykeion import AstrologicalSubjectFactory  # type: ignore
@@ -9,6 +10,59 @@ from service.enums import HouseSystem, ZodiacType
 from service.schemas import BirthData, ChartConfig
 from .config import ensure_config
 from .formatting import format_degree, house_display, sign_display
+
+
+def _shift_birth_kwargs(kwargs: dict, minutes: int) -> dict:
+    shifted = datetime(
+        int(kwargs["year"]),
+        int(kwargs["month"]),
+        int(kwargs["day"]),
+        int(kwargs["hour"]),
+        int(kwargs["minute"]),
+    ) + timedelta(minutes=minutes)
+    return {
+        **kwargs,
+        "year": shifted.year,
+        "month": shifted.month,
+        "day": shifted.day,
+        "hour": shifted.hour,
+        "minute": shifted.minute,
+    }
+
+
+def _from_birth_data_with_dst_retries(kwargs: dict):
+    try:
+        return AstrologicalSubjectFactory.from_birth_data(**kwargs)
+    except KerykeionException as err:
+        msg = str(err)
+        if "Ambiguous time error" in msg:
+            for is_dst in (True, False):
+                try:
+                    return AstrologicalSubjectFactory.from_birth_data(**{**kwargs, "is_dst": is_dst})
+                except KerykeionException:
+                    continue
+            raise
+
+        if "Non-existent time error" in msg:
+            for minutes in range(1, 181):
+                shifted_kwargs = _shift_birth_kwargs(kwargs, minutes)
+                try:
+                    subject = AstrologicalSubjectFactory.from_birth_data(**shifted_kwargs)
+                    print(
+                        "[build_subject] nonexistent local time shifted forward to next valid minute.",
+                        {
+                            "from": f"{kwargs['year']:04d}-{kwargs['month']:02d}-{kwargs['day']:02d} {kwargs['hour']:02d}:{kwargs['minute']:02d}",
+                            "to": f"{shifted_kwargs['year']:04d}-{shifted_kwargs['month']:02d}-{shifted_kwargs['day']:02d} {shifted_kwargs['hour']:02d}:{shifted_kwargs['minute']:02d}",
+                            "tz": kwargs.get("tz_str"),
+                        },
+                    )
+                    return subject
+                except KerykeionException as retry_err:
+                    if "Non-existent time error" not in str(retry_err):
+                        raise
+            raise
+
+        raise
 
 
 def build_subject(birth: BirthData, config: Optional[ChartConfig]):
@@ -43,19 +97,7 @@ def build_subject(birth: BirthData, config: Optional[ChartConfig]):
     original_kwargs = dict(kwargs)
 
     try:
-        subject = AstrologicalSubjectFactory.from_birth_data(**kwargs)
-    except KerykeionException as err:
-        if "Ambiguous time error" in str(err):
-            for is_dst in (True, False):
-                try:
-                    subject = AstrologicalSubjectFactory.from_birth_data(**{**kwargs, "is_dst": is_dst})
-                    break
-                except KerykeionException:
-                    subject = None
-            if subject is None:
-                raise
-        else:
-            raise
+        subject = _from_birth_data_with_dst_retries(kwargs)
     except ValueError as err:
         # Kerykeion can raise when a planet sits exactly on a house cusp; retry with Whole Sign as a safe fallback.
         if (
@@ -67,7 +109,7 @@ def build_subject(birth: BirthData, config: Optional[ChartConfig]):
             safe_cfg = cfg.model_copy(deep=True)
             safe_cfg.house_system = HouseSystem.WHOLE_SIGN
             kwargs["houses_system_identifier"] = safe_cfg.house_system.value
-            subject = AstrologicalSubjectFactory.from_birth_data(**kwargs)
+            subject = _from_birth_data_with_dst_retries(kwargs)
             # debug_input = {
             #     "birth": birth.model_dump(),
             #     "config": cfg.model_dump(),

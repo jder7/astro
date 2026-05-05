@@ -11,6 +11,7 @@
 - Focus: Biwheel aspect grid model for cross-chart aspect visualization and hover highlighting.
 - Reference: https://www.palden.co.uk/living/lit-glossary.html
 - Focus: Definition of aspectarian as a chronological list with exact times; baseline for timeline mode.
+- Aspects description: https://timenomad.app/posts/astrology/philosophy/2019/07/01/aspect-patterns-building-blocks-of-charts.html
 
 ## House Projection Documentation
 - Article: https://medium.com/@anantorapp/understanding-the-12-houses-in-vedic-astrology-your-life-map-explained-e23d0f7bab93
@@ -23,6 +24,7 @@
 - Focus: Baseline definition of transits and how they relate to natal chart themes; good primer for bridging to house projection.
 - Article: https://www.siderealchart.com/guide/astrological-transits-explained
 - Focus: Dedicated section on transit-to-natal house positions, emphasizing the "where" of manifestation and house ingress timing.
+- Article: https://masteringthezodiac.com/how-to-read-a-birth-chart
 
 ## Tarot Correspondence
 - Site: https://masteringthezodiac.com/tarot-and-astrology

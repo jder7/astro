@@ -122,6 +122,14 @@ export async function requestTransitRange(payload) {
   return postJson('/api/transit-range', payload);
 }
 
+export async function requestAspectSpans(payload) {
+  return postJson('/api/aspect-spans', payload);
+}
+
+export async function requestKinematicAspectSpans(payload) {
+  return postJson('/api/aspect-spans-kinematic', payload);
+}
+
 export async function requestTimeRangeSweeps(payload) {
   return postJson('/api/timeRangeSweeps', payload);
 }

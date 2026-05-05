@@ -116,3 +116,7 @@ For a concise overview of paths and request/response shapes, see:
 
 That file is the canonical API reference for this project and is kept in sync
 with the FastAPI schemas.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).

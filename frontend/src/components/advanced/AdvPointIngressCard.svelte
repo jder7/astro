@@ -176,8 +176,10 @@
   {#if !collapsed}
     <div id="adv-point-ingress-panel" class="space-y-4">
       <div class="flex flex-wrap items-center gap-3">
-        <label class="text-xs uppercase tracking-wide text-slate-400">Point</label>
+        <label for="adv-point-ingress-point-select" class="text-xs uppercase tracking-wide text-slate-400">Point</label>
         <select
+          id="adv-point-ingress-point-select"
+          name="adv-point-ingress-point-select"
           class="rounded-lg border border-slate-800 bg-slate-950/60 text-slate-100 px-3 py-2 text-sm"
           on:change={handleSelection}
           bind:value={selectedPoint}

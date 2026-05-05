@@ -85,6 +85,8 @@ export const SIGN_SYMBOLS = { ...FULL, ...ABBREV };
 
 export const signSymbol = (sign) => SIGN_SYMBOLS[String(sign || '').trim().toLowerCase()] || '';
 
+export const astroFontSignGlyph = signSymbol;
+
 const NAME_MAP = {
   aries: 'Aries',
   taurus: 'Taurus',

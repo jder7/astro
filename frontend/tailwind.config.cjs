@@ -4,8 +4,41 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Space Grotesk"', 'Inter', 'system-ui', 'sans-serif'],
-        body: ['Inter', 'system-ui', 'sans-serif'],
+        display: [
+          '"Space Grotesk"',
+          'Inter',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          '"Segoe UI Symbol"',
+          '"Apple Symbols"',
+          '"Noto Sans Symbols 2"',
+          '"Noto Sans Symbols"',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          '"DejaVu Sans"',
+          '"Symbola"',
+          'sans-serif',
+        ],
+        body: [
+          'Inter',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          '"Segoe UI Symbol"',
+          '"Apple Symbols"',
+          '"Noto Sans Symbols 2"',
+          '"Noto Sans Symbols"',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          '"DejaVu Sans"',
+          '"Symbola"',
+          'sans-serif',
+        ],
       },
       colors: {
         nebula: {

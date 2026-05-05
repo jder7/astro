@@ -17,6 +17,7 @@
   import StatusCard from '$components/shared/StatusCard.svelte';
   import AdvSummaryCard from '$components/advanced/AdvSummaryCard.svelte';
   import AdvAspectsCard from '$components/advanced/AdvAspectsCard.svelte';
+  import AdvAspectsTimelineCard from '$components/advanced/AdvAspectsTimelineCard.svelte';
   import AdvRangeCard from '$components/advanced/AdvRangeCard.svelte';
   import AdvSkyMapCard from '$components/advanced/AdvSkyMapCard.svelte';
   import AdvAscClockCard from '$components/advanced/AdvAscClockCard.svelte';
@@ -277,6 +278,10 @@
       {/if}
 
       <AdvAspectsCard response={responseWithTimeRangeSweeps} mode={activeMode} />
+
+      {#if activeMode !== 'relationship'}
+        <AdvAspectsTimelineCard mode={activeMode} />
+      {/if}
 
       {#if activeMode !== 'relationship'}
         <AdvRangeCard
