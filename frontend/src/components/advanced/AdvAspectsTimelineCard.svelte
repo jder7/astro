@@ -10,6 +10,7 @@
   import AdvAspectsTimelineControls from './AdvAspectsTimelineControls.svelte';
   import AdvAspectsTimeline from './AdvAspectsTimeline.svelte';
   import AdvAspectsTimelineDetails from './AdvAspectsTimelineDetails.svelte';
+  import ZoomEntryButton from '$components/shared/ZoomEntryButton.svelte';
 
   export let mode = 'natal';
 
@@ -242,7 +243,18 @@
   };
 
   // Fullscreen toggle
+  const copyThemeVars = (node) => {
+    if (typeof document === 'undefined') return;
+    const themeSource = document.getElementById('app-shell') || document.documentElement;
+    const styles = getComputedStyle(themeSource);
+    ['--accent', '--accent-strong', '--accent-soft', '--badge-bg', '--badge-border', '--badge-text'].forEach((name) => {
+      const value = styles.getPropertyValue(name);
+      if (value) node.style.setProperty(name, value.trim());
+    });
+  };
+
   function portal(node) {
+    copyThemeVars(node);
     document.body.appendChild(node);
     return {
       destroy() {
@@ -339,7 +351,7 @@
       {/if}
       <button
         type="button"
-        class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-800 bg-slate-900/70 text-slate-200 hover:border-cyan-400 hover:text-white transition"
+        class="icon-button"
         on:click={handleToggleCollapsed}
         aria-expanded={!collapsed}
         aria-controls="adv-timeline-body"
@@ -397,9 +409,7 @@
         <button type="button" class="action-btn" on:click={() => jumpToNextExact(1)} disabled={!spans.length || loading} title="Next exact">
           Next exact →
         </button>
-        <button type="button" class="action-btn action-btn--expand" on:click={toggleFullscreen} disabled={!spans.length || loading} title="Expand fullscreen">
-          ⛶
-        </button>
+        <ZoomEntryButton onClick={toggleFullscreen} disabled={!spans.length || loading} title="Expand fullscreen" ariaLabel="Expand fullscreen" alignEnd={true} />
       </div>
 
       {#if nextPeaks.length}
@@ -552,7 +562,7 @@
     height: 3px;
     margin: 0 auto 8px;
     border-radius: 2px;
-    background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+    background: linear-gradient(90deg, transparent, var(--accent, #06b6d4), transparent);
     animation: shimmer 1.2s ease-in-out infinite;
   }
   @keyframes shimmer {
@@ -565,37 +575,45 @@
     flex-wrap: wrap;
   }
   .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 34px;
     padding: 5px 10px;
     font-size: 11px;
     font-weight: 600;
-    color: #94a3b8;
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(148, 163, 184, 0.15);
-    border-radius: 8px;
+    color: color-mix(in srgb, var(--accent, #06b6d4) 18%, #e2e8f0 82%);
+    background: color-mix(in srgb, var(--accent-soft, rgba(14, 165, 233, 0.12)) 24%, rgba(15, 23, 42, 0.68));
+    border: 1px solid color-mix(in srgb, var(--accent, #06b6d4) 18%, #1e293b 82%);
+    border-radius: 12px;
     cursor: pointer;
-    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    transition: color 0.15s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
   }
   .action-btn:hover:not(:disabled) {
-    color: #e2e8f0;
-    border-color: rgba(56, 189, 248, 0.4);
-    background: rgba(56, 189, 248, 0.08);
+    color: #f8fafc;
+    border-color: color-mix(in srgb, var(--accent, #06b6d4) 42%, #334155 58%);
+    background: var(--accent-soft, rgba(14, 165, 233, 0.12));
+  }
+  .action-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent, #06b6d4);
   }
   .action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .action-btn--expand { margin-left: auto; font-size: 14px; }
   .timeline-peak-rail {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
     padding: 8px 10px;
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    border: 1px solid color-mix(in srgb, var(--accent, #06b6d4) 14%, #1e293b 86%);
     border-radius: 8px;
-    background: rgba(15, 23, 42, 0.45);
+    background: color-mix(in srgb, var(--accent-soft, rgba(14, 165, 233, 0.12)) 12%, rgba(15, 23, 42, 0.45));
   }
   .rail-label {
     font-size: 11px;
     font-weight: 700;
-    color: #64748b;
+    color: color-mix(in srgb, var(--accent, #06b6d4) 18%, #94a3b8 82%);
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -606,8 +624,8 @@
     max-width: 220px;
     padding: 5px 8px;
     border-radius: 7px;
-    border: 1px solid rgba(56, 189, 248, 0.16);
-    background: rgba(8, 47, 73, 0.24);
+    border: 1px solid color-mix(in srgb, var(--accent, #06b6d4) 18%, #1e293b 82%);
+    background: color-mix(in srgb, var(--accent-soft, rgba(14, 165, 233, 0.12)) 32%, rgba(15, 23, 42, 0.56));
     color: #cbd5e1;
     font-size: 11px;
     cursor: pointer;
@@ -618,11 +636,11 @@
     white-space: nowrap;
   }
   .peak-btn strong {
-    color: #7dd3fc;
+    color: color-mix(in srgb, var(--accent, #06b6d4) 55%, #f8fafc 45%);
     font-weight: 700;
   }
   .peak-btn:hover {
-    border-color: rgba(56, 189, 248, 0.45);
+    border-color: color-mix(in srgb, var(--accent, #06b6d4) 45%, #334155 55%);
     color: #f8fafc;
   }
 
@@ -659,23 +677,24 @@
     gap: 2px;
   }
   .zoom-btns button {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 6px;
-    border: 1px solid rgba(148,163,184,0.2);
-    background: rgba(15,23,42,0.85);
-    color: #94a3b8;
+    border: 1px solid color-mix(in srgb, var(--accent, #06b6d4) 18%, #1e293b 82%);
+    background: color-mix(in srgb, var(--accent-soft, rgba(14, 165, 233, 0.12)) 24%, rgba(15, 23, 42, 0.85));
+    color: color-mix(in srgb, var(--accent, #06b6d4) 18%, #cbd5e1 82%);
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.15s, border-color 0.15s;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
   }
   .zoom-btns button:hover:not(:disabled) {
-    color: #e2e8f0;
-    border-color: #38bdf8;
+    color: #f8fafc;
+    border-color: color-mix(in srgb, var(--accent, #06b6d4) 45%, #334155 55%);
+    background: var(--accent-soft, rgba(14, 165, 233, 0.12));
   }
   .zoom-btns button:disabled {
     opacity: 0.3;
@@ -685,9 +704,9 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    background: rgba(15, 23, 42, 0.7);
-    color: #94a3b8;
+    border: 1px solid color-mix(in srgb, var(--accent, #06b6d4) 18%, #1e293b 82%);
+    background: color-mix(in srgb, var(--accent-soft, rgba(14, 165, 233, 0.12)) 24%, rgba(15, 23, 42, 0.68));
+    color: color-mix(in srgb, var(--accent, #06b6d4) 18%, #cbd5e1 82%);
     font-size: 16px;
     cursor: pointer;
     display: inline-flex;
@@ -695,7 +714,11 @@
     justify-content: center;
     transition: color 0.15s, border-color 0.15s;
   }
-  .fs-close:hover { color: #f43f5e; border-color: rgba(244, 63, 94, 0.4); }
+  .fs-close:hover {
+    color: #f8fafc;
+    border-color: color-mix(in srgb, var(--accent, #06b6d4) 42%, #334155 58%);
+    background: var(--accent-soft, rgba(14, 165, 233, 0.12));
+  }
   .fs-controls {
     padding: 10px 20px;
     border-bottom: 1px solid rgba(148, 163, 184, 0.06);

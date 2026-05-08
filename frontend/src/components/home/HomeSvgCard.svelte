@@ -5,6 +5,7 @@
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
   import { downloadBlob, downloadSvg } from '$lib/utils/download';
+  import ZoomEntryButton from '$components/shared/ZoomEntryButton.svelte';
 
   export let svgMarkup = '';
   export let loading = false;
@@ -92,9 +93,7 @@
       <button class="button-ghost" type="button" on:click={() => downloadSvg(svgMarkup)} disabled={!svgMarkup}>
         <span aria-hidden="true">⬇️</span> SVG
       </button>
-      <button class="button-ghost" type="button" on:click={openZoom} disabled={!svgMarkup}>
-        <span aria-hidden="true">🔍</span> Zoom
-      </button>
+      <ZoomEntryButton onClick={openZoom} disabled={!svgMarkup} ariaLabel="Open chart zoom view" title="Zoom" />
       {#if svgMarkup}
         <span class="badge">Live render</span>
       {/if}

@@ -743,15 +743,19 @@
   .zoom-btns button {
     width: 26px; height: 26px;
     border-radius: 6px;
-    border: 1px solid rgba(148,163,184,0.2);
-    background: rgba(15,23,42,0.85);
-    color: #94a3b8;
+    border: 1px solid color-mix(in srgb, var(--accent, #06b6d4) 18%, #1e293b 82%);
+    background: color-mix(in srgb, var(--accent-soft, rgba(14, 165, 233, 0.12)) 24%, rgba(15,23,42,0.85));
+    color: color-mix(in srgb, var(--accent, #06b6d4) 18%, #cbd5e1 82%);
     font-size: 16px; font-weight: 700;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: color 0.15s, border-color 0.15s;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
   }
-  .zoom-btns button:hover:not(:disabled) { color: #e2e8f0; border-color: #38bdf8; }
+  .zoom-btns button:hover:not(:disabled) {
+    color: #f8fafc;
+    border-color: color-mix(in srgb, var(--accent, #06b6d4) 45%, #334155 55%);
+    background: var(--accent-soft, rgba(14, 165, 233, 0.12));
+  }
   .zoom-btns button:disabled { opacity: 0.3; cursor: not-allowed; }
   .span-bar { cursor: pointer; transition: fill-opacity 0.12s; }
   .span-bar:hover { fill-opacity: 0.9 !important; }

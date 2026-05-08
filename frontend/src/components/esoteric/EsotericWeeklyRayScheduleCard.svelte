@@ -9,6 +9,7 @@
   import { inputStore } from '$lib/state/inputStore';
   import { downloadBlob } from '$lib/utils/download';
   import ElementSigil from '$components/shared/ElementSigil.svelte';
+  import ZoomEntryButton from '$components/shared/ZoomEntryButton.svelte';
 
   export let mode = 'natal';
   export let chartReady = false;
@@ -313,6 +314,17 @@
     let placeholder = null;
     let originalParent = null;
     let originalNextSibling = null;
+    const themeVarNames = ['--accent', '--accent-strong', '--accent-soft', '--badge-bg', '--badge-border', '--badge-text'];
+
+    const copyThemeVars = () => {
+      if (typeof document === 'undefined') return;
+      const themeSource = document.getElementById('app-shell') || document.documentElement;
+      const styles = getComputedStyle(themeSource);
+      themeVarNames.forEach((name) => {
+        const value = styles.getPropertyValue(name);
+        if (value) node.style.setProperty(name, value.trim());
+      });
+    };
 
     const attach = () => {
       if (active || typeof document === 'undefined') return;
@@ -320,6 +332,7 @@
       originalNextSibling = node.nextSibling;
       placeholder = document.createComment('weekly-portal-anchor');
       originalParent?.insertBefore(placeholder, node);
+      copyThemeVars();
       document.body.appendChild(node);
       active = true;
     };
@@ -1017,7 +1030,7 @@
       {#if supported}
         <button
           type="button"
-          class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-800 bg-slate-900/70 text-slate-200 hover:border-cyan-400 hover:text-white transition weekly-toggle-button"
+          class="icon-button weekly-toggle-button"
           id="weekly-toggle-button"
           on:click={togglePanel}
           aria-expanded={!collapsed}
@@ -1064,26 +1077,31 @@
         {titleSubtitle}
       </p>
       <div class="weekly-panel-tools" id="weekly-panel-tools">
-        <span class="badge weekly-window-badge" id="weekly-window-badge">{formatHourWindow(hourWindow.start, hourWindow.end)}</span>
-        <div class="weekly-panel-actions" id="weekly-panel-actions">
+        <div class="weekly-panel-actions weekly-panel-actions--left" id="weekly-panel-actions">
+          <span class="badge weekly-window-badge" id="weekly-window-badge">{formatHourWindow(hourWindow.start, hourWindow.end)}</span>
           <button class="button-ghost weekly-action-button" id="weekly-action-toggle-window" type="button" on:click={toggleWindow} disabled={loading || !schedule}>
             {fullDay ? 'Default window' : 'Full day'}
           </button>
           <button class="button-ghost weekly-action-button" id="weekly-action-refresh" type="button" on:click={() => loadSchedule(true)} disabled={loading || !chartReady}>
             {loading ? 'Loading…' : 'Refresh'}
           </button>
-          <button
-            class="button-ghost weekly-action-button"
-            id="weekly-action-zoom"
-            type="button"
-            on:click={() => (zoomed = !zoomed)}
-            disabled={!schedule}
-          >
-            {zoomed ? 'Exit zoom' : 'Zoom'}
-          </button>
           <button class="button-ghost weekly-action-button" id="weekly-action-pdf" type="button" on:click={downloadPdf} disabled={pdfLoading || !schedule}>
             {pdfLoading ? 'Preparing…' : 'PDF'}
           </button>
+        </div>
+        <div class="weekly-panel-actions weekly-panel-actions--right" id="weekly-panel-zoom-actions">
+          <ZoomEntryButton
+            id="weekly-action-zoom"
+            onClick={() => (zoomed = !zoomed)}
+            disabled={!schedule}
+            ariaLabel={zoomed ? 'Exit schedule zoom' : 'Zoom schedule'}
+            title={zoomed ? 'Exit zoom' : 'Zoom'}
+          />
+          {#if zoomed}
+            <button class="weekly-zoom-close" id="weekly-action-close-zoom" type="button" on:click={() => (zoomed = false)} aria-label="Close schedule zoom" title="Close zoom">
+              ✕
+            </button>
+          {/if}
         </div>
       </div>
       <div class="weekly-grid-wrap" id="weekly-grid-wrap" bind:this={gridWrapEl} style={`--glow-sun:${gridGlowSun()}`}>
@@ -1218,6 +1236,47 @@
     align-items: center;
     gap: 0.55rem;
     flex-wrap: wrap;
+  }
+
+  .weekly-panel-actions--left {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .weekly-panel-actions--right {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+
+  .weekly-zoom-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--accent, #06b6d4) 18%, #1e293b 82%);
+    background: color-mix(in srgb, var(--accent-soft, rgba(14, 165, 233, 0.12)) 24%, rgba(15, 23, 42, 0.68));
+    color: color-mix(in srgb, var(--accent, #06b6d4) 18%, #e2e8f0 82%);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+
+  .weekly-zoom-close:hover {
+    color: #f8fafc;
+    border-color: color-mix(in srgb, var(--accent, #06b6d4) 45%, #334155 55%);
+    background: var(--accent-soft, rgba(14, 165, 233, 0.12));
+  }
+
+  .weekly-zoom-close:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent, #06b6d4);
   }
 
   .weekly-shell.is-zoomed {
