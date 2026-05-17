@@ -7,6 +7,7 @@
   import HypercubeIcon from '$components/shared/HypercubeIcon.svelte';
   import PlanetRingIcon from '$components/shared/PlanetRingIcon.svelte';
   import OrbArcIcon from '$components/shared/OrbArcIcon.svelte';
+  import AspectCopyButton from '$components/shared/AspectCopyButton.svelte';
   import { POINT_SYMBOLS } from '$lib/astro/signs';
   import { capitalise } from '$lib/astro/format';
 
@@ -307,26 +308,13 @@
             <div class="major-aspect-kicker-row">
               <p class="major-aspect-kicker">Major configuration details panel</p>
               <div class="major-aspect-actions">
-                <button
-                  type="button"
-                  class="major-aspect-copy"
-                  on:click={copyDetails}
-                  aria-label={copyButtonTitle}
+                <AspectCopyButton
+                  className="major-aspect-copy"
+                  size="md"
+                  onClick={copyDetails}
                   title={copyButtonTitle}
-                >
-                  {#if copyState === 'copied'}
-                    <span aria-hidden="true">✓</span>
-                  {:else if copyState === 'error'}
-                    <span aria-hidden="true">!</span>
-                  {:else}
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                      <path
-                        d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1Zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H10V7h9v14Z"
-                        fill="currentColor"
-                      ></path>
-                    </svg>
-                  {/if}
-                </button>
+                  state={copyState}
+                />
                 <button type="button" class="major-aspect-close" on:click={close} aria-label="Close details" title="Close details">
                   ✕
                 </button>
@@ -589,26 +577,6 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-  }
-
-  .major-aspect-copy {
-    border: 1px solid rgba(56, 189, 248, 0.45);
-    background: rgba(8, 47, 73, 0.45);
-    color: #bae6fd;
-    border-radius: 999px;
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    font-size: 0.85rem;
-    font-weight: 700;
-  }
-
-  .major-aspect-copy svg {
-    width: 15px;
-    height: 15px;
   }
 
   .major-aspect-body {

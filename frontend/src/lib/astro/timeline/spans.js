@@ -179,6 +179,9 @@ export function normalizeBackendSpans(rawSpans) {
       const leftOwner = span.leftOwner || span.left_owner || 'Transit';
       const rightOwner = span.rightOwner || span.right_owner || 'Transit';
       const minOrb = parseOrb(span.minOrb ?? span.min_orb ?? span.orb_value ?? span.orb);
+      const maxOrb = parseOrb(span.maxOrb ?? span.max_orb);
+      const startOrb = parseOrb(span.startOrb ?? span.start_orb ?? span.orbStart ?? span.orb_start);
+      const endOrb = parseOrb(span.endOrb ?? span.end_orb ?? span.orbEnd ?? span.orb_end);
       const leftSign = span.leftSign || span.left_sign || span.signLeft || span.sign_left || '';
       const rightSign = span.rightSign || span.right_sign || span.signRight || span.sign_right || '';
       const parentId = span.id || `${leftOwner}:${normalizeLabel(left)}:${normalizeLabel(aspectType)}:${rightOwner}:${normalizeLabel(right)}:${index}`;
@@ -190,6 +193,9 @@ export function normalizeBackendSpans(rawSpans) {
               const passEndAt = new Date(pass.endAt || pass.separating_end).getTime();
               if (![passStartAt, passExactAt, passEndAt].every(Number.isFinite)) return null;
               const passMinOrb = parseOrb(pass.minOrb ?? pass.min_orb ?? pass.orb_value ?? pass.orb);
+              const passMaxOrb = parseOrb(pass.maxOrb ?? pass.max_orb ?? maxOrb);
+              const passStartOrb = parseOrb(pass.startOrb ?? pass.start_orb ?? pass.orbStart ?? pass.orb_start);
+              const passEndOrb = parseOrb(pass.endOrb ?? pass.end_orb ?? pass.orbEnd ?? pass.orb_end);
               return {
                 id: pass.id || `${parentId}:pass:${passIndex + 1}`,
                 parentId,
@@ -200,6 +206,9 @@ export function normalizeBackendSpans(rawSpans) {
                 exactAt: passExactAt,
                 endAt: passEndAt,
                 minOrb: Number.isFinite(passMinOrb) ? Math.abs(passMinOrb) : NaN,
+                maxOrb: Number.isFinite(passMaxOrb) ? Math.abs(passMaxOrb) : NaN,
+                startOrb: Number.isFinite(passStartOrb) ? Math.abs(passStartOrb) : NaN,
+                endOrb: Number.isFinite(passEndOrb) ? Math.abs(passEndOrb) : NaN,
                 movementStart: pass.movementStart || pass.movement_start || '',
                 movementEnd: pass.movementEnd || pass.movement_end || '',
                 confidence: pass.confidence || 'full',
@@ -226,6 +235,9 @@ export function normalizeBackendSpans(rawSpans) {
         exactAt,
         endAt,
         minOrb: Number.isFinite(minOrb) ? Math.abs(minOrb) : NaN,
+        maxOrb: Number.isFinite(maxOrb) ? Math.abs(maxOrb) : NaN,
+        startOrb: Number.isFinite(startOrb) ? Math.abs(startOrb) : NaN,
+        endOrb: Number.isFinite(endOrb) ? Math.abs(endOrb) : NaN,
         movementStart: span.movementStart || span.movement_start || '',
         movementEnd: span.movementEnd || span.movement_end || '',
         confidence: span.confidence || 'full',

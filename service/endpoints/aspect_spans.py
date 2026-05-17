@@ -1,4 +1,5 @@
 from datetime import timedelta
+from time import perf_counter
 
 from fastapi import APIRouter
 
@@ -65,6 +66,7 @@ def _compute_aspect_spans_response(payload: dict, compute_fn, engine: str) -> di
     if end_dt < start_dt:
         start_dt, end_dt = end_dt, start_dt
 
+    compute_started = perf_counter()
     result = compute_fn(
         transit_base=start_base,
         cfg=cfg,
@@ -73,11 +75,24 @@ def _compute_aspect_spans_response(payload: dict, compute_fn, engine: str) -> di
         mode=mode,
         birth=birth,
     )
+    compute_ms = (perf_counter() - compute_started) * 1000
 
     spans = result["spans"]
     for span in spans:
         if isinstance(span, dict):
             span.setdefault("engine", result.get("engine", engine))
+
+    print(
+        "[aspect-spans] "
+        f"engine={result.get('engine', engine)} "
+        f"mode={result['mode']} "
+        f"range={start_dt.isoformat()}..{end_dt.isoformat()} "
+        f"spans={result['spans_count']} "
+        f"pairs={result['candidate_pairs']} "
+        f"timestamps={result['timestamps_evaluated']} "
+        f"compute_ms={compute_ms:.2f}",
+        flush=True,
+    )
 
     return {
         "timestamp": result["start"],

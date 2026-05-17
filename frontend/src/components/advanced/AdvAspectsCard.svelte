@@ -4,6 +4,7 @@
   import AdvAspectMatrix from '$components/advanced/AdvAspectMatrix.svelte';
   import AdvSynastryAspects from '$components/advanced/AdvSynastryAspects.svelte';
   import AdvAspectsConfigPanel from '$components/advanced/AdvAspectsConfigPanel.svelte';
+  import AspectCopyButton from '$components/shared/AspectCopyButton.svelte';
   import CardHeader from '$components/shared/CardHeader.svelte';
   import ConfigIcon from '$components/visual/ConfigIcon.svelte';
   import SkyMapAspects from '$components/shared/SkyMapAspects.svelte';
@@ -589,27 +590,13 @@
                     {filteredAspectsCount} hidden
                   </span>
                 {/if}
-                <button
-                  type="button"
-                  class="aspects-copy-btn"
-                  on:click={copySelectedAspects}
+                <AspectCopyButton
+                  className="aspects-copy-btn"
+                  onClick={copySelectedAspects}
                   disabled={!skyMapAspects.length}
-                  aria-label={copyButtonTitle}
                   title={copyButtonTitle}
-                >
-                  {#if copyState === 'copied'}
-                    <span aria-hidden="true">✓</span>
-                  {:else if copyState === 'error'}
-                    <span aria-hidden="true">!</span>
-                  {:else}
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                      <path
-                        d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1Zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H10V7h9v14Z"
-                        fill="currentColor"
-                      ></path>
-                    </svg>
-                  {/if}
-                </button>
+                  state={copyState}
+                />
               </div>
             </svelte:fragment>
           </CardHeader>
@@ -763,37 +750,5 @@
     background: rgba(220, 38, 38, 0.2);
     border: 1px solid rgba(220, 38, 38, 0.4);
     border-radius: 0.375rem;
-  }
-
-  .aspects-copy-btn {
-    border: 1px solid rgba(56, 189, 248, 0.45);
-    background: rgba(8, 47, 73, 0.45);
-    color: #bae6fd;
-    border-radius: 999px;
-    width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    font-size: 0.8rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: border-color 0.15s, background-color 0.15s;
-  }
-
-  .aspects-copy-btn:hover:not(:disabled) {
-    border-color: rgba(56, 189, 248, 0.8);
-    background: rgba(8, 47, 73, 0.7);
-  }
-
-  .aspects-copy-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  .aspects-copy-btn svg {
-    width: 14px;
-    height: 14px;
   }
 </style>

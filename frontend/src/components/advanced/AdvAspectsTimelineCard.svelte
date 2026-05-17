@@ -1,15 +1,23 @@
 <script>
   import { get } from 'svelte/store';
-  import { tick } from 'svelte';
+  import { onDestroy, tick } from 'svelte';
   import { requestAspectSpans, requestKinematicAspectSpans } from '$lib/api/client';
   import { buildRangePayload } from '$lib/payloads';
   import { configStore } from '$lib/state/configStore';
   import { inputStore } from '$lib/state/inputStore';
-  import { normalizeBackendSpans, presetToRange, RANGE_PRESETS, spanSpeedClass, isVeryFastSpanForRange } from '$lib/astro/timeline/spans';
+  import {
+    buildTimelineCacheKey,
+    getMemoizedTimelineSpans,
+    getTimelineCacheEntry,
+    setTimelineCacheEntry,
+  } from '$lib/astro/timeline/cache';
+  import { normalizeBackendSpans, presetToRange, RANGE_PRESETS, spanSpeedClass } from '$lib/astro/timeline/spans';
+  import { copyToClipboard } from '$lib/utils/download';
 
   import AdvAspectsTimelineControls from './AdvAspectsTimelineControls.svelte';
   import AdvAspectsTimeline from './AdvAspectsTimeline.svelte';
   import AdvAspectsTimelineDetails from './AdvAspectsTimelineDetails.svelte';
+  import AspectCopyButton from '$components/shared/AspectCopyButton.svelte';
   import ZoomEntryButton from '$components/shared/ZoomEntryButton.svelte';
 
   export let mode = 'natal';
@@ -32,15 +40,18 @@
   let requestTimeMs = NaN;
   let requestReferenceTs = NaN;
   let spanEngine = 'kinematic';
+  let timelineCopyState = 'idle';
+  let timelineCopyTimer = null;
+
+  const pendingTimelineRequests = new Map();
 
   // Filter state
   let focusFilter = 'all';
-  let aspectFilter = 'all';
-  let orbLimit = 3;
+  let selectedAspectTypes = [];
+  let selectedPoints = [];
   let searchFilter = '';
   let movementFilter = 'both';
   let groupBy = 'planet';
-  let hideVeryFast = false;
 
   // Derive base date from inputStore transit moment
   const getBaseDate = () => {
@@ -60,8 +71,6 @@
     const d = new Date(parts.year, (parts.month || 1) - 1, parts.day || 1, parts.hour || 0, parts.minute || 0);
     return d.getTime();
   };
-  const DAY_MS = 86_400_000;
-
   const matchesMovement = (span) => {
     if (movementFilter === 'both') return true;
     const movement = String(span.movementStart || '').toLowerCase();
@@ -74,25 +83,37 @@
     return span.left.toLowerCase().includes(q) || span.right.toLowerCase().includes(q) || span.aspectType.toLowerCase().includes(q);
   };
   const normalizeAspect = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, '_');
-  const matchesAspectType = (span) => aspectFilter === 'all' || normalizeAspect(span.aspectType) === normalizeAspect(aspectFilter);
+  const normalizePoint = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, '_');
+  const matchesAspectType = (span) =>
+    !selectedAspectTypes.length ||
+    selectedAspectTypes.map(normalizeAspect).includes(normalizeAspect(span.aspectType));
+  const matchesPointSelection = (span) => {
+    if (!selectedPoints.length) return true;
+    const pointSet = new Set(selectedPoints.map(normalizePoint));
+    return pointSet.has(normalizePoint(span.left)) && pointSet.has(normalizePoint(span.right));
+  };
 
   const matchesActiveFilters = (span) => {
-    if (Number.isFinite(span.minOrb) && span.minOrb > orbLimit) return false;
     if (focusFilter !== 'all' && spanSpeedClass(span) !== focusFilter) return false;
     if (!matchesAspectType(span)) return false;
-    if (hideVeryFast && isVeryFastSpanForRange(span, viewEnd - viewStart)) return false;
+    if (!matchesPointSelection(span)) return false;
     if (!matchesMovement(span)) return false;
     if (!matchesSearch(span)) return false;
     return true;
   };
 
-  async function fetchSpanWindow({ start, end, granularity, viewStartNext, viewEndNext, resetSelection = false, setDefaultPin = false, referenceTs = NaN }) {
+  const hydrateTimelineResult = (result, cacheKey, memoToken = '') => {
+    const rawSpans = Array.isArray(result?.spans) ? result.spans : [];
+    const memoKey = `${cacheKey || 'uncached'}:${memoToken || rawSpans.length}`;
+    spans = getMemoizedTimelineSpans(memoKey, rawSpans, normalizeBackendSpans);
+  };
+
+  async function fetchSpanWindow({ start, end, granularity, viewStartNext, viewEndNext, resetSelection = false, setDefaultPin = false, referenceTs = NaN, presetKey = activePreset }) {
     if (!start || !end) return;
     const requestStart = parseRangeTs(start);
     const requestEnd = parseRangeTs(end);
     if (!Number.isFinite(requestStart) || !Number.isFinite(requestEnd)) return;
 
-    loading = true;
     errorMsg = '';
     if (resetSelection) selectedSpan = null;
     const seq = ++requestSeq;
@@ -110,26 +131,47 @@
       );
       payload.mode = mode === 'natal_transit' ? 'natal_transit' : 'transit';
 
+      const { key: cacheKey, fingerprint } = buildTimelineCacheKey({
+        state,
+        payload,
+        mode: payload.mode,
+        engine: spanEngine,
+        presetKey,
+      });
+      const cachedEntry = getTimelineCacheEntry(payload.mode, cacheKey);
+      if (cachedEntry?.response) {
+        if (seq !== requestSeq) return;
+        hydrateTimelineResult(cachedEntry.response, cacheKey, cachedEntry.createdAt);
+        requestTimeMs = Number(cachedEntry.requestTimeMs);
+        requestReferenceTs = Number.isFinite(cachedEntry.referenceTs) ? cachedEntry.referenceTs : referenceTs;
+        hasLoaded = true;
+        viewStart = viewStartNext;
+        viewEnd = viewEndNext;
+        if (setDefaultPin) pinTs = Math.max(viewStart, Math.min(viewEnd, getBaseDate().getTime()));
+        loading = false;
+        return;
+      }
+
+      loading = true;
       const requestFn = spanEngine === 'kinematic' ? requestKinematicAspectSpans : requestAspectSpans;
-      const result = await requestFn(payload);
+      let requestPromise = pendingTimelineRequests.get(cacheKey);
+      if (!requestPromise) {
+        requestPromise = requestFn(payload).finally(() => pendingTimelineRequests.delete(cacheKey));
+        pendingTimelineRequests.set(cacheKey, requestPromise);
+      }
+      const result = await requestPromise;
       if (seq !== requestSeq) return;
       requestTimeMs = performance.now() - startedAt;
-      spans = normalizeBackendSpans(result?.spans);
-      console.debug('[AdvAspectsTimelineCard][aspect-spans-response]', {
-        engine: result?.engine || spanEngine,
-        rawCount: Array.isArray(result?.spans) ? result.spans.length : 0,
-        normalizedCount: spans.length,
-        timestampsEvaluated: result?.timestamps_evaluated,
-        passParents: spans
-          .filter((span) => span.passes?.length)
-          .map((span) => ({
-            id: span.id,
-            label: `${span.left} ${span.aspectType} ${span.right}`,
-            startAt: new Date(span.startAt).toISOString(),
-            endAt: new Date(span.endAt).toISOString(),
-            passCount: span.passes.length,
-            exacts: span.passes.map((pass) => new Date(pass.exactAt).toISOString().slice(0, 10)),
-          })),
+      const createdAt = Date.now();
+      hydrateTimelineResult(result, cacheKey, createdAt);
+      setTimelineCacheEntry(payload.mode, cacheKey, {
+        fingerprint,
+        preset: presetKey,
+        engine: spanEngine,
+        mode: payload.mode,
+        referenceTs,
+        requestTimeMs,
+        response: result,
       });
       hasLoaded = true;
 
@@ -153,7 +195,6 @@
 
     const initialViewStart = parseRangeTs(preset.start);
     const initialViewEnd = parseRangeTs(preset.end);
-    hideVeryFast = preset.days > 1;
     await fetchSpanWindow({
       start: preset.start,
       end: preset.end,
@@ -185,12 +226,11 @@
 
   const handleFilterChange = (filters) => {
     focusFilter = filters.focusFilter;
-    aspectFilter = filters.aspectFilter;
-    orbLimit = filters.orbLimit;
+    selectedAspectTypes = Array.isArray(filters.selectedAspectTypes) ? filters.selectedAspectTypes : [];
+    selectedPoints = Array.isArray(filters.selectedPoints) ? filters.selectedPoints : [];
     searchFilter = filters.searchFilter;
     movementFilter = filters.movementFilter;
     groupBy = filters.groupBy;
-    hideVeryFast = filters.hideVeryFast;
   };
 
   const handleViewChange = (start, end) => {
@@ -204,16 +244,71 @@
     if (Number.isFinite(nextRange) && nextRange > 0) {
       pinTs = Math.max(viewStart, Math.min(viewEnd, viewStart + pinFraction * nextRange));
     }
-    if ((end - start) > DAY_MS) hideVeryFast = true;
   };
 
   const handleSelectSpan = (span) => {
     selectedSpan = span;
+    if (span && (!Number.isFinite(pinTs) || pinTs < span.startAt || pinTs > span.endAt)) {
+      pinTs = span.exactAt;
+    }
     tick().then(() => detailsRegionEl?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }));
   };
 
   const handlePinMove = (ts) => {
     pinTs = ts;
+  };
+
+  const formatCopyTs = (ms) => {
+    if (!Number.isFinite(ms)) return '—';
+    try {
+      return new Date(ms).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    } catch {
+      return new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
+    }
+  };
+
+  const resetTimelineCopyStateSoon = () => {
+    if (timelineCopyTimer) clearTimeout(timelineCopyTimer);
+    timelineCopyTimer = setTimeout(() => {
+      timelineCopyState = 'idle';
+      timelineCopyTimer = null;
+    }, 1800);
+  };
+
+  const buildTimelineCopyText = () => {
+    const windowLabel = `${formatCopyTs(viewStart)} -> ${formatCopyTs(viewEnd)}`;
+    const peakRows = nextPeaks.map((span, index) => (
+      `${index + 1}. ${span.left} ${span.aspectType} ${span.right} — approx exact ${formatCopyTs(span.exactAt)}`
+    ));
+    const rows = filteredVisibleWindowSpans.map((span, index) => {
+      const clippedStart = Math.max(span.startAt, viewStart);
+      const clippedEnd = Math.min(span.endAt, viewEnd);
+      return [
+        `${index + 1}. ${span.left} ${span.aspectType} ${span.right}`,
+        `   Aspect: ${span.aspectType}`,
+        `   Points: ${span.left} / ${span.right}`,
+        `   Start: ${formatCopyTs(clippedStart)}`,
+        `   End: ${formatCopyTs(clippedEnd)}`,
+        `   Approx exact: ${formatCopyTs(span.exactAt)}`,
+      ].join('\n');
+    });
+    return [
+      `Aspects Timeline`,
+      `Window: ${windowLabel}`,
+      '',
+      `Next peaks`,
+      ...(peakRows.length ? peakRows : ['None']),
+      '',
+      `Visible filtered aspects`,
+      ...rows,
+    ].join('\n');
+  };
+
+  const copyVisibleTimelineAspects = async () => {
+    if (!filteredVisibleWindowSpans.length) return;
+    const ok = await copyToClipboard(buildTimelineCopyText());
+    timelineCopyState = ok ? 'copied' : 'error';
+    resetTimelineCopyStateSoon();
   };
 
   // Jump actions
@@ -223,7 +318,6 @@
     viewStart = now - halfRange;
     viewEnd = now + halfRange;
     pinTs = now;
-    if ((viewEnd - viewStart) > DAY_MS) hideVeryFast = true;
   };
 
   const jumpToNextExact = (direction = 1) => {
@@ -238,7 +332,6 @@
     viewStart = target - halfRange;
     viewEnd = target + halfRange;
     pinTs = target;
-    if ((viewEnd - viewStart) > DAY_MS) hideVeryFast = true;
     selectedSpan = candidates[0];
   };
 
@@ -283,40 +376,57 @@
     if (e.key === 'Escape' && isFullscreen) closeFullscreen();
   };
 
-  $: hiddenCount = (() => {
-    if (!spans.length || !hideVeryFast) return 0;
-    const viewMs = viewEnd - viewStart;
-    const days = viewMs / DAY_MS;
-    if (days <= 1) return 0;
-    return spans.filter((span) => {
-      if (!isVeryFastSpanForRange(span, viewMs)) return false;
-      if (Number.isFinite(span.minOrb) && span.minOrb > orbLimit) return false;
-      if (focusFilter !== 'all' && spanSpeedClass(span) !== focusFilter) return false;
-      if (!matchesAspectType(span)) return false;
-      if (!matchesMovement(span)) return false;
-      if (!matchesSearch(span)) return false;
-      return true;
-    }).length;
-  })();
-
+  $: aspectTypes = Array.from(new Set(spans.map((span) => span.aspectType).filter(Boolean)))
+    .sort((a, b) => String(a).localeCompare(String(b)));
+  $: pointOptions = Array.from(new Set(spans.flatMap((span) => [span.left, span.right]).filter(Boolean)))
+    .sort((a, b) => String(a).localeCompare(String(b)));
+  $: selectedAspectSet = new Set(selectedAspectTypes.map(normalizeAspect));
+  $: selectedPointSet = new Set(selectedPoints.map(normalizePoint));
+  $: searchQuery = searchFilter.trim().toLowerCase();
+  $: filteredTimelineSpans = spans.filter((span) => {
+    if (focusFilter !== 'all' && spanSpeedClass(span) !== focusFilter) return false;
+    if (selectedAspectSet.size && !selectedAspectSet.has(normalizeAspect(span.aspectType))) return false;
+    if (
+      selectedPointSet.size &&
+      !(selectedPointSet.has(normalizePoint(span.left)) && selectedPointSet.has(normalizePoint(span.right)))
+    ) return false;
+    if (movementFilter !== 'both') {
+      const movement = String(span.movementStart || '').toLowerCase();
+      const movementMatches = movementFilter === 'applying'
+        ? movement.includes('applying')
+        : movement.includes('separating');
+      if (!movementMatches) return false;
+    }
+    if (
+      searchQuery &&
+      !span.left.toLowerCase().includes(searchQuery) &&
+      !span.right.toLowerCase().includes(searchQuery) &&
+      !span.aspectType.toLowerCase().includes(searchQuery)
+    ) return false;
+    return true;
+  });
   $: nextPeaks = (() => {
-    if (!spans.length) return [];
+    if (!filteredTimelineSpans.length) return [];
     const reference = pinTs || ((viewStart + viewEnd) / 2) || Date.now();
-    return spans
-      .filter((span) => matchesActiveFilters(span) && span.exactAt >= reference)
+    return filteredTimelineSpans
+      .filter((span) => span.exactAt >= reference)
       .sort((a, b) => a.exactAt - b.exactAt)
       .slice(0, 3);
   })();
-
-  $: aspectTypes = Array.from(new Set(spans.map((span) => span.aspectType).filter(Boolean)))
-    .sort((a, b) => String(a).localeCompare(String(b)));
+  $: filteredVisibleWindowSpans = filteredTimelineSpans
+    .filter((span) => span.endAt >= viewStart && span.startAt <= viewEnd)
+    .sort((a, b) => a.startAt - b.startAt || a.exactAt - b.exactAt);
+  $: timelineCopyTitle = timelineCopyState === 'copied'
+    ? 'Copied filtered visible timeline aspects'
+    : timelineCopyState === 'error'
+      ? 'Copy failed'
+      : `Copy ${filteredVisibleWindowSpans.length} filtered visible timeline aspect${filteredVisibleWindowSpans.length === 1 ? '' : 's'}`;
 
   const jumpToSpan = (span) => {
     if (!span) return;
     const halfRange = Math.max((viewEnd - viewStart) / 2, 3_600_000);
     viewStart = span.exactAt - halfRange;
     viewEnd = span.exactAt + halfRange;
-    if ((viewEnd - viewStart) > DAY_MS) hideVeryFast = true;
     pinTs = span.exactAt;
     selectedSpan = span;
   };
@@ -335,6 +445,10 @@
     selectedSpan = null;
     if (!collapsed && !loading) fetchRange(activePreset);
   }
+
+  onDestroy(() => {
+    if (timelineCopyTimer) clearTimeout(timelineCopyTimer);
+  });
 </script>
 
 <svelte:window on:keydown={handleFsKey} />
@@ -370,16 +484,15 @@
         instanceId="inline"
         {activePreset}
         {focusFilter}
-        {aspectFilter}
+        {selectedAspectTypes}
         {aspectTypes}
-        {orbLimit}
+        {selectedPoints}
+        {pointOptions}
         {searchFilter}
         {movementFilter}
         {groupBy}
-        {hideVeryFast}
         {loading}
         spanCount={spans.length}
-        {hiddenCount}
         {requestTimeMs}
         {requestReferenceTs}
         {spanEngine}
@@ -409,6 +522,12 @@
         <button type="button" class="action-btn" on:click={() => jumpToNextExact(1)} disabled={!spans.length || loading} title="Next exact">
           Next exact →
         </button>
+        <AspectCopyButton
+          onClick={copyVisibleTimelineAspects}
+          disabled={!filteredVisibleWindowSpans.length || loading}
+          title={timelineCopyTitle}
+          state={timelineCopyState}
+        />
         <ZoomEntryButton onClick={toggleFullscreen} disabled={!spans.length || loading} title="Expand fullscreen" ariaLabel="Expand fullscreen" alignEnd={true} />
       </div>
 
@@ -432,11 +551,10 @@
         {groupBy}
         {activePreset}
         {focusFilter}
-        {aspectFilter}
-        {orbLimit}
+        selectedAspectTypes={selectedAspectTypes}
+        selectedPoints={selectedPoints}
         {searchFilter}
         {movementFilter}
-        {hideVeryFast}
         {selectedSpan}
         {pinTs}
         frozen={loading}
@@ -471,6 +589,12 @@
         <button type="button" class="action-btn" on:click={jumpToNow} disabled={!spans.length || loading} title="Jump to now">⏐ Now</button>
         <button type="button" class="action-btn" on:click={() => jumpToNextExact(-1)} disabled={!spans.length || loading} title="Previous exact">← Prev</button>
         <button type="button" class="action-btn" on:click={() => jumpToNextExact(1)} disabled={!spans.length || loading} title="Next exact">Next →</button>
+        <AspectCopyButton
+          onClick={copyVisibleTimelineAspects}
+          disabled={!filteredVisibleWindowSpans.length || loading}
+          title={timelineCopyTitle}
+          state={timelineCopyState}
+        />
         <button type="button" class="fs-close" on:click={closeFullscreen} aria-label="Exit fullscreen">✕</button>
       </div>
     </div>
@@ -480,16 +604,15 @@
         instanceId="fullscreen"
         {activePreset}
         {focusFilter}
-        {aspectFilter}
+        {selectedAspectTypes}
         {aspectTypes}
-        {orbLimit}
+        {selectedPoints}
+        {pointOptions}
         {searchFilter}
         {movementFilter}
         {groupBy}
-        {hideVeryFast}
         {loading}
         spanCount={spans.length}
-        {hiddenCount}
         {requestTimeMs}
         {requestReferenceTs}
         {spanEngine}
@@ -522,11 +645,10 @@
         {groupBy}
         {activePreset}
         {focusFilter}
-        {aspectFilter}
-        {orbLimit}
+        selectedAspectTypes={selectedAspectTypes}
+        selectedPoints={selectedPoints}
         {searchFilter}
         {movementFilter}
-        {hideVeryFast}
         {selectedSpan}
         {pinTs}
         frozen={loading}

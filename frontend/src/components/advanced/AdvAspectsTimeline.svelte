@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { aspectHexColor, aspectIcon } from '$lib/astro/aspects';
   import { POINT_SYMBOLS, astroFontSignGlyph } from '$lib/astro/signs';
-  import { spanSpeedClass, spanSpeedDebug, spanPrimaryPointLabel, packRows, formatDuration, isVeryFastSpanForRange, pointSpeedRank, spanFastestPointRank } from '$lib/astro/timeline/spans';
+  import { spanSpeedClass, spanPrimaryPointLabel, packRows, formatDuration, pointSpeedRank, spanFastestPointRank } from '$lib/astro/timeline/spans';
 
   export let spans = [];
   export let viewStart = 0;
@@ -10,11 +10,10 @@
   export let groupBy = 'planet';
   export let activePreset = '1M';
   export let focusFilter = 'all';
-  export let aspectFilter = 'all';
-  export let orbLimit = 3;
+  export let selectedAspectTypes = [];
+  export let selectedPoints = [];
   export let searchFilter = '';
   export let movementFilter = 'both';
-  export let hideVeryFast = false;
   export let selectedSpan = null;
   export let frozen = false;
   export let onSelectSpan = () => {};
@@ -79,7 +78,6 @@
     return span.left.toLowerCase().includes(lq) || span.right.toLowerCase().includes(lq) || span.aspectType.toLowerCase().includes(lq);
   };
   const normalizeAspect = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, '_');
-  const matchesAspectType = (span, filter) => filter === 'all' || normalizeAspect(span.aspectType) === normalizeAspect(filter);
   const pinStepMs = (preset) => {
     if (preset === '1D') return 15 * 60_000;
     if (preset === '1W') return 60 * 60_000;
@@ -100,48 +98,23 @@
     Number.isFinite(ts) ? new Date(ts).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) : '';
 
   // --- Filtered spans ---
+  $: selectedAspectSet = new Set(selectedAspectTypes.map(normalizeAspect));
+  $: selectedPointSet = new Set(selectedPoints.map(normalizeKey));
+  $: searchQuery = searchFilter.trim().toLowerCase();
   $: filtered = spans.filter((s) => {
-    if (Number.isFinite(s.minOrb) && s.minOrb > orbLimit) return false;
     if (focusFilter !== 'all' && spanSpeedClass(s) !== focusFilter) return false;
-    if (!matchesAspectType(s, aspectFilter)) return false;
-    if (hideVeryFast && isVeryFastSpanForRange(s, viewEnd - viewStart)) return false;
+    if (selectedAspectSet.size && !selectedAspectSet.has(normalizeAspect(s.aspectType))) return false;
+    if (
+      selectedPointSet.size &&
+      !(selectedPointSet.has(normalizeKey(s.left)) && selectedPointSet.has(normalizeKey(s.right)))
+    ) return false;
     if (!matchesMovement(s, movementFilter)) return false;
-    if (!matchesSearch(s, searchFilter)) return false;
+    if (!matchesSearch(s, searchQuery)) return false;
     return true;
   });
 
   $: visibleSpans = filtered.filter((s) => s.endAt >= viewStart && s.startAt <= viewEnd);
   $: denseMode = visibleSpans.length > 400;
-  $: if (spans.length) {
-    const summaries = spans.map(spanSpeedDebug);
-    const bucketCounts = summaries.reduce((acc, item) => {
-      acc[item.speedClass] = (acc[item.speedClass] || 0) + 1;
-      return acc;
-    }, {});
-    const passParents = spans
-      .filter((span) => span.passes?.length)
-      .map((span) => ({
-        id: span.id,
-        left: span.left,
-        aspectType: span.aspectType,
-        right: span.right,
-        speedClass: spanSpeedClass(span),
-        passCount: span.passes.length,
-        exacts: span.passes.map((pass) => new Date(pass.exactAt).toISOString().slice(0, 10)),
-      }));
-    console.debug('[AdvAspectsTimeline][debug]', {
-      total: spans.length,
-      visible: visibleSpans.length,
-      filtered: filtered.length,
-      focusFilter,
-      groupBy,
-      bucketCounts,
-      passParents,
-      outerSamples: summaries
-        .filter((item) => item.slowestRank >= 9)
-        .slice(0, 20),
-    });
-  }
 
   // --- Time scale ---
   const plotW = () => Math.max(1, width - MARGIN.left - MARGIN.right);
@@ -607,7 +580,7 @@
           </text>
         {/if}
 
-        {#if span.passes?.length && span.passes?.length > 1 && !dimmed}
+        {#if span.passes?.length && span.passes?.length > 1 && !dimmed && !denseMode}
           <g class="timeline-pass-segments" data-parent-span-id={span.id}>
             {#each span.passes as pass}
               {@const px = passX(pass)}
